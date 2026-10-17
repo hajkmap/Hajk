@@ -3,6 +3,7 @@ import { Alert, Box, CircularProgress, Typography } from "@mui/material";
 import { useIsMutating } from "@tanstack/react-query";
 import { useMemo, useState, type ReactNode } from "react";
 import { DndProvider } from "react-dnd";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -17,7 +18,9 @@ import LayerTreeBackground from "./layer-tree-background";
 import LayerTreeCatalog from "./layer-tree-catalog";
 import LayerTreeCatalogColumn from "./layer-tree-catalog-column";
 import LayerTreeDrawOrder from "./layer-tree-draw-order";
+import LayerTreeEditorWindow from "./layer-tree-editor-window";
 import {
+  completeDrawOrder,
   contentSignature,
   isLayerTreeDraftFor,
   shownLayers,
@@ -25,6 +28,7 @@ import {
   type LayerTreeEditorMode,
   type LayerTreeFlatNode,
 } from "./layer-tree-model";
+import LayerTreeMoveZoneBox from "./layer-tree-move-zone-box";
 import LayerTreePanel from "./layer-tree-panel";
 import LayerTreePreviewFrame, {
   type LayerTreeMapTab,
@@ -38,7 +42,10 @@ import {
   settingsSignature,
   type LayerTreeSettings,
 } from "./layer-tree-settings";
+import { useClickPlace } from "./use-click-place";
+import { useDraftHistory } from "./use-draft-history";
 import { useLayerTreeBaseline } from "./use-layer-tree-baseline";
+import { useMoveZone } from "./use-move-zone";
 
 const EMPTY_NODES: LayerTreeFlatNode[] = [];
 const EMPTY_BACKGROUND: MapBackgroundLayer[] = [];
@@ -50,14 +57,6 @@ const MAP_HELP: Record<LayerTreeMapTab, string> = {
   drawOrder: "layerTree.drawOrderHelp",
 };
 
-/** Catalog on the left and the content on the right, as in Lagerordning. */
-const COLUMNS = {
-  display: "grid",
-  gap: { xs: 2, lg: 3 },
-  gridTemplateColumns: { xs: "1fr", lg: "minmax(220px, 280px) minmax(0, 1fr)" },
-  alignItems: "start",
-} as const;
-
 interface LayerTreeEditorProps {
   mode: LayerTreeEditorMode;
   /** The group's id in group mode, the map's name in map mode. */
@@ -67,6 +66,8 @@ interface LayerTreeEditorProps {
   onDraftChange: (draft: LayerTreeDraft | null) => void;
   /** Map mode: what the map's layerswitcher shows, to look like it. */
   preview?: LayerTreePreviewOptions;
+  /** Map mode: where the page shows the move zone, beside its save button. */
+  moveZoneHost?: HTMLElement | null;
 }
 
 /**
@@ -81,6 +82,7 @@ export default function LayerTreeEditor({
   draft,
   onDraftChange,
   preview = NO_LAYERSWITCHER,
+  moveZoneHost = null,
 }: LayerTreeEditorProps) {
   const { t } = useTranslation();
   const groupTree = useGroupTree(mode === "group" ? ownerId : "");
@@ -113,6 +115,9 @@ export default function LayerTreeEditor({
     [catalogLayers],
   );
 
+  // Every change goes through here, so Ctrl+Z can take it back.
+  const history = useDraftHistory(activeDraft, onDraftChange, baseline);
+
   /** Keeps what differs from the saved state; no draft when nothing does. */
   const updateDraft = (
     changes: Partial<
@@ -142,7 +147,7 @@ export default function LayerTreeEditor({
       next.drawOrder && next.drawOrder.join() !== baseline.drawOrder.join()
         ? next.drawOrder
         : undefined;
-    onDraftChange(
+    history.change(
       nodesChanged || changedSettings || changedBackground || changedOrder
         ? {
             mode,
@@ -155,6 +160,33 @@ export default function LayerTreeEditor({
         : null,
     );
   };
+
+  // The draw order as the list shows it, layers new in the tree on top.
+  const fullDrawOrder = useMemo(
+    () => completeDrawOrder(layersShown, drawOrder),
+    [layersShown, drawOrder],
+  );
+  const layerNames = useMemo(
+    () => new Map(layersShown.map((layer) => [layer.id, layer.name])),
+    [layersShown],
+  );
+  const moveZoneOn = mode === "map" && moveZoneHost !== null;
+  const zone = useMoveZone({
+    enabled: moveZoneOn,
+    ready: baseline !== null,
+    mapName: ownerId,
+    tab,
+    nodes,
+    background,
+    drawOrder: fullDrawOrder,
+    layerNames,
+    disabled: isSaving,
+    onBackgroundChange: (next) => updateDraft({ background: next }),
+    onDrawOrderChange: (next) => updateDraft({ drawOrder: next }),
+  });
+  // Click and place is switched on in the move zone, for the tree.
+  const click = useClickPlace(moveZoneOn && tab === "layers");
+  const held = click.pick;
 
   if (query.isLoading) {
     return <CircularProgress size={24} />;
@@ -213,9 +245,27 @@ export default function LayerTreeEditor({
           onSettingsChange={(next) => updateDraft({ settings: next })}
           frame={mode === "map" ? framed : undefined}
           showSearch={mode === "group" || preview.showFilter}
+          history={history}
+          moveZone={
+            moveZoneOn
+              ? { flagged: zone.flaggedNodeIds, onPlaced: zone.placed }
+              : undefined
+          }
+          clickPlace={
+            click.active
+              ? {
+                  pick: held,
+                  pickCatalog: click.pickCatalog,
+                  pickTree: click.pickTree,
+                  clear: click.clear,
+                  zoneItems: zone.items,
+                  onZonePlaced: zone.placedMany,
+                }
+              : undefined
+          }
         />
       ) : tab === "background" ? (
-        <Box sx={COLUMNS}>
+        <LayerTreeEditorWindow>
           <LayerTreeCatalogColumn>
             <LayerTreeCatalog
               offer="layer"
@@ -245,11 +295,19 @@ export default function LayerTreeEditor({
               background={background}
               layers={displayLayers}
               onChange={(next) => updateDraft({ background: next })}
+              moveZone={
+                moveZoneOn
+                  ? {
+                      ...zone.backgroundDrop,
+                      flaggedIds: zone.flaggedBackgroundIds,
+                    }
+                  : undefined
+              }
             />,
           )}
-        </Box>
+        </LayerTreeEditorWindow>
       ) : (
-        <Box sx={COLUMNS}>
+        <LayerTreeEditorWindow>
           {/* Keeps the frame where it is on the other tabs. */}
           <Box sx={{ display: { xs: "none", lg: "block" } }} />
           {framed(
@@ -257,10 +315,50 @@ export default function LayerTreeEditor({
               layers={layersShown}
               order={drawOrder}
               onChange={(next) => updateDraft({ drawOrder: next })}
+              moveZone={
+                moveZoneOn
+                  ? {
+                      ...zone.drawOrderDrop,
+                      flaggedIds: zone.flaggedDrawOrderIds,
+                    }
+                  : undefined
+              }
             />,
           )}
-        </Box>
+        </LayerTreeEditorWindow>
       )}
+      {/* Inside the drag and drop context, though shown by the save button. */}
+      {moveZoneOn && moveZoneHost
+        ? createPortal(
+            <LayerTreeMoveZoneBox
+              tab={tab}
+              items={zone.items}
+              canAccept={zone.canAccept}
+              onAccept={zone.accept}
+              onRemove={zone.remove}
+              clickPlace={
+                tab === "layers"
+                  ? {
+                      on: click.active,
+                      onToggle: click.toggle,
+                      pickedKeys: new Set(
+                        held?.source === "zone" ? held.keys : [],
+                      ),
+                      onPick: click.pickZone,
+                      onHoldHere:
+                        held && held.source !== "zone"
+                          ? () => {
+                              zone.hold(held);
+                              click.clear();
+                            }
+                          : undefined,
+                    }
+                  : undefined
+              }
+            />,
+            moveZoneHost,
+          )
+        : null}
     </DndProvider>
   );
 }

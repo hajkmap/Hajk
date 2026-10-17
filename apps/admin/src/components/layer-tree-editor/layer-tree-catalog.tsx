@@ -40,6 +40,9 @@ interface CatalogRowProps {
   dragType: string;
   disabled: boolean;
   onAdd: (item: LayerTreeCatalogItem) => void;
+  /** Click and place: a click picks the item instead of dragging it. */
+  onPick?: (item: LayerTreeCatalogItem, additive: boolean) => void;
+  picked: boolean;
 }
 
 function CatalogRow({
@@ -51,16 +54,18 @@ function CatalogRow({
   dragType,
   disabled,
   onAdd,
+  onPick,
+  picked,
 }: CatalogRowProps) {
   const { t } = useTranslation();
   const [{ isDragging }, drag] = useDrag(
     () => ({
       type: dragType,
       item,
-      canDrag: !disabled,
+      canDrag: !disabled && !onPick,
       collect: (monitor) => ({ isDragging: monitor.isDragging() }),
     }),
-    [item, disabled, dragType],
+    [item, disabled, dragType, onPick],
   );
 
   return (
@@ -74,12 +79,20 @@ function CatalogRow({
           gap: 0.75,
           pl: 0.5,
           opacity: isDragging ? 0.5 : 1,
+          bgcolor: picked ? "action.selected" : undefined,
+          borderColor: picked ? "primary.main" : undefined,
         }}
       >
         <Box
           ref={(element) => {
             drag(element as HTMLDivElement | null);
           }}
+          onClick={
+            onPick && !disabled
+              ? (event) => onPick(item, event.ctrlKey || event.metaKey)
+              : undefined
+          }
+          aria-pressed={onPick ? picked : undefined}
           sx={{
             display: "flex",
             alignItems: "center",
@@ -87,10 +100,17 @@ function CatalogRow({
             flex: 1,
             minWidth: 0,
             py: 0.75,
-            cursor: disabled ? "default" : "grab",
+            cursor: disabled ? "default" : onPick ? "pointer" : "grab",
           }}
         >
-          <DragIndicatorIcon fontSize="small" sx={{ color: "action.active" }} />
+          <DragIndicatorIcon
+            fontSize="small"
+            sx={{
+              color: "action.active",
+              // Click and place: picked by a click, not dragged.
+              visibility: onPick ? "hidden" : "visible",
+            }}
+          />
           {item.kind === "group" ? (
             <FolderIcon fontSize="small" color="primary" />
           ) : (
@@ -155,6 +175,11 @@ interface LayerTreeCatalogProps {
   canAdd?: (item: LayerTreeCatalogItem) => boolean;
   disabled: boolean;
   onAdd: (item: LayerTreeCatalogItem) => void;
+  /** Click and place: clicks pick items; "kind:id" of those held. */
+  pick?: {
+    picked: ReadonlySet<string>;
+    onPick: (item: LayerTreeCatalogItem, additive: boolean) => void;
+  };
 }
 
 // Enter in a text field would otherwise submit a surrounding form.
@@ -170,6 +195,7 @@ export default function LayerTreeCatalog({
   canAdd = () => true,
   disabled,
   onAdd,
+  pick,
 }: LayerTreeCatalogProps) {
   const { t } = useTranslation();
   const { data: groups } = useGroups();
@@ -260,6 +286,7 @@ export default function LayerTreeCatalog({
           minHeight: 0,
           maxHeight: { xs: 460, lg: "none" },
           overflowY: "auto",
+          overscrollBehavior: "contain",
         }}
       >
         {items.map((item) => (
@@ -273,6 +300,8 @@ export default function LayerTreeCatalog({
             dragType={dragType}
             disabled={disabled}
             onAdd={onAdd}
+            onPick={pick?.onPick}
+            picked={pick?.picked.has(`${item.kind}:${item.id}`) ?? false}
           />
         ))}
       </List>

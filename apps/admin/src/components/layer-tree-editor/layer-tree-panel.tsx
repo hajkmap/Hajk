@@ -13,6 +13,8 @@ import { toast } from "react-toastify";
 import { getGroupTree } from "../../api/layer-tree";
 import LayerTreeCatalog from "./layer-tree-catalog";
 import LayerTreeCatalogColumn from "./layer-tree-catalog-column";
+import LayerTreeEditorWindow from "./layer-tree-editor-window";
+import { EDITOR_COLUMN } from "./layer-tree-layout";
 import {
   asPlaced,
   countLayers,
@@ -24,6 +26,7 @@ import {
   isMovable,
   LAYER_TREE_CATALOG_DRAG_TYPE,
   LAYER_TREE_ROOT_ID,
+  moveNodeTo,
   placedFrom,
   placeProblem,
   removeNode,
@@ -33,13 +36,23 @@ import {
   type LayerTreeEditorMode,
   type LayerTreeFlatNode,
   type LayerTreeNodeData,
+  type LayerTreePlaceProblem,
 } from "./layer-tree-model";
+import {
+  MOVE_ZONE_DRAG_TYPE,
+  type LayerTreeMoveZoneItem,
+} from "./layer-tree-move-zone";
 import LayerTreeNewGroupDialog from "./layer-tree-new-group-dialog";
 import LayerTreeRow from "./layer-tree-row";
 import type { LayerTreeSettings } from "./layer-tree-settings";
 import LayerTreeToolbar from "./layer-tree-toolbar";
 import { useItemDetails, type LayerTreeItemDetails } from "./use-item-details";
+import type { LayerTreeHistoryControls } from "./use-draft-history";
 import { useOpenGroups } from "./use-open-groups";
+import {
+  useTreeClickPlace,
+  type PanelClickPlace,
+} from "./use-tree-click-place";
 import { useTreeSettingsUi } from "./use-tree-settings-ui";
 
 interface LayerTreePanelProps {
@@ -58,6 +71,17 @@ interface LayerTreePanelProps {
   frame?: (tree: ReactNode, toolbar: ReactNode) => ReactNode;
   /** As the client: no search where its layerswitcher has no filter. */
   showSearch?: boolean;
+  /** Map mode: the move zone, whose items the tree takes. */
+  moveZone?: {
+    /** Nodes flagged as in the zone. */
+    flagged: ReadonlySet<string>;
+    /** An item was dropped from the zone where it goes. */
+    onPlaced: (key: string) => void;
+  };
+  /** Map mode: click and place, instead of dragging, when it is on. */
+  clickPlace?: PanelClickPlace;
+  /** Undo and redo, shown in the toolbar. */
+  history?: LayerTreeHistoryControls;
 }
 
 /** POC (layer trees): the catalog and the tree, for a group or a map. */
@@ -72,6 +96,9 @@ export default function LayerTreePanel({
   onSettingsChange,
   frame,
   showSearch = true,
+  moveZone,
+  clickPlace,
+  history,
 }: LayerTreePanelProps) {
   const { t } = useTranslation();
   const { palette } = useTheme();
@@ -144,11 +171,19 @@ export default function LayerTreePanel({
     onChange(next);
   };
 
+  const warn = (problem: LayerTreePlaceProblem, name: string) =>
+    toast.warning(t(`layerTree.problem.${problem}`, { name }), {
+      position: "bottom-left",
+      theme: palette.mode,
+      hideProgressBar: true,
+    });
+
+  /** Puts a catalog item in the tree; whether it could be placed there. */
   const insertItem = async (
     item: LayerTreeCatalogItem,
     parentId: string,
     index?: number,
-  ) => {
+  ): Promise<boolean> => {
     let subtree: LayerTreeFlatNode[];
     if (item.kind === "layer") {
       // In a map, a layer dropped in a group is an addition on this map; in a
@@ -181,7 +216,7 @@ export default function LayerTreePanel({
             ? fetchError.message
             : t("layerTree.loadFailed"),
         );
-        return;
+        return false;
       }
     }
 
@@ -198,12 +233,8 @@ export default function LayerTreePanel({
         .map((node) => node.data.sourceId),
     });
     if (problem) {
-      toast.warning(t(`layerTree.problem.${problem}`, { name: item.name }), {
-        position: "bottom-left",
-        theme: palette.mode,
-        hideProgressBar: true,
-      });
-      return;
+      warn(problem, item.name);
+      return false;
     }
 
     commit(insertNodes(current, subtree, parentId, index));
@@ -219,6 +250,7 @@ export default function LayerTreePanel({
         )
         .map((node) => node.id),
     ]);
+    return true;
   };
 
   const addNewGroup = (name: string) => {
@@ -257,6 +289,34 @@ export default function LayerTreePanel({
     nodes,
     disabled: isSaving,
   });
+  const click = useTreeClickPlace({
+    clickPlace: canEdit ? clickPlace : undefined,
+    nodes,
+    mode,
+    rootGroupId,
+    movable,
+    insertItem,
+    commit,
+    openNodes,
+    warn,
+  });
+
+  /** Moves a node with its content and places it anew where it now lies. */
+  const moveTo = (nodeId: string, parentId: string, index?: number) => {
+    const own = new Set(
+      [nodeId, ...descendantIds(nodes, nodeId)].filter((id) => {
+        const node = byId.get(id);
+        return node !== undefined && movable(node);
+      }),
+    );
+    const next = moveNodeTo(nodes, nodeId, parentId, index);
+    commit(
+      next.map((node) =>
+        own.has(node.id) ? asPlaced(node, next, mode, rootGroupId) : node,
+      ),
+    );
+    if (parentId !== LAYER_TREE_ROOT_ID) openNodes([parentId]);
+  };
 
   const canDrop = (
     _tree: NodeModel<LayerTreeNodeData>[],
@@ -264,6 +324,24 @@ export default function LayerTreePanel({
   ) => {
     if (!canEdit) return false;
     const parentId = String(options.dropTargetId);
+    if (options.monitor.getItemType() === MOVE_ZONE_DRAG_TYPE) {
+      const item = options.monitor.getItem() as LayerTreeMoveZoneItem;
+      if (item.inList) return false;
+      // Flagged in the tree: it moves from where it lies.
+      const moving = item.nodeId ? byId.get(item.nodeId) : undefined;
+      if (item.nodeId && !(moving && movable(moving))) return false;
+      return (
+        placeProblem({
+          nodes,
+          mode,
+          rootGroupId,
+          parentId,
+          kind: item.kind,
+          sourceId: item.sourceId,
+          movingId: moving?.id,
+        }) === null
+      );
+    }
     if (options.monitor.getItemType() === LAYER_TREE_CATALOG_DRAG_TYPE) {
       const item = options.monitor.getItem() as LayerTreeCatalogItem;
       return (
@@ -297,6 +375,23 @@ export default function LayerTreePanel({
     newTree: NodeModel<LayerTreeNodeData>[],
     options: DropOptions<LayerTreeNodeData>,
   ) => {
+    if (options.monitor.getItemType() === MOVE_ZONE_DRAG_TYPE) {
+      const item = options.monitor.getItem() as LayerTreeMoveZoneItem;
+      const parentId = String(options.dropTargetId);
+      if (item.nodeId) {
+        moveTo(item.nodeId, parentId, options.relativeIndex);
+        moveZone?.onPlaced(item.key);
+      } else {
+        void insertItem(
+          { kind: item.kind, id: item.sourceId, name: item.name },
+          parentId,
+          options.relativeIndex,
+        ).then((inserted) => {
+          if (inserted) moveZone?.onPlaced(item.key);
+        });
+      }
+      return;
+    }
     if (options.monitor.getItemType() === LAYER_TREE_CATALOG_DRAG_TYPE) {
       void insertItem(
         options.monitor.getItem() as LayerTreeCatalogItem,
@@ -340,134 +435,146 @@ export default function LayerTreePanel({
       canExpand={expandableIds.length > 0 && !found}
       onToggleAll={() => setOpen(allExpanded ? [] : expandableIds)}
       disabled={isSaving}
+      history={history}
     />
   );
 
   const tree = (
-    <Paper
-      variant="outlined"
-      sx={{
-        position: "relative",
-        "& ul": { listStyle: "none", m: 0, p: 0 },
-        "& .layer-tree-root": { minHeight: 160, pb: 3 },
-        "& .layer-tree-drop-target": { bgcolor: "action.hover" },
-      }}
-    >
-      {nodes.length === 0 || found?.visible.size === 0 ? (
-        <Typography
-          color="text.secondary"
-          sx={{
-            position: "absolute",
-            inset: 0,
-            display: "grid",
-            placeItems: "center",
-            pointerEvents: "none",
-          }}
-        >
-          {t(found ? "layerTree.noMatches" : "layerTree.empty")}
-        </Typography>
-      ) : null}
-      <Tree<LayerTreeNodeData>
-        tree={nodes}
-        rootId={LAYER_TREE_ROOT_ID}
-        extraAcceptTypes={[LAYER_TREE_CATALOG_DRAG_TYPE]}
-        initialOpen={shownOpenIds}
-        onChangeOpen={(ids) => setOpen(ids.map(String))}
-        sort={false}
-        insertDroppableFirst={false}
-        enableAnimateExpand
-        dropTargetOffset={8}
-        canDrag={(node) =>
-          canEdit && node !== undefined && movable(node as LayerTreeFlatNode)
-        }
-        canDrop={canDrop}
-        onDrop={handleDrop}
-        classes={{
-          root: "layer-tree-root",
-          dropTarget: "layer-tree-drop-target",
+    <>
+      {click.holding}
+      <Paper
+        variant="outlined"
+        onMouseLeave={click.clearHover}
+        sx={{
+          position: "relative",
+          // Takes the window's height left, and scrolls inside it without
+          // taking the page along at its ends.
+          flex: { lg: "1 1 0" },
+          minHeight: 0,
+          overflowY: { lg: "auto" },
+          overscrollBehavior: "contain",
+          "& ul": { listStyle: "none", m: 0, p: 0 },
+          "& .layer-tree-root": { minHeight: 160, pb: 3 },
+          "& .layer-tree-drop-target": { bgcolor: "action.hover" },
         }}
-        placeholderRender={(_, { depth }) => (
-          <Box
+      >
+        {click.top}
+        {nodes.length === 0 || found?.visible.size === 0 ? (
+          <Typography
+            color="text.secondary"
             sx={{
-              height: 2,
-              ml: `${depth * 24}px`,
-              bgcolor: "primary.main",
-              borderRadius: 1,
+              position: "absolute",
+              inset: 0,
+              display: "grid",
+              placeItems: "center",
+              pointerEvents: "none",
             }}
-          />
-        )}
-        render={(node, { depth, isOpen, hasChild, isDragging, onToggle }) => {
-          const flatNode = node as LayerTreeFlatNode;
-          const { kind, sourceId, isNew, added } = flatNode.data;
-          const topLevel = flatNode.parent === LAYER_TREE_ROOT_ID;
-          const editable = movable(flatNode);
-          const details: LayerTreeItemDetails = isNew
-            ? { lines: [t("layerTree.newGroupHint")], context: "" }
-            : getDetails(kind, sourceId);
-          return (
+          >
+            {t(found ? "layerTree.noMatches" : "layerTree.empty")}
+          </Typography>
+        ) : null}
+        <Tree<LayerTreeNodeData>
+          tree={nodes}
+          rootId={LAYER_TREE_ROOT_ID}
+          extraAcceptTypes={
+            moveZone
+              ? [LAYER_TREE_CATALOG_DRAG_TYPE, MOVE_ZONE_DRAG_TYPE]
+              : [LAYER_TREE_CATALOG_DRAG_TYPE]
+          }
+          initialOpen={shownOpenIds}
+          onChangeOpen={(ids) => setOpen(ids.map(String))}
+          sort={false}
+          insertDroppableFirst={false}
+          enableAnimateExpand
+          dropTargetOffset={8}
+          canDrag={(node) =>
+            canEdit &&
+            !click.active &&
+            node !== undefined &&
+            movable(node as LayerTreeFlatNode)
+          }
+          canDrop={canDrop}
+          onDrop={handleDrop}
+          classes={{
+            root: "layer-tree-root",
+            dropTarget: "layer-tree-drop-target",
+          }}
+          placeholderRender={(_, { depth }) => (
             <Box
               sx={{
-                display:
-                  found && !found.visible.has(flatNode.id) ? "none" : "block",
+                height: 2,
+                ml: `${depth * 24}px`,
+                bgcolor: "primary.main",
+                borderRadius: 1,
               }}
-            >
-              <LayerTreeRow
-                node={flatNode}
-                details={details}
-                depth={depth}
-                isOpen={isOpen}
-                hasChild={hasChild}
-                isDragging={isDragging}
-                fixed={!editable || !canEdit}
-                locked={kind === "group" && !isNew && editable}
-                from={editable ? undefined : placedFrom(flatNode, nodes)}
-                misplaced={mode === "map" && kind === "layer" && topLevel}
-                layerCount={layerCounts.get(flatNode.id)}
-                onToggle={onToggle}
-                onRemove={
-                  editable && !isSaving
-                    ? () => commit(removeNode(nodes, flatNode.id))
-                    : undefined
-                }
-                onEditGroup={
-                  kind === "group" && !isNew
-                    ? () => void navigate(`/groups/${sourceId}`)
-                    : undefined
-                }
-                onNewGroup={
-                  mode === "group" && flatNode.droppable && !isSaving
-                    ? () => setNewGroupParent(flatNode.id)
-                    : undefined
-                }
-                onToggleHidden={
-                  mode === "map" && !topLevel && !added && !isSaving
-                    ? () => commit(toggleHidden(nodes, flatNode.id))
-                    : undefined
-                }
-                hiddenWith={hiddenWith.get(flatNode.id)}
-                {...rowSettings(flatNode)}
-              />
-            </Box>
-          );
-        }}
-      />
-    </Paper>
+            />
+          )}
+          render={(node, { depth, isOpen, hasChild, isDragging, onToggle }) => {
+            const flatNode = node as LayerTreeFlatNode;
+            const { kind, sourceId, isNew, added } = flatNode.data;
+            const topLevel = flatNode.parent === LAYER_TREE_ROOT_ID;
+            const editable = movable(flatNode);
+            const details: LayerTreeItemDetails = isNew
+              ? { lines: [t("layerTree.newGroupHint")], context: "" }
+              : getDetails(kind, sourceId);
+            return (
+              <Box
+                sx={{
+                  display:
+                    found && !found.visible.has(flatNode.id) ? "none" : "block",
+                }}
+              >
+                <LayerTreeRow
+                  node={flatNode}
+                  details={details}
+                  depth={depth}
+                  isOpen={isOpen}
+                  hasChild={hasChild}
+                  isDragging={isDragging}
+                  fixed={!editable || !canEdit || click.active}
+                  locked={kind === "group" && !isNew && editable}
+                  from={editable ? undefined : placedFrom(flatNode, nodes)}
+                  misplaced={mode === "map" && kind === "layer" && topLevel}
+                  layerCount={layerCounts.get(flatNode.id)}
+                  onToggle={onToggle}
+                  onRemove={
+                    editable && !isSaving
+                      ? () => commit(removeNode(nodes, flatNode.id))
+                      : undefined
+                  }
+                  onEditGroup={
+                    kind === "group" && !isNew
+                      ? () => void navigate(`/groups/${sourceId}`)
+                      : undefined
+                  }
+                  onNewGroup={
+                    mode === "group" && flatNode.droppable && !isSaving
+                      ? () => setNewGroupParent(flatNode.id)
+                      : undefined
+                  }
+                  onToggleHidden={
+                    mode === "map" && !topLevel && !added && !isSaving
+                      ? () => commit(toggleHidden(nodes, flatNode.id))
+                      : undefined
+                  }
+                  hiddenWith={hiddenWith.get(flatNode.id)}
+                  inMoveZone={moveZone?.flagged.has(flatNode.id)}
+                  {...rowSettings(flatNode)}
+                  {...click.rowProps(flatNode, depth)}
+                />
+              </Box>
+            );
+          }}
+        />
+        {click.bottom}
+      </Paper>
+    </>
   );
 
   return (
     <>
       {/* Catalog on the left and tree on the right, as in Lagerordning. */}
-      <Box
-        sx={{
-          display: "grid",
-          gap: { xs: 2, lg: 3 },
-          gridTemplateColumns: {
-            xs: "1fr",
-            lg: "minmax(220px, 280px) minmax(0, 1fr)",
-          },
-          alignItems: "start",
-        }}
-      >
+      <LayerTreeEditorWindow>
         <LayerTreeCatalogColumn>
           <LayerTreeCatalog
             excludeGroupId={rootGroupId}
@@ -476,9 +583,10 @@ export default function LayerTreePanel({
             canAdd={(item) => mode === "group" || item.kind === "group"}
             disabled={isSaving}
             onAdd={(item) => void insertItem(item, LAYER_TREE_ROOT_ID)}
+            pick={click.catalogPick}
           />
         </LayerTreeCatalogColumn>
-        <Box>
+        <Box sx={EDITOR_COLUMN}>
           {error ? (
             <Alert
               severity="error"
@@ -497,7 +605,7 @@ export default function LayerTreePanel({
             </>
           )}
         </Box>
-      </Box>
+      </LayerTreeEditorWindow>
       <LayerTreeNewGroupDialog
         open={newGroupParent !== null}
         onClose={() => setNewGroupParent(null)}

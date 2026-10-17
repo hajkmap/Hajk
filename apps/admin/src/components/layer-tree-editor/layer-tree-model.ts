@@ -512,6 +512,34 @@ export function removeNode(
   return nodes.filter((node) => !gone.has(node.id));
 }
 
+/**
+ * Moves a node, with what lies under it, under `parentId` before sibling
+ * `index` (counted as the siblings show now, the node itself included).
+ */
+export function moveNodeTo(
+  nodes: LayerTreeFlatNode[],
+  nodeId: string,
+  parentId: string,
+  index?: number,
+): LayerTreeFlatNode[] {
+  const root = nodes.find((node) => node.id === nodeId);
+  if (!root) return nodes;
+  const inside = descendantIds(nodes, nodeId);
+  const rest = nodes.filter((node) => inside.has(node.id));
+  const remaining = nodes.filter(
+    (node) => node.id !== nodeId && !inside.has(node.id),
+  );
+  let at = index;
+  if (at !== undefined && root.parent === parentId) {
+    // Once taken out, the siblings after it move up one.
+    const was = nodes
+      .filter((node) => node.parent === parentId)
+      .findIndex((node) => node.id === nodeId);
+    if (was < at) at -= 1;
+  }
+  return insertNodes(remaining, [root, ...rest], parentId, at);
+}
+
 /** Layers shown inside each group node, nested groups included. */
 export function countLayers(nodes: LayerTreeFlatNode[]): Map<string, number> {
   const children = buildChildren(nodes);
@@ -583,6 +611,77 @@ export function shownLayers(
   };
   walk(LAYER_TREE_ROOT_ID);
   return [...layers].map(([id, name]) => ({ id, name }));
+}
+
+/**
+ * Which part of a row a click lands on: its upper edge puts what is held
+ * before the row, its middle into the group, its lower edge after the row.
+ */
+export type LayerTreeClickPart = "before" | "into" | "after";
+
+/** Where click and place puts what is held. */
+export interface LayerTreeClickDestination {
+  parentId: string;
+  /** Before this sibling. */
+  index: number;
+  part: LayerTreeClickPart;
+}
+
+/**
+ * Click and place: before or after the row clicked, or first in the group
+ * clicked (a group that takes nothing gets it after it instead).
+ */
+export function clickDestination(
+  nodes: LayerTreeFlatNode[],
+  targetId: string,
+  part: LayerTreeClickPart,
+): LayerTreeClickDestination | null {
+  const target = nodes.find((node) => node.id === targetId);
+  if (!target) return null;
+  if (part === "into" && isGroup(target) && target.droppable) {
+    return { parentId: target.id, index: 0, part };
+  }
+  const siblings = nodes.filter((node) => node.parent === target.parent);
+  const index = siblings.findIndex((node) => node.id === target.id);
+  return part === "before"
+    ? { parentId: target.parent, index, part }
+    : { parentId: target.parent, index: index + 1, part: "after" };
+}
+
+/** The picked nodes, less those inside another picked one (they move with it). */
+export function selectionRoots(
+  nodes: LayerTreeFlatNode[],
+  ids: string[],
+): string[] {
+  const picked = new Set(ids);
+  const byId = new Map(nodes.map((node) => [node.id, node]));
+  return ids.filter((id) => {
+    for (
+      let above = byId.get(byId.get(id)?.parent ?? "");
+      above;
+      above = byId.get(above.parent)
+    ) {
+      if (picked.has(above.id)) return false;
+    }
+    return byId.has(id);
+  });
+}
+
+/**
+ * The draw order as shown: the shown layers in the saved order, those not in
+ * it yet on top, and removed ones left out.
+ */
+export function completeDrawOrder(
+  layers: { id: string }[],
+  order: string[],
+): string[] {
+  const shown = new Set(layers.map((layer) => layer.id));
+  const known = order.filter((id) => shown.has(id));
+  const placed = new Set(known);
+  return [
+    ...layers.map((layer) => layer.id).filter((id) => !placed.has(id)),
+    ...known,
+  ];
 }
 
 /** Group ids from `parentId` up to the top, plus the edited group. */

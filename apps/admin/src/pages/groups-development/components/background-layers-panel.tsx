@@ -4,6 +4,7 @@ import LayersIcon from "@mui/icons-material/Layers";
 import MoreOutlinedIcon from "@mui/icons-material/MoreOutlined";
 import {
   Box,
+  Chip,
   IconButton,
   ListItemButton,
   ListItemSecondaryAction,
@@ -60,6 +61,8 @@ interface BackgroundLayersPanelProps {
   search?: string;
   onMoveZoneDrop?: (item: MoveZoneItem, insertIndex?: number) => void;
   canAcceptMoveZoneItem?: (item: MoveZoneItem) => boolean;
+  /** Layers flagged as in the move zone; they stay here until moved. */
+  flaggedIds?: ReadonlySet<string>;
 }
 
 function orderedIdsFromTree(tree: GroupLayerTreeNode[]): string[] {
@@ -167,11 +170,13 @@ function canDropBackgroundLayerNode(
 function BackgroundLayerTreeNode({
   node,
   options,
+  flagged = false,
   onEdit,
   onRemove,
 }: {
   node: GroupLayerTreeNode;
   options: RenderParams;
+  flagged?: boolean;
   onEdit: (layerId: string, name: string) => void;
   onRemove: (layerId: string) => void;
 }) {
@@ -255,6 +260,15 @@ function BackgroundLayerTreeNode({
                 },
               }}
             />
+            {flagged ? (
+              <Chip
+                label={t("layerTree.moveZone.flag")}
+                size="small"
+                color="warning"
+                variant="outlined"
+                sx={{ mt: 0.5, mr: 9, flexShrink: 0 }}
+              />
+            ) : null}
           </Box>
 
           <ListItemSecondaryAction
@@ -319,6 +333,7 @@ export default function BackgroundLayersPanel({
   search = "",
   onMoveZoneDrop,
   canAcceptMoveZoneItem = () => false,
+  flaggedIds,
 }: BackgroundLayersPanelProps) {
   const { t } = useTranslation();
   const [editTarget, setEditTarget] = useState<{
@@ -611,6 +626,9 @@ export default function BackgroundLayersPanel({
                 <BackgroundLayerTreeNode
                   node={node}
                   options={options}
+                  flagged={
+                    flaggedIds?.has(parseTreeNodeSourceId(node.id)) ?? false
+                  }
                   onEdit={handleEdit}
                   onRemove={handleRemove}
                 />

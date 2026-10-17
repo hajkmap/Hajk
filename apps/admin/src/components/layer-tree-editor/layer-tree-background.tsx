@@ -8,21 +8,35 @@ import {
   type LayerDisplaySettings,
 } from "../../pages/groups-development/types";
 
+/** What a move zone item is to the panel: its key and what it is. */
+interface MoveZoneDropItem {
+  key: string;
+  kind: string;
+  sourceId: string;
+}
+
 interface LayerTreeBackgroundProps {
   background: MapBackgroundLayer[];
   /** Every display layer, for the names of layers dropped in. */
   layers: { id: string; name: string }[];
   onChange: (background: MapBackgroundLayer[]) => void;
+  /** The move zone, whose layers can be dropped in the list. */
+  moveZone?: {
+    canAcceptMoveZoneItem: (item: MoveZoneDropItem) => boolean;
+    onMoveZoneDrop: (item: MoveZoneDropItem, insertIndex?: number) => void;
+    flaggedIds: ReadonlySet<string>;
+  };
 }
 
 /**
- * POC (layer trees): the map's background layers, with the same panel as in
- * Lagerordning (drop from the catalog, order, visible at start, infobox).
+ * The map's background layers, with the same panel as in Lagerordning (drop
+ * from the catalog, order, visible at start, infobox).
  */
 export default function LayerTreeBackground({
   background,
   layers,
   onChange,
+  moveZone,
 }: LayerTreeBackgroundProps) {
   const names = useMemo(
     () =>
@@ -52,11 +66,19 @@ export default function LayerTreeBackground({
   );
 
   // The panel fills its parent (as in Lagerordning); without a height its drop
-  // area would be only a few pixels high.
+  // area would be only a few pixels high. In the editor's window it scrolls
+  // inside, as the tree does.
   return (
     <Paper
       variant="outlined"
-      sx={{ display: "flex", flexDirection: "column", minHeight: 320 }}
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        flex: { lg: "1 1 0" },
+        minHeight: { xs: 320, lg: 0 },
+        overflowY: { lg: "auto" },
+        overscrollBehavior: "contain",
+      }}
     >
       <BackgroundLayersPanel
         layers={rows}
@@ -88,6 +110,9 @@ export default function LayerTreeBackground({
             ),
           )
         }
+        onMoveZoneDrop={moveZone?.onMoveZoneDrop}
+        canAcceptMoveZoneItem={moveZone?.canAcceptMoveZoneItem}
+        flaggedIds={moveZone?.flaggedIds}
       />
     </Paper>
   );

@@ -13,10 +13,11 @@ import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { Box, Chip, IconButton, Tooltip, Typography } from "@mui/material";
+import type { MouseEvent as ReactMouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 
 import LayerTreeItemTooltip from "./layer-tree-item-tooltip";
-import type { LayerTreeFlatNode } from "./layer-tree-model";
+import type { LayerTreeClickPart, LayerTreeFlatNode } from "./layer-tree-model";
 import type { LayerTreeToggleState } from "./layer-tree-settings";
 import LayerTreeVisibilityToggle from "./layer-tree-visibility-toggle";
 import type { LayerTreeItemDetails } from "./use-item-details";
@@ -63,6 +64,18 @@ interface LayerTreeRowProps {
   displayName?: string;
   /** Map mode: opens the group's or the layer's settings on this map. */
   onEditSettings?: () => void;
+  /** In the move zone: it stays here until it is dropped from the zone. */
+  inMoveZone?: boolean;
+  /**
+   * Click and place: a click on the row picks it or places what is held,
+   * before, in or after the row by where it lands.
+   */
+  onRowClick?: (additive: boolean, part: LayerTreeClickPart) => void;
+  onRowHover?: (part: LayerTreeClickPart) => void;
+  /** Click and place: held. */
+  picked?: boolean;
+  /** Click and place: what is held would go here, at this depth, if it can. */
+  placeLine?: { depth: number; edge: "top" | "bottom"; ok: boolean };
 }
 
 export default function LayerTreeRow({
@@ -87,10 +100,24 @@ export default function LayerTreeRow({
   active = false,
   displayName,
   onEditSettings,
+  inMoveZone = false,
+  onRowClick,
+  onRowHover,
+  picked = false,
+  placeLine,
 }: LayerTreeRowProps) {
   const { t } = useTranslation();
   const isGroup = node.data.kind === "group";
   const isHidden = node.data.hidden === true || hiddenWith !== undefined;
+  /** Upper edge: before the row; middle: in a group; lower edge: after it. */
+  const partAt = (event: ReactMouseEvent<HTMLElement>): LayerTreeClickPart => {
+    const box = event.currentTarget.getBoundingClientRect();
+    const y = box.height > 0 ? (event.clientY - box.top) / box.height : 0.5;
+    if (!isGroup) return y < 0.5 ? "before" : "after";
+    if (y < 0.25) return "before";
+    // An open group's lower edge sits on its content: that is in it.
+    return y > 0.75 && !isOpen ? "after" : "into";
+  };
   const canToggle = isGroup && hasChild;
   const usedIn = node.data.usedIn;
   const places = [
@@ -102,7 +129,21 @@ export default function LayerTreeRow({
 
   return (
     <Box
+      onClick={
+        onRowClick
+          ? (event) => {
+              // The row's buttons do their own thing.
+              if ((event.target as HTMLElement).closest("button")) return;
+              onRowClick(event.ctrlKey || event.metaKey, partAt(event));
+            }
+          : undefined
+      }
+      onMouseMove={
+        onRowHover ? (event) => onRowHover(partAt(event)) : undefined
+      }
+      aria-selected={onRowClick ? picked : undefined}
       sx={{
+        position: "relative",
         display: "flex",
         alignItems: "center",
         gap: 0.5,
@@ -112,9 +153,28 @@ export default function LayerTreeRow({
         borderBottom: 1,
         borderColor: "divider",
         opacity: isDragging ? 0.4 : 1,
-        cursor: fixed ? "default" : "grab",
+        cursor: onRowClick ? "pointer" : fixed ? "default" : "grab",
+        bgcolor: picked ? "action.selected" : undefined,
+        outline: picked ? 2 : 0,
+        outlineColor: "primary.main",
+        outlineOffset: -2,
       }}
     >
+      {placeLine ? (
+        <Box
+          aria-hidden
+          sx={{
+            position: "absolute",
+            left: `${placeLine.depth * 24 + 8}px`,
+            right: 8,
+            ...(placeLine.edge === "top" ? { top: -1 } : { bottom: -1 }),
+            height: 3,
+            borderRadius: 1,
+            bgcolor: placeLine.ok ? "primary.main" : "error.main",
+            zIndex: 1,
+          }}
+        />
+      ) : null}
       {/* What comes from a linked group shows a link where yours can be
           dragged, and is toned down. */}
       {from ? (
@@ -187,7 +247,7 @@ export default function LayerTreeRow({
         <Typography
           variant="body2"
           noWrap
-          onClick={canToggle ? onToggle : undefined}
+          onClick={canToggle && !onRowClick ? onToggle : undefined}
           sx={{
             flex: 1,
             minWidth: 0,
@@ -196,7 +256,7 @@ export default function LayerTreeRow({
             fontWeight: active ? 700 : isGroup ? 500 : 400,
             opacity: isHidden ? 0.5 : 1,
             textDecoration: isHidden ? "line-through" : "none",
-            cursor: canToggle ? "pointer" : "inherit",
+            cursor: canToggle || onRowClick ? "pointer" : "inherit",
           }}
         >
           {displayName ?? node.text}
@@ -223,6 +283,14 @@ export default function LayerTreeRow({
           label={t("layerTree.newBadge")}
           size="small"
           color="primary"
+          variant="outlined"
+        />
+      ) : null}
+      {inMoveZone ? (
+        <Chip
+          label={t("layerTree.moveZone.flag")}
+          size="small"
+          color="warning"
           variant="outlined"
         />
       ) : null}

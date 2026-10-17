@@ -1,4 +1,4 @@
-import { useMemo, useState, type RefObject } from "react";
+import { useEffect, useMemo, useState, type RefObject } from "react";
 import { Box } from "@mui/material";
 import LayersIcon from "@mui/icons-material/Layers";
 import TouchAppIcon from "@mui/icons-material/TouchApp";
@@ -63,6 +63,8 @@ export default function MapContentPanel({
   mapTools,
   catalogTools,
   activeToolIds,
+  onGroupsDevelopmentActiveChange,
+  moveZoneHostRef,
   layerTreeDraft = null,
   onLayerTreeDraftChange,
 }: MapContentPanelProps) {
@@ -73,6 +75,27 @@ export default function MapContentPanel({
     () => previewOptionsFor(mapTools, activeToolIds, catalogTools),
     [mapTools, activeToolIds, catalogTools],
   );
+
+  // With Lagerordning open the page shows a place for the move zone by its
+  // save button; it is there once the page has drawn it.
+  const treeOpen = contentSubTab === "layerTree";
+  const [moveZoneHost, setMoveZoneHost] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    onGroupsDevelopmentActiveChange?.(treeOpen);
+    return () => onGroupsDevelopmentActiveChange?.(false);
+  }, [treeOpen, onGroupsDevelopmentActiveChange]);
+  useEffect(() => {
+    if (!treeOpen || !moveZoneHostRef) return;
+    let frame = 0;
+    let tries = 0;
+    const find = () => {
+      const host = moveZoneHostRef.current;
+      if (host) setMoveZoneHost(host);
+      else if (tries++ < 30) frame = window.requestAnimationFrame(find);
+    };
+    frame = window.requestAnimationFrame(find);
+    return () => window.cancelAnimationFrame(frame);
+  }, [treeOpen, moveZoneHostRef]);
 
   return (
     <Box>
@@ -98,6 +121,7 @@ export default function MapContentPanel({
             draft={layerTreeDraft}
             onDraftChange={onLayerTreeDraftChange}
             preview={preview}
+            moveZoneHost={treeOpen && moveZoneHost?.isConnected ? moveZoneHost : null}
           />
         </Box>
       ) : null}

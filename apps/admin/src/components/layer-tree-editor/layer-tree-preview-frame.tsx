@@ -55,9 +55,24 @@ export default function LayerTreePreviewFrame({
         borderRadius: 2,
         overflow: "hidden",
         bgcolor: "background.paper",
+        // Fills the editor's window (below an alert, if any); the content
+        // below takes what is left.
+        display: "flex",
+        flexDirection: "column",
+        flex: { lg: "1 1 0" },
+        minHeight: 0,
+        height: { lg: "100%" },
       }}
     >
-      <Box sx={{ px: 2, py: 1.5, borderBottom: 1, borderColor: "divider" }}>
+      <Box
+        sx={{
+          px: 2,
+          py: 1.5,
+          borderBottom: 1,
+          borderColor: "divider",
+          flexShrink: 0,
+        }}
+      >
         <Typography
           variant="subtitle2"
           sx={{
@@ -81,7 +96,7 @@ export default function LayerTreePreviewFrame({
         position="relative"
         color="default"
         elevation={0}
-        sx={{ zIndex: 1 }}
+        sx={{ zIndex: 1, flexShrink: 0 }}
       >
         <Tabs
           value={tab}
@@ -95,7 +110,9 @@ export default function LayerTreePreviewFrame({
         </Tabs>
       </AppBar>
 
-      {toolbar ? <Box sx={{ px: 2, pt: 1.25 }}>{toolbar}</Box> : null}
+      {toolbar ? (
+        <Box sx={{ px: 2, pt: 1.25, flexShrink: 0 }}>{toolbar}</Box>
+      ) : null}
 
       {tab === "layers" && options.showQuickAccess ? (
         <Box
@@ -108,6 +125,7 @@ export default function LayerTreePreviewFrame({
             display: "flex",
             alignItems: "center",
             gap: 1,
+            flexShrink: 0,
           }}
         >
           <StarBorderOutlinedIcon fontSize="small" />
@@ -140,13 +158,25 @@ export default function LayerTreePreviewFrame({
         <Typography
           variant="body2"
           color="text.secondary"
-          sx={{ px: 2, pt: 1 }}
+          sx={{ px: 2, pt: 1, flexShrink: 0 }}
         >
           {t("layerTree.preview.drawOrderHidden")}
         </Typography>
       ) : null}
 
-      <Box sx={{ p: 1 }}>{children}</Box>
+      <Box
+        sx={{
+          p: 1,
+          flex: { lg: "1 1 0" },
+          minHeight: 0,
+          display: "flex",
+          flexDirection: "column",
+          overflowY: { lg: "auto" },
+          overscrollBehavior: "contain",
+        }}
+      >
+        {children}
+      </Box>
 
       <DialogWrapper
         open={themesOpen}

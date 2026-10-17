@@ -6,6 +6,7 @@ import {
 } from "@mui/icons-material";
 import {
   Box,
+  Chip,
   IconButton,
   ListItemButton,
   ListItemSecondaryAction,
@@ -41,6 +42,8 @@ interface DrawOrderPanelProps {
   onOrderedIdsChange: (ids: string[]) => void;
   onMoveZoneDrop?: (item: MoveZoneItem, insertIndex?: number) => void;
   canAcceptMoveZoneItem?: (item: MoveZoneItem) => boolean;
+  /** Layers flagged as in the move zone; they stay here until moved. */
+  flaggedIds?: ReadonlySet<string>;
 }
 
 function orderedIdsFromTree(tree: GroupLayerTreeNode[]): string[] {
@@ -121,6 +124,7 @@ function DrawOrderTreeNode({
   canMoveUp,
   canMoveDown,
   isHighlighted,
+  flagged = false,
   onMoveUp,
   onMoveDown,
 }: {
@@ -130,6 +134,7 @@ function DrawOrderTreeNode({
   canMoveUp: boolean;
   canMoveDown: boolean;
   isHighlighted: boolean;
+  flagged?: boolean;
   onMoveUp: () => void;
   onMoveDown: () => void;
 }) {
@@ -221,6 +226,15 @@ function DrawOrderTreeNode({
                 },
               }}
             />
+            {flagged ? (
+              <Chip
+                label={t("layerTree.moveZone.flag")}
+                size="small"
+                color="warning"
+                variant="outlined"
+                sx={{ mt: 0.5, ml: 1, flexShrink: 0 }}
+              />
+            ) : null}
           </Box>
 
           <ListItemSecondaryAction
@@ -294,6 +308,7 @@ export default function DrawOrderPanel({
   onOrderedIdsChange,
   onMoveZoneDrop,
   canAcceptMoveZoneItem = () => false,
+  flaggedIds,
 }: DrawOrderPanelProps) {
   const { t } = useTranslation();
   const [highlightedLayerId, setHighlightedLayerId] = useState<string | null>(
@@ -543,6 +558,7 @@ export default function DrawOrderPanel({
                 canMoveUp={index > 0}
                 canMoveDown={index >= 0 && index < orderedIds.length - 1}
                 isHighlighted={highlightedLayerId === layerId}
+                flagged={flaggedIds?.has(layerId) ?? false}
                 onMoveUp={() => handleMoveLayer(layerId, -1)}
                 onMoveDown={() => handleMoveLayer(layerId, 1)}
               />
