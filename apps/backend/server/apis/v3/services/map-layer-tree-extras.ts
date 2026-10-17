@@ -6,6 +6,7 @@ import HttpStatusCodes from "../../../common/http-status-codes.ts";
 import HajkStatusCodes from "../../../common/hajk-status-codes.ts";
 import type { LayerTreeNode } from "./layer-tree.service.ts";
 import {
+  layerSettingsKey,
   parseSettings,
   validateSettings,
   writeSettings,
@@ -299,6 +300,96 @@ export async function loadExceptions(
     byGroup.set(groupId, [...(byGroup.get(groupId) ?? []), row]);
   }
   return byGroup;
+}
+
+/** Every map's exceptions, by map and then by the group they are about. */
+export async function loadAllExceptions(): Promise<
+  Map<string, Map<string, ExceptionRow[]>>
+> {
+  const rows = await prisma.mapGroupException.findMany({
+    where: { map: { deletedAt: null } },
+    orderBy: { index: "asc" },
+    select: {
+      mapName: true,
+      groupId: true,
+      kind: true,
+      displayLayerId: true,
+      childGroupId: true,
+      afterKey: true,
+    },
+  });
+  const byMap = new Map<string, Map<string, ExceptionRow[]>>();
+  for (const { mapName, groupId, ...row } of rows) {
+    const byGroup = byMap.get(mapName) ?? new Map<string, ExceptionRow[]>();
+    byGroup.set(groupId, [...(byGroup.get(groupId) ?? []), row]);
+    byMap.set(mapName, byGroup);
+  }
+  return byMap;
+}
+
+/** The groups and layers on a map, hidden ones included. */
+export interface ItemsOnMap {
+  groupIds: Set<string>;
+  layerIds: Set<string>;
+  /** layerSettingsKey(group, layer) for every layer in a group. */
+  layerKeys: Set<string>;
+}
+
+export function itemsOnMap(shown: LayerTreeNode[]): ItemsOnMap {
+  const onMap: ItemsOnMap = {
+    groupIds: new Set(),
+    layerIds: new Set(),
+    layerKeys: new Set(),
+  };
+  const walk = (nodes: LayerTreeNode[]) => {
+    for (const node of nodes) {
+      if (node.type !== "group") continue;
+      onMap.groupIds.add(node.id);
+      for (const item of node.items) {
+        if (item.type !== "layer") continue;
+        onMap.layerIds.add(item.id);
+        onMap.layerKeys.add(layerSettingsKey(node.id, item.id));
+      }
+      walk(node.items);
+    }
+  };
+  walk(shown);
+  return onMap;
+}
+
+/**
+ * Removes the map's rows about groups and layers that are no longer on it,
+ * so what is taken out of the tree takes its settings, exceptions and place
+ * in the draw order with it (as taking a group out of Lagerordning did).
+ */
+export async function pruneMapRows(
+  tx: Prisma.TransactionClient,
+  mapName: string,
+  onMap: ItemsOnMap
+) {
+  const groupIds = [...onMap.groupIds];
+  await tx.mapGroupSetting.deleteMany({
+    where: { mapName, groupId: { notIn: groupIds } },
+  });
+  await tx.mapGroupException.deleteMany({
+    where: { mapName, groupId: { notIn: groupIds } },
+  });
+  await tx.mapDrawOrderItem.deleteMany({
+    where: { mapName, displayLayerId: { notIn: [...onMap.layerIds] } },
+  });
+  const layerRows = await tx.mapLayerSetting.findMany({
+    where: { mapName },
+    select: { id: true, groupId: true, displayLayerId: true },
+  });
+  const gone = layerRows
+    .filter(
+      (row) =>
+        !onMap.layerKeys.has(layerSettingsKey(row.groupId, row.displayLayerId))
+    )
+    .map((row) => row.id);
+  if (gone.length > 0) {
+    await tx.mapLayerSetting.deleteMany({ where: { id: { in: gone } } });
+  }
 }
 
 /** Layers shown on the map (hidden ones left out), each once, in tree order. */

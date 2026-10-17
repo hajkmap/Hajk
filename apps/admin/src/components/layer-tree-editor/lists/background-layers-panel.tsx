@@ -280,8 +280,8 @@ function BackgroundLayerTreeNode({
           >
             <IconButton
               size="small"
-              aria-label={t("groupsDevelopment.editLayer")}
-              title={t("groupsDevelopment.editLayer")}
+              aria-label={t("layerTree.background.editLayer")}
+              title={t("layerTree.background.editLayer")}
               sx={{ mt: "1px", cursor: "pointer" }}
               onMouseDown={(event) => {
                 event.stopPropagation();
@@ -302,8 +302,8 @@ function BackgroundLayerTreeNode({
             </IconButton>
             <IconButton
               size="small"
-              aria-label={t("groupsDevelopment.removeLayerFromTree")}
-              title={t("groupsDevelopment.removeLayerFromTree")}
+              aria-label={t("layerTree.background.remove")}
+              title={t("layerTree.background.remove")}
               sx={{ mt: "1px", cursor: "pointer" }}
               onMouseDown={(event) => {
                 event.stopPropagation();
@@ -533,7 +533,7 @@ export default function BackgroundLayersPanel({
   if (orderedIds.length === 0) {
     return (
       <GroupLayerTreeDropZone
-        emptyLabel={t("groupsDevelopment.emptyBackground")}
+        emptyLabel={t("layerTree.background.empty")}
         onCatalogDrop={handleCatalogDropToRoot}
         canAcceptCatalogItem={canAcceptCatalogItem}
         onMoveZoneDrop={handleMoveZoneDropToRoot}

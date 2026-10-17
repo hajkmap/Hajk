@@ -490,6 +490,7 @@ model LayerInstance {
   editingLayer      EditingLayer?         @relation(fields: [editingLayerId], references: [id])
   map               Map?                  @relation(fields: [mapId], references: [id])
   group             Group?                @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  /// BACKGROUND for a map's background layers; search and editing layers have none.
   usage             UseType?
   restrictedToRoles RoleOnLayerInstance[]
   infoClickActive   Boolean               @default(true)

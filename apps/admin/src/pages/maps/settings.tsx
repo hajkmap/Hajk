@@ -852,6 +852,14 @@ export default function MapSettings() {
         didSave = true;
       }
 
+      // Before the map's own fields, like the tools: saved after a rename it
+      // would go to the old name, and the draft would be lost with the error.
+      if (layerTreeDirty && layerTreeDraft) {
+        await saveLayerTree(layerTreeDraft);
+        setLayerTreeDraft(null);
+        didSave = true;
+      }
+
       if (isDirty) {
         const payload = buildMapUpdatePayload(formData, map);
         await updateMap({
@@ -859,12 +867,6 @@ export default function MapSettings() {
           data: payload,
         });
         setCommittedFormBaseline(formData);
-        didSave = true;
-      }
-
-      if (layerTreeDirty && layerTreeDraft) {
-        await saveLayerTree(layerTreeDraft);
-        setLayerTreeDraft(null);
         didSave = true;
       }
 

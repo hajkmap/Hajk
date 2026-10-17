@@ -195,7 +195,9 @@ export default function LayerTreeRow({
           size="small"
           onClick={onToggle}
           disabled={!hasChild}
-          aria-label={isOpen ? "Collapse group" : "Expand group"}
+          aria-label={t(
+            isOpen ? "layerTree.collapseGroup" : "layerTree.expandGroup",
+          )}
         >
           <KeyboardArrowRightIcon
             fontSize="small"

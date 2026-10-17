@@ -16,7 +16,7 @@ import {
   resolveLayerPlacementById,
 } from "../utils/layer-instance.ts";
 import { toolsOnMapsOptionsForTarget } from "../utils/tool-placement.ts";
-import LayerTreeService from "./layer-tree.service.ts";
+import LayerTreeService, { type MapContent } from "./layer-tree.service.ts";
 
 const logger = log4js.getLogger("service.v3.map");
 
@@ -140,10 +140,11 @@ class MapService {
       },
     });
 
-    const [contents, layerCounts] = await Promise.all([
-      LayerTreeService.getMapContents(),
-      this.countLayersByMapNames(maps.map((entry) => entry.name)),
-    ]);
+    const contents = await LayerTreeService.getMapContents();
+    const layerCounts = await this.countLayersByMapNames(
+      maps.map((entry) => entry.name),
+      contents
+    );
 
     return maps.map(({ _count, ...map }) => ({
       ...map,
@@ -155,26 +156,26 @@ class MapService {
   }
 
   /**
-   * Counts the layers each map uses: those its tree shows, its background
-   * layers, and the search and editing layers it uses — each once.
+   * Counts the layers each map uses: those its tree shows (`contents`), its
+   * background layers, and the search and editing layers it uses — each once.
    */
-  private async countLayersByMapNames(mapNames: string[]) {
+  private async countLayersByMapNames(
+    mapNames: string[],
+    contents: Map<string, MapContent>
+  ) {
     if (mapNames.length === 0) {
       return new Map<string, number>();
     }
 
-    const [contents, instances] = await Promise.all([
-      LayerTreeService.getMapContents(),
-      prisma.layerInstance.findMany({
-        where: activeLayerInstancesForMapsWhere(mapNames),
-        select: {
-          displayLayerId: true,
-          searchLayerId: true,
-          editingLayerId: true,
-          map: { select: { name: true } },
-        },
-      }),
-    ]);
+    const instances = await prisma.layerInstance.findMany({
+      where: activeLayerInstancesForMapsWhere(mapNames),
+      select: {
+        displayLayerId: true,
+        searchLayerId: true,
+        editingLayerId: true,
+        map: { select: { name: true } },
+      },
+    });
 
     const layerIdsByMap = new Map(
       mapNames.map(

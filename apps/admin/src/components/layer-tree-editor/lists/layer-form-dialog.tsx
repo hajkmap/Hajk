@@ -55,7 +55,7 @@ function LayerFormDialogBody({
 
   return (
     <>
-      <DialogTitle>{t("groupsDevelopment.editLayer")}</DialogTitle>
+      <DialogTitle>{t("layerTree.background.editLayer")}</DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
           {layerName}
@@ -82,7 +82,7 @@ function LayerFormDialogBody({
         />
 
         <TextField
-          label={t("groupsDevelopment.layerInfoBox")}
+          label={t("layerTree.settings.infobox")}
           value={values.layerInfoBox}
           onChange={(event) => {
             setValues((current) => ({

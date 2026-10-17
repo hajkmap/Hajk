@@ -6,7 +6,7 @@
 export interface LayerTreeUsage {
   /** Groups that link this group into their content. */
   groups: number;
-  /** Maps that have this group on their tree's top level. */
+  /** Maps whose tree shows this group, hidden placements left out. */
   maps: number;
 }
 

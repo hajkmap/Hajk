@@ -122,12 +122,37 @@ export function useTreeClickPlace({
     );
   };
 
-  /** Moves nodes to one place, the first picked first; the ones moved. */
+  /**
+   * The sibling everything goes in front of, or null for the end. A held row
+   * can't be it: it moves too. Unlike an index, it stays put while rows are
+   * taken out of the same group.
+   */
+  const anchorOf = (destination: Destination, moving: Set<string>) =>
+    nodes
+      .filter((node) => node.parent === destination.parentId)
+      .slice(destination.index)
+      .find((node) => !moving.has(node.id))?.id ?? null;
+
+  /** Where `anchorId` is among the siblings now; the end without one. */
+  const indexBefore = (
+    current: LayerTreeFlatNode[],
+    parentId: string,
+    anchorId: string | null,
+  ) => {
+    if (anchorId === null) return undefined;
+    const index = current
+      .filter((node) => node.parent === parentId)
+      .findIndex((node) => node.id === anchorId);
+    return index === -1 ? undefined : index;
+  };
+
+  /** Moves nodes to one place, in the order picked; the ones moved. */
   const moveMany = (ids: string[], destination: Destination) => {
     let current = nodes;
     const moved: string[] = [];
     const own = new Set<string>();
-    for (const id of [...ids].reverse()) {
+    const anchorId = anchorOf(destination, new Set(ids));
+    for (const id of ids) {
       const node = byId.get(id);
       if (!node || !movable(node)) continue;
       const problem = placeProblem({
@@ -151,7 +176,7 @@ export function useTreeClickPlace({
         current,
         id,
         destination.parentId,
-        destination.index,
+        indexBefore(current, destination.parentId, anchorId),
       );
       moved.push(id);
     }
@@ -165,7 +190,7 @@ export function useTreeClickPlace({
         openNodes([destination.parentId]);
       }
     }
-    return moved;
+    return { moved, nodes: current, anchorId };
   };
 
   const placeAt = async (destination: Destination) => {
@@ -183,26 +208,34 @@ export function useTreeClickPlace({
       return;
     }
     if (pick.source === "tree") {
-      if (moveMany(selectionRoots(nodes, pick.nodeIds), destination).length) {
-        clickPlace.clear();
-      }
+      const { moved } = moveMany(
+        selectionRoots(nodes, pick.nodeIds),
+        destination,
+      );
+      if (moved.length > 0) clickPlace.clear();
       return;
     }
     const placedKeys: string[] = [];
     const flagged = zoneHeld.filter((item) => item.nodeId !== undefined);
-    const moved = new Set(
-      moveMany(
-        selectionRoots(
-          nodes,
-          flagged.flatMap((item) => item.nodeId ?? []),
-        ),
-        destination,
+    const result = moveMany(
+      selectionRoots(
+        nodes,
+        flagged.flatMap((item) => item.nodeId ?? []),
       ),
+      destination,
     );
+    const moved = new Set(result.moved);
     placedKeys.push(
       ...flagged
         .filter((item) => item.nodeId && moved.has(item.nodeId))
         .map((item) => item.key),
+    );
+    // What isn't in the tree yet goes after what was moved, before the same
+    // row; inserted last first, so the first picked ends first.
+    const index = indexBefore(
+      result.nodes,
+      destination.parentId,
+      result.anchorId,
     );
     for (const item of zoneHeld
       .filter((entry) => entry.nodeId === undefined)
@@ -211,7 +244,7 @@ export function useTreeClickPlace({
         await insertItem(
           { kind: item.kind, id: item.sourceId, name: item.name },
           destination.parentId,
-          destination.index,
+          index,
         )
       ) {
         placedKeys.push(item.key);

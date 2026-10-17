@@ -14,8 +14,11 @@ import {
   isItemType,
   isObject,
   itemKey,
+  itemsOnMap,
+  loadAllExceptions,
   loadExceptions,
   parseMapTreeExtras,
+  pruneMapRows,
   readBackground,
   validateMapTreeExtras,
   writeMapTreeExtras,
@@ -47,7 +50,7 @@ const MAX_DEPTH = 25;
 export interface LayerTreeUsage {
   /** Groups that link this group into their content. */
   groups: number;
-  /** Maps that have this group on their tree's top level. */
+  /** Maps whose tree shows this group, hidden placements left out. */
   maps: number;
 }
 
@@ -340,14 +343,16 @@ class LayerTreeService {
   /**
    * Loads every group reachable from `rootGroupIds` (level by level), their
    * items and what they put in the groups linked in their trees, the names of
-   * all layers involved and how widely each group is used. `overrides` stand
-   * in for what a save is about to store.
+   * all layers involved and how widely each group is used (unless `usage` is
+   * off, as when a save is checked). `overrides` stand in for what a save is
+   * about to store.
    */
   private async loadContext(
     rootGroupIds: string[],
     rootLayerIds: string[],
     exceptions?: Map<string, ExceptionRow[]>,
-    overrides?: TreeOverrides
+    overrides?: TreeOverrides,
+    options: { usage?: boolean } = {}
   ): Promise<TreeContext> {
     const groups = new Map(overrides?.groups ?? []);
     const itemsByGroup = new Map<string, ItemRef[]>();
@@ -433,19 +438,24 @@ class LayerTreeService {
     }
 
     const groupIds = [...groups.keys()];
-    const [layers, parentLinks, mapLinks] = await Promise.all([
+    const withUsage = options.usage !== false;
+    const [layers, parentLinks, mapsShowing] = await Promise.all([
       prisma.displayLayer.findMany({
         where: { id: { in: [...layerIds] }, deletedAt: null },
         select: { id: true, name: true },
       }),
-      prisma.groupItem.findMany({
-        where: { childGroupId: { in: groupIds }, group: { deletedAt: null } },
-        select: { groupId: true, childGroupId: true },
-      }),
-      prisma.mapTreeItem.findMany({
-        where: { groupId: { in: groupIds }, map: { deletedAt: null } },
-        select: { mapName: true, groupId: true },
-      }),
+      withUsage
+        ? prisma.groupItem.findMany({
+            where: {
+              childGroupId: { in: groupIds },
+              group: { deletedAt: null },
+            },
+            select: { groupId: true, childGroupId: true },
+          })
+        : [],
+      // Where each group shows once the maps' exceptions are in: the same
+      // count the group page and the lists give.
+      withUsage ? this.mapsShowingGroups() : new Map<string, Set<string>>(),
     ]);
 
     const parents = new Map<string, Set<string>>();
@@ -455,19 +465,12 @@ class LayerTreeService {
       set.add(link.groupId);
       parents.set(link.childGroupId, set);
     }
-    const maps = new Map<string, Set<string>>();
-    for (const link of mapLinks) {
-      if (!link.groupId) continue;
-      const set = maps.get(link.groupId) ?? new Set<string>();
-      set.add(link.mapName);
-      maps.set(link.groupId, set);
-    }
 
     const usage = new Map<string, LayerTreeUsage>();
     for (const id of groupIds) {
       usage.set(id, {
         groups: parents.get(id)?.size ?? 0,
-        maps: maps.get(id)?.size ?? 0,
+        maps: mapsShowing.get(id)?.size ?? 0,
       });
     }
 
@@ -704,14 +707,49 @@ class LayerTreeService {
 
   /**
    * What every map shows in its tree, with its exceptions applied and what it
-   * hides left out: for the lists of where groups and layers are used.
+   * hides left out: for the lists of where groups and layers are used. All
+   * maps are expanded from one load, so the cost doesn't grow with each map.
    */
   async getMapContents(): Promise<Map<string, MapContent>> {
-    const maps = await prisma.map.findMany({
-      where: { deletedAt: null },
-      orderBy: { name: "asc" },
-      select: { name: true },
-    });
+    const [maps, rows, exceptionsByMap] = await Promise.all([
+      prisma.map.findMany({
+        where: { deletedAt: null },
+        orderBy: { name: "asc" },
+        select: { name: true },
+      }),
+      prisma.mapTreeItem.findMany({
+        where: { map: { deletedAt: null } },
+        orderBy: { index: "asc" },
+        select: { mapName: true, displayLayerId: true, groupId: true },
+      }),
+      loadAllExceptions(),
+    ]);
+    const refsByMap = new Map<string, ItemRef[]>();
+    for (const row of rows) {
+      refsByMap.set(row.mapName, [
+        ...(refsByMap.get(row.mapName) ?? []),
+        { displayLayerId: row.displayLayerId, childGroupId: row.groupId },
+      ]);
+    }
+    // One context for all maps: every top-level group, and everything any
+    // map puts in a group. Each map is then expanded with its own exceptions.
+    const allExceptions = new Map<string, ExceptionRow[]>();
+    for (const byGroup of exceptionsByMap.values()) {
+      for (const [groupId, list] of byGroup) {
+        allExceptions.set(groupId, [
+          ...(allExceptions.get(groupId) ?? []),
+          ...list,
+        ]);
+      }
+    }
+    const context = await this.loadContext(
+      rows.flatMap((row) => (row.groupId ? [row.groupId] : [])),
+      rows.flatMap((row) => (row.displayLayerId ? [row.displayLayerId] : [])),
+      allExceptions,
+      undefined,
+      { usage: false }
+    );
+
     const contents = new Map<string, MapContent>();
     for (const { name } of maps) {
       const content: MapContent = { groups: new Set(), layers: new Map() };
@@ -727,10 +765,26 @@ class LayerTreeService {
           }
         }
       };
-      walk(await this.getMapItems(name), "");
+      const items = this.toNodes(
+        refsByMap.get(name) ?? [],
+        { ...context, exceptions: exceptionsByMap.get(name), cycles: [] },
+        []
+      );
+      walk(items, "");
       contents.set(name, content);
     }
     return contents;
+  }
+
+  /** For every group, the maps whose tree shows it. */
+  private async mapsShowingGroups(): Promise<Map<string, Set<string>>> {
+    const byGroup = new Map<string, Set<string>>();
+    for (const [mapName, content] of await this.getMapContents()) {
+      for (const groupId of content.groups) {
+        byGroup.set(groupId, (byGroup.get(groupId) ?? new Set()).add(mapName));
+      }
+    }
+    return byGroup;
   }
 
   /** The map's tree with its exceptions merged in. */
@@ -881,7 +935,9 @@ class LayerTreeService {
         },
       ]);
     }
-    const context = await this.loadContext([groupId], [], undefined, overrides);
+    const context = await this.loadContext([groupId], [], undefined, overrides, {
+      usage: false,
+    });
     const nameOf = (id: string) => context.groups.get(id)?.name ?? id;
     const [shownRoot] = this.toNodes(
       [{ displayLayerId: null, childGroupId: groupId }],
@@ -1022,40 +1078,41 @@ class LayerTreeService {
     // Exceptions, settings, background and draw order are written only when
     // sent.
     const extras = parseMapTreeExtras(body);
-    let shown: LayerTreeNode[] = [];
-    let context: TreeContext | undefined;
-    if (extras.exceptions?.length || extras.settings) {
-      if (extras.exceptions?.length) {
-        await this.assertExist(
-          new Set(
-            extras.exceptions
-              .filter((exception) => exception.type === "group")
-              .map((exception) => exception.id)
-          ),
-          new Set()
-        );
-      }
-      // The map's tree as it will be shown, with the groups it puts in others
-      // (the stored exceptions, unless new ones are sent).
-      context = await this.loadContext(
-        [...groupIds],
-        [],
-        extras.exceptions
-          ? exceptionsByGroup(extras.exceptions)
-          : await loadExceptions(map.name)
-      );
-      shown = this.toNodes(
-        [...groupIds].map((id) => ({ displayLayerId: null, childGroupId: id })),
-        context,
-        []
+    if (extras.exceptions?.length) {
+      await this.assertExist(
+        new Set(
+          extras.exceptions
+            .filter((exception) => exception.type === "group")
+            .map((exception) => exception.id)
+        ),
+        new Set()
       );
     }
+    // The map's tree as it will be shown, with the groups it puts in others
+    // (the stored exceptions, unless new ones are sent).
+    const context = await this.loadContext(
+      [...groupIds],
+      [],
+      extras.exceptions
+        ? exceptionsByGroup(extras.exceptions)
+        : await loadExceptions(map.name),
+      undefined,
+      { usage: false }
+    );
+    const shown = this.toNodes(
+      [...groupIds].map((id) => ({ displayLayerId: null, childGroupId: id })),
+      context,
+      []
+    );
+    // A cycle that stored exceptions make doesn't stop a save that leaves
+    // them alone: the editor shows it, and the added group is taken out there.
     await validateMapTreeExtras(
       extras,
       shown,
-      context?.cycles ?? [],
-      (id) => context?.groups.get(id)?.name ?? id
+      extras.exceptions?.length || extras.settings ? context.cycles : [],
+      (id) => context.groups.get(id)?.name ?? id
     );
+    const onMap = itemsOnMap(shown);
 
     await prisma.$transaction(async (tx) => {
       await tx.mapTreeItem.deleteMany({ where: { mapName: map.name } });
@@ -1069,6 +1126,8 @@ class LayerTreeService {
         });
       }
       await writeMapTreeExtras(tx, map, extras);
+      // What was taken out of the tree takes its rows with it.
+      await pruneMapRows(tx, map.name, onMap);
       await tx.map.update({
         where: { id: map.id },
         data: { lastSavedBy: userId, lastSavedDate: new Date() },

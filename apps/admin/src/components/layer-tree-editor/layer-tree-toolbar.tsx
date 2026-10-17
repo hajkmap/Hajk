@@ -40,9 +40,7 @@ export default function LayerTreeToolbar({
   const undoLabel = t("layerTree.undo");
   const redoLabel = t("layerTree.redo");
   const expandLabel = t(
-    allExpanded
-      ? "groupsDevelopment.collapseAllGroups"
-      : "groupsDevelopment.expandAllGroups",
+    allExpanded ? "layerTree.collapseAll" : "layerTree.expandAll",
   );
 
   return (

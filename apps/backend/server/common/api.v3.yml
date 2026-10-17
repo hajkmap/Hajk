@@ -355,6 +355,55 @@ paths:
                         required:
                           - groupId
                           - layerId
+                exceptions:
+                  type: array
+                  description: The map's own exceptions to the groups it shows; replaces all of them. add puts a layer or a group in a group on this map only, after the item named by after (null puts it first); hide leaves out one of the group's own items on this map.
+                  items:
+                    type: object
+                    properties:
+                      groupId:
+                        type: string
+                      kind:
+                        type: string
+                        enum: [add, hide]
+                      type:
+                        type: string
+                        enum: [layer, group]
+                      id:
+                        type: string
+                      after:
+                        type: object
+                        nullable: true
+                        properties:
+                          type:
+                            type: string
+                            enum: [layer, group]
+                          id:
+                            type: string
+                    required:
+                      - groupId
+                      - kind
+                      - type
+                      - id
+                background:
+                  type: array
+                  description: The map's background layers in order; replaces all of them.
+                  items:
+                    type: object
+                    properties:
+                      layerId:
+                        type: string
+                      visibleAtStart:
+                        type: boolean
+                      infobox:
+                        type: string
+                    required:
+                      - layerId
+                drawOrder:
+                  type: array
+                  description: Layer ids, top first; replaces the map's draw order. Layers not in it are drawn on top.
+                  items:
+                    type: string
               required:
                 - items
       responses:
