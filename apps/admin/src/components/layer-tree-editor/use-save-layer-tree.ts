@@ -11,6 +11,7 @@ import {
   toWriteNodes,
   type LayerTreeDraft,
 } from "./layer-tree-model";
+import { toMapTreeSettings } from "./layer-tree-settings";
 
 /**
  * Saves a layer tree draft from the page's own save button. Throws with the
@@ -36,6 +37,9 @@ export function useSaveLayerTree() {
         items,
         exceptions: toMapExceptions(draft.nodes),
         // Only what was changed is sent.
+        settings: draft.settings
+          ? toMapTreeSettings(draft.settings, draft.nodes)
+          : undefined,
         background: draft.background?.map(
           ({ layerId, visibleAtStart, infobox }) => ({
             layerId,

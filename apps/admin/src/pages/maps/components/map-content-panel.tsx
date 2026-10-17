@@ -1,21 +1,22 @@
-import { useEffect, useState, type RefObject } from "react";
+import { useMemo, useState, type RefObject } from "react";
 import { Box } from "@mui/material";
-import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import LayersIcon from "@mui/icons-material/Layers";
 import TouchAppIcon from "@mui/icons-material/TouchApp";
 
 import { SettingsPageTabs } from "../../../components/settings-page-tabs";
 import LayerTreeEditor, {
+  previewOptionsFor,
   type LayerTreeDraft,
 } from "../../../components/layer-tree-editor";
 import type { ToolOnMap } from "../../../api/maps";
 import type { Tool } from "../../../api/tools";
 import type { LayerSwitcherDraft } from "../../groups-development/types";
-import GroupLayerTree from "../../groups-development/components/group-layer-tree";
-import { findActiveLayerswitcher } from "../../groups-development/utils/active-layerswitcher";
 import MapLayersPanel from "./map-layers-panel";
 import type { MapLayerActivationRow } from "../map-layer-activation";
 
+// Lagerordning is the map's layer tree (MapTreeItem and the map's exceptions
+// and settings), apart from the layerswitcher tool. The old editor in
+// groups-development is no longer shown.
 const CONTENT_SUB_TABS = [
   {
     key: "layers" as const,
@@ -23,14 +24,9 @@ const CONTENT_SUB_TABS = [
     icon: <LayersIcon />,
   },
   {
-    key: "groupsDevelopment" as const,
+    key: "layerTree" as const,
     labelKey: "maps.contentTab.placement",
     icon: <TouchAppIcon />,
-  },
-  {
-    key: "layerTree" as const,
-    labelKey: "layerTree.tab",
-    icon: <AccountTreeIcon />,
   },
 ];
 
@@ -38,20 +34,24 @@ interface MapContentPanelProps {
   mapName?: string;
   layerActivationRows: MapLayerActivationRow[];
   onLayerActivationRowsChange: (rows: MapLayerActivationRow[]) => void;
+  /** The map's tools, to show Lagerordning as its active layerswitcher. */
   mapTools?: ToolOnMap[];
   catalogTools?: Tool[];
+  /** The tools turned on in the tools tab, saved or not. */
   activeToolIds?: Set<number>;
+  /** @deprecated Used by the old Lagerordning editor, no longer shown. */
   layerSwitcherDraft?: LayerSwitcherDraft | null;
+  /** @deprecated Used by the old Lagerordning editor, no longer shown. */
   onLayerSwitcherDraftChange?: (draft: LayerSwitcherDraft | null) => void;
-  /** Bumped when Layers checkboxes are reverted to the last committed state. */
+  /** @deprecated Used by the old Lagerordning editor, no longer shown. */
   layerActivationResetKey?: number;
-  /** Layers tab rows synced from server — required before map-layers dirty checks. */
+  /** @deprecated Used by the old Lagerordning editor, no longer shown. */
   menuSynced?: boolean;
-  /** Called when the groups-development sub-tab is active. */
+  /** Called when the Lagerordning sub-tab is active. */
   onGroupsDevelopmentActiveChange?: (active: boolean) => void;
   /** Host element for the map-layers move zone (FormActionPanel sidebar). */
   moveZoneHostRef?: RefObject<HTMLDivElement | null>;
-  /** POC (layer trees): unsaved edits of the map's layer tree. */
+  /** Unsaved edits of the map's layer tree. */
   layerTreeDraft?: LayerTreeDraft | null;
   onLayerTreeDraftChange?: (draft: LayerTreeDraft | null) => void;
 }
@@ -63,50 +63,16 @@ export default function MapContentPanel({
   mapTools,
   catalogTools,
   activeToolIds,
-  layerSwitcherDraft = null,
-  onLayerSwitcherDraftChange,
-  layerActivationResetKey = 0,
-  menuSynced = false,
-  onGroupsDevelopmentActiveChange,
-  moveZoneHostRef,
   layerTreeDraft = null,
   onLayerTreeDraftChange,
 }: MapContentPanelProps) {
-  const [contentSubTab, setContentSubTab] = useState<
-    "layers" | "groupsDevelopment" | "layerTree"
-  >("layers");
-  const [moveZoneHostEl, setMoveZoneHostEl] = useState<HTMLElement | null>(
-    null,
+  const [contentSubTab, setContentSubTab] = useState<"layers" | "layerTree">(
+    "layers",
   );
-
-  const isGroupsDevelopment = contentSubTab === "groupsDevelopment";
-  const hasActiveLayerswitcher =
-    findActiveLayerswitcher(mapTools, activeToolIds, catalogTools) != null;
-  const showMapLayersEditor = isGroupsDevelopment && hasActiveLayerswitcher;
-
-  useEffect(() => {
-    onGroupsDevelopmentActiveChange?.(showMapLayersEditor);
-    return () => {
-      onGroupsDevelopmentActiveChange?.(false);
-    };
-  }, [showMapLayersEditor, onGroupsDevelopmentActiveChange]);
-
-  useEffect(() => {
-    if (!showMapLayersEditor || !moveZoneHostRef) {
-      setMoveZoneHostEl(null);
-      return;
-    }
-
-    const syncHost = () => {
-      setMoveZoneHostEl(moveZoneHostRef.current);
-    };
-
-    syncHost();
-    const frame = window.requestAnimationFrame(syncHost);
-    return () => {
-      window.cancelAnimationFrame(frame);
-    };
-  }, [showMapLayersEditor, moveZoneHostRef]);
+  const preview = useMemo(
+    () => previewOptionsFor(mapTools, activeToolIds, catalogTools),
+    [mapTools, activeToolIds, catalogTools],
+  );
 
   return (
     <Box>
@@ -124,22 +90,6 @@ export default function MapContentPanel({
         />
       ) : null}
 
-      {/* Keep mounted (hidden) so move-zone / map-layers draft state survives sub-tab switches. */}
-      <Box sx={{ display: isGroupsDevelopment ? "block" : "none" }}>
-        <GroupLayerTree
-          mapName={mapName}
-          mapTools={mapTools}
-          catalogTools={catalogTools}
-          activeToolIds={activeToolIds}
-          layerActivationRows={layerActivationRows}
-          pendingDraft={layerSwitcherDraft}
-          onLayerSwitcherDraftChange={onLayerSwitcherDraftChange}
-          layerActivationResetKey={layerActivationResetKey}
-          menuSynced={menuSynced}
-          moveZoneHostEl={showMapLayersEditor ? moveZoneHostEl : null}
-        />
-      </Box>
-
       {contentSubTab === "layerTree" && mapName && onLayerTreeDraftChange ? (
         <Box sx={{ mt: 2 }}>
           <LayerTreeEditor
@@ -147,6 +97,7 @@ export default function MapContentPanel({
             ownerId={mapName}
             draft={layerTreeDraft}
             onDraftChange={onLayerTreeDraftChange}
+            preview={preview}
           />
         </Box>
       ) : null}

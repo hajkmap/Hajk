@@ -8,6 +8,7 @@ import LayersIcon from "@mui/icons-material/Layers";
 import LinkIcon from "@mui/icons-material/Link";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import SyncProblemIcon from "@mui/icons-material/SyncProblem";
+import TuneOutlinedIcon from "@mui/icons-material/TuneOutlined";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
@@ -16,7 +17,18 @@ import { useTranslation } from "react-i18next";
 
 import LayerTreeItemTooltip from "./layer-tree-item-tooltip";
 import type { LayerTreeFlatNode } from "./layer-tree-model";
+import type { LayerTreeToggleState } from "./layer-tree-settings";
+import LayerTreeVisibilityToggle from "./layer-tree-visibility-toggle";
 import type { LayerTreeItemDetails } from "./use-item-details";
+
+/** Map mode: the box left of the name, as in Lagerordning. */
+export interface LayerTreeRowToggle {
+  state: LayerTreeToggleState;
+  variant: "checkbox" | "radio";
+  label: string;
+  disabled?: boolean;
+  onClick?: () => void;
+}
 
 interface LayerTreeRowProps {
   node: LayerTreeFlatNode;
@@ -43,6 +55,14 @@ interface LayerTreeRowProps {
   onToggleHidden?: () => void;
   /** Map mode: hidden with a group above it; the name of that group. */
   hiddenWith?: string;
+  /** Map mode: visible at start for a layer, all its layers for a group. */
+  toggle?: LayerTreeRowToggle;
+  /** Map mode: the layer, or all of the group's layers, visible at start. */
+  active?: boolean;
+  /** Map mode: the group's name on this map, where it has one. */
+  displayName?: string;
+  /** Map mode: opens the group's or the layer's settings on this map. */
+  onEditSettings?: () => void;
 }
 
 export default function LayerTreeRow({
@@ -63,6 +83,10 @@ export default function LayerTreeRow({
   onNewGroup,
   onToggleHidden,
   hiddenWith,
+  toggle,
+  active = false,
+  displayName,
+  onEditSettings,
 }: LayerTreeRowProps) {
   const { t } = useTranslation();
   const isGroup = node.data.kind === "group";
@@ -124,6 +148,15 @@ export default function LayerTreeRow({
       ) : (
         <Box sx={{ width: 30, flexShrink: 0 }} />
       )}
+      {toggle ? (
+        <LayerTreeVisibilityToggle
+          state={toggle.state}
+          variant={toggle.variant}
+          label={toggle.label}
+          disabled={toggle.disabled}
+          onClick={toggle.onClick}
+        />
+      ) : null}
       {isGroup ? (
         <FolderIcon
           fontSize="small"
@@ -137,7 +170,20 @@ export default function LayerTreeRow({
           sx={{ opacity: from ? 0.5 : 1 }}
         />
       )}
-      <LayerTreeItemTooltip name={node.text} details={details}>
+      <LayerTreeItemTooltip
+        name={displayName ?? node.text}
+        details={
+          displayName
+            ? {
+                ...details,
+                lines: [
+                  t("layerTree.settings.ownName", { name: node.text }),
+                  ...details.lines,
+                ],
+              }
+            : details
+        }
+      >
         <Typography
           variant="body2"
           noWrap
@@ -146,13 +192,14 @@ export default function LayerTreeRow({
             flex: 1,
             minWidth: 0,
             color: from ? "text.secondary" : "text.primary",
-            fontWeight: isGroup ? 500 : 400,
+            // As in Lagerordning, what is on at start stands out.
+            fontWeight: active ? 700 : isGroup ? 500 : 400,
             opacity: isHidden ? 0.5 : 1,
             textDecoration: isHidden ? "line-through" : "none",
             cursor: canToggle ? "pointer" : "inherit",
           }}
         >
-          {node.text}
+          {displayName ?? node.text}
         </Typography>
       </LayerTreeItemTooltip>
       {node.data.added ? (
@@ -236,6 +283,17 @@ export default function LayerTreeRow({
             ) : (
               <VisibilityOutlinedIcon fontSize="small" />
             )}
+          </IconButton>
+        </Tooltip>
+      ) : null}
+      {onEditSettings ? (
+        <Tooltip title={t("layerTree.settings.edit")}>
+          <IconButton
+            size="small"
+            aria-label={t("layerTree.settings.edit")}
+            onClick={onEditSettings}
+          >
+            <TuneOutlinedIcon fontSize="small" />
           </IconButton>
         </Tooltip>
       ) : null}

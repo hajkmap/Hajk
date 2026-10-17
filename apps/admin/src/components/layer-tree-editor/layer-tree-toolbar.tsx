@@ -9,6 +9,8 @@ interface LayerTreeToolbarProps {
   onNewGroup?: () => void;
   search: string;
   onSearchChange: (search: string) => void;
+  /** As the client: no search where its layerswitcher has no filter. */
+  showSearch?: boolean;
   allExpanded: boolean;
   /** Some group has content to show. */
   canExpand: boolean;
@@ -21,6 +23,7 @@ export default function LayerTreeToolbar({
   onNewGroup,
   search,
   onSearchChange,
+  showSearch = true,
   allExpanded,
   canExpand,
   onToggleAll,
@@ -45,17 +48,21 @@ export default function LayerTreeToolbar({
           {t("layerTree.newGroup")}
         </Button>
       ) : null}
-      <TextField
-        size="small"
-        placeholder={t("layerTree.searchTree")}
-        value={search}
-        onChange={(event) => onSearchChange(event.target.value)}
-        // Enter would otherwise submit a surrounding form.
-        onKeyDown={(event) => {
-          if (event.key === "Enter") event.preventDefault();
-        }}
-        sx={{ flex: 1, maxWidth: 320, ml: "auto" }}
-      />
+      {showSearch ? (
+        <TextField
+          size="small"
+          placeholder={t("layerTree.searchTree")}
+          value={search}
+          onChange={(event) => onSearchChange(event.target.value)}
+          // Enter would otherwise submit a surrounding form.
+          onKeyDown={(event) => {
+            if (event.key === "Enter") event.preventDefault();
+          }}
+          sx={{ flex: 1, maxWidth: 320, ml: "auto" }}
+        />
+      ) : (
+        <Box sx={{ flex: 1 }} />
+      )}
       <Tooltip title={expandLabel}>
         <span>
           <IconButton

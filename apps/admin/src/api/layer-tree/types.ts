@@ -104,19 +104,62 @@ export interface MapGroupException {
   after?: { type: "layer" | "group"; id: string } | null;
 }
 
+/** A text box shown with a group in the client. */
+export interface MapInfoGroup {
+  visible: boolean;
+  title: string;
+  text: string;
+  url: string;
+  urlText: string;
+  openDataLink: string;
+  owner: string;
+}
+
+/** A map's settings for a group in its tree, the same wherever it shows. */
+export interface MapGroupSettings {
+  groupId: string;
+  /** The group's name on this map; null shows the group's own name. */
+  name: string | null;
+  /** Shows a button that turns all the group's layers on or off. */
+  toggled: boolean;
+  /** Open when the map starts. */
+  expanded: boolean;
+  /** Only one of the group's layers can be on at a time. */
+  exclusive: boolean;
+  infoGroup: MapInfoGroup;
+}
+
+/** A map's settings for a layer in one of its groups. */
+export interface MapLayerSettings {
+  /** The group the layer shows in. */
+  groupId: string;
+  layerId: string;
+  visibleAtStart: boolean;
+  infobox: string;
+}
+
+/** Only settings that differ from the defaults are stored and loaded. */
+export interface MapTreeSettings {
+  groups: MapGroupSettings[];
+  layers: MapLayerSettings[];
+}
+
 export interface MapLayerTree {
   mapName: string;
   /** With the map's exceptions merged in (see `added` and `hidden`). */
   items: LayerTreeNode[];
+  /** The map's settings for the groups and layers in its tree. */
+  settings: MapTreeSettings;
   background: MapBackgroundLayer[];
   /** Layer ids, top first. */
   drawOrder: string[];
 }
 
-/** Background and draw order are written only when sent. */
+/** Settings, background and draw order are written only when sent. */
 export interface MapLayerTreeWrite {
   items: LayerTreeWriteNode[];
   exceptions: MapGroupException[];
+  settings?: MapTreeSettings;
   background?: Omit<MapBackgroundLayer, "name">[];
   drawOrder?: string[];
 }

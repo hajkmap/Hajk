@@ -1,14 +1,7 @@
 import { getBackendOptions, MultiBackend } from "@minoru/react-dnd-treeview";
-import {
-  Alert,
-  Box,
-  CircularProgress,
-  Tab,
-  Tabs,
-  Typography,
-} from "@mui/material";
+import { Alert, Box, CircularProgress, Typography } from "@mui/material";
 import { useIsMutating } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { DndProvider } from "react-dnd";
 import { useTranslation } from "react-i18next";
 
@@ -33,19 +26,37 @@ import {
   type LayerTreeFlatNode,
 } from "./layer-tree-model";
 import LayerTreePanel from "./layer-tree-panel";
+import LayerTreePreviewFrame, {
+  type LayerTreeMapTab,
+} from "./layer-tree-preview-frame";
+import {
+  NO_LAYERSWITCHER,
+  type LayerTreePreviewOptions,
+} from "./layer-tree-preview-options";
+import {
+  EMPTY_SETTINGS,
+  settingsSignature,
+  type LayerTreeSettings,
+} from "./layer-tree-settings";
 import { useLayerTreeBaseline } from "./use-layer-tree-baseline";
 
 const EMPTY_NODES: LayerTreeFlatNode[] = [];
 const EMPTY_BACKGROUND: MapBackgroundLayer[] = [];
 const EMPTY_ORDER: string[] = [];
 
-type MapTab = "layers" | "background" | "drawOrder";
-
-const MAP_HELP: Record<MapTab, string> = {
+const MAP_HELP: Record<LayerTreeMapTab, string> = {
   layers: "layerTree.mapHelp",
   background: "layerTree.backgroundHelp",
   drawOrder: "layerTree.drawOrderHelp",
 };
+
+/** Catalog on the left and the content on the right, as in Lagerordning. */
+const COLUMNS = {
+  display: "grid",
+  gap: { xs: 2, lg: 3 },
+  gridTemplateColumns: { xs: "1fr", lg: "minmax(220px, 280px) minmax(0, 1fr)" },
+  alignItems: "start",
+} as const;
 
 interface LayerTreeEditorProps {
   mode: LayerTreeEditorMode;
@@ -54,18 +65,22 @@ interface LayerTreeEditorProps {
   /** Unsaved edits; the page saves them with its own save button. */
   draft: LayerTreeDraft | null;
   onDraftChange: (draft: LayerTreeDraft | null) => void;
+  /** Map mode: what the map's layerswitcher shows, to look like it. */
+  preview?: LayerTreePreviewOptions;
 }
 
 /**
- * POC (layer trees): edits a group's content (layers and linked groups, so a
- * group with groups in it is a layer tree), or a map: its tree of groups with
- * the map's own exceptions, its background layers and its draw order.
+ * Edits a group's content (layers and linked groups, so a group with groups
+ * in it is a layer tree), or a map: its tree of groups with the map's own
+ * exceptions and settings, its background layers and its draw order, framed
+ * as the map's layerswitcher.
  */
 export default function LayerTreeEditor({
   mode,
   ownerId,
   draft,
   onDraftChange,
+  preview = NO_LAYERSWITCHER,
 }: LayerTreeEditorProps) {
   const { t } = useTranslation();
   const groupTree = useGroupTree(mode === "group" ? ownerId : "");
@@ -73,7 +88,7 @@ export default function LayerTreeEditor({
   const { data: catalogLayers } = useLayers();
   const query = mode === "group" ? groupTree : mapTree;
   const isSaving = useIsMutating({ mutationKey: LAYER_TREE_SAVE_KEY }) > 0;
-  const [tab, setTab] = useState<MapTab>("layers");
+  const [tab, setTab] = useState<LayerTreeMapTab>("layers");
 
   const activeDraft = isLayerTreeDraftFor(draft, mode, ownerId) ? draft : null;
   const baseline = useLayerTreeBaseline(
@@ -83,6 +98,8 @@ export default function LayerTreeEditor({
     activeDraft?.nodes,
   );
   const nodes = activeDraft?.nodes ?? baseline?.nodes ?? EMPTY_NODES;
+  const settings: LayerTreeSettings =
+    activeDraft?.settings ?? baseline?.settings ?? EMPTY_SETTINGS;
   const background =
     activeDraft?.background ?? baseline?.background ?? EMPTY_BACKGROUND;
   const drawOrder =
@@ -99,17 +116,23 @@ export default function LayerTreeEditor({
   /** Keeps what differs from the saved state; no draft when nothing does. */
   const updateDraft = (
     changes: Partial<
-      Pick<LayerTreeDraft, "nodes" | "background" | "drawOrder">
+      Pick<LayerTreeDraft, "nodes" | "settings" | "background" | "drawOrder">
     >,
   ) => {
     if (!baseline) return;
     const next = {
       nodes,
+      settings: activeDraft?.settings,
       background: activeDraft?.background,
       drawOrder: activeDraft?.drawOrder,
       ...changes,
     };
     const nodesChanged = contentSignature(next.nodes) !== baseline.signature;
+    const changedSettings =
+      next.settings &&
+      settingsSignature(next.settings) !== baseline.settingsSignature
+        ? next.settings
+        : undefined;
     const changedBackground =
       next.background &&
       JSON.stringify(next.background) !== JSON.stringify(baseline.background)
@@ -120,11 +143,12 @@ export default function LayerTreeEditor({
         ? next.drawOrder
         : undefined;
     onDraftChange(
-      nodesChanged || changedBackground || changedOrder
+      nodesChanged || changedSettings || changedBackground || changedOrder
         ? {
             mode,
             ownerId,
             nodes: next.nodes,
+            settings: changedSettings,
             background: changedBackground,
             drawOrder: changedOrder,
           }
@@ -142,19 +166,22 @@ export default function LayerTreeEditor({
   const mapExceptions =
     mode === "group" ? (groupTree.data?.mapExceptions ?? []) : [];
 
+  // In a map: framed as the map's layerswitcher, whose tabs switch between
+  // the tree, the background and the draw order.
+  const framed = (content: ReactNode, toolbar?: ReactNode) => (
+    <LayerTreePreviewFrame
+      mapName={ownerId}
+      options={preview}
+      tab={tab}
+      onTabChange={setTab}
+      toolbar={toolbar}
+    >
+      {content}
+    </LayerTreePreviewFrame>
+  );
+
   return (
     <DndProvider backend={MultiBackend} options={getBackendOptions()}>
-      {mode === "map" ? (
-        <Tabs
-          value={tab}
-          onChange={(_, value) => setTab(value as MapTab)}
-          sx={{ mb: 1.5 }}
-        >
-          <Tab value="layers" label={t("layerTree.tabs.layers")} />
-          <Tab value="background" label={t("layerTree.tabs.background")} />
-          <Tab value="drawOrder" label={t("layerTree.tabs.drawOrder")} />
-        </Tabs>
-      ) : null}
       <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
         {t(mode === "group" ? "layerTree.groupHelp" : MAP_HELP[tab])}
       </Typography>
@@ -182,19 +209,13 @@ export default function LayerTreeEditor({
           ownerKey={`${mode}:${ownerId}`}
           isSaving={isSaving}
           onChange={(next) => updateDraft({ nodes: next })}
+          settings={mode === "map" ? settings : undefined}
+          onSettingsChange={(next) => updateDraft({ settings: next })}
+          frame={mode === "map" ? framed : undefined}
+          showSearch={mode === "group" || preview.showFilter}
         />
       ) : tab === "background" ? (
-        <Box
-          sx={{
-            display: "grid",
-            gap: { xs: 2, lg: 3 },
-            gridTemplateColumns: {
-              xs: "1fr",
-              lg: "minmax(220px, 280px) minmax(0, 1fr)",
-            },
-            alignItems: "start",
-          }}
-        >
+        <Box sx={COLUMNS}>
           <LayerTreeCatalogColumn>
             <LayerTreeCatalog
               offer="layer"
@@ -219,18 +240,26 @@ export default function LayerTreeEditor({
               }
             />
           </LayerTreeCatalogColumn>
-          <LayerTreeBackground
-            background={background}
-            layers={displayLayers}
-            onChange={(next) => updateDraft({ background: next })}
-          />
+          {framed(
+            <LayerTreeBackground
+              background={background}
+              layers={displayLayers}
+              onChange={(next) => updateDraft({ background: next })}
+            />,
+          )}
         </Box>
       ) : (
-        <LayerTreeDrawOrder
-          layers={layersShown}
-          order={drawOrder}
-          onChange={(next) => updateDraft({ drawOrder: next })}
-        />
+        <Box sx={COLUMNS}>
+          {/* Keeps the frame where it is on the other tabs. */}
+          <Box sx={{ display: { xs: "none", lg: "block" } }} />
+          {framed(
+            <LayerTreeDrawOrder
+              layers={layersShown}
+              order={drawOrder}
+              onChange={(next) => updateDraft({ drawOrder: next })}
+            />,
+          )}
+        </Box>
       )}
     </DndProvider>
   );

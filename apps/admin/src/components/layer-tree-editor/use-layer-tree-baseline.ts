@@ -13,11 +13,19 @@ import {
   type LayerTreeEditorMode,
   type LayerTreeFlatNode,
 } from "./layer-tree-model";
+import {
+  EMPTY_SETTINGS,
+  fromMapTreeSettings,
+  settingsSignature,
+  type LayerTreeSettings,
+} from "./layer-tree-settings";
 
 /** The saved state, which tells what a draft changes. */
 export interface LayerTreeBaseline {
   nodes: LayerTreeFlatNode[];
   signature: string;
+  settings: LayerTreeSettings;
+  settingsSignature: string;
   background: MapBackgroundLayer[];
   drawOrder: string[];
 }
@@ -48,11 +56,15 @@ export function useLayerTreeBaseline(
 
   if (data && data !== loaded?.data) {
     const nodes = toFlatNodes(data.items, LAYER_TREE_ROOT_ID, mode);
+    const settings =
+      "settings" in data ? fromMapTreeSettings(data.settings) : EMPTY_SETTINGS;
     setLoaded({
       data,
       baseline: {
         nodes: shown?.owner === owner ? keepNodeIds(nodes, shown.nodes) : nodes,
         signature: loadedSignature(data.items),
+        settings,
+        settingsSignature: settingsSignature(settings),
         background: "background" in data ? data.background : EMPTY_BACKGROUND,
         drawOrder: "drawOrder" in data ? data.drawOrder : EMPTY_ORDER,
       },

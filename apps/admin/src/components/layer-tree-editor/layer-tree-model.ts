@@ -6,6 +6,7 @@ import type {
   MapBackgroundLayer,
   MapGroupException,
 } from "../../api/layer-tree";
+import type { LayerTreeSettings } from "./layer-tree-settings";
 
 // POC (layer trees): the editor works on a flat node list, as
 // @minoru/react-dnd-treeview wants it. Siblings keep their order from the
@@ -62,14 +63,16 @@ export interface LayerTreeCatalogItem {
 
 /**
  * Unsaved edits. Kept by the page, which saves them with its own save button
- * and keeps them across tab switches. In map mode `background` and
- * `drawOrder` are only set once they have been changed.
+ * and keeps them across tab switches. In map mode `settings`, `background`
+ * and `drawOrder` are only set once they have been changed.
  */
 export interface LayerTreeDraft {
   mode: LayerTreeEditorMode;
   /** The group's id in group mode, the map's name in map mode. */
   ownerId: string;
   nodes: LayerTreeFlatNode[];
+  /** The map's settings for the groups and layers in its tree. */
+  settings?: LayerTreeSettings;
   background?: MapBackgroundLayer[];
   /** Layer ids, top first. */
   drawOrder?: string[];
