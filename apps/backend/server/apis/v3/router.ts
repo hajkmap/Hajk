@@ -10,6 +10,7 @@ import layersRouter from "./controllers/layers/router.ts";
 import mapsRouter from "./controllers/maps/router.ts";
 import publicRouter from "./controllers/public/router.ts";
 import servicesRouter from "./controllers/services/router.ts";
+import themesGlobalRouter from "./controllers/themes/global.router.ts";
 import toolsRouter from "./controllers/tools/router.ts";
 import usersRouter from "./controllers/users/router.ts";
 import websocketsRouter from "./controllers/websockets/router.ts";
@@ -32,5 +33,6 @@ export default Router()
   .use("/layers", isAdmin, layersRouter)
   .use("/maps", isAdmin, mapsRouter)
   .use("/services", isAdmin, servicesRouter)
+  .use("/themes", isAdmin, themesGlobalRouter)
   .use("/tools", isAdmin, toolsRouter)
   .use("/users", isAdmin, usersRouter);

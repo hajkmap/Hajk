@@ -17,7 +17,9 @@ class ThemeService {
   }
 
   async #requireMap(mapName: string) {
-    const map = await prisma.map.findUnique({ where: { name: mapName } });
+    const map = await prisma.map.findFirst({
+      where: { name: mapName, deletedAt: null },
+    });
     if (!map) {
       throw new HajkError(
         HttpStatusCodes.NOT_FOUND,
@@ -105,6 +107,39 @@ class ThemeService {
     await prisma.theme.updateMany({
       where: { id, mapName, deletedAt: null },
       data: { deletedAt, lastSavedDate: deletedAt },
+    });
+  }
+
+  async getDeletedThemes() {
+    return prisma.theme.findMany({
+      where: { deletedAt: { not: null } },
+      orderBy: { deletedAt: "desc" },
+    });
+  }
+
+  async restoreTheme(id: number, userId?: string) {
+    const theme = await prisma.theme.findFirst({
+      where: { id, deletedAt: { not: null } },
+      select: { id: true, mapName: true },
+    });
+
+    if (!theme) {
+      throw new HajkError(
+        HttpStatusCodes.NOT_FOUND,
+        `No deleted theme with id ${id} could be found.`,
+        HajkStatusCodes.UNKNOWN_THEME
+      );
+    }
+
+    await this.#requireMap(theme.mapName);
+
+    return prisma.theme.update({
+      where: { id },
+      data: {
+        deletedAt: null,
+        lastSavedBy: userId,
+        lastSavedDate: new Date(),
+      },
     });
   }
 }

@@ -10,6 +10,7 @@ import { getUserRoles } from "../../../common/auth/get-user-roles.ts";
 import { isAuthActive } from "../../../common/auth/is-auth-active.ts";
 import { assertExactlyOneLayerParent } from "../utils/assert-exactly-one-layer-parent.ts";
 import {
+  activeLayerInstanceWhere,
   activeLayerInstancesForMapWhere,
   activeLayerInstancesForMapsWhere,
   layerInstanceIncludeAll,
@@ -170,6 +171,7 @@ class MapService {
 
   async getMaps() {
     const maps = await prisma.map.findMany({
+      where: { deletedAt: null },
       orderBy: { name: "asc" },
       include: {
         projection: true,
@@ -238,7 +240,10 @@ class MapService {
   }
 
   async getMapNames() {
-    const maps = await prisma.map.findMany({ select: { name: true } });
+    const maps = await prisma.map.findMany({
+      where: { deletedAt: null },
+      select: { name: true },
+    });
 
     // Transform the [{name: "map1"}, {name: "map2"}] to ["map1", "map2"]
     return maps.map((m) => m.name).sort();
@@ -274,6 +279,7 @@ class MapService {
     const mapExist = await prisma.map.findFirst({
       where: {
         name: mapName,
+        deletedAt: null,
       },
     });
 
@@ -295,6 +301,7 @@ class MapService {
     const mapConfig = await prisma.map.findFirst({
       where: {
         name: mapName,
+        deletedAt: null,
         // If auth is active, let's filter the request to only include
         // the maps that a) either are completely unrestricted (no roles in
         // `restrictedToRoles`) or, b) where at least one of the roles in
@@ -321,7 +328,10 @@ class MapService {
         layers: {
           include: layerInstanceIncludeAll,
         },
-        groups: { include: { group: { include: { layers: true } } } },
+        groups: {
+          where: { group: { deletedAt: null } },
+          include: { group: { include: { layers: true } } },
+        },
       },
     });
 
@@ -370,6 +380,7 @@ class MapService {
     const allGroups = await prisma.groupsOnMaps.findMany({
       where: {
         mapName: mapName,
+        group: { deletedAt: null },
       },
       include: {
         group: {
@@ -479,7 +490,9 @@ class MapService {
   }
 
   private async requireMapByName(mapName: string) {
-    const map = await prisma.map.findUnique({ where: { name: mapName } });
+    const map = await prisma.map.findFirst({
+      where: { name: mapName, deletedAt: null },
+    });
     if (map === null) {
       throw new HajkError(
         HttpStatusCodes.NOT_FOUND,
@@ -577,7 +590,7 @@ class MapService {
     const groupIds = Array.from(new Set(placements.map((p) => p.groupId)));
     if (groupIds.length > 0) {
       const groupRecords = await prisma.group.findMany({
-        where: { id: { in: groupIds } },
+        where: { id: { in: groupIds }, deletedAt: null },
         select: { id: true, name: true, type: true },
       });
       const knownIds = new Set(groupRecords.map((g) => g.id));
@@ -1136,7 +1149,7 @@ class MapService {
       return;
     }
     const groupRecords = await prisma.group.findMany({
-      where: { id: { in: groupIds } },
+      where: { id: { in: groupIds }, deletedAt: null },
       select: { id: true },
     });
     const knownIds = new Set(groupRecords.map((g) => g.id));
@@ -1156,7 +1169,7 @@ class MapService {
     const groupRecords =
       groupIds.length > 0
         ? await prisma.group.findMany({
-            where: { id: { in: groupIds } },
+            where: { id: { in: groupIds }, deletedAt: null },
             select: { id: true, name: true },
           })
         : [];
@@ -1180,6 +1193,7 @@ class MapService {
           await tx.group.findMany({
             where: {
               id: { in: Array.from(new Set(groups.map((g) => g.groupId))) },
+              deletedAt: null,
             },
             select: { id: true, name: true },
           })
@@ -1334,8 +1348,8 @@ class MapService {
         projection.code
       );
       updateData.projection = { connect };
-      const existing = await prisma.map.findUnique({
-        where: { name: mapName },
+      const existing = await prisma.map.findFirst({
+        where: { name: mapName, deletedAt: null },
         select: { options: true },
       });
       const existingOptions =
@@ -1354,6 +1368,8 @@ class MapService {
       );
     }
 
+    await this.requireMapByName(mapName);
+
     const updatedMap = await prisma.map.update({
       where: { name: mapName },
       data: updateData,
@@ -1363,7 +1379,9 @@ class MapService {
   }
 
   async deleteMap(mapName: string) {
-    const map = await prisma.map.findUnique({ where: { name: mapName } });
+    const map = await prisma.map.findFirst({
+      where: { name: mapName, deletedAt: null },
+    });
     if (map === null) {
       throw new HajkError(
         HttpStatusCodes.NOT_FOUND,
@@ -1386,6 +1404,8 @@ class MapService {
     // deleting them, so other maps that reuse the same groups keep their
     // Active layers. Shared catalog entities (layers, tools, groups,
     // projections) are kept. RoleOnMap / DocumentFolder / Document cascade.
+    const deletedAt = new Date();
+
     await prisma.$transaction([
       prisma.layerInstance.deleteMany({
         where: { mapId: map.id, groupId: null },
@@ -1396,7 +1416,15 @@ class MapService {
       }),
       prisma.toolsOnMaps.deleteMany({ where: { mapName } }),
       prisma.groupsOnMaps.deleteMany({ where: { mapName } }),
-      prisma.map.delete({ where: { id: map.id } }),
+      prisma.roleOnMap.deleteMany({ where: { mapId: map.id } }),
+      prisma.theme.updateMany({
+        where: { mapName, deletedAt: null },
+        data: { deletedAt, lastSavedDate: deletedAt },
+      }),
+      prisma.map.updateMany({
+        where: { id: map.id, deletedAt: null },
+        data: { deletedAt, lastSavedDate: deletedAt },
+      }),
     ]);
   }
 
@@ -1424,16 +1452,22 @@ class MapService {
     const includeGroups = options.includeGroups !== false;
     const includeTools = options.includeTools !== false;
 
-    const source = await prisma.map.findUnique({
-      where: { name: sourceMapName },
+    const source = await prisma.map.findFirst({
+      where: { name: sourceMapName, deletedAt: null },
       include: {
         projection: true,
         projections: true,
         restrictedToRoles: true,
-        tools: true,
-        layers: { include: { restrictedToRoles: true } },
-        groups: { include: { metadata: true } },
-        themes: true,
+        tools: { where: ACTIVE_TOOLS_ON_MAP_WHERE },
+        layers: {
+          where: activeLayerInstanceWhere,
+          include: { restrictedToRoles: true },
+        },
+        groups: {
+          where: { group: { deletedAt: null } },
+          include: { metadata: true },
+        },
+        themes: { where: { deletedAt: null } },
       },
     });
 
@@ -1500,7 +1534,7 @@ class MapService {
             ...new Set(source.groups.map((entry) => entry.groupId)),
           ];
           const existingGroups = await tx.group.findMany({
-            where: { id: { in: uniqueGroupIds } },
+            where: { id: { in: uniqueGroupIds }, deletedAt: null },
             select: { id: true },
           });
           const knownGroupIds = new Set(

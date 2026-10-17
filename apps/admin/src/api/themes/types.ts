@@ -10,6 +10,7 @@ export interface Theme {
   createdDate?: string;
   lastSavedBy?: string;
   lastSavedDate?: string;
+  deletedAt?: string | null;
 }
 
 export interface ThemesApiResponse {

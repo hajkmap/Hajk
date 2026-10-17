@@ -90,3 +90,33 @@ export const deleteTheme = async (
     );
   }
 };
+
+export const getDeletedThemes = async (): Promise<Theme[]> => {
+  const client = getApiClient();
+  try {
+    const response = await client.get<ThemesApiResponse>("/themes/deleted");
+    return response.data.themes;
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+    throw new Error(
+      axiosError.response
+        ? `Failed to fetch deleted themes. ErrorId: ${axiosError.response.data.errorId}.`
+        : "Failed to fetch deleted themes."
+    );
+  }
+};
+
+export const restoreTheme = async (id: number): Promise<Theme> => {
+  const client = getApiClient();
+  try {
+    const response = await client.post<Theme>(`/themes/${id}/restore`);
+    return response.data;
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+    throw new Error(
+      axiosError.response
+        ? `Failed to restore theme. ErrorId: ${axiosError.response.data.errorId}.`
+        : "Failed to restore theme."
+    );
+  }
+};

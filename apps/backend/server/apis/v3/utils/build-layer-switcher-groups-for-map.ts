@@ -533,7 +533,7 @@ export async function buildLayerSwitcherGroupsForMap(
   mapName: string
 ): Promise<ClientLayerSwitcherGroupNode[]> {
   const placements = await prisma.groupsOnMaps.findMany({
-    where: { mapName },
+    where: { mapName, group: { deletedAt: null } },
     include: { group: true, metadata: true },
   });
 
@@ -558,7 +558,7 @@ export async function buildLayerSwitcherGroupsForMap(
   });
 
   const groups = await prisma.group.findMany({
-    where: { id: { in: groupIds } },
+    where: { id: { in: groupIds }, deletedAt: null },
     select: { id: true, name: true },
   });
 

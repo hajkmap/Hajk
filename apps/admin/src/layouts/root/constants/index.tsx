@@ -10,6 +10,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import ExampleIcon from "@mui/icons-material/Code";
 import StorageIcon from "@mui/icons-material/Storage";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
 
 export const HEADER_HEIGHT = 64;
 export const HEADER_Z_INDEX = 1001;
@@ -102,6 +103,11 @@ export const SIDEBAR_MENU = [
         to: "/database",
         titleKey: "common.database",
         icon: <StorageIcon />,
+      },
+      {
+        to: "/deleted",
+        titleKey: "deleted.title",
+        icon: <DeleteOutlineIcon />,
       },
     ],
   },

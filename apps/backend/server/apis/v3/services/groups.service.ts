@@ -198,7 +198,9 @@ class GroupsService {
   }
 
   private async requireGroup(id: string) {
-    const group = await prisma.group.findUnique({ where: { id } });
+    const group = await prisma.group.findFirst({
+      where: { id, deletedAt: null },
+    });
     if (group === null) {
       throw new HajkError(
         HttpStatusCodes.NOT_FOUND,
@@ -210,7 +212,10 @@ class GroupsService {
   }
 
   async getGroups() {
-    const groups = await prisma.group.findMany({ orderBy: { name: "asc" } });
+    const groups = await prisma.group.findMany({
+      where: { deletedAt: null },
+      orderBy: { name: "asc" },
+    });
 
     if (groups.length === 0) {
       return [];
@@ -257,13 +262,17 @@ class GroupsService {
   }
 
   async getGroupById(id: string) {
-    return await prisma.group.findUnique({
-      where: { id },
+    const group = await prisma.group.findFirst({
+      where: { id, deletedAt: null },
       include: groupInclude,
     });
+
+    return group;
   }
 
   async getLayersByGroupId(id: string) {
+    await this.requireGroup(id);
+
     const instances = await prisma.layerInstance.findMany({
       where: {
         AND: [{ groupId: id }, activeLayerInstanceWhere],
@@ -316,12 +325,17 @@ class GroupsService {
   }
 
   async getMapsByGroupId(id: string) {
+    await this.requireGroup(id);
+
     const maps = await prisma.map.findMany({
       select: {
         id: true,
         name: true,
       },
-      where: { groups: { some: { groupId: id } } },
+      where: {
+        deletedAt: null,
+        groups: { some: { groupId: id } },
+      },
     });
 
     return maps;
@@ -402,8 +416,8 @@ class GroupsService {
       data;
 
     return await prisma.$transaction(async (transaction) => {
-      const existingGroup = await transaction.group.findUnique({
-        where: { id },
+      const existingGroup = await transaction.group.findFirst({
+        where: { id, deletedAt: null },
       });
 
       if (existingGroup === null) {
@@ -499,8 +513,12 @@ class GroupsService {
       await transaction.layerInstance.deleteMany({ where: { groupId: id } });
       await transaction.roleOnGroup.deleteMany({ where: { groupId: id } });
 
-      // Finally remove the group itself.
-      await transaction.group.delete({ where: { id } });
+      const deletedAt = new Date();
+
+      await transaction.group.updateMany({
+        where: { id, deletedAt: null },
+        data: { deletedAt, lastSavedDate: deletedAt },
+      });
     });
   }
 }

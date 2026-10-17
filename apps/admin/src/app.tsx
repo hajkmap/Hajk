@@ -31,6 +31,7 @@ import UsersPage from "./pages/users/index.tsx";
 import UserRolesPage from "./pages/user-roles/index.tsx";
 import FormComponentsExamplePage from "./pages/examples/index.tsx";
 import DatabasePage from "./pages/database/index.tsx";
+import DeletedItemsPage from "./pages/deleted/index.tsx";
 import { SquareSpinnerComponent } from "./components/progress/square-progress.jsx";
 
 const queryClient = new QueryClient({
@@ -124,6 +125,10 @@ const router = createBrowserRouter(
         {
           path: "database",
           element: <DatabasePage />,
+        },
+        {
+          path: "deleted",
+          element: <DeletedItemsPage />,
         },
       ],
     },
