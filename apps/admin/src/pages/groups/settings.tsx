@@ -31,6 +31,7 @@ import type { Map } from "../../api/maps";
 import { SquareSpinnerComponent } from "../../components/progress/square-progress";
 import { HttpError } from "../../lib/http-error";
 import { useUpdateGroup } from "../../api/groups";
+import { isLayerTreeConflict } from "../../api/layer-tree";
 import { toast } from "react-toastify";
 import DialogWrapper from "../../components/flexible-dialog";
 import FormContainer from "../../components/form-components/form-container";
@@ -52,6 +53,7 @@ import {
 import UnsavedChangesGuard from "../../components/unsaved-changes-guard";
 import LayerTreeEditor, {
   isLayerTreeDraftFor,
+  LayerTreeConflictDialog,
   useSaveLayerTree,
   type LayerTreeDraft,
 } from "../../components/layer-tree-editor";
@@ -83,6 +85,8 @@ function GroupSettings() {
   const { save: saveLayerTree, isSaving: isSavingLayerTree } =
     useSaveLayerTree();
   const layerTreeDirty = isLayerTreeDraftFor(layerTreeDraft, "group", groupId);
+  /** Someone else saved the tree meanwhile, so its save was refused. */
+  const [layerTreeConflict, setLayerTreeConflict] = useState(false);
 
   const {
     register,
@@ -131,14 +135,18 @@ function GroupSettings() {
       setLayerTreeDraft(null);
       return true;
     } catch (error) {
-      toast.error(
-        `${t("layerTree.saveFailed")}: ${error instanceof Error ? error.message : ""}`,
-        {
-          position: "bottom-left",
-          theme: palette.mode,
-          hideProgressBar: true,
-        },
-      );
+      if (isLayerTreeConflict(error)) {
+        setLayerTreeConflict(true);
+      } else {
+        toast.error(
+          `${t("layerTree.saveFailed")}: ${error instanceof Error ? error.message : ""}`,
+          {
+            position: "bottom-left",
+            theme: palette.mode,
+            hideProgressBar: true,
+          },
+        );
+      }
       return false;
     }
   };
@@ -527,6 +535,16 @@ function GroupSettings() {
           disabled={isDeletingGroup}
         />
       </DialogWrapper>
+      <LayerTreeConflictDialog
+        mode="group"
+        ownerId={group.id}
+        open={layerTreeConflict}
+        onClose={() => setLayerTreeConflict(false)}
+        onReload={() => {
+          setLayerTreeConflict(false);
+          setLayerTreeDraft(null);
+        }}
+      />
       <UnsavedChangesGuard when={isDirty || layerTreeDirty} />
     </Page>
   );

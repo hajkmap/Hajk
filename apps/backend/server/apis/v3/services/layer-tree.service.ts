@@ -98,6 +98,8 @@ export interface MapContent {
 
 export interface MapLayerTree {
   mapName: string;
+  /** Sent back with a save (see parseVersion). */
+  version: number;
   /** With the map's exceptions merged in (see `added` and `hidden`). */
   items: LayerTreeNode[];
   /** The map's settings for the groups and layers in its tree. */
@@ -189,6 +191,34 @@ function unknownGroup(id: string): HajkError {
     HttpStatusCodes.NOT_FOUND,
     `No group with id: ${id} could be found.`,
     HajkStatusCodes.UNKNOWN_GROUP_ID
+  );
+}
+
+// A save replaces the tree, so one made from an older version would undo what
+// someone else saved meanwhile. GET gives the tree's version; a save sends it
+// back and is refused unless it is still the stored one. The check that counts
+// raises the version first in the save's transaction: of two saves made from
+// the same version, the later one waits there for the other and then finds
+// the version taken.
+
+/** The version of the tree a save was made from, as GET gave it. */
+function parseVersion(body: unknown): number {
+  const version = (body as { version?: unknown } | null)?.version;
+  if (
+    typeof version !== "number" ||
+    !Number.isInteger(version) ||
+    version < 0
+  ) {
+    throw badRequest("version must be the tree's version, as GET gave it.");
+  }
+  return version;
+}
+
+function treeChanged(owner: string, version: number): HajkError {
+  return new HajkError(
+    HttpStatusCodes.CONFLICT,
+    `The layer tree of ${owner} has been saved since version ${version} was loaded. Load it again and redo the change.`,
+    HajkStatusCodes.LAYER_TREE_CHANGED
   );
 }
 
@@ -587,9 +617,13 @@ class LayerTreeService {
     }
   }
 
-  async getGroupTree(
-    groupId: string
-  ): Promise<LayerTreeNode & { mapExceptions: LayerTreeMapExceptions[] }> {
+  async getGroupTree(groupId: string): Promise<
+    LayerTreeNode & {
+      /** Sent back with a save (see parseVersion). */
+      version: number;
+      mapExceptions: LayerTreeMapExceptions[];
+    }
+  > {
     const context = await this.loadContext([groupId], []);
     if (!context.groups.has(groupId)) {
       throw unknownGroup(groupId);
@@ -600,14 +634,20 @@ class LayerTreeService {
       []
     );
 
-    // So whoever edits the group sees which maps deviate from it.
-    const exceptions = await prisma.mapGroupException.findMany({
-      where: {
-        groupId: { in: [...context.groups.keys()] },
-        map: { deletedAt: null },
-      },
-      select: { mapName: true, kind: true },
-    });
+    const [{ treeVersion }, exceptions] = await Promise.all([
+      prisma.group.findUniqueOrThrow({
+        where: { id: groupId },
+        select: { treeVersion: true },
+      }),
+      // So whoever edits the group sees which maps deviate from it.
+      prisma.mapGroupException.findMany({
+        where: {
+          groupId: { in: [...context.groups.keys()] },
+          map: { deletedAt: null },
+        },
+        select: { mapName: true, kind: true },
+      }),
+    ]);
     const byMap = new Map<string, LayerTreeMapExceptions>();
     for (const { mapName, kind } of exceptions) {
       const entry = byMap.get(mapName) ?? { mapName, added: 0, hidden: 0 };
@@ -617,6 +657,7 @@ class LayerTreeService {
     }
     return {
       ...root,
+      version: treeVersion,
       mapExceptions: [...byMap.values()].sort((a, b) =>
         a.mapName.localeCompare(b.mapName, "sv")
       ),
@@ -702,7 +743,14 @@ class LayerTreeService {
       readBackground(map.name),
       effectiveDrawOrder(map.name, items),
     ]);
-    return { mapName: map.name, items, settings, background, drawOrder };
+    return {
+      mapName: map.name,
+      version: map.treeVersion,
+      items,
+      settings,
+      background,
+      drawOrder,
+    };
   }
 
   /**
@@ -819,10 +867,15 @@ class LayerTreeService {
   async updateGroupTree(groupId: string, body: unknown, userId?: string) {
     const root = await prisma.group.findFirst({
       where: { id: groupId, deletedAt: null },
-      select: { id: true },
+      select: { id: true, name: true, treeVersion: true },
     });
     if (!root) {
       throw unknownGroup(groupId);
+    }
+    const version = parseVersion(body);
+    // Checked again when writing; here so a stale draft is told so first.
+    if (root.treeVersion !== version) {
+      throw treeChanged(`group "${root.name}"`, version);
     }
 
     const raw = (body as { items?: unknown; nested?: unknown } | null) ?? {};
@@ -981,6 +1034,19 @@ class LayerTreeService {
 
     const now = new Date();
     await prisma.$transaction(async (tx) => {
+      // The version check that counts (see parseVersion), before any write.
+      const claimed = await tx.group.updateMany({
+        where: { id: groupId, treeVersion: version },
+        data: {
+          treeVersion: { increment: 1 },
+          lastSavedBy: userId,
+          lastSavedDate: now,
+        },
+      });
+      if (claimed.count === 0) {
+        throw treeChanged(`group "${root.name}"`, version);
+      }
+
       // New groups first, so the items below can point at their real ids.
       const realIds = new Map<string, string>();
       for (const [temporaryId, name] of newGroups) {
@@ -1013,12 +1079,6 @@ class LayerTreeService {
             ),
           });
         }
-        if (!isNew) {
-          await tx.group.update({
-            where: { id: ownerId },
-            data: { lastSavedBy: userId, lastSavedDate: now },
-          });
-        }
       }
 
       // What the group and its new groups put in the linked groups.
@@ -1048,6 +1108,11 @@ class LayerTreeService {
    */
   async updateMapTree(mapName: string, body: unknown, userId?: string) {
     const map = await this.requireMap(mapName);
+    const version = parseVersion(body);
+    // Checked again when writing; here so a stale draft is told so first.
+    if (map.treeVersion !== version) {
+      throw treeChanged(`map "${map.name}"`, version);
+    }
     const items = parseWriteNodes(
       (body as { items?: unknown } | null)?.items,
       "items"
@@ -1115,6 +1180,19 @@ class LayerTreeService {
     const onMap = itemsOnMap(shown);
 
     await prisma.$transaction(async (tx) => {
+      // The version check that counts (see parseVersion), before any write.
+      const claimed = await tx.map.updateMany({
+        where: { id: map.id, treeVersion: version },
+        data: {
+          treeVersion: { increment: 1 },
+          lastSavedBy: userId,
+          lastSavedDate: new Date(),
+        },
+      });
+      if (claimed.count === 0) {
+        throw treeChanged(`map "${map.name}"`, version);
+      }
+
       await tx.mapTreeItem.deleteMany({ where: { mapName: map.name } });
       if (items.length > 0) {
         await tx.mapTreeItem.createMany({
@@ -1128,10 +1206,6 @@ class LayerTreeService {
       await writeMapTreeExtras(tx, map, extras);
       // What was taken out of the tree takes its rows with it.
       await pruneMapRows(tx, map.name, onMap);
-      await tx.map.update({
-        where: { id: map.id },
-        data: { lastSavedBy: userId, lastSavedDate: new Date() },
-      });
     });
 
     return await this.getMapTree(map.name);

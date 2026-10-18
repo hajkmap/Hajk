@@ -94,11 +94,13 @@ import {
   getTakenIndexesForPlacement,
 } from "./tool-placement-indexes";
 import { useProjections } from "../../api/services";
+import { isLayerTreeConflict } from "../../api/layer-tree";
 import useAppStateStore from "../../store/use-app-state-store";
 import { SettingsPageTabs } from "../../components/settings-page-tabs";
 import UnsavedChangesGuard from "../../components/unsaved-changes-guard";
 import {
   isLayerTreeDraftFor,
+  LayerTreeConflictDialog,
   useSaveLayerTree,
   type LayerTreeDraft,
 } from "../../components/layer-tree-editor";
@@ -260,6 +262,8 @@ export default function MapSettings() {
     null,
   );
   const { save: saveLayerTree } = useSaveLayerTree();
+  /** Someone else saved the tree meanwhile, so its save was refused. */
+  const [layerTreeConflict, setLayerTreeConflict] = useState(false);
   const layerTreeDirty = isLayerTreeDraftFor(layerTreeDraft, "map", mapName);
 
   const applyMenuStateFromServer = useCallback(
@@ -878,12 +882,16 @@ export default function MapSettings() {
         });
       }
     } catch (error) {
-      console.error("Failed to update map:", error);
-      toast.error(t("maps.updateMapFailed", { name: map.name }), {
-        position: "bottom-left",
-        theme: palette.mode,
-        hideProgressBar: true,
-      });
+      if (isLayerTreeConflict(error)) {
+        setLayerTreeConflict(true);
+      } else {
+        console.error("Failed to update map:", error);
+        toast.error(t("maps.updateMapFailed", { name: map.name }), {
+          position: "bottom-left",
+          theme: palette.mode,
+          hideProgressBar: true,
+        });
+      }
     } finally {
       saveInFlightRef.current = false;
       setIsSaving(false);
@@ -1210,6 +1218,16 @@ export default function MapSettings() {
           disabled={isDeletingMap}
         />
       </DialogWrapper>
+      <LayerTreeConflictDialog
+        mode="map"
+        ownerId={map.name}
+        open={layerTreeConflict}
+        onClose={() => setLayerTreeConflict(false)}
+        onReload={() => {
+          setLayerTreeConflict(false);
+          setLayerTreeDraft(null);
+        }}
+      />
       <UnsavedChangesGuard when={mapSettingsDirty} />
     </Page>
   );

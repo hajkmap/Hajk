@@ -152,6 +152,9 @@ export default function LayerTreeEditor({
         ? {
             mode,
             ownerId,
+            // A draft keeps the version it was begun on, even when the tree
+            // is loaded again meanwhile: the save is checked against it.
+            version: activeDraft?.version ?? baseline.version,
             nodes: next.nodes,
             settings: changedSettings,
             background: changedBackground,

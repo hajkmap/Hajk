@@ -130,6 +130,9 @@ model Map {
   createdDate       DateTime?           @db.Timestamptz(3) // Timestamp when created
   lastSavedBy       String?
   lastSavedDate     DateTime?           @db.Timestamptz(3) // Timestamp when last saved
+  /// Raised by every save of the layer tree. A save names the version it was
+  /// made from and is refused when the tree has been saved since.
+  treeVersion       Int                 @default(0)
   deletedAt         DateTime?           @db.Timestamptz(3)
   projection        Projection?         @relation("MapViewProjection", fields: [projectionId], references: [id])
   projections       Projection[]        @relation("MapProjections")
@@ -277,6 +280,9 @@ model Group {
   createdDate       DateTime?           @db.Timestamptz(3) // Timestamp when created
   lastSavedBy       String?
   lastSavedDate     DateTime?           @db.Timestamptz(3) // Timestamp when last saved
+  /// Raised by every save of the group's tree. A save names the version it was
+  /// made from and is refused when the tree has been saved since.
+  treeVersion       Int                 @default(0)
   deletedAt         DateTime?           @db.Timestamptz(3)
   /// A search group's layers. A layer group's content is in `items`.
   layers            LayerInstance[]

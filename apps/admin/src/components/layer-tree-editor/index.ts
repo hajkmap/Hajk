@@ -1,4 +1,5 @@
 export { default } from "./layer-tree-editor";
+export { default as LayerTreeConflictDialog } from "./layer-tree-conflict-dialog";
 export { default as LayerTreeItemTooltip } from "./layer-tree-item-tooltip";
 export { isLayerTreeDraftFor } from "./layer-tree-model";
 export type { LayerTreeDraft } from "./layer-tree-model";

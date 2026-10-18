@@ -70,6 +70,8 @@ export interface LayerTreeDraft {
   mode: LayerTreeEditorMode;
   /** The group's id in group mode, the map's name in map mode. */
   ownerId: string;
+  /** The version of the saved tree the draft was made from. */
+  version: number;
   nodes: LayerTreeFlatNode[];
   /** The map's settings for the groups and layers in its tree. */
   settings?: LayerTreeSettings;

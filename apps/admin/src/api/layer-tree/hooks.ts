@@ -67,6 +67,13 @@ export const useUpdateMapLayerTree = () => {
   });
 };
 
+/** Loads a tree again, as when a save was refused because it had changed. */
+export const useReloadLayerTree = () => {
+  const queryClient = useQueryClient();
+  return (mode: "group" | "map", ownerId: string) =>
+    queryClient.invalidateQueries({ queryKey: ["layerTree", mode, ownerId] });
+};
+
 /** Which groups and maps every group and layer is placed in. */
 export const useLayerTreePlacements = () =>
   useQuery({

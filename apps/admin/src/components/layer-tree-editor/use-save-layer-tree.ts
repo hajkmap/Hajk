@@ -27,13 +27,18 @@ export function useSaveLayerTree() {
     if (draft.mode === "group") {
       await updateGroupTree({
         groupId: draft.ownerId,
-        payload: { items, nested: toGroupNested(draft.nodes, draft.ownerId) },
+        payload: {
+          version: draft.version,
+          items,
+          nested: toGroupNested(draft.nodes, draft.ownerId),
+        },
       });
       return;
     }
     await updateMapTree({
       mapName: draft.ownerId,
       payload: {
+        version: draft.version,
         items,
         exceptions: toMapExceptions(draft.nodes),
         // Only what was changed is sent.

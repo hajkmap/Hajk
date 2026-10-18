@@ -265,7 +265,7 @@ paths:
             type: string
       responses:
         200:
-          description: Top-level linked groups, each expanded from its own content with the map's exceptions merged in (items added or hidden on this map), plus the map's settings for its groups and layers (only those that differ from the defaults), the background layers and the draw order
+          description: Top-level linked groups, each expanded from its own content with the map's exceptions merged in (items added or hidden on this map), plus the map's settings for its groups and layers (only those that differ from the defaults), the background layers, the draw order and the tree's version, which a save sends back
         404:
           description: Map not found
     put:
@@ -279,13 +279,17 @@ paths:
           schema:
             type: string
       requestBody:
-        description: Ordered top-level groups (layers go in groups, since the client only shows layers inside groups). Groups are linked; their content is edited on the group. Optional, each written only when sent - exceptions (add a layer or a group to a group on this map only, or hide one of its own items), settings, background and drawOrder.
+        description: Ordered top-level groups (layers go in groups, since the client only shows layers inside groups). Groups are linked; their content is edited on the group. Optional, each written only when sent - exceptions (add a layer or a group to a group on this map only, or hide one of its own items), settings, background and drawOrder. version is the tree's version as GET gave it; the save is refused if the tree has been saved since.
         required: true
         content:
           application/json:
             schema:
               type: object
               properties:
+                version:
+                  type: integer
+                  minimum: 0
+                  description: The tree's version as GET gave it.
                 items:
                   type: array
                   items:
@@ -405,14 +409,17 @@ paths:
                   items:
                     type: string
               required:
+                - version
                 - items
       responses:
         200:
-          description: The saved tree
+          description: The saved tree, with its new version
         400:
           description: Invalid request
         404:
           description: Map not found
+        409:
+          description: The tree has been saved since the version sent; load it again
   /layers:
     get:
       tags:
@@ -484,7 +491,7 @@ paths:
             type: string
       responses:
         200:
-          description: The group with its layers and linked child groups
+          description: The group with its layers and linked child groups, and the tree's version, which a save sends back
         404:
           description: Requested group was not found
     put:
@@ -498,13 +505,17 @@ paths:
           schema:
             type: string
       requestBody:
-        description: Ordered items. Groups are only linked and sent without items; their content is edited on the group itself. A group sent with new set to true, a name and its items is created on save; its id is then a temporary id. Optional nested lists what the group (ownerId - the group itself or a new group's temporary id) puts inside the groups linked in its tree (groupId), each after the item named by after (null puts it first), without changing those groups. A placement can be a group made in the editor - new set to true, a name and its items - which is created on save.
+        description: Ordered items. Groups are only linked and sent without items; their content is edited on the group itself. A group sent with new set to true, a name and its items is created on save; its id is then a temporary id. Optional nested lists what the group (ownerId - the group itself or a new group's temporary id) puts inside the groups linked in its tree (groupId), each after the item named by after (null puts it first), without changing those groups. A placement can be a group made in the editor - new set to true, a name and its items - which is created on save. version is the tree's version as GET gave it; the save is refused if the tree has been saved since.
         required: true
         content:
           application/json:
             schema:
               type: object
               properties:
+                version:
+                  type: integer
+                  minimum: 0
+                  description: The tree's version as GET gave it.
                 items:
                   type: array
                   items:
@@ -557,14 +568,17 @@ paths:
                       - type
                       - id
               required:
+                - version
                 - items
       responses:
         200:
-          description: The saved tree
+          description: The saved tree, with its new version
         400:
           description: Invalid request, for example a group placed inside itself, a linked group sent with items, or a nested item put in a group outside the owner's tree
         404:
           description: Requested group was not found
+        409:
+          description: The tree has been saved since the version sent; load it again
   /services:
     get:
       tags:

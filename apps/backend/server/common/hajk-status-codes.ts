@@ -96,6 +96,11 @@ enum HajkStatusCodes {
   UNKNOWN_THEME = "DB014",
 
   /**
+   * A layer tree has been saved since the version the save was made from.
+   */
+  LAYER_TREE_CHANGED = "DB015",
+
+  /**
    * The folder cannot be deleted because it still contains documents.
    */
   FOLDER_NOT_EMPTY = "DB011",

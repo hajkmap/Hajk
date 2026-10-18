@@ -1,3 +1,4 @@
+import { HttpError } from "../../lib/http-error";
 import { getApiClient, InternalApiError } from "../../lib/internal-api-client";
 import {
   GroupTreeWrite,
@@ -13,11 +14,19 @@ import {
  */
 
 // The backend explains why a tree can't be saved (for example a group placed
-// inside itself), so pass its text on instead of a generic message.
+// inside itself), so pass its text on instead of a generic message, with the
+// status when there is one.
 function toError(error: unknown, fallback: string): Error {
-  const message = (error as InternalApiError).response?.data?.error;
-  return new Error(message ?? fallback);
+  const response = (error as InternalApiError).response;
+  const message = response?.data?.error ?? fallback;
+  return response
+    ? new HttpError(response.status, message)
+    : new Error(message);
 }
+
+/** A save refused because someone else saved the tree after it was loaded. */
+export const isLayerTreeConflict = (error: unknown) =>
+  error instanceof HttpError && error.status === 409;
 
 export const getGroupTree = async (
   groupId: string,

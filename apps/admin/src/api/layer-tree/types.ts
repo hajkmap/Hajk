@@ -46,6 +46,8 @@ export interface LayerTreeMapExceptions {
 
 /** A group's tree always starts with the group itself. */
 export type LayerTreeGroupNode = Extract<LayerTreeNode, { type: "group" }> & {
+  /** Sent back with a save, which is refused if the tree was saved since. */
+  version: number;
   mapExceptions?: LayerTreeMapExceptions[];
 };
 
@@ -83,6 +85,8 @@ export interface GroupNestedPlacement {
 }
 
 export interface GroupTreeWrite {
+  /** The version the tree was loaded with. */
+  version: number;
   items: LayerTreeWriteNode[];
   nested: GroupNestedPlacement[];
 }
@@ -146,6 +150,8 @@ export interface MapTreeSettings {
 
 export interface MapLayerTree {
   mapName: string;
+  /** Sent back with a save, which is refused if the tree was saved since. */
+  version: number;
   /** With the map's exceptions merged in (see `added` and `hidden`). */
   items: LayerTreeNode[];
   /** The map's settings for the groups and layers in its tree. */
@@ -157,6 +163,8 @@ export interface MapLayerTree {
 
 /** Settings, background and draw order are written only when sent. */
 export interface MapLayerTreeWrite {
+  /** The version the tree was loaded with. */
+  version: number;
   items: LayerTreeWriteNode[];
   exceptions: MapGroupException[];
   settings?: MapTreeSettings;

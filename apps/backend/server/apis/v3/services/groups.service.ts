@@ -249,6 +249,8 @@ class GroupsService {
         where: { id },
         data: {
           ...groupData,
+          // Raised only by saves of the group's tree, whatever the body holds.
+          treeVersion: undefined,
           lastSavedBy: userId,
           lastSavedDate: new Date(),
           ...(roleConnections !== undefined && {
