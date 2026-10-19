@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Backend: The delimiter used between groups in the AD group header is now configurable via `AD_TRUSTED_GROUP_HEADER_DELIMITER`, making it possible to use the same header for Hajk and GeoServer. [#1914](https://github.com/hajkmap/Hajk/issues/1914)
 - Client: Measurer/Sketch - Angle snapping can be repeated while Ctrl/Cmd is held. Clicking a green snap guide removes that guide and draws a new one from the clicked point. [#1923](https://github.com/hajkmap/Hajk/issues/1923)
 - Client: Measurer/Sketch - Angle snapping guides no longer pull the cursor off drawn edges: real features (drawn or WFS) always win over the green guides, segment labels are no longer snap targets, and points where a guide crosses an edge are shown and snappable. [#1923](https://github.com/hajkmap/Hajk/issues/1923)
 - Client: Measurer and Sketch can select real vector features (`ol/Feature`) from vector layers, including layers that are not queryable which was an annoying limitation. Vector-tile RenderFeatures are not included in this. [#1923](https://github.com/hajkmap/Hajk/issues/1923)
