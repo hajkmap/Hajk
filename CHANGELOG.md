@@ -18,7 +18,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Admin + Client: Map setting `replaceAppStateInHash` (default off, and only used when `enableAppStateInHash` is on). When on, hash updates use `history.replaceState` so the browser Back button leaves the map instead of stepping through pans, layer toggles, and opened tools. Missing or any value other than `true` keeps assigning `location.hash`.
 - Backend: The delimiter used between groups in the AD group header is now configurable via `AD_TRUSTED_GROUP_HEADER_DELIMITER`, making it possible to use the same header for Hajk and GeoServer. [#1914](https://github.com/hajkmap/Hajk/issues/1914)
 - Client: Measurer/Sketch - Angle snapping can be repeated while Ctrl/Cmd is held. Clicking a green snap guide removes that guide and draws a new one from the clicked point. [#1923](https://github.com/hajkmap/Hajk/issues/1923)
 - Client: Measurer/Sketch - Angle snapping guides no longer pull the cursor off drawn edges: real features (drawn or WFS) always win over the green guides, segment labels are no longer snap targets, and points where a guide crosses an edge are shown and snappable. [#1923](https://github.com/hajkmap/Hajk/issues/1923)
@@ -59,6 +58,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Client: DocumentHandler - On mobile, chapter jumps scroll the bottom sheet so the chapter lines up. [#1933](https://github.com/hajkmap/Hajk/issues/1933)
+- Client: DocumentHandler - The scroll-to-top button stays half transparent until hover or focus, and document text can scroll clear of it. [#1933](https://github.com/hajkmap/Hajk/issues/1933)
 - Client: Measurer - Measurements added with "Välj på kartan" get the same delete-hover highlight as drawn lines, polygons, and circles. [#1923](https://github.com/hajkmap/Hajk/issues/1923)
 - Client: Sketch - The tab for choosing an editable layer to save to, including the "Öppna Attributredigerare" button, is now hidden when AttributeEditor isn't available in the map, or when the user has no access to any of its editing services. [#1919](https://github.com/hajkmap/Hajk/issues/1919)
 - Backend: Error responses that include request data (informative documents, settings, and FIR) are now sent as `text/plain` instead of HTML. [Code scanning alert #75](https://github.com/hajkmap/Hajk/security/code-scanning/75), [#71](https://github.com/hajkmap/Hajk/security/code-scanning/71), [#70](https://github.com/hajkmap/Hajk/security/code-scanning/70), [#69](https://github.com/hajkmap/Hajk/security/code-scanning/69), [#68](https://github.com/hajkmap/Hajk/security/code-scanning/68), [#67](https://github.com/hajkmap/Hajk/security/code-scanning/67)
