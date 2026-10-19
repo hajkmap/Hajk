@@ -9,7 +9,7 @@
   },
   "license": "MIT",
   "engines": {
-    "node": ">=22"
+    "node": ">=22.18"
   },
   "scripts": {
     "start": "vite dev",
@@ -27,22 +27,22 @@
     "defaults"
   ],
   "devDependencies": {
-    "@eslint/js": "^9",
+    "@eslint-react/eslint-plugin": "^5.26.5",
+    "@eslint/js": "^10",
     "@types/load-google-maps-api": "^2.0.5",
-    "@types/node": "^25.6.0",
+    "@types/node": "^25.9.1",
     "@vitejs/plugin-react-swc": "^4.3.0",
-    "eslint": "^9",
+    "eslint": "^10",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-jsx-a11y": "^6",
-    "eslint-plugin-prettier": "^5.5.5",
-    "eslint-plugin-react": "^7",
+    "eslint-plugin-jsx-a11y-x": "^0.2.0",
+    "eslint-plugin-prettier": "^5.5.6",
     "eslint-plugin-react-hooks": "^7",
     "eslint-plugin-react-refresh": "^0.5",
     "globals": "^17",
     "prettier": "^3.8.3",
     "prop-types": "^15.8.1",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.56.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.71.2",
     "vite": "^7.3.6",
     "vite-tsconfig-paths": "6.1.1"
   },
@@ -82,9 +82,9 @@
     "ol-mapbox-style": "^13.4.3",
     "proj4": "^2.20.8",
     "qrcode": "^1.5.4",
-    "react": "^19.2.5",
+    "react": "^19.2.7",
     "react-color": "^2.19.3",
-    "react-dom": "^19.2.5",
+    "react-dom": "^19.2.7",
     "react-event-observer": "^0.5.11",
     "react-horizontal-scrolling-menu": "^8.2.0",
     "react-markdown": "^10.1.0",
