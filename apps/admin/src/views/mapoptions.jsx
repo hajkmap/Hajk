@@ -52,6 +52,7 @@ class MapOptions extends Component {
         constrainResolutionMobile: config.constrainResolutionMobile || false,
         enableDownloadLink: config.enableDownloadLink || false,
         enableAppStateInHash: config.enableAppStateInHash,
+        replaceAppStateInHash: config.replaceAppStateInHash === true,
         confirmOnWindowClose: config.confirmOnWindowClose ?? true,
         altShiftDragRotate: config.altShiftDragRotate || true,
         onFocusOnly: config.onFocusOnly || false,
@@ -165,6 +166,7 @@ class MapOptions extends Component {
       constrainResolutionMobile: mapConfig.constrainResolutionMobile || false,
       enableDownloadLink: mapConfig.enableDownloadLink,
       enableAppStateInHash: mapConfig.enableAppStateInHash,
+      replaceAppStateInHash: mapConfig.replaceAppStateInHash === true,
       confirmOnWindowClose: mapConfig.confirmOnWindowClose ?? true,
       altShiftDragRotate: mapConfig.altShiftDragRotate,
       onFocusOnly: mapConfig.onFocusOnly,
@@ -384,6 +386,7 @@ class MapOptions extends Component {
       case "constrainResolutionMobile":
       case "enableDownloadLink":
       case "enableAppStateInHash":
+      case "replaceAppStateInHash":
       case "confirmOnWindowClose":
       case "altShiftDragRotate":
       case "onFocusOnly":
@@ -459,6 +462,7 @@ class MapOptions extends Component {
         );
         config.enableDownloadLink = this.getValue("enableDownloadLink");
         config.enableAppStateInHash = this.getValue("enableAppStateInHash");
+        config.replaceAppStateInHash = this.getValue("replaceAppStateInHash");
         config.confirmOnWindowClose = this.getValue("confirmOnWindowClose");
         config.altShiftDragRotate = this.getValue("altShiftDragRotate");
         config.onFocusOnly = this.getValue("onFocusOnly");
@@ -900,6 +904,30 @@ class MapOptions extends Component {
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
                   title="Kartans status hålls ständigt uppdaterad, som en del av URL:ens #-parametrar. Se även #1252."
+                />
+              </label>
+            </div>
+            <div style={{ marginLeft: 24 }}>
+              <input
+                id="input_replaceAppStateInHash"
+                type="checkbox"
+                ref="input_replaceAppStateInHash"
+                disabled={!this.state.enableAppStateInHash}
+                onChange={(e) => {
+                  this.setState({ replaceAppStateInHash: e.target.checked });
+                }}
+                checked={this.state.replaceAppStateInHash}
+              />
+              &nbsp;
+              <label
+                className="long-label"
+                htmlFor="input_replaceAppStateInHash"
+              >
+                Uppdatera hash utan att lägga till webbläsarhistorik{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om aktivt så uppdateras adressen i webbläsaren utan att varje ändring läggs till i historiken. Bakåtknappen går då tillbaka till föregående sida, till exempel den sida användaren kom ifrån. Annars backar den genom panoreringar, lagerväxlingar och öppnade verktyg. Kräver att liveuppdatering av hashparametrar är på."
                 />
               </label>
             </div>
