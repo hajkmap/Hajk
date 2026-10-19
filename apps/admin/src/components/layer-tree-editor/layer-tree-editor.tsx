@@ -7,6 +7,7 @@ import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 
 import {
+  isSavedHere,
   LAYER_TREE_SAVE_KEY,
   useGroupTree,
   useMapLayerTree,
@@ -39,11 +40,15 @@ import {
 } from "./layer-tree-preview-options";
 import {
   EMPTY_SETTINGS,
+  savedSettingsSignature,
   settingsSignature,
   type LayerTreeSettings,
 } from "./layer-tree-settings";
 import { useClickPlace } from "./use-click-place";
-import { useDraftHistory } from "./use-draft-history";
+import {
+  useDraftHistory,
+  type LayerTreeEditorState,
+} from "./use-draft-history";
 import { useLayerTreeBaseline } from "./use-layer-tree-baseline";
 import { useMoveZone } from "./use-move-zone";
 
@@ -114,9 +119,62 @@ export default function LayerTreeEditor({
         .map((layer) => ({ id: layer.id, name: layer.name })),
     [catalogLayers],
   );
+  // The draw order as the list shows it, layers new in the tree on top.
+  const fullDrawOrder = useMemo(
+    () => completeDrawOrder(layersShown, drawOrder),
+    [layersShown, drawOrder],
+  );
+  const layerNames = useMemo(
+    () => new Map(layersShown.map((layer) => [layer.id, layer.name])),
+    [layersShown],
+  );
 
-  // Every change goes through here, so Ctrl+Z can take it back.
-  const history = useDraftHistory(activeDraft, onDraftChange, baseline);
+  /** The draft that shows `state`: what differs from the saved tree, or none. */
+  const draftFor = (state: LayerTreeEditorState): LayerTreeDraft | null => {
+    if (!baseline) return null;
+    const nodesChanged = contentSignature(state.nodes) !== baseline.signature;
+    // Compared as they would be saved: the settings of what is in the tree,
+    // and the draw order as the list shows it.
+    const settingsChanged =
+      mode === "map" &&
+      savedSettingsSignature(state.settings, state.nodes) !==
+        savedSettingsSignature(baseline.settings, baseline.nodes);
+    const backgroundChanged =
+      mode === "map" &&
+      JSON.stringify(state.background) !== JSON.stringify(baseline.background);
+    const orderChanged =
+      mode === "map" &&
+      state.drawOrder.join() !==
+        completeDrawOrder(
+          shownLayers(baseline.nodes),
+          baseline.drawOrder,
+        ).join();
+    const changed =
+      nodesChanged || settingsChanged || backgroundChanged || orderChanged;
+    if (!changed) return null;
+    return {
+      mode,
+      ownerId,
+      version: activeDraft?.version ?? baseline.version,
+      nodes: state.nodes,
+      settings: settingsChanged ? state.settings : undefined,
+      background: backgroundChanged ? state.background : undefined,
+      drawOrder: orderChanged ? state.drawOrder : undefined,
+    };
+  };
+
+  // Every change goes through here, so Ctrl+Z can take it back, also past a
+  // save made here.
+  const history = useDraftHistory({
+    owner: `${mode}:${ownerId}`,
+    savedVersion: baseline?.version ?? null,
+    savedHere: (version) => isSavedHere(mode, ownerId, version),
+    draft: activeDraft,
+    onDraftChange,
+    current: { nodes, settings, background, drawOrder: fullDrawOrder },
+    draftFor,
+    disabled: isSaving,
+  });
 
   /** Keeps what differs from the saved state; no draft when nothing does. */
   const updateDraft = (
@@ -164,15 +222,6 @@ export default function LayerTreeEditor({
     );
   };
 
-  // The draw order as the list shows it, layers new in the tree on top.
-  const fullDrawOrder = useMemo(
-    () => completeDrawOrder(layersShown, drawOrder),
-    [layersShown, drawOrder],
-  );
-  const layerNames = useMemo(
-    () => new Map(layersShown.map((layer) => [layer.id, layer.name])),
-    [layersShown],
-  );
   const moveZoneOn = mode === "map" && moveZoneHost !== null;
   const zone = useMoveZone({
     enabled: moveZoneOn,

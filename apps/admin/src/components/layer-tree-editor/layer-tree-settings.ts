@@ -183,6 +183,12 @@ export function toMapTreeSettings(
   };
 }
 
+/** Signature of the settings as they would be saved with `nodes`. */
+export const savedSettingsSignature = (
+  settings: LayerTreeSettings,
+  nodes: LayerTreeFlatNode[],
+) => settingsSignature(fromMapTreeSettings(toMapTreeSettings(settings, nodes)));
+
 export type LayerTreeToggleState = "unchecked" | "checked" | "semichecked";
 
 /** The group a layer node shows in, or undefined outside any group. */
