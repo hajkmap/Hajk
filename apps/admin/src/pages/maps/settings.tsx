@@ -32,19 +32,14 @@ import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 import { FieldValues, useForm } from "react-hook-form";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   useMapByName,
   useUpdateMap,
   useUpdateMapTools,
-  useUpdateMapLayers,
   useDeleteMap,
   useMaps,
   useToolsByMapName,
-  useLayersByMapName,
 } from "../../api/maps";
-import type { MapLayer } from "../../api/maps";
-import { getLayersByMapName } from "../../api/maps";
 import DialogWrapper from "../../components/flexible-dialog";
 import {
   buildMapSettingsFormValues,
@@ -59,14 +54,7 @@ import MapSettingsForm, {
   type MapSettingsSection,
 } from "./components/map-settings-form";
 import MapContentPanel from "./components/map-content-panel";
-import {
-  buildMapLayerActivationRows,
-  mapLayerActivationSignature,
-  mapLayerActivationToPayload,
-  type MapLayerActivationRow,
-} from "./map-layer-activation";
 import { useTools } from "../../api/tools";
-import { useLayers } from "../../api/layers";
 import type { ToolWindowPosition, ToolZone } from "../../api/maps";
 import MapToolsPanel from "./components/map-tools-panel";
 import {
@@ -155,7 +143,6 @@ interface ToolsDraft {
 
 export default function MapSettings() {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { mapId } = useParams();
   const { data: maps } = useMaps();
@@ -164,7 +151,6 @@ export default function MapSettings() {
   const { data: map, isLoading, isError } = useMapByName(mapName ?? "");
   const { mutateAsync: updateMap, status: updateStatus } = useUpdateMap();
   const { mutateAsync: updateMapTools } = useUpdateMapTools();
-  const { mutateAsync: updateMapLayers } = useUpdateMapLayers();
   const { mutateAsync: deleteMap, isPending: isDeletingMap } = useDeleteMap();
   const { palette } = useTheme();
   const [deleteWarningExpanded, setDeleteWarningExpanded] = useState(false);
@@ -214,25 +200,8 @@ export default function MapSettings() {
   const showSettingsSearchUi =
     activeTab === "settings" && settingsSection === "search";
   const settingsSearchTerm = showSettingsSearchUi ? settingsSearchQuery : "";
-  const { data: layers = [], isFetched: layersFetched } = useLayers();
-  const catalogLayers = useMemo(
-    () =>
-      layers.map((layer) => ({
-        id: layer.id,
-        name: layer.name,
-        layerKind: layer.layerKind,
-      })),
-    [layers],
-  );
   const { data: mapTools } = useToolsByMapName(mapName ?? "");
   const { data: catalogTools } = useTools();
-  // The search and editing layers the map uses ("Lager"); its display layers
-  // are its layer tree and background (Lagerordning).
-  const {
-    data: mapLayers,
-    isError: mapContentError,
-    isLoading: mapContentLoading,
-  } = useLayersByMapName(mapName ?? "");
   const { data: projections } = useProjections();
   const { defaultCoordinates } = useAppStateStore.getState();
 
@@ -247,16 +216,6 @@ export default function MapSettings() {
     [projections],
   );
 
-  const [layerActivationRows, setLayerActivationRows] = useState<
-    MapLayerActivationRow[]
-  >([]);
-  const [
-    layerActivationCommittedSignature,
-    setLayerActivationCommittedSignature,
-  ] = useState("");
-  const layerActivationWasDirtyRef = useRef(false);
-  const [menuSynced, setMenuSynced] = useState(false);
-  const [menuSyncedMapName, setMenuSyncedMapName] = useState(mapName);
   // The map's layer tree, saved with the rest of the map (see handleUpdateMap).
   const [layerTreeDraft, setLayerTreeDraft] = useState<LayerTreeDraft | null>(
     null,
@@ -266,120 +225,6 @@ export default function MapSettings() {
   const [layerTreeConflict, setLayerTreeConflict] = useState(false);
   const layerTreeDirty = isLayerTreeDraftFor(layerTreeDraft, "map", mapName);
 
-  const applyMenuStateFromServer = useCallback(
-    (layers: MapLayer[]) => {
-      const activationRows = buildMapLayerActivationRows(catalogLayers, layers);
-      setLayerActivationRows(activationRows);
-      setLayerActivationCommittedSignature(
-        mapLayerActivationSignature(activationRows),
-      );
-    },
-    [catalogLayers],
-  );
-
-  const serverLayerActivationRows = useMemo(
-    () => buildMapLayerActivationRows(catalogLayers, mapLayers ?? []),
-    [catalogLayers, mapLayers],
-  );
-
-  const menuDataReady =
-    Boolean(mapName) && mapLayers !== undefined && layersFetched;
-
-  // Adjust state during render when the map or server rows change (no effect setState).
-  if (menuSyncedMapName !== mapName) {
-    setMenuSyncedMapName(mapName);
-    setMenuSynced(false);
-    setLayerActivationCommittedSignature("");
-  } else if (menuDataReady && !menuSynced) {
-    setLayerActivationRows(serverLayerActivationRows);
-    setLayerActivationCommittedSignature(
-      mapLayerActivationSignature(serverLayerActivationRows),
-    );
-    setMenuSynced(true);
-  }
-
-  useEffect(() => {
-    layerActivationWasDirtyRef.current = false;
-  }, [mapName]);
-
-  const layerActivationDirtyRaw = useMemo(() => {
-    if (!mapName || mapLayers === undefined || !layersFetched || !menuSynced) {
-      return false;
-    }
-    return (
-      mapLayerActivationSignature(layerActivationRows) !==
-      layerActivationCommittedSignature
-    );
-  }, [
-    layerActivationRows,
-    layerActivationCommittedSignature,
-    layersFetched,
-    mapLayers,
-    mapName,
-    menuSynced,
-  ]);
-
-  const contentDirtyRaw = layerActivationDirtyRaw;
-
-  if (
-    menuSyncedMapName === mapName &&
-    menuDataReady &&
-    menuSynced &&
-    !contentDirtyRaw
-  ) {
-    const serverActivationSignature = mapLayerActivationSignature(
-      serverLayerActivationRows,
-    );
-    const localActivationSignature =
-      mapLayerActivationSignature(layerActivationRows);
-    const localMatchesCommitted =
-      localActivationSignature === layerActivationCommittedSignature;
-
-    // After Layers save, local rows reflect the commit but refetched server rows
-    // can lag one render — wait until server catches up before re-applying.
-    const waitingForServerCatchUp =
-      localMatchesCommitted &&
-      serverActivationSignature !== layerActivationCommittedSignature;
-
-    if (
-      !waitingForServerCatchUp &&
-      (localActivationSignature !== serverActivationSignature ||
-        layerActivationCommittedSignature !== serverActivationSignature)
-    ) {
-      setLayerActivationRows(serverLayerActivationRows);
-      setLayerActivationCommittedSignature(serverActivationSignature);
-    }
-  }
-
-  useEffect(() => {
-    if (layerActivationDirtyRaw) {
-      layerActivationWasDirtyRef.current = true;
-      return;
-    }
-    if (!layerActivationWasDirtyRef.current) {
-      return;
-    }
-    layerActivationWasDirtyRef.current = false;
-  }, [layerActivationDirtyRaw]);
-
-  const handleLayerActivationRowsChange = useCallback(
-    (rows: MapLayerActivationRow[]) => {
-      const nextSignature = mapLayerActivationSignature(rows);
-      if (
-        menuSynced &&
-        layerActivationCommittedSignature &&
-        nextSignature === layerActivationCommittedSignature
-      ) {
-        setLayerActivationRows(serverLayerActivationRows);
-        layerActivationWasDirtyRef.current = false;
-        return;
-      }
-      setLayerActivationRows(rows);
-    },
-    [layerActivationCommittedSignature, menuSynced, serverLayerActivationRows],
-  );
-
-  const contentDirty = menuSynced && contentDirtyRaw;
   const serverToolZones = useMemo(
     () => (mapTools ? mapToolsToZones(mapTools) : null),
     [mapTools],
@@ -782,19 +627,8 @@ export default function MapSettings() {
   });
 
   const mapSettingsDirty = useMemo(
-    () =>
-      isDirty ||
-      toolsDirty ||
-      hasPendingWindowSizeInput ||
-      contentDirty ||
-      layerTreeDirty,
-    [
-      isDirty,
-      toolsDirty,
-      hasPendingWindowSizeInput,
-      contentDirty,
-      layerTreeDirty,
-    ],
+    () => isDirty || toolsDirty || hasPendingWindowSizeInput || layerTreeDirty,
+    [isDirty, toolsDirty, hasPendingWindowSizeInput, layerTreeDirty],
   );
 
   const savePending = isSaving || updateStatus === "pending";
@@ -835,24 +669,6 @@ export default function MapSettings() {
         toolsDraftRef.current = null;
         setToolsDraft(null);
         setHasPendingWindowSizeInput(false);
-        didSave = true;
-      }
-
-      // "Lager": the search and editing layers the map uses.
-      if (contentDirty && layerActivationDirtyRaw) {
-        await updateMapLayers({
-          mapName: map.name,
-          layers: mapLayerActivationToPayload(layerActivationRows),
-        });
-        layerActivationWasDirtyRef.current = false;
-        await queryClient.cancelQueries({
-          queryKey: ["layersByMap", map.name],
-        });
-        const savedLayers = await queryClient.fetchQuery<MapLayer[]>({
-          queryKey: ["layersByMap", map.name],
-          queryFn: () => getLayersByMapName(map.name),
-        });
-        applyMenuStateFromServer(savedLayers);
         didSave = true;
       }
 
@@ -1114,28 +930,18 @@ export default function MapSettings() {
           </FormContainer>
         </Box>
 
-        {activeTab === "menu" &&
-          (mapContentLoading ||
-          (mapLayers === undefined && !mapContentError) ? (
-            <SquareSpinnerComponent />
-          ) : mapContentError ? (
-            <Alert severity="error" sx={{ mt: 2 }}>
-              {t("maps.contentLoadError")}
-            </Alert>
-          ) : (
-            <MapContentPanel
-              mapName={mapName}
-              layerActivationRows={layerActivationRows}
-              onLayerActivationRowsChange={handleLayerActivationRowsChange}
-              mapTools={mapTools}
-              catalogTools={catalogTools}
-              activeToolIds={activeToolIds}
-              onLayerTreeOpenChange={handleLayerTreeOpenChange}
-              moveZoneHostRef={mapLayersMoveZoneHostRef}
-              layerTreeDraft={layerTreeDraft}
-              onLayerTreeDraftChange={setLayerTreeDraft}
-            />
-          ))}
+        {activeTab === "menu" && (
+          <MapContentPanel
+            mapName={mapName}
+            mapTools={mapTools}
+            catalogTools={catalogTools}
+            activeToolIds={activeToolIds}
+            onLayerTreeOpenChange={handleLayerTreeOpenChange}
+            moveZoneHostRef={mapLayersMoveZoneHostRef}
+            layerTreeDraft={layerTreeDraft}
+            onLayerTreeDraftChange={setLayerTreeDraft}
+          />
+        )}
 
         {activeTab === "tools" && (
           <MapToolsPanel

@@ -335,7 +335,14 @@ export interface ItemsOnMap {
   layerKeys: Set<string>;
 }
 
-export function itemsOnMap(shown: LayerTreeNode[]): ItemsOnMap {
+/**
+ * `realId` gives the real id of a group created on save, for its temporary
+ * one in `shown`.
+ */
+export function itemsOnMap(
+  shown: LayerTreeNode[],
+  realId: (id: string) => string = (id) => id
+): ItemsOnMap {
   const onMap: ItemsOnMap = {
     groupIds: new Set(),
     layerIds: new Set(),
@@ -344,17 +351,42 @@ export function itemsOnMap(shown: LayerTreeNode[]): ItemsOnMap {
   const walk = (nodes: LayerTreeNode[]) => {
     for (const node of nodes) {
       if (node.type !== "group") continue;
-      onMap.groupIds.add(node.id);
+      const groupId = realId(node.id);
+      onMap.groupIds.add(groupId);
       for (const item of node.items) {
         if (item.type !== "layer") continue;
         onMap.layerIds.add(item.id);
-        onMap.layerKeys.add(layerSettingsKey(node.id, item.id));
+        onMap.layerKeys.add(layerSettingsKey(groupId, item.id));
       }
       walk(node.items);
     }
   };
   walk(shown);
   return onMap;
+}
+
+/**
+ * The extras with the real ids of the groups created on save, where the
+ * settings name them by their temporary ids.
+ */
+export function withRealIds(
+  extras: MapTreeExtrasInput,
+  realId: (id: string) => string
+): MapTreeExtrasInput {
+  if (!extras.settings) return extras;
+  return {
+    ...extras,
+    settings: {
+      groups: extras.settings.groups.map((group) => ({
+        ...group,
+        groupId: realId(group.groupId),
+      })),
+      layers: extras.settings.layers.map((layer) => ({
+        ...layer,
+        groupId: realId(layer.groupId),
+      })),
+    },
+  };
 }
 
 /**

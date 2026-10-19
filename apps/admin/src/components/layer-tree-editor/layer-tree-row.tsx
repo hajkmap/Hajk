@@ -1,4 +1,3 @@
-import CreateNewFolderOutlinedIcon from "@mui/icons-material/CreateNewFolderOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
@@ -44,14 +43,17 @@ interface LayerTreeRowProps {
   locked: boolean;
   /** Part of a linked group's own content: the name of that group. */
   from?: string;
+  /**
+   * Group mode: put in a linked group (`target`) by the tree edited here,
+   * whose group is `group`, as an exception; the linked group doesn't have it.
+   */
+  exceptionIn?: { group: string; target: string };
   /** A layer straight in a map's tree, which the client can't show. */
   misplaced?: boolean;
   layerCount?: number;
   onToggle: () => void;
   onRemove?: () => void;
   onEditGroup?: () => void;
-  /** Adds a new group inside this one. */
-  onNewGroup?: () => void;
   /** Map mode: hides one of a group's own items on the map, or shows it. */
   onToggleHidden?: () => void;
   /** Map mode: hidden with a group above it; the name of that group. */
@@ -88,12 +90,12 @@ export default function LayerTreeRow({
   fixed,
   locked,
   from,
+  exceptionIn,
   misplaced = false,
   layerCount,
   onToggle,
   onRemove,
   onEditGroup,
-  onNewGroup,
   onToggleHidden,
   hiddenWith,
   toggle,
@@ -280,6 +282,25 @@ export default function LayerTreeRow({
           variant="outlined"
         />
       ) : null}
+      {exceptionIn ? (
+        // Purple as the map's own changes: here only, the group is left as is.
+        <Tooltip
+          title={t(
+            isGroup
+              ? "layerTree.exceptionInGroup"
+              : "layerTree.exceptionInLayer",
+            exceptionIn,
+          )}
+        >
+          <Chip
+            label={t("layerTree.exceptionIn", { group: exceptionIn.group })}
+            size="small"
+            color="secondary"
+            variant="outlined"
+            sx={{ maxWidth: 200 }}
+          />
+        </Tooltip>
+      ) : null}
       {node.data.isNew ? (
         <Chip
           label={t("layerTree.newBadge")}
@@ -364,17 +385,6 @@ export default function LayerTreeRow({
             onClick={onEditSettings}
           >
             <TuneOutlinedIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      ) : null}
-      {onNewGroup ? (
-        <Tooltip title={t("layerTree.newGroupHere")}>
-          <IconButton
-            size="small"
-            aria-label={t("layerTree.newGroupHere")}
-            onClick={onNewGroup}
-          >
-            <CreateNewFolderOutlinedIcon fontSize="small" />
           </IconButton>
         </Tooltip>
       ) : null}

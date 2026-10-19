@@ -1,4 +1,4 @@
-import { MapGroupExceptionKind } from "@prisma/client";
+import { MapGroupExceptionKind, type Prisma } from "@prisma/client";
 import log4js from "log4js";
 
 import prisma from "../../../common/prisma.ts";
@@ -21,6 +21,7 @@ import {
   pruneMapRows,
   readBackground,
   validateMapTreeExtras,
+  withRealIds,
   writeMapTreeExtras,
   type AddedRow,
   type ExceptionRow,
@@ -42,7 +43,8 @@ const logger = log4js.getLogger("service.v3.layer-tree");
 // (MapTreeItem), kept apart from the layerswitcher tool; the map can put
 // layers and groups in them, on this map only (MapGroupException). Linked
 // groups are always expanded from their own content, so a change to a group
-// shows up everywhere it's used.
+// shows up everywhere it's used. Both trees can make new groups, created with
+// their content when the tree is saved.
 
 /** Upper bound when expanding linked groups, in case stored data is broken. */
 const MAX_DEPTH = 25;
@@ -86,6 +88,16 @@ export interface LayerTreeMapExceptions {
   mapName: string;
   added: number;
   hidden: number;
+}
+
+/**
+ * Groups outside a group's tree that put layers or groups in it (or in a
+ * group inside it) in their own trees.
+ */
+export interface LayerTreeGroupAdditions {
+  groupId: string;
+  name: string;
+  added: number;
 }
 
 /** What a map shows in its tree. */
@@ -349,6 +361,133 @@ function assertNoDuplicates(owner: string, nodes: LayerTreeWriteNode[]) {
     }
     seen.add(key);
   }
+}
+
+/** What a save writes as groups' own content. */
+interface TreeContent {
+  /** The content, by owner: a group, or a new group's temporary id. */
+  rewrites: Map<string, LayerTreeWriteNode[]>;
+  /** Temporary id → name of the groups to create. */
+  newGroups: Map<string, string>;
+}
+
+const emptyContent = (): TreeContent => ({
+  rewrites: new Map(),
+  newGroups: new Map(),
+});
+
+/**
+ * Collects `nodes` as the content of `owner` (null for a map's top level,
+ * which is no group's content), and the content of each new group among them,
+ * by its temporary id. Linked groups are sent without items: their content is
+ * edited on the group itself.
+ */
+function collectContent(
+  content: TreeContent,
+  owner: string | null,
+  nodes: LayerTreeWriteNode[]
+) {
+  if (owner !== null) {
+    const earlier = content.rewrites.get(owner);
+    if (earlier) {
+      if (signature(earlier) !== signature(nodes)) {
+        throw badRequest(
+          `Group "${owner}" appears more than once with different content.`
+        );
+      }
+      return;
+    }
+    assertNoDuplicates(owner, nodes);
+    content.rewrites.set(owner, nodes);
+  }
+  for (const node of nodes) {
+    if (node.type !== "group") continue;
+    if (node.items && !node.new) {
+      throw badRequest(
+        `Group "${node.id}" is linked here; edit its content on the group itself.`
+      );
+    }
+    if (node.new && node.name) {
+      const earlierName = content.newGroups.get(node.id);
+      if (earlierName !== undefined && earlierName !== node.name) {
+        throw badRequest(
+          `New group "${node.id}" is sent with two different names.`
+        );
+      }
+      content.newGroups.set(node.id, node.name);
+    }
+    if (node.items) collectContent(content, node.id, node.items);
+  }
+}
+
+/**
+ * The collected content as it will be stored, so the tree can be expanded
+ * before it is written. `owners` put nothing in linked groups unless the
+ * caller adds it.
+ */
+function toOverrides(content: TreeContent, owners: string[]): TreeOverrides {
+  return {
+    groups: new Map(
+      [...content.newGroups].map(([id, name]) => [id, { id, name }] as const)
+    ),
+    itemsByGroup: new Map(
+      [...content.rewrites].map(([owner, nodes]) => [
+        owner,
+        nodes.map((node) =>
+          node.type === "layer"
+            ? { displayLayerId: node.id, childGroupId: null }
+            : { displayLayerId: null, childGroupId: node.id }
+        ),
+      ])
+    ),
+    nestedByOwner: new Map(owners.map((owner) => [owner, new Map()])),
+  };
+}
+
+/**
+ * Creates the new groups and writes the collected content, inside a save's
+ * transaction. Gives back the real id for a new group's temporary id (other
+ * ids as they are).
+ */
+async function writeContent(
+  tx: Prisma.TransactionClient,
+  content: TreeContent,
+  userId: string | undefined,
+  now: Date
+): Promise<(id: string) => string> {
+  // New groups first, so the items below can point at their real ids.
+  const realIds = new Map<string, string>();
+  for (const [temporaryId, name] of content.newGroups) {
+    const created = await tx.group.create({
+      data: {
+        name,
+        createdBy: userId,
+        createdDate: now,
+        lastSavedBy: userId,
+        lastSavedDate: now,
+      },
+      select: { id: true },
+    });
+    realIds.set(temporaryId, created.id);
+  }
+  const realId = (id: string) => realIds.get(id) ?? id;
+
+  for (const [owner, nodes] of content.rewrites) {
+    const ownerId = realId(owner);
+    if (!content.newGroups.has(owner)) {
+      await tx.groupItem.deleteMany({ where: { groupId: ownerId } });
+    }
+    if (nodes.length > 0) {
+      await tx.groupItem.createMany({
+        data: nodes.map((node, index) =>
+          node.type === "layer"
+            ? { groupId: ownerId, index, displayLayerId: node.id }
+            : { groupId: ownerId, index, childGroupId: realId(node.id) }
+        ),
+      });
+    }
+  }
+  return realId;
 }
 
 class LayerTreeService {
@@ -622,6 +761,7 @@ class LayerTreeService {
       /** Sent back with a save (see parseVersion). */
       version: number;
       mapExceptions: LayerTreeMapExceptions[];
+      groupAdditions: LayerTreeGroupAdditions[];
     }
   > {
     const context = await this.loadContext([groupId], []);
@@ -633,19 +773,26 @@ class LayerTreeService {
       context,
       []
     );
+    const inTree = [...context.groups.keys()];
 
-    const [{ treeVersion }, exceptions] = await Promise.all([
+    // So whoever edits the group sees which maps and groups show it with
+    // their own changes. Groups in the tree show theirs in it.
+    const [{ treeVersion }, exceptions, additions] = await Promise.all([
       prisma.group.findUniqueOrThrow({
         where: { id: groupId },
         select: { treeVersion: true },
       }),
-      // So whoever edits the group sees which maps deviate from it.
       prisma.mapGroupException.findMany({
-        where: {
-          groupId: { in: [...context.groups.keys()] },
-          map: { deletedAt: null },
-        },
+        where: { groupId: { in: inTree }, map: { deletedAt: null } },
         select: { mapName: true, kind: true },
+      }),
+      prisma.groupNestedItem.findMany({
+        where: {
+          groupId: { in: inTree },
+          ownerGroupId: { notIn: inTree },
+          owner: { deletedAt: null },
+        },
+        select: { ownerGroupId: true, owner: { select: { name: true } } },
       }),
     ]);
     const byMap = new Map<string, LayerTreeMapExceptions>();
@@ -655,11 +802,24 @@ class LayerTreeService {
       else entry.hidden += 1;
       byMap.set(mapName, entry);
     }
+    const byOwner = new Map<string, LayerTreeGroupAdditions>();
+    for (const { ownerGroupId, owner } of additions) {
+      const entry = byOwner.get(ownerGroupId) ?? {
+        groupId: ownerGroupId,
+        name: owner.name,
+        added: 0,
+      };
+      entry.added += 1;
+      byOwner.set(ownerGroupId, entry);
+    }
     return {
       ...root,
       version: treeVersion,
       mapExceptions: [...byMap.values()].sort((a, b) =>
         a.mapName.localeCompare(b.mapName, "sv")
+      ),
+      groupAdditions: [...byOwner.values()].sort((a, b) =>
+        a.name.localeCompare(b.name, "sv")
       ),
     };
   }
@@ -882,41 +1042,9 @@ class LayerTreeService {
     const items = parseWriteNodes(raw.items, "items");
     const nested = parseNested(raw.nested);
 
-    const rewrites = new Map<string, LayerTreeWriteNode[]>();
-    // Temporary id → name of the groups to create.
-    const newGroups = new Map<string, string>();
-    const collect = (owner: string, nodes: LayerTreeWriteNode[]) => {
-      const earlier = rewrites.get(owner);
-      if (earlier) {
-        if (signature(earlier) !== signature(nodes)) {
-          throw badRequest(
-            `Group "${owner}" appears more than once with different content.`
-          );
-        }
-        return;
-      }
-      assertNoDuplicates(owner, nodes);
-      rewrites.set(owner, nodes);
-      for (const node of nodes) {
-        if (node.type !== "group") continue;
-        if (node.items && !node.new) {
-          throw badRequest(
-            `Group "${node.id}" is linked here; edit its content on the group itself.`
-          );
-        }
-        if (node.new && node.name) {
-          const earlierName = newGroups.get(node.id);
-          if (earlierName !== undefined && earlierName !== node.name) {
-            throw badRequest(
-              `New group "${node.id}" is sent with two different names.`
-            );
-          }
-          newGroups.set(node.id, node.name);
-        }
-        if (node.items) collect(node.id, node.items);
-      }
-    };
-    collect(groupId, items);
+    const content = emptyContent();
+    const { rewrites, newGroups } = content;
+    collectContent(content, groupId, items);
     // Groups made in the editor right inside a linked group come with their
     // placement, and are created like the others.
     for (const entry of nested) {
@@ -925,7 +1053,7 @@ class LayerTreeService {
         throw badRequest(`New group "${entry.id}" is sent more than once.`);
       }
       newGroups.set(entry.id, entry.name ?? entry.id);
-      collect(entry.id, entry.items ?? []);
+      collectContent(content, entry.id, entry.items ?? []);
     }
 
     const groupIds = new Set<string>();
@@ -957,24 +1085,7 @@ class LayerTreeService {
     // The tree as it will be: nothing may end up inside itself, and what is
     // put in a linked group must land in a group in the owner's tree that
     // doesn't already show it.
-    const overrides: TreeOverrides = {
-      groups: new Map(
-        [...newGroups].map(([id, name]) => [id, { id, name }] as const)
-      ),
-      itemsByGroup: new Map(
-        [...rewrites].map(([owner, nodes]) => [
-          owner,
-          nodes.map((node) =>
-            node.type === "layer"
-              ? { displayLayerId: node.id, childGroupId: null }
-              : { displayLayerId: null, childGroupId: node.id }
-          ),
-        ])
-      ),
-      nestedByOwner: new Map(
-        [groupId, ...newGroups.keys()].map((owner) => [owner, new Map()])
-      ),
-    };
+    const overrides = toOverrides(content, [groupId, ...newGroups.keys()]);
     for (const entry of nested) {
       const byTarget = overrides.nestedByOwner.get(entry.ownerId);
       byTarget?.set(entry.groupId, [
@@ -1047,39 +1158,7 @@ class LayerTreeService {
         throw treeChanged(`group "${root.name}"`, version);
       }
 
-      // New groups first, so the items below can point at their real ids.
-      const realIds = new Map<string, string>();
-      for (const [temporaryId, name] of newGroups) {
-        const created = await tx.group.create({
-          data: {
-            name,
-            createdBy: userId,
-            createdDate: now,
-            lastSavedBy: userId,
-            lastSavedDate: now,
-          },
-          select: { id: true },
-        });
-        realIds.set(temporaryId, created.id);
-      }
-      const realId = (id: string) => realIds.get(id) ?? id;
-
-      for (const [owner, nodes] of rewrites) {
-        const ownerId = realId(owner);
-        const isNew = newGroups.has(owner);
-        if (!isNew) {
-          await tx.groupItem.deleteMany({ where: { groupId: ownerId } });
-        }
-        if (nodes.length > 0) {
-          await tx.groupItem.createMany({
-            data: nodes.map((node, index) =>
-              node.type === "layer"
-                ? { groupId: ownerId, index, displayLayerId: node.id }
-                : { groupId: ownerId, index, childGroupId: realId(node.id) }
-            ),
-          });
-        }
-      }
+      const realId = await writeContent(tx, content, userId, now);
 
       // What the group and its new groups put in the linked groups.
       await tx.groupNestedItem.deleteMany({ where: { ownerGroupId: groupId } });
@@ -1104,7 +1183,9 @@ class LayerTreeService {
 
   /**
    * Replaces the top level of the map's tree. The content of linked groups is
-   * never written from here; it is edited on the group itself.
+   * never written from here; it is edited on the group itself. Only groups
+   * sent with `new` carry their content; they are created in the same
+   * transaction, so nothing is created if the save fails.
    */
   async updateMapTree(mapName: string, body: unknown, userId?: string) {
     const map = await this.requireMap(mapName);
@@ -1118,13 +1199,6 @@ class LayerTreeService {
       "items"
     );
 
-    if (
-      items.some((node) => node.type === "group" && (node.items || node.new))
-    ) {
-      throw badRequest(
-        "A map's tree only places existing groups; create and edit groups on a group."
-      );
-    }
     // The client only shows layers inside groups.
     if (items.some((node) => node.type === "layer")) {
       throw badRequest(
@@ -1132,17 +1206,36 @@ class LayerTreeService {
       );
     }
     assertNoDuplicates(map.name, items);
+    const content = emptyContent();
+    const { rewrites, newGroups } = content;
+    collectContent(content, null, items);
 
     const groupIds = new Set<string>();
     const layerIds = new Set<string>();
     for (const node of items) {
-      (node.type === "layer" ? layerIds : groupIds).add(node.id);
+      if (!newGroups.has(node.id)) groupIds.add(node.id);
+    }
+    for (const nodes of rewrites.values()) {
+      for (const node of nodes) {
+        if (node.type === "layer") layerIds.add(node.id);
+        else if (!newGroups.has(node.id)) groupIds.add(node.id);
+      }
     }
     await this.assertExist(groupIds, layerIds);
 
     // Exceptions, settings, background and draw order are written only when
-    // sent.
+    // sent. Settings can be about a new group, by its temporary id.
     const extras = parseMapTreeExtras(body);
+    if (
+      extras.exceptions?.some(
+        (exception) =>
+          newGroups.has(exception.groupId) || newGroups.has(exception.id)
+      )
+    ) {
+      throw badRequest(
+        "Exceptions are about linked groups; a new group's content goes in its items."
+      );
+    }
     if (extras.exceptions?.length) {
       await this.assertExist(
         new Set(
@@ -1153,32 +1246,38 @@ class LayerTreeService {
         new Set()
       );
     }
-    // The map's tree as it will be shown, with the groups it puts in others
-    // (the stored exceptions, unless new ones are sent).
+    // The map's tree as it will be shown, with its new groups and the groups
+    // it puts in others (the stored exceptions, unless new ones are sent).
+    const topIds = items.map((node) => node.id);
     const context = await this.loadContext(
-      [...groupIds],
+      topIds,
       [],
       extras.exceptions
         ? exceptionsByGroup(extras.exceptions)
         : await loadExceptions(map.name),
-      undefined,
+      toOverrides(content, [...newGroups.keys()]),
       { usage: false }
     );
     const shown = this.toNodes(
-      [...groupIds].map((id) => ({ displayLayerId: null, childGroupId: id })),
+      topIds.map((id) => ({ displayLayerId: null, childGroupId: id })),
       context,
       []
     );
     // A cycle that stored exceptions make doesn't stop a save that leaves
     // them alone: the editor shows it, and the added group is taken out there.
+    // One through a group created here is this save's own, and is refused.
+    const madeHere = context.cycles.filter((chain) => {
+      const loop = chain.slice(chain.indexOf(chain[chain.length - 1]));
+      return (loop.length > 1 ? loop : chain).some((id) => newGroups.has(id));
+    });
     await validateMapTreeExtras(
       extras,
       shown,
-      extras.exceptions?.length || extras.settings ? context.cycles : [],
+      extras.exceptions?.length || extras.settings ? context.cycles : madeHere,
       (id) => context.groups.get(id)?.name ?? id
     );
-    const onMap = itemsOnMap(shown);
 
+    const now = new Date();
     await prisma.$transaction(async (tx) => {
       // The version check that counts (see parseVersion), before any write.
       const claimed = await tx.map.updateMany({
@@ -1186,26 +1285,27 @@ class LayerTreeService {
         data: {
           treeVersion: { increment: 1 },
           lastSavedBy: userId,
-          lastSavedDate: new Date(),
+          lastSavedDate: now,
         },
       });
       if (claimed.count === 0) {
         throw treeChanged(`map "${map.name}"`, version);
       }
 
+      const realId = await writeContent(tx, content, userId, now);
       await tx.mapTreeItem.deleteMany({ where: { mapName: map.name } });
       if (items.length > 0) {
         await tx.mapTreeItem.createMany({
-          data: items.map((node, index) =>
-            node.type === "layer"
-              ? { mapName: map.name, index, displayLayerId: node.id }
-              : { mapName: map.name, index, groupId: node.id }
-          ),
+          data: items.map((node, index) => ({
+            mapName: map.name,
+            index,
+            groupId: realId(node.id),
+          })),
         });
       }
-      await writeMapTreeExtras(tx, map, extras);
+      await writeMapTreeExtras(tx, map, withRealIds(extras, realId));
       // What was taken out of the tree takes its rows with it.
-      await pruneMapRows(tx, map.name, onMap);
+      await pruneMapRows(tx, map.name, itemsOnMap(shown, realId));
     });
 
     return await this.getMapTree(map.name);

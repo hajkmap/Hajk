@@ -22,7 +22,8 @@ export const LAYER_TREE_CATALOG_DRAG_TYPE = "LAYER_TREE_CATALOG_ITEM";
  * content is locked and edited on each group; only groups made in the editor
  * are filled here, until they are saved.
  * "map": place groups on a map's top level. Their content is locked, but the
- * map can add layers to them and hide their items, on this map only.
+ * map can add layers to them and hide their items, on this map only. Groups
+ * made in the editor are filled here, as in a group, until they are saved.
  */
 export type LayerTreeEditorMode = "group" | "map";
 
@@ -81,7 +82,7 @@ export interface LayerTreeDraft {
 }
 
 export type LayerTreePlaceProblem =
-  "notHere" | "duplicate" | "cycle" | "layerInMap";
+  "notHere" | "duplicate" | "cycle" | "layerInMap" | "newGroupInMap";
 
 export const isLayerTreeDraftFor = (
   draft: LayerTreeDraft | null,
@@ -110,26 +111,17 @@ export function createNewGroupNode(
   };
 }
 
-/** A layer added to a group on this map only. */
-export function createAddedLayerNode(
-  layer: { id: string; name: string },
-  parent: string,
-): LayerTreeFlatNode {
-  return {
-    id: newNodeId(),
-    parent,
-    text: layer.name,
-    droppable: false,
-    data: { kind: "layer", sourceId: layer.id, added: true },
-  };
-}
-
 /**
- * Map mode: a group the map puts in another group is the map's own addition
- * there; on the top level it is a plain placement. Layers always lie in groups.
+ * Map mode: what the map puts in a linked group is its own addition there;
+ * on the top level, or in a group made in the editor, it is plain content.
+ * Layers always lie in groups.
  */
-export function asPlacedInMap(node: LayerTreeFlatNode): LayerTreeFlatNode {
-  const added = node.parent !== LAYER_TREE_ROOT_ID;
+export function asPlacedInMap(
+  node: LayerTreeFlatNode,
+  nodes: LayerTreeFlatNode[],
+): LayerTreeFlatNode {
+  const parent = nodes.find((other) => other.id === node.parent);
+  const added = node.parent !== LAYER_TREE_ROOT_ID && !parent?.data.isNew;
   return Boolean(node.data.added) === added
     ? node
     : { ...node, data: { ...node.data, added: added || undefined } };
@@ -174,7 +166,7 @@ export function asPlaced(
   rootGroupId?: string,
 ): LayerTreeFlatNode {
   return mode === "map"
-    ? asPlacedInMap(node)
+    ? asPlacedInMap(node, nodes)
     : asPlacedInGroup(node, nodes, rootGroupId ?? "");
 }
 
@@ -362,8 +354,9 @@ export function toWriteNodes(
 }
 
 /**
- * Map mode: the map's exceptions to its groups. An added layer remembers what
- * it comes after, so it keeps its place when the group changes.
+ * Map mode: the map's exceptions to its linked groups (a new group's content
+ * is its own). An added layer remembers what it comes after, so it keeps its
+ * place when the group changes.
  */
 export function toMapExceptions(
   nodes: LayerTreeFlatNode[],
@@ -372,7 +365,7 @@ export function toMapExceptions(
   const exceptions: MapGroupException[] = [];
   for (const [parentId, siblings] of buildChildren(nodes)) {
     const parent = byId.get(parentId);
-    if (!parent || !isGroup(parent)) continue;
+    if (!parent || !isGroup(parent) || parent.data.isNew) continue;
     siblings.forEach((node, index) => {
       const { kind, sourceId, added, hidden } = node.data;
       if (added) {
@@ -411,11 +404,10 @@ export function isMovable(
   mode: LayerTreeEditorMode,
   rootGroupId?: string,
 ): boolean {
-  if (node.parent === LAYER_TREE_ROOT_ID) return true;
+  if (node.parent === LAYER_TREE_ROOT_ID || parent?.data.isNew) return true;
   return mode === "map"
     ? Boolean(node.data.added)
-    : Boolean(parent?.data.isNew) ||
-        placedHere(node.data.placedBy, rootGroupId);
+    : placedHere(node.data.placedBy, rootGroupId);
 }
 
 /**
@@ -737,6 +729,15 @@ export function placeProblem({
     // Nothing goes in a hidden group, or in a group inside one.
     if (!parent?.droppable || hiddenGroupsAbove(nodes).has(parentId)) {
       return "notHere";
+    }
+    // In a map, a group made in the editor stays on the top level or in
+    // another new group until it is saved: in a linked group it would be an
+    // addition on this map, and those are made of saved groups.
+    const movingNode = movingId
+      ? nodes.find((node) => node.id === movingId)
+      : undefined;
+    if (mode === "map" && movingNode?.data.isNew && !parent.data.isNew) {
+      return "newGroupInMap";
     }
   }
 

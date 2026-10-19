@@ -44,11 +44,22 @@ export interface LayerTreeMapExceptions {
   hidden: number;
 }
 
+/**
+ * Groups outside a group's tree that put layers or groups in it (or in a
+ * group inside it) in their own trees.
+ */
+export interface LayerTreeGroupAdditions {
+  groupId: string;
+  name: string;
+  added: number;
+}
+
 /** A group's tree always starts with the group itself. */
 export type LayerTreeGroupNode = Extract<LayerTreeNode, { type: "group" }> & {
   /** Sent back with a save, which is refused if the tree was saved since. */
   version: number;
   mapExceptions?: LayerTreeMapExceptions[];
+  groupAdditions?: LayerTreeGroupAdditions[];
 };
 
 /**
@@ -165,6 +176,7 @@ export interface MapLayerTree {
 export interface MapLayerTreeWrite {
   /** The version the tree was loaded with. */
   version: number;
+  /** Groups; new ones carry their content and are created on save. */
   items: LayerTreeWriteNode[];
   exceptions: MapGroupException[];
   settings?: MapTreeSettings;

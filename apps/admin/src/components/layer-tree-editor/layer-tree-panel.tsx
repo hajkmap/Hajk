@@ -18,7 +18,6 @@ import { EDITOR_COLUMN } from "./layer-tree-layout";
 import {
   asPlaced,
   countLayers,
-  createAddedLayerNode,
   createNewGroupNode,
   descendantIds,
   hiddenGroupsAbove,
@@ -28,6 +27,7 @@ import {
   LAYER_TREE_ROOT_ID,
   moveNodeTo,
   placedFrom,
+  placedHere,
   placeProblem,
   removeNode,
   toFlatNodes,
@@ -59,6 +59,8 @@ interface LayerTreePanelProps {
   mode: LayerTreeEditorMode;
   /** The group being edited, in group mode. */
   rootGroupId?: string;
+  /** Group mode: the name of the group being edited. */
+  rootGroupName?: string;
   nodes: LayerTreeFlatNode[];
   /** The group or map shown; another one starts with the default open groups. */
   ownerKey: string;
@@ -88,6 +90,7 @@ interface LayerTreePanelProps {
 export default function LayerTreePanel({
   mode,
   rootGroupId,
+  rootGroupName,
   nodes,
   ownerKey,
   isSaving,
@@ -107,8 +110,9 @@ export default function LayerTreePanel({
   const getDetails = useItemDetails();
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  // Where the "new group" dialog adds the group; null while it's closed.
-  const [newGroupParent, setNewGroupParent] = useState<string | null>(null);
+  // The "new group" dialog. The group goes last on the top level, and from
+  // there wherever it is dragged.
+  const [newGroupOpen, setNewGroupOpen] = useState(false);
 
   // Inserting a catalog group waits for its content, so it reads the nodes
   // as they are when the content arrives.
@@ -186,18 +190,13 @@ export default function LayerTreePanel({
   ): Promise<boolean> => {
     let subtree: LayerTreeFlatNode[];
     if (item.kind === "layer") {
-      // In a map, a layer dropped in a group is an addition on this map; in a
-      // group, one dropped in a linked group is this tree's own there.
-      subtree =
-        mode === "map"
-          ? [createAddedLayerNode(item, parentId)]
-          : toFlatNodes(
-              [{ type: "layer", id: item.id, name: item.name }],
-              parentId,
-              mode,
-            ).map((node) =>
-              asPlaced(node, nodesRef.current, mode, rootGroupId),
-            );
+      // In a map, a layer dropped in a linked group is an addition on this
+      // map; in a group, this tree's own there. In a new group it is content.
+      subtree = toFlatNodes(
+        [{ type: "layer", id: item.id, name: item.name }],
+        parentId,
+        mode,
+      ).map((node) => asPlaced(node, nodesRef.current, mode, rootGroupId));
     } else {
       try {
         const group = await queryClient.fetchQuery({
@@ -254,23 +253,14 @@ export default function LayerTreePanel({
   };
 
   const addNewGroup = (name: string) => {
-    const parentId = newGroupParent ?? LAYER_TREE_ROOT_ID;
-    setNewGroupParent(null);
+    setNewGroupOpen(false);
     commit(
       insertNodes(
         nodesRef.current,
-        [
-          asPlaced(
-            createNewGroupNode(name, parentId),
-            nodesRef.current,
-            mode,
-            rootGroupId,
-          ),
-        ],
-        parentId,
+        [createNewGroupNode(name, LAYER_TREE_ROOT_ID)],
+        LAYER_TREE_ROOT_ID,
       ),
     );
-    openNodes([parentId]);
   };
 
   // Linked groups' own content is locked; it is edited on each group. What
@@ -423,11 +413,7 @@ export default function LayerTreePanel({
 
   const toolbar = (
     <LayerTreeToolbar
-      onNewGroup={
-        mode === "group"
-          ? () => setNewGroupParent(LAYER_TREE_ROOT_ID)
-          : undefined
-      }
+      onNewGroup={() => setNewGroupOpen(true)}
       search={search}
       onSearchChange={setSearch}
       showSearch={showSearch}
@@ -511,8 +497,9 @@ export default function LayerTreePanel({
           )}
           render={(node, { depth, isOpen, hasChild, isDragging, onToggle }) => {
             const flatNode = node as LayerTreeFlatNode;
-            const { kind, sourceId, isNew, added } = flatNode.data;
+            const { kind, sourceId, isNew, added, placedBy } = flatNode.data;
             const topLevel = flatNode.parent === LAYER_TREE_ROOT_ID;
+            const parent = byId.get(flatNode.parent);
             const editable = movable(flatNode);
             const details: LayerTreeItemDetails = isNew
               ? { lines: [t("layerTree.newGroupHint")], context: "" }
@@ -534,6 +521,17 @@ export default function LayerTreePanel({
                   fixed={!editable || !canEdit || click.active}
                   locked={kind === "group" && !isNew && editable}
                   from={editable ? undefined : placedFrom(flatNode, nodes)}
+                  // What this tree put in a linked group, as an exception,
+                  // and whose: the group edited here, or a new group in it.
+                  exceptionIn={
+                    mode === "group" && placedHere(placedBy, rootGroupId)
+                      ? {
+                          group:
+                            placedFrom(flatNode, nodes) ?? rootGroupName ?? "",
+                          target: parent?.text ?? "",
+                        }
+                      : undefined
+                  }
                   misplaced={mode === "map" && kind === "layer" && topLevel}
                   layerCount={layerCounts.get(flatNode.id)}
                   onToggle={onToggle}
@@ -547,13 +545,14 @@ export default function LayerTreePanel({
                       ? () => void navigate(`/groups/${sourceId}`)
                       : undefined
                   }
-                  onNewGroup={
-                    mode === "group" && flatNode.droppable && !isSaving
-                      ? () => setNewGroupParent(flatNode.id)
-                      : undefined
-                  }
+                  // A map hides what a linked group holds; what lies in a
+                  // new group is its own, and is removed instead.
                   onToggleHidden={
-                    mode === "map" && !topLevel && !added && !isSaving
+                    mode === "map" &&
+                    !topLevel &&
+                    !added &&
+                    !parent?.data.isNew &&
+                    !isSaving
                       ? () => commit(toggleHidden(nodes, flatNode.id))
                       : undefined
                   }
@@ -607,8 +606,8 @@ export default function LayerTreePanel({
         </Box>
       </LayerTreeEditorWindow>
       <LayerTreeNewGroupDialog
-        open={newGroupParent !== null}
-        onClose={() => setNewGroupParent(null)}
+        open={newGroupOpen}
+        onClose={() => setNewGroupOpen(false)}
         onAdd={addNewGroup}
       />
       {settingsDialog}

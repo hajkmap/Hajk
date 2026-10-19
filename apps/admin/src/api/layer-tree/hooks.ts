@@ -10,7 +10,7 @@ import { GroupTreeWrite, MapLayerTreeWrite } from "./types";
 
 // Groups are linked into other groups and maps, so a save can change any
 // layer tree that uses them. Of the ["groups"] queries only the list is
-// refreshed (a group save can create groups): refetching a single group would
+// refreshed (both saves can create groups): refetching a single group would
 // reset the unsaved fields on its settings page.
 
 /** Shared by both saves, so an editor can tell when a save is running. */
@@ -78,6 +78,7 @@ export const useUpdateMapLayerTree = () => {
       savedHere.set(`map:${mapName}`, tree.version);
       queryClient.setQueryData(["layerTree", "map", mapName], tree);
       void queryClient.invalidateQueries({ queryKey: ["layerTree"] });
+      void queryClient.invalidateQueries({ queryKey: ["groups"], exact: true });
     },
   });
 };

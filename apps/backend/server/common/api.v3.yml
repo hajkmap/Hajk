@@ -279,7 +279,7 @@ paths:
           schema:
             type: string
       requestBody:
-        description: Ordered top-level groups (layers go in groups, since the client only shows layers inside groups). Groups are linked; their content is edited on the group. Optional, each written only when sent - exceptions (add a layer or a group to a group on this map only, or hide one of its own items), settings, background and drawOrder. version is the tree's version as GET gave it; the save is refused if the tree has been saved since.
+        description: Ordered top-level groups (layers go in groups, since the client only shows layers inside groups). Groups are linked and sent without items; their content is edited on the group. A group sent with new set to true, a name and its items is created on save with that content (layers, linked groups and new groups); its id is then a temporary id, which the settings can use. Optional, each written only when sent - exceptions (add a layer or a group to a linked group on this map only, or hide one of its own items), settings, background and drawOrder. version is the tree's version as GET gave it; the save is refused if the tree has been saved since.
         required: true
         content:
           application/json:
@@ -301,6 +301,15 @@ paths:
                         enum: [layer, group]
                       id:
                         type: string
+                      new:
+                        type: boolean
+                      name:
+                        type: string
+                      items:
+                        type: array
+                        items:
+                          type: object
+                          additionalProperties: true
                     required:
                       - type
                       - id
@@ -491,7 +500,7 @@ paths:
             type: string
       responses:
         200:
-          description: The group with its layers and linked child groups, and the tree's version, which a save sends back
+          description: The group with its layers and linked child groups, the tree's version (which a save sends back), the maps with their own exceptions to the group or a group in it (mapExceptions), and the groups outside its tree that put layers or groups in it in their own trees (groupAdditions)
         404:
           description: Requested group was not found
     put:
