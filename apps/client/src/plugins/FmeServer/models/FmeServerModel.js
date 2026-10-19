@@ -48,59 +48,27 @@ class FmeServerModel {
     return this.#makeRestApiOrder(product, productParameters);
   };
 
-  // Creates a string to be used for the data-download request
-  // Built upon the userEmail and the parameterValues.
+  // Creates the application/x-www-form-urlencoded body for a data-download
+  // order. Values are encoded so &, +, = and % survive the form parser.
   #createRequestUrlString = (product, productParameters, userEmail) => {
-    // We're gonna need some base information in the request string, let's add
-    // that first.
-    let requestString = `opt_servicemode=async&opt_responseformat=json&opt_requesteremail=${userEmail}&`;
-    // Let's check wether their will be a geometry to send
+    const params = new URLSearchParams();
+    params.set("opt_servicemode", "async");
+    params.set("opt_responseformat", "json");
+    params.set("opt_requesteremail", userEmail);
     if (!this.noGeomAttributeSupplied(product)) {
-      // If there is, we get the geometries as GeoJSON
       const geoJson = this.#mapViewModel.getAllFeaturesAsGeoJson();
-      // And add it to the request string.
-      requestString += `${product.geoAttribute}=${geoJson}&`;
+      params.set(product.geoAttribute, geoJson);
     }
+    // Append, don't set. productParameters still includes the geometry
+    // parameter, which is sent again after the GeoJSON.
     productParameters.forEach((parameter) => {
-      requestString += `${this.#getParameterNameValueString(parameter)}&`;
+      const value = this.#getParameterValue(parameter);
+      params.append(
+        parameter.name,
+        Array.isArray(value) ? value.join(",") : value
+      );
     });
-    // Then we return the string!
-    return requestString;
-  };
-
-  // Returns a name value string for the supplied parameter
-  #getParameterNameValueString = (parameter) => {
-    switch (parameter.type) {
-      case "CHOICE":
-      case "LOOKUP_CHOICE":
-      case "STRING":
-      case "TEXT":
-      case "PASSWORD":
-        // All above should be clean strings... TODO: Tests!
-        return `${parameter.name}=${
-          parameter.value ?? parameter.defaultValue ?? ""
-        }`;
-      case "LISTBOX":
-      case "LOOKUP_LISTBOX": {
-        // These should be array of strings...
-        const selectedArray = parameter.value ?? parameter.defaultValue ?? [];
-        // If the array is empty, we can return an empty string
-        if (selectedArray.length === 0) {
-          return `${parameter.name}=`;
-        }
-        // Otherwise we concatenate a string with all selected values.
-        const urlString = `${parameter.name}=${selectedArray.join(",")}`;
-        return urlString;
-      }
-      case "RANGE_SLIDER": {
-        // This one expects a number
-        const { value } = this.getRangeSliderValueAndStep(parameter);
-        return `${parameter.name}=${value}`;
-      }
-      default:
-        // Let's default to a string.
-        return parameter.value ?? parameter.defaultValue ?? "";
-    }
+    return params.toString();
   };
 
   // Checks wether the geoAttribute contains a valid value.

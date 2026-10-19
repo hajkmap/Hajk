@@ -58,6 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Client: FME Server - Encode the data-download order body so attribute values and emails containing &, +, = or % are no longer truncated or altered. [#1886](https://github.com/hajkmap/Hajk/issues/1886)
 - Client: DocumentHandler - On mobile, chapter jumps scroll the bottom sheet so the chapter lines up. [#1933](https://github.com/hajkmap/Hajk/issues/1933)
 - Client: DocumentHandler - The scroll-to-top button stays half transparent until hover or focus, and document text can scroll clear of it. [#1933](https://github.com/hajkmap/Hajk/issues/1933)
 - Client: Measurer - Measurements added with "Välj på kartan" get the same delete-hover highlight as drawn lines, polygons, and circles. [#1923](https://github.com/hajkmap/Hajk/issues/1923)
