@@ -108,5 +108,18 @@ class ServicesController {
     await ServicesService.deleteService(req.params.id);
     res.status(HttpStatusCodes.NO_CONTENT).send();
   });
+
+  getDeletedServices = asyncHandler(async (_: Request, res: Response) => {
+    const services = await ServicesService.getDeletedServices();
+    res.status(HttpStatusCodes.OK).json({ count: services.length, services });
+  });
+
+  restoreService = asyncHandler(async (req: Request, res: Response) => {
+    const service = await ServicesService.restoreService(
+      req.params.id,
+      req.user?.id
+    );
+    res.status(HttpStatusCodes.OK).json(service);
+  });
 }
 export default new ServicesController();

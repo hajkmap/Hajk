@@ -30,6 +30,8 @@ export interface Service {
   } | null;
   status?: SERVICE_STATUS;
   lastChecked?: string;
+  deletedAt?: string | null;
+  layerCount?: number;
 }
 
 export interface Projection {

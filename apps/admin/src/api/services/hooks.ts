@@ -7,6 +7,7 @@ import {
 import {
   getServices,
   getServiceById,
+  getDeletedServices,
   getLayersByServiceId,
   getLayerCountByServiceId,
   getMapsByServiceId,
@@ -14,6 +15,7 @@ import {
   createService,
   updateService,
   deleteService,
+  restoreService,
   getAllProjections,
   checkServiceHealth,
 } from "./requests";
@@ -56,6 +58,13 @@ export const useServices = (): UseQueryResult<Service[]> => {
   return useQuery({
     queryKey: ["services"],
     queryFn: () => getServices(),
+  });
+};
+
+export const useDeletedServices = (): UseQueryResult<Service[]> => {
+  return useQuery({
+    queryKey: ["deletedServices"],
+    queryFn: getDeletedServices,
   });
 };
 
@@ -168,6 +177,7 @@ export const useDeleteService = () => {
     mutationFn: (serviceId: string) => deleteService(serviceId),
     onSuccess: (_data, serviceId) => {
       void queryClient.invalidateQueries({ queryKey: ["services"] });
+      void queryClient.invalidateQueries({ queryKey: ["deletedServices"] });
       void queryClient.invalidateQueries({ queryKey: ["services", serviceId] });
       void queryClient.invalidateQueries({
         queryKey: ["services", "layers", serviceId],
@@ -181,6 +191,29 @@ export const useDeleteService = () => {
       void queryClient.invalidateQueries({
         queryKey: ["groupsByServiceId", serviceId],
       });
+      void queryClient.invalidateQueries({ queryKey: ["layers"] });
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+};
+
+export const useRestoreService = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (serviceId: string) => restoreService(serviceId),
+    onSuccess: (_data, serviceId) => {
+      void queryClient.invalidateQueries({ queryKey: ["deletedServices"] });
+      void queryClient.invalidateQueries({ queryKey: ["services"] });
+      void queryClient.invalidateQueries({ queryKey: ["services", serviceId] });
+      void queryClient.invalidateQueries({
+        queryKey: ["services", "layers", serviceId],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["services", "layers", serviceId, "count"],
+      });
+      void queryClient.invalidateQueries({ queryKey: ["layers"] });
     },
     onError: (error) => {
       console.error(error);
