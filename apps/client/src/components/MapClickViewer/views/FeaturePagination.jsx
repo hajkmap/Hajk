@@ -9,10 +9,12 @@ import {
   Stack,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import { useTranslation } from "react-i18next";
 
 import { functionalOk } from "../../../models/Cookie";
 
 const FeaturePagination = (props) => {
+  const { t } = useTranslation();
   const {
     paginationCollection, // An Array of feature IDs
     selectedFeatureId, // ID of currently selected feature
@@ -97,7 +99,7 @@ const FeaturePagination = (props) => {
           <Alert
             action={
               <IconButton
-                aria-label="close"
+                aria-label={t("common.close")}
                 color="inherit"
                 size="small"
                 onClick={() => {
@@ -111,8 +113,7 @@ const FeaturePagination = (props) => {
             }
             sx={{ mb: 2 }}
           >
-            Tips: du kan bläddra bland resultaten med knapparna &#8592; och
-            &#8594; på tangentbordet
+            {t("mapClickViewer.keyboardHint")}
           </Alert>
         </Collapse>
       )}

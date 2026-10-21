@@ -14,6 +14,7 @@ import ArrowLeftIcon from "@mui/icons-material/ArrowLeft";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import { styled } from "@mui/material/styles";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 const StyledTableCell = styled(TableCell)(() => ({
   paddingLeft: 0,
@@ -184,7 +185,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
           <HajkToolTip
             title={
               !buttonLeftDisabled
-                ? "Visa föregående objekt i resultatlistan"
+                ? i18n.t("search.results.showPreviousFeature")
                 : ""
             }
           >
@@ -196,7 +197,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
                 onClick={() =>
                   this.handleTogglerPressed(currentFeatureIndex - 1)
                 }
-                aria-label="show-previous-feature"
+                aria-label={i18n.t("search.results.showPreviousFeature")}
                 id="step-left"
               >
                 <ArrowLeftIcon
@@ -209,13 +210,18 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
         </Grid>
         <Grid>
           <Typography variant="body2" sx={{ px: 1 }}>
-            {currentFeatureIndex + 1} av {numFeaturesInCollection}
+            {i18n.t("common.xOfY", {
+              current: currentFeatureIndex + 1,
+              total: numFeaturesInCollection,
+            })}
           </Typography>
         </Grid>
         <Grid>
           <HajkToolTip
             title={
-              !buttonRightDisabled ? "Visa nästa objekt i resultatlistan" : ""
+              !buttonRightDisabled
+                ? i18n.t("search.results.showNextFeature")
+                : ""
             }
           >
             <span>
@@ -226,7 +232,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
                 onClick={() =>
                   this.handleTogglerPressed(currentFeatureIndex + 1)
                 }
-                aria-label="show-next-feature"
+                aria-label={i18n.t("search.results.showNextFeature")}
                 id="step-right"
               >
                 <ArrowRightIcon

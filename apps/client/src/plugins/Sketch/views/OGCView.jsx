@@ -9,6 +9,8 @@ import {
 } from "@mui/material";
 import Information from "../components/Information";
 import TableChartIcon from "@mui/icons-material/TableChart";
+import { NO_SERVICE_LABEL } from "../../../buses/editBus";
+import i18n from "src/i18n";
 
 const OGCView = ({
   id,
@@ -17,7 +19,7 @@ const OGCView = ({
   handleOgcSourceChange,
   handleFocus,
   focusKey = "ogc",
-  labelText = "Välj redigerbart lager att spara till",
+  labelText = i18n.t("sketch.ogc.chooseLayer"),
   uiDisabled,
   serviceList = [],
   globalObserver,
@@ -35,7 +37,7 @@ const OGCView = ({
 
   const options = React.useMemo(() => {
     return [
-      { id: "NONE_ID", label: "Ingen" },
+      { id: "NONE_ID", label: NO_SERVICE_LABEL },
       ...serviceList.map((s) => ({
         id: s.id,
         label: s.title || s.id,
@@ -74,7 +76,9 @@ const OGCView = ({
           >
             {options.map((option) => (
               <MenuItem value={option.label} key={option.id}>
-                {option.label}
+                {option.id === "NONE_ID"
+                  ? i18n.t("editing.noService")
+                  : option.label}
               </MenuItem>
             ))}
           </Select>
@@ -90,7 +94,7 @@ const OGCView = ({
           onClick={handleOpenAttributeEditor}
           disabled={uiDisabled}
         >
-          Öppna Attributredigerare
+          {i18n.t("sketch.ogc.openAttributeEditor")}
         </Button>
       </Grid>
     </Grid>

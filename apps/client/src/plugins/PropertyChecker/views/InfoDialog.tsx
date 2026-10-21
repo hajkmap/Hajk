@@ -9,6 +9,9 @@ import {
   Typography,
 } from "@mui/material";
 
+import { Trans } from "react-i18next";
+import i18n from "src/i18n";
+
 import type { InfoDialogProps } from "../types";
 
 function InfoDialog({ localObserver }: InfoDialogProps) {
@@ -41,52 +44,47 @@ function InfoDialog({ localObserver }: InfoDialogProps) {
         e.stopPropagation();
       }}
     >
-      <DialogTitle>Hjälp</DialogTitle>
+      <DialogTitle>{i18n.t("common.help")}</DialogTitle>
       <DialogContent>
-        <Typography variant="subtitle1">Allmänt</Typography>
+        <Typography variant="subtitle1">
+          {i18n.t("propertyChecker.help.generalTitle")}
+        </Typography>
         <DialogContentText>
-          Syftet med det här verktyget är att underlätta flödet vid arbete som
-          rör fastighetsfrågor.
+          {i18n.t("propertyChecker.help.general")}
         </DialogContentText>
       </DialogContent>
       <DialogContent>
-        <Typography variant="subtitle1">Huvudknapp</Typography>
+        <Typography variant="subtitle1">
+          {i18n.t("propertyChecker.help.mainButtonTitle")}
+        </Typography>
         <DialogContentText>
-          Överst i verktyget finns en knapp, så kallad <i>Huvudknapp</i>. Med
-          hjälp av den kan du aktivera ett läge som låter dig klicka i kartan
-          för att välja fastighet av intresse. <br />
-          <br />
-          Efter ett genomfört klick ändras denna knapp till en rensa-knapp. Du
-          klickar på den för att nollställa verktyget och välja en annan
-          fastighet.
+          <Trans
+            i18nKey="propertyChecker.help.mainButton"
+            components={{ i: <i />, br: <br /> }}
+          />
         </DialogContentText>
       </DialogContent>
       <DialogContent>
-        <Typography variant="subtitle1">Snabblager</Typography>
+        <Typography variant="subtitle1">
+          {i18n.t("propertyChecker.help.quickLayersTitle")}
+        </Typography>
         <DialogContentText>
-          Direkt under Huvudknappen hittar du tre snabbknappar. Där hittar
-          snabbval för att synliggöra lagren Byggnader, Fastighetsinformation
-          samt Detaljplaner.
+          {i18n.t("propertyChecker.help.quickLayers")}
         </DialogContentText>
       </DialogContent>
       <DialogContent>
-        <Typography variant="subtitle1">Listvy</Typography>
+        <Typography variant="subtitle1">
+          {i18n.t("propertyChecker.help.listViewTitle")}
+        </Typography>
         <DialogContentText>
-          När du klickar i kartan görs en sökning mot tjänsterna.
-          <b>
-            Sökningen tittar på fastigheten som ditt klick inträffade på och
-            undersöker vilka lager som berör fastigheten.
-          </b>
-          <br />
-          <br />
-          Resultaten presenteras i en listvy. Om du klickar i närheten av en
-          fastighetsgräns kan det hända att du får resultatet för flera
-          fastigheter. Om det finns flera val, tänk då på att notera vilken
-          fastighet du valt att granska mot i listan.
+          <Trans
+            i18nKey="propertyChecker.help.listView"
+            components={{ b: <b />, br: <br /> }}
+          />
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Stäng</Button>
+        <Button onClick={handleClose}>{i18n.t("common.close")}</Button>
       </DialogActions>
     </BaseDialog>
   );

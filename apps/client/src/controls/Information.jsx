@@ -7,6 +7,7 @@ import InfoIcon from "@mui/icons-material/Info";
 import Dialog from "../components/Dialog/Dialog";
 import { functionalOk as functionalCookieOk } from "../models/Cookie";
 import ControlButton from "components/ControlButton";
+import { configText } from "src/i18n";
 
 class Information extends React.PureComponent {
   static propTypes = {
@@ -17,7 +18,7 @@ class Information extends React.PureComponent {
     super(props);
     this.type = "Information"; // Special case - plugins that don't use BaseWindowPlugin must specify .type here
     this.options = props.options;
-    this.title = this.options.title || "Om kartan";
+    this.title = configText("controls.informationTitle", this.options.title);
     this.state = {
       dialogOpen: false,
     };

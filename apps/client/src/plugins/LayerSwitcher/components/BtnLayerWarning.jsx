@@ -1,11 +1,12 @@
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import HajkToolTip from "components/HajkToolTip";
 import LsIconButton from "./LsIconButton";
+import i18n from "src/i18n";
 
 const BtnLayerWarning = ({ ...props }) => (
   <HajkToolTip
     disableInteractive
-    title="Lagret kunde inte laddas in. Kartservern svarar inte."
+    title={i18n.t("layerSwitcher.layerLoadError")}
   >
     <LsIconButton
       sx={(theme) => ({

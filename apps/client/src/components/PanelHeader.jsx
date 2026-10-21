@@ -7,6 +7,7 @@ import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import AspectRatioIcon from "@mui/icons-material/AspectRatio";
 import { Typography, IconButton, Box } from "@mui/material";
 import { visuallyHidden } from "@mui/utils";
+import i18n from "src/i18n";
 
 const StyledHeader = styled("header")(({ theme }) => ({
   padding: `${theme.spacing(1)} ${theme.spacing(2)}`,
@@ -85,28 +86,28 @@ class PanelHeader extends Component {
           {mode !== "maximized" && // If window isn't in fit screen mode currently…
             (mode === "minimized" ? ( // … but it's minimized…
               <IconButton size="small" onClick={this.props.onMaximize}>
-                <span style={visuallyHidden}>Maximera fönster</span>
+                <span style={visuallyHidden}>{i18n.t("window.maximize")}</span>
                 <FullscreenIcon // …render the maximize icon.
                 />
               </IconButton>
             ) : (
               // If it's already in "window" mode though, render the minimize icon.
               <IconButton size="small" onClick={this.props.onMinimize}>
-                <span style={visuallyHidden}>Minimera fönster</span>
+                <span style={visuallyHidden}>{i18n.t("window.minimize")}</span>
                 <FullscreenExitIcon />
               </IconButton>
             ))}
           <div style={{ display: { xs: "none", md: "block" } }}>
             {allowMaximizedWindow && ( // If we're not on mobile and config allows fit-to-screen…
               <IconButton size="small" onClick={this.props.onMaximize}>
-                <span style={visuallyHidden}>Maximera fönster</span>
+                <span style={visuallyHidden}>{i18n.t("window.maximize")}</span>
                 <AspectRatioIcon // … render the action button. Note: it will remain the same…
                 />
               </IconButton>
             )}
           </div>
           <IconButton size="small" onClick={this.props.onClose}>
-            <span style={visuallyHidden}>Stäng fönster</span>
+            <span style={visuallyHidden}>{i18n.t("window.close")}</span>
             <CloseIcon />
           </IconButton>
         </Box>

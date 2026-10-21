@@ -5,6 +5,7 @@ import { Paper, Slider } from "@mui/material";
 
 import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 const StyledAccordionSummary = styled(AccordionSummary)(() => ({
   minHeight: 35,
@@ -35,17 +36,17 @@ const StrokeSizeSlider = ({ radius, handleRadiusChange }) => {
           value={radius}
           onChange={handleRadiusChange}
           marks={[
-            { value: 2, label: "Liten" },
+            { value: 2, label: i18n.t("sketch.style.small") },
             { value: 4 },
             { value: 6 },
             { value: 8 },
             { value: 10 },
-            { value: 12, label: "Mellan" },
+            { value: 12, label: i18n.t("sketch.style.medium") },
             { value: 14 },
             { value: 16 },
             { value: 18 },
             { value: 20 },
-            { value: 22, label: "Stor" },
+            { value: 22, label: i18n.t("sketch.style.large") },
           ]}
           step={null}
         />
@@ -83,7 +84,9 @@ const FeaturePointSizeAccordion = (props) => {
   return (
     <Accordion size="small" style={{ marginBottom: 8 }}>
       <HajkToolTip
-        title={`Klicka här för att ändra ${props.title.toLowerCase()}.`}
+        title={i18n.t("sketch.style.changeHint", {
+          name: props.title.toLowerCase(),
+        })}
       >
         <StyledAccordionSummary>
           <AccordionSummaryContents

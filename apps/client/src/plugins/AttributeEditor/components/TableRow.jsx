@@ -1,4 +1,5 @@
 import React from "react";
+import i18n from "src/i18n";
 import {
   renderTableCellEditor,
   renderTableCellDisplay,
@@ -73,7 +74,7 @@ const TableRow = ({
         if (tableSelectedIds.size > 1) openSelectedInFormFromTable();
         else openInFormFromTable(row.id);
       }}
-      title="Klick: markera • Dubbelklick: öppna i formulär"
+      title={i18n.t("attributeEditor.table.rowTooltip")}
     >
       {/* react-hooks/refs: every caretStoreRef/editorNode access below lives
           inside ref callbacks and event handlers (which run after render) —
@@ -309,7 +310,11 @@ const TableRow = ({
               e.stopPropagation();
               beginEdit();
             }}
-            title={editable ? "Dubbelklicka för att redigera" : "Ej redigerbar"}
+            title={
+              editable
+                ? i18n.t("attributeEditor.table.doubleClickToEdit")
+                : i18n.t("attributeEditor.table.notEditable")
+            }
           >
             {isEditing
               ? renderTableCellEditor({
@@ -321,7 +326,7 @@ const TableRow = ({
                   useTextarea,
                 })
               : isPlaceholder
-                ? "#saknas"
+                ? i18n.t("attributeEditor.missingValue")
                 : renderTableCellDisplay({
                     meta,
                     value: effectiveValue,

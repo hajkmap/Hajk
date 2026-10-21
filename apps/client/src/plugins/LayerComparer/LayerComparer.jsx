@@ -19,6 +19,8 @@ import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { useSnackbar } from "notistack";
+import { Trans } from "react-i18next";
+import i18n, { configText } from "src/i18n";
 
 import { StyledControlButton } from "components/ControlButton";
 import HajkToolTip from "components/HajkToolTip";
@@ -55,10 +57,10 @@ const ComparerSnackbar = forwardRef(function ComparerSnackbar(
       }}
     >
       <Button variant="contained" color="primary" onClick={onShowWindow}>
-        Ändra val
+        {i18n.t("layerComparer.changeSelection")}
       </Button>
       <Button variant="contained" color="error" onClick={onAbort}>
-        Sluta jämföra
+        {i18n.t("layerComparer.stopComparing")}
       </Button>
     </Paper>
   );
@@ -363,36 +365,44 @@ const LayerComparer = (props) => {
     }
   };
 
-  const dropdown1Label = isSpy ? "Bakgrundslager" : "Vänster sida";
-  const dropdown2Label = isSpy ? "Titthålslager" : "Höger sida";
+  const dropdown1Label = isSpy
+    ? i18n.t("layerComparer.backgroundLayer")
+    : i18n.t("layerComparer.leftSide");
+  const dropdown2Label = isSpy
+    ? i18n.t("layerComparer.spyGlassLayer")
+    : i18n.t("layerComparer.rightSide");
 
-  const helpContent = isSpy ? (
-    <>
-      Välj vilket lager som ska vara <i>bakgrund</i> och vilket som ska visas
-      inuti <i>titthålet</i>.
-    </>
-  ) : (
-    <>
-      Välj två lager att jämföra och tryck på <i>Jämför</i>.
-    </>
+  const helpContent = (
+    <Trans
+      i18nKey={
+        isSpy ? "layerComparer.helpSpyGlass" : "layerComparer.helpSideBySide"
+      }
+      components={{ i: <i /> }}
+    />
+  );
+
+  // Admin texts are assumed to be Swedish, see configText(). They're
+  // passed in options too, as options override defaults.
+  const title = configText("layerComparer.title", props.options.title);
+  const description = configText(
+    "layerComparer.description",
+    props.options.description
   );
 
   return (
     <>
       <DialogWindowPlugin
-        options={props.options} // Supply the unique instance's options…
+        options={{ ...props.options, title, description }} // Supply the unique instance's options…
         map={props.map} // …but the shared map…
         app={props.app} // …and app.
         type="LayerComparer" // Unique name - each plugin needs one. Upper-case first letter, must be valid JS variable name.
         defaults={{
           // Some defaults to fall back to in case instanceOptions doesn't provide them.
           icon: <CompareIcon />, // Default icon for this plugin
-          title: "Lagerjämförare",
-          description: "Jämför lager sida vid sida eller med titthål", // Shown on Widget button as well as Tooltip for Control button
-          headerText: "Jämför lager",
-          buttonText: "Jämför",
+          headerText: i18n.t("layerComparer.headerText"),
+          buttonText: i18n.t("layerComparer.compare"),
           primaryButtonVariant: "contained",
-          abortText: "Nollställ & stäng",
+          abortText: i18n.t("layerComparer.resetAndClose"),
           onAbort: onAbort, // Called when user presses the Reset & Close button
           onClose: onClose, // Called when user presses the main primary button
           onVisibilityChanged: onVisibilityChanged, // Called when the dialog is shown or hidden
@@ -405,16 +415,22 @@ const LayerComparer = (props) => {
             fullWidth
             color="primary"
             onChange={handleModeChange}
-            aria-label="Jämförelseläge"
+            aria-label={i18n.t("layerComparer.mode")}
             size="small"
           >
-            <ToggleButton value={MODE_SIDE_BY_SIDE} aria-label="Sida vid sida">
+            <ToggleButton
+              value={MODE_SIDE_BY_SIDE}
+              aria-label={i18n.t("layerComparer.sideBySide")}
+            >
               <CompareIcon fontSize="small" sx={{ mr: 1 }} />
-              Sida vid sida
+              {i18n.t("layerComparer.sideBySide")}
             </ToggleButton>
-            <ToggleButton value={MODE_SPY_GLASS} aria-label="Titthål">
+            <ToggleButton
+              value={MODE_SPY_GLASS}
+              aria-label={i18n.t("layerComparer.spyGlass")}
+            >
               <VisibilityIcon fontSize="small" sx={{ mr: 1 }} />
-              Titthål
+              {i18n.t("layerComparer.spyGlass")}
             </ToggleButton>
           </ToggleButtonGroup>
 
@@ -443,7 +459,7 @@ const LayerComparer = (props) => {
                     component="span"
                     sx={{ typography: "caption", pt: "4px", pl: "6px" }}
                   >
-                    Pil vänster/höger: Ändra transparens
+                    {i18n.t("layerComparer.keyHintOpacity")}
                   </Box>
                 </KeyHintRow>
                 <KeyHintRow>
@@ -457,7 +473,7 @@ const LayerComparer = (props) => {
                     component="span"
                     sx={{ typography: "caption", pt: "4px", pl: "6px" }}
                   >
-                    Pil upp/ner: Ändra storlek
+                    {i18n.t("layerComparer.keyHintSize")}
                   </Box>
                 </KeyHintRow>
               </Box>
@@ -498,9 +514,12 @@ const LayerComparer = (props) => {
           })}
         >
           <Paper>
-            <HajkToolTip title="Gör titthålet större" placement="left">
+            <HajkToolTip
+              title={i18n.t("layerComparer.increaseLens")}
+              placement="left"
+            >
               <StyledControlButton
-                aria-label="Gör titthålet större"
+                aria-label={i18n.t("layerComparer.increaseLens")}
                 onClick={() => spyRef.current?.increaseLensSize()}
                 sx={(theme) => ({
                   borderRadius: `${theme.shape.borderRadius}px ${theme.shape.borderRadius}px 0 0`,
@@ -510,9 +529,12 @@ const LayerComparer = (props) => {
               </StyledControlButton>
             </HajkToolTip>
             <Divider />
-            <HajkToolTip title="Gör titthålet mindre" placement="left">
+            <HajkToolTip
+              title={i18n.t("layerComparer.decreaseLens")}
+              placement="left"
+            >
               <StyledControlButton
-                aria-label="Gör titthålet mindre"
+                aria-label={i18n.t("layerComparer.decreaseLens")}
                 onClick={() => spyRef.current?.decreaseLensSize()}
                 sx={(theme) => ({
                   borderRadius: `0 0 ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px`,

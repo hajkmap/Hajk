@@ -21,6 +21,8 @@ import {
   MEASUREMENT_PRECISIONS,
   SNAP_TOLERANCE_OPTIONS,
 } from "../constants";
+import i18n from "src/i18n";
+import { NO_SERVICE_LABEL } from "../../../buses/editBus";
 
 const SettingsView = (props) => {
   // Let's destruct some props
@@ -125,17 +127,17 @@ const SettingsView = (props) => {
       <Grid sx={{ marginTop: 2 }} size={12}>
         <FormControl component="fieldset">
           <FormLabel focused={false} component="legend">
-            Generella inställningar
+            {i18n.t("common.generalSettings")}
           </FormLabel>
           <HajkToolTip
-            title={`Slå ${
-              measurementSettings.showText ? "av" : "på"
-            } om du vill ${
-              measurementSettings.showText ? "dölja" : "visa"
-            } text på objekten.`}
+            title={
+              measurementSettings.showText
+                ? i18n.t("sketch.settings.showTextOff")
+                : i18n.t("sketch.settings.showTextOn")
+            }
           >
             <FormControlLabel
-              label="Visa text på objekten"
+              label={i18n.t("sketch.settings.showTextLabel")}
               control={
                 <Switch
                   checked={measurementSettings.showText}
@@ -151,12 +153,14 @@ const SettingsView = (props) => {
             />
           </HajkToolTip>
           <HajkToolTip
-            title={`Slå ${showHelperSnacks ? "av" : "på"} om du vill ${
-              showHelperSnacks ? "dölja" : "visa"
-            } hjälptexter.`}
+            title={
+              showHelperSnacks
+                ? i18n.t("sketch.settings.helperTextsOff")
+                : i18n.t("sketch.settings.helperTextsOn")
+            }
           >
             <FormControlLabel
-              label="Hjälptexter aktiverade"
+              label={i18n.t("sketch.settings.helperTextsLabel")}
               control={
                 <Switch
                   checked={showHelperSnacks}
@@ -166,14 +170,16 @@ const SettingsView = (props) => {
               }
             />
           </HajkToolTip>
-          {ogcSource !== "Ingen" && (
+          {ogcSource !== NO_SERVICE_LABEL && (
             <HajkToolTip
-              title={`Slå ${showKinkMarkers ? "av" : "på"} om du vill ${
-                showKinkMarkers ? "dölja" : "visa"
-              } röda markeringar där geometrin korsar sig själv. Varningar om självkorsningar visas alltid.`}
+              title={
+                showKinkMarkers
+                  ? i18n.t("sketch.settings.kinkMarkersOff")
+                  : i18n.t("sketch.settings.kinkMarkersOn")
+              }
             >
               <FormControlLabel
-                label="Visa geometrifel"
+                label={i18n.t("sketch.settings.kinkMarkersLabel")}
                 control={
                   <Switch
                     checked={showKinkMarkers}
@@ -185,10 +191,14 @@ const SettingsView = (props) => {
             </HajkToolTip>
           )}
           <HajkToolTip
-            title={`Slå ${snapEnabled ? "av" : "på"} snappning. När snappning är påslaget kommer ritverktyget att automatiskt fästa vid närliggande punkter och linjer.`}
+            title={
+              snapEnabled
+                ? i18n.t("sketch.settings.snapOff")
+                : i18n.t("sketch.settings.snapOn")
+            }
           >
             <FormControlLabel
-              label="Snappning aktiverad"
+              label={i18n.t("sketch.settings.snapLabel")}
               control={
                 <Switch
                   checked={snapEnabled}
@@ -201,7 +211,7 @@ const SettingsView = (props) => {
           <HajkToolTip
             title={
               showHajkToolTips.select4
-                ? "Välj hur känslig snappningen ska vara. Högre värde betyder att snappning aktiveras på längre avstånd."
+                ? i18n.t("sketch.settings.snapToleranceHelp")
                 : ""
             }
           >
@@ -214,13 +224,13 @@ const SettingsView = (props) => {
                 variant="outlined"
                 id="sketch-select-snap-tolerance-label"
               >
-                Snappningsavstånd
+                {i18n.t("sketch.settings.snapTolerance")}
               </InputLabel>
               <Select
                 id="sketch-select-snap-tolerance"
                 labelId="sketch-select-snap-tolerance-label"
                 value={snapTolerance}
-                label="Snappningsavstånd"
+                label={i18n.t("sketch.settings.snapTolerance")}
                 variant="outlined"
                 onChange={(e) => setSnapTolerance(Number(e.target.value))}
                 onFocus={() => handleFocus("select4", false)}
@@ -241,22 +251,20 @@ const SettingsView = (props) => {
       <Grid size={12}>
         <FormControl component="fieldset">
           <FormLabel focused={false} component="legend">
-            Mätinställningar
+            {i18n.t("sketch.settings.measurement")}
           </FormLabel>
 
           <HajkToolTip
             title={
               !measurementSettings.showText
-                ? "Aktivera text på objekten om du vill visa objektens omkrets/radie."
-                : `Slå ${
-                    measurementSettings.showArea ? "av" : "på"
-                  } om du vill ${
-                    measurementSettings.showArea ? "dölja" : "visa"
-                  } area på objekten.`
+                ? i18n.t("sketch.settings.enableTextForPerimeter")
+                : measurementSettings.showArea
+                  ? i18n.t("sketch.settings.showAreaOff")
+                  : i18n.t("sketch.settings.showAreaOn")
             }
           >
             <FormControlLabel
-              label="Visa area"
+              label={i18n.t("sketch.settings.showAreaLabel")}
               control={
                 <Switch
                   disabled={!measurementSettings.showText}
@@ -275,16 +283,14 @@ const SettingsView = (props) => {
           <HajkToolTip
             title={
               !measurementSettings.showText
-                ? "Aktivera text på objekten om du vill visa objektens längd"
-                : `Slå ${
-                    measurementSettings.showLength ? "av" : "på"
-                  } om du vill ${
-                    measurementSettings.showLength ? "dölja" : "visa"
-                  } längd på objekten.`
+                ? i18n.t("sketch.settings.enableTextForLength")
+                : measurementSettings.showLength
+                  ? i18n.t("sketch.settings.showLengthOff")
+                  : i18n.t("sketch.settings.showLengthOn")
             }
           >
             <FormControlLabel
-              label="Visa längd"
+              label={i18n.t("sketch.settings.showLengthLabel")}
               control={
                 <Switch
                   disabled={!measurementSettings.showText}
@@ -303,16 +309,14 @@ const SettingsView = (props) => {
           <HajkToolTip
             title={
               !measurementSettings.showText
-                ? "Aktivera text på objekten om du vill visa objektens omkrets/radie."
-                : `Slå ${
-                    measurementSettings.showPerimeter ? "av" : "på"
-                  } om du vill ${
-                    measurementSettings.showPerimeter ? "dölja" : "visa"
-                  } omkrets/radie. på objekten.`
+                ? i18n.t("sketch.settings.enableTextForPerimeter")
+                : measurementSettings.showPerimeter
+                  ? i18n.t("sketch.settings.showPerimeterOff")
+                  : i18n.t("sketch.settings.showPerimeterOn")
             }
           >
             <FormControlLabel
-              label="Visa omkrets/radie"
+              label={i18n.t("sketch.settings.showPerimeterLabel")}
               control={
                 <Switch
                   disabled={!measurementSettings.showText}
@@ -330,7 +334,9 @@ const SettingsView = (props) => {
           </HajkToolTip>
           <HajkToolTip
             title={
-              showHajkToolTips.select1 ? "Välj enhet för mätning av areal." : ""
+              showHajkToolTips.select1
+                ? i18n.t("sketch.settings.areaUnitHelp")
+                : ""
             }
           >
             <FormControl size="small" style={{ marginTop: 8 }}>
@@ -338,13 +344,13 @@ const SettingsView = (props) => {
                 variant="outlined"
                 id="sketch-select-area-measurement-unit-label"
               >
-                Mätenhet, areal
+                {i18n.t("sketch.settings.areaUnit")}
               </InputLabel>
               <Select
                 id="sketch-select-area-measurement-unit"
                 labelId="sketch-select-area-measurement-unit-label"
                 value={measurementSettings.areaUnit}
-                label="Mätenhet, areal"
+                label={i18n.t("sketch.settings.areaUnit")}
                 variant="outlined"
                 onChange={(e) => {
                   setMeasurementSettings((settings) => ({
@@ -368,7 +374,9 @@ const SettingsView = (props) => {
 
           <HajkToolTip
             title={
-              showHajkToolTips.select2 ? "Välj enhet för mätning av längd." : ""
+              showHajkToolTips.select2
+                ? i18n.t("sketch.settings.lengthUnitHelp")
+                : ""
             }
           >
             <FormControl size="small" style={{ marginTop: 16 }}>
@@ -376,13 +384,13 @@ const SettingsView = (props) => {
                 variant="outlined"
                 id="sketch-select-length-measurement-unit-label"
               >
-                Mätenhet, längd
+                {i18n.t("sketch.settings.lengthUnit")}
               </InputLabel>
               <Select
                 id="sketch-select-length-measurement-unit"
                 labelId="sketch-select-length-measurement-unit-label"
                 value={measurementSettings.lengthUnit}
-                label="Mätenhet, längd"
+                label={i18n.t("sketch.settings.lengthUnit")}
                 variant="outlined"
                 onChange={(e) => {
                   setMeasurementSettings((settings) => ({
@@ -406,19 +414,19 @@ const SettingsView = (props) => {
           <HajkToolTip
             title={
               showHajkToolTips.select3
-                ? "Välj med vilken precision mätvärdena ska presenteras."
+                ? i18n.t("sketch.settings.precisionHelp")
                 : ""
             }
           >
             <FormControl size="small" style={{ marginTop: 16 }}>
               <InputLabel variant="outlined" id="sketch-select-precision-label">
-                Mätprecision
+                {i18n.t("sketch.settings.precision")}
               </InputLabel>
               <Select
                 id="sketch-select-precision"
                 labelId="sketch-select-precision-label"
                 value={measurementSettings.precision ?? 0}
-                label="Mätprecision"
+                label={i18n.t("sketch.settings.precision")}
                 variant="outlined"
                 onChange={(e) => {
                   setMeasurementSettings((settings) => ({
@@ -442,7 +450,7 @@ const SettingsView = (props) => {
           <HajkToolTip
             title={
               showHajkToolTips.select5
-                ? "Välj med vilken precision koordinaterna på punkter ska visas."
+                ? i18n.t("sketch.settings.pointPrecisionHelp")
                 : ""
             }
           >
@@ -451,13 +459,13 @@ const SettingsView = (props) => {
                 variant="outlined"
                 id="sketch-select-point-precision-label"
               >
-                Mätprecision, punkter
+                {i18n.t("sketch.settings.pointPrecision")}
               </InputLabel>
               <Select
                 id="sketch-select-point-precision"
                 labelId="sketch-select-point-precision-label"
                 value={measurementSettings.pointPrecision ?? 0}
-                label="Mätprecision, punkter"
+                label={i18n.t("sketch.settings.pointPrecision")}
                 variant="outlined"
                 onChange={(e) => {
                   setMeasurementSettings((settings) => ({

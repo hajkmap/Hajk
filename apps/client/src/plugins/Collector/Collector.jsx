@@ -49,8 +49,6 @@ class Collector extends React.Component {
         type="Collector"
         custom={{
           icon: <RateReviewIcon />,
-          title: "Tyck till",
-          description: "Vi vill veta vad du tycker!",
           height: 450,
           width: 430,
           onWindowHide: this.onWindowHide,

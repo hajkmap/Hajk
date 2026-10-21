@@ -17,6 +17,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Slide from "@mui/material/Slide";
 import Toolbar from "./Toolbar";
 import withSnackbar from "components/WithSnackbar";
+import i18n from "src/i18n";
 
 const PageContent = styled("div")(() => ({
   height: "calc(100% - 60px)",
@@ -86,8 +87,7 @@ class Page extends Component {
       delete this.formErrors[name];
     } else {
       formValues[name] = "";
-      this.formErrors[name] =
-        "Ange en giltig url. t.ex. https://www.example.com";
+      this.formErrors[name] = i18n.t("collector.invalidUrl");
     }
     this.props.model.formValues = formValues;
     this.forceUpdate();
@@ -284,7 +284,7 @@ class Page extends Component {
           if (field.defaultValue === undefined || field.defaultValue === "") {
             options.unshift(
               <option key="-1" value="">
-                -Välj värde-
+                {i18n.t("collector.selectValue")}
               </option>
             );
           }
@@ -344,9 +344,7 @@ class Page extends Component {
             onChangeTool={() => {
               if (window.innerWidth < 600) {
                 this.props.model.globalObserver.publish("core.minimizeWindow");
-                this.props.enqueueSnackbar(
-                  "Klicka i kartan för att rita objekt"
-                );
+                this.props.enqueueSnackbar(i18n.t("collector.clickToDraw"));
               }
             }}
           />
@@ -502,7 +500,7 @@ class Page extends Component {
   saveError = () => {
     this.props.model.globalObserver.publish(
       "core.alert",
-      "Det gick inte att spara, försök igen senare."
+      i18n.t("collector.saveFailed")
     );
   };
 
@@ -545,7 +543,7 @@ class Page extends Component {
         sx={{ float: "right", margin: 1 }}
         onClick={this.save}
       >
-        Skicka
+        {i18n.t("collector.send")}
       </Button>
     );
 
@@ -557,7 +555,9 @@ class Page extends Component {
           this.props.model.observer.publish("abort");
         }}
       >
-        {this.props.options.collectAgain ? "Tyck till igen" : "Stäng"}
+        {this.props.options.collectAgain
+          ? i18n.t("collector.collectAgain")
+          : i18n.t("common.close")}
       </Button>
     );
 
@@ -573,7 +573,7 @@ class Page extends Component {
           });
         }}
       >
-        Stäng
+        {i18n.t("common.close")}
       </Button>
     );
 

@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 const Root = styled(Grid)(() => ({
   display: "flex",
@@ -23,6 +24,10 @@ const StyledFormControl = styled(FormControl)(({ theme }) => ({
   margin: theme.spacing(1),
   width: "100%",
 }));
+
+// Not translated: a scale notation and file formats.
+const SCALE_PREFIX = "1:";
+const SAVE_AS_TYPES = ["PDF", "PNG"];
 
 class GeneralOptions extends React.PureComponent {
   state = {
@@ -93,8 +98,8 @@ class GeneralOptions extends React.PureComponent {
           id: "useMargin",
         }}
       >
-        <MenuItem value={true}>Ja</MenuItem>
-        <MenuItem value={false}>Nej</MenuItem>
+        <MenuItem value={true}>{i18n.t("common.yes")}</MenuItem>
+        <MenuItem value={false}>{i18n.t("common.no")}</MenuItem>
       </Select>
     );
   };
@@ -112,8 +117,8 @@ class GeneralOptions extends React.PureComponent {
           id: "useTextIconsInMargin",
         }}
       >
-        <MenuItem value={true}>Ja</MenuItem>
-        <MenuItem value={false}>Nej</MenuItem>
+        <MenuItem value={true}>{i18n.t("common.yes")}</MenuItem>
+        <MenuItem value={false}>{i18n.t("common.no")}</MenuItem>
       </Select>
     );
   };
@@ -130,8 +135,8 @@ class GeneralOptions extends React.PureComponent {
           id: "orientation",
         }}
       >
-        <MenuItem value={"landscape"}>Liggande</MenuItem>
-        <MenuItem value={"portrait"}>Stående</MenuItem>
+        <MenuItem value={"landscape"}>{i18n.t("print.landscape")}</MenuItem>
+        <MenuItem value={"portrait"}>{i18n.t("print.portrait")}</MenuItem>
       </Select>
     );
   };
@@ -147,7 +152,7 @@ class GeneralOptions extends React.PureComponent {
       ...scales.map((s) => {
         return { value: s, label: model.getUserFriendlyScale(s) };
       }),
-      { value: "CUSTOM_SCALE", label: "Ange annan skala" },
+      { value: "CUSTOM_SCALE", label: i18n.t("print.customScale") },
     ];
     return (
       <Select
@@ -176,12 +181,14 @@ class GeneralOptions extends React.PureComponent {
       <Input
         value={this.props.scale}
         type="number"
-        startAdornment={<InputAdornment position="start">1:</InputAdornment>}
+        startAdornment={
+          <InputAdornment position="start">{SCALE_PREFIX}</InputAdornment>
+        }
         endAdornment={
           <InputAdornment position="end">
-            <HajkToolTip title="Visa fördefinerade val">
+            <HajkToolTip title={i18n.t("print.showPredefinedScales")}>
               <IconButton
-                aria-label="toggle custom scale selector"
+                aria-label={i18n.t("print.showPredefinedScales")}
                 onClick={this.handleDisableCustomScaleInput}
               >
                 <FormatListNumberedIcon />
@@ -210,8 +217,11 @@ class GeneralOptions extends React.PureComponent {
           id: "saveAsType",
         }}
       >
-        <MenuItem value={"PDF"}>PDF</MenuItem>
-        <MenuItem value={"PNG"}>PNG</MenuItem>
+        {SAVE_AS_TYPES.map((type) => (
+          <MenuItem key={type} value={type}>
+            {type}
+          </MenuItem>
+        ))}
       </Select>
     );
   };
@@ -223,45 +233,42 @@ class GeneralOptions extends React.PureComponent {
         <Root>
           <StyledFormControl>
             <InputLabel variant="standard" htmlFor="format">
-              Format
+              {i18n.t("print.format")}
             </InputLabel>
             {this.renderPaperSizeSelector()}
           </StyledFormControl>
           <StyledFormControl>
             <InputLabel variant="standard" htmlFor="useMargin">
-              Marginaler runt kartbilden
+              {i18n.t("print.useMargin")}
             </InputLabel>
             {this.renderUseMarginSelector()}
           </StyledFormControl>
           <StyledFormControl>
             <InputLabel variant="standard" htmlFor="useMargin">
-              Rubriktext m.m. i marginalerna
+              {i18n.t("print.textInMargins")}
             </InputLabel>
             {this.renderTextIconInMarginsSelector()}
           </StyledFormControl>
           <StyledFormControl>
             <InputLabel variant="standard" htmlFor="orientation">
-              Orientering
+              {i18n.t("print.orientation")}
             </InputLabel>
             {this.renderOrientationSelector()}
           </StyledFormControl>
           <StyledFormControl error={!printOptionsOk}>
             <InputLabel variant="standard" htmlFor="scale">
-              Skala
+              {i18n.t("print.scale")}
             </InputLabel>
             {this.state.useCustomScale
               ? this.renderScaleInput()
               : this.renderScaleSelector()}
             {!printOptionsOk && (
-              <FormHelperText>
-                Bilden kommer inte kunna skrivas ut korrekt. Testa med en lägre
-                upplösning eller mindre skala.
-              </FormHelperText>
+              <FormHelperText>{i18n.t("print.cannotPrint")}</FormHelperText>
             )}
           </StyledFormControl>
           <StyledFormControl>
             <InputLabel variant="standard" htmlFor="saveAsType">
-              Spara som
+              {i18n.t("print.saveAs")}
             </InputLabel>
             {this.renderSaveAsTypeSelector()}
           </StyledFormControl>

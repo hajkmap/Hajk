@@ -6,7 +6,6 @@ import FloodSimulatorView from "./FloodSimulatorView";
 
 import WaterIcon from "@mui/icons-material/Water";
 
-import { DEFAULT_DESCRIPTION, DEFAULT_TITLE } from "./constants";
 import type { FloodSimulatorProps } from "./types";
 
 /**
@@ -50,11 +49,9 @@ const FloodSimulator: React.FC<FloodSimulatorProps> = (props) => {
   return (
     <BaseWindowPlugin
       {...props}
-      type="floodsimulator"
+      type="FloodSimulator"
       custom={{
         icon: <WaterIcon />,
-        title: props.options.title || DEFAULT_TITLE,
-        description: props.options.description || DEFAULT_DESCRIPTION,
         height: "dynamic",
         width: 400,
         disablePadding: true,

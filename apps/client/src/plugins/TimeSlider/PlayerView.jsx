@@ -6,6 +6,7 @@ import PauseIcon from "@mui/icons-material/Pause";
 import RotateLeftOutlinedIcon from "@mui/icons-material/RotateLeftOutlined";
 import SettingsButton from "./components/SettingsButton";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 export default function PlayerView(props) {
   // Handles when the user wants to step one step forwards.
@@ -75,7 +76,7 @@ export default function PlayerView(props) {
         }}
       >
         <Grid align="center" size={2}>
-          <HajkToolTip title="Återställ tidslinjen">
+          <HajkToolTip title={i18n.t("timeSlider.player.reset")}>
             <Button variant="contained" onClick={props.resetTimeSlider}>
               <RotateLeftOutlinedIcon />
             </Button>
@@ -85,8 +86,8 @@ export default function PlayerView(props) {
           <HajkToolTip
             title={
               props.playing
-                ? "Du kan inte hoppa bakåt när spelaren är aktiv."
-                : "Hoppa ett steg bakåt"
+                ? i18n.t("timeSlider.player.backwardDisabled")
+                : i18n.t("timeSlider.player.backward")
             }
           >
             <span>
@@ -104,7 +105,11 @@ export default function PlayerView(props) {
         </Grid>
         <Grid align="center" size={2}>
           <HajkToolTip
-            title={props.playing ? "Stoppa tidslinjen" : "Starta tidslinjen"}
+            title={
+              props.playing
+                ? i18n.t("timeSlider.player.stop")
+                : i18n.t("timeSlider.player.start")
+            }
           >
             <Button
               variant="contained"
@@ -120,8 +125,8 @@ export default function PlayerView(props) {
           <HajkToolTip
             title={
               props.playing
-                ? "Du kan inte hoppa framåt när spelaren är aktiv."
-                : "Hoppa ett steg framåt"
+                ? i18n.t("timeSlider.player.forwardDisabled")
+                : i18n.t("timeSlider.player.forward")
             }
           >
             <span>

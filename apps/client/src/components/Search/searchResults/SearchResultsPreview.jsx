@@ -2,6 +2,7 @@ import React from "react";
 import { Grid, Popover, Typography, alpha } from "@mui/material";
 import SearchResultsDatasetFeatureDetails from "./SearchResultsDatasetFeatureDetails";
 import { styled } from "@mui/material/styles";
+import i18n from "src/i18n";
 
 const StyledPopover = styled(Popover)(({ theme }) => ({
   pointerEvents: "none",
@@ -43,7 +44,9 @@ class SearchResultsPreview extends React.PureComponent {
       >
         <Grid container>
           <HeaderContainer align="center" size={12}>
-            <Typography variant="button">Förhandsvisning</Typography>
+            <Typography variant="button">
+              {i18n.t("search.results.preview")}
+            </Typography>
           </HeaderContainer>
           <ContentContainer size={12}>
             <SearchResultsDatasetFeatureDetails

@@ -1,0 +1,73 @@
+{
+  "commandPalette": {
+    "backDescription": "Tillbaka till kommandon",
+    "backgroundLayers": "Bakgrundslager",
+    "backgrounds": {
+      "description": "Välj kartans bakgrundslager",
+      "title": "Byt bakgrundslager"
+    },
+    "clearSearch": {
+      "description": "Rensa sökning och fokusera sökfältet",
+      "title": "Rensa sökning"
+    },
+    "closeAllWindows": {
+      "description": "Stäng alla öppna plugin-fönster",
+      "title": "Stäng alla fönster"
+    },
+    "darkTheme": "Växla till mörkt tema",
+    "hideAllLayers": {
+      "description": "Gör alla synliga lager osynliga",
+      "title": "Dölj alla aktiva lager"
+    },
+    "layers": {
+      "description": "Visa och hantera kartlager",
+      "title": "Lager"
+    },
+    "lightTheme": "Växla till ljust tema",
+    "moreBackgrounds_one": "Visa {{count}} bakgrundslager",
+    "moreBackgrounds_other": "Visa alla {{count}} bakgrundslager",
+    "moreLayers_one": "Visa {{count}} lager",
+    "moreLayers_other": "Visa alla {{count}} lager",
+    "morePresets_one": "Visa {{count}} snabbval",
+    "morePresets_other": "Visa alla {{count}} snabbval",
+    "moreTools_one": "Visa {{count}} verktyg",
+    "moreTools_other": "Visa alla {{count}} verktyg",
+    "noBackgrounds": "Inga bakgrundslager hittades",
+    "noLayers": "Inga lager hittades",
+    "noPresets": "Inga snabbval hittades",
+    "noSearchCommands": "Inga sökkommandon hittades",
+    "noTools": "Inga verktyg hittades",
+    "openTools": {
+      "description": "Visa alla tillgängliga verktyg",
+      "title": "Öppna verktyg"
+    },
+    "presets": {
+      "description": "Snabbval till fördefinierade platser och lager",
+      "title": "Snabbval"
+    },
+    "recentlyUsed": "Senast använda",
+    "searchCommands": {
+      "description": "Visa sökalternativ",
+      "title": "Sök..."
+    },
+    "searchExtent": {
+      "description": "Sök i den aktuella kartan",
+      "title": "Sök inom vyn"
+    },
+    "searchFor": "Sök efter \"{{query}}\" i sökverktyget",
+    "searchPolygon": {
+      "description": "Rita en polygon för att söka inom området",
+      "title": "Sök med polygon"
+    },
+    "searchRadius": {
+      "description": "Rita en cirkel för att söka inom radien",
+      "title": "Sök med radie"
+    },
+    "searchSelect": {
+      "description": "Välj objekt i kartan för att söka",
+      "title": "Sök med objekt"
+    },
+    "searchTool": "Sök",
+    "tools": "Verktyg"
+  }
+}

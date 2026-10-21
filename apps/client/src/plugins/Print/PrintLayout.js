@@ -15,6 +15,7 @@
  */
 
 import { createLayoutContext } from "./layout/context";
+import i18n from "src/i18n";
 
 /**
  * Build the complete layout for a print page.
@@ -256,7 +257,7 @@ export async function buildLayout(
     } catch (error) {
       ctx.localObserver.publish("error-loading-image", {
         error,
-        type: "Logotypbilden",
+        type: i18n.t("print.logoImage"),
       });
     }
   }
@@ -303,7 +304,7 @@ export async function buildLayout(
     } catch (error) {
       ctx.localObserver.publish("error-loading-image", {
         error,
-        type: "Norrpilen",
+        type: i18n.t("print.northArrowImage"),
       });
     }
   }
@@ -615,11 +616,14 @@ function buildScaleBarElements(
   // The height of the scale bar, could be configurable later but for now it's a constant.
   const scaleBarHeight = 6;
 
-  ctx.scaleText = `Skala: ${ctx.getUserFriendlyScale(
-    scale
-  )} (vid ${format.toUpperCase()} ${
-    orientation === "landscape" ? "liggande" : "stående"
-  })`;
+  ctx.scaleText = i18n.t("print.scaleText", {
+    scale: ctx.getUserFriendlyScale(scale),
+    format: format.toUpperCase(),
+    orientation:
+      orientation === "landscape"
+        ? i18n.t("print.landscapeLower")
+        : i18n.t("print.portraitLower"),
+  });
 
   // Determine the position of the scale bar on the page.
   const scaleBarPosition = ctx.getPlacement(

@@ -91,37 +91,37 @@ When `depthColors` has classes the UI shows a toggle between **Djupklasser** (th
 
 ### Options
 
-| Option                  | Default                           | Description                                                                                                                               |
-| ----------------------- | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `elevationUrl`          | _(empty)_                         | Tile URL template (`{z}/{x}/{y}`). Overlay is not created until this is set                                                               |
-| `elevationEncoding`     | `terrarium`                       | `terrarium` or `mapbox`                                                                                                                   |
-| `crossOrigin`           | `anonymous`                       | CORS mode for elevation tiles (`anonymous`, `use-credentials`, or `null` to omit). Needed for the pointer readout                         |
-| `tileSize`              | `256`                             | XYZ tile size                                                                                                                             |
-| `minZoom`               | `0`                               | Lowest terrain `{z}` that exists. Lower Hajk zooms reuse these tiles                                                                      |
-| `maxZoom`               | `15`                              | Highest terrain `{z}` that exists. Higher Hajk zooms reuse these tiles                                                                    |
-| `terrainZoomByMapZoom`  | clamp to min/max                  | Optional Hajk zoom → terrain `{z}` mapping (array or breakpoints). Omit or `null` to use `minZoom`/`maxZoom`                              |
-| `elevationExtent`       | map extent                        | DEM coverage `[minX, minY, maxX, maxY]`. Clips the tile grid and overlay; XYZ origin still comes from the map                             |
-| `elevationTileGrid`     | Map origin / extent / resolutions | Override the elevation pyramid's tile grid                                                                                                |
-| `hideAtMinZoom`         | _(none)_                          | Hide the overlay at this OpenLayers zoom and below (stops tile loads). `1` hides zoom 0 and 1. Unset keeps water visible when zoomed out  |
-| `minMapZoom`            | _(none)_                          | Hide the overlay below this Hajk zoom. Unset so zooming out past `minZoom` still shows water (reuses that `{z}`)                          |
-| `maxResolution`         | derived from `minMapZoom`         | OpenLayers layer `maxResolution` (exclusive). Set this directly if you prefer resolution units                                            |
-| `maxResolutionSlack`    | `1`                               | Multiplier on the coarsest terrain resolution when deriving `maxResolution`. `1` uses the next coarser zoom                               |
-| `attributions`          | _(empty)_                         | Shown in the map attribution control                                                                                                      |
-| `minLevel` / `maxLevel` | `0` / `10`                        | Slider range, meters. Max is also adjustable in the plugin under more settings (up to 100 m)                                              |
-| `levelStep`             | `0.01`                            | Slider step, meters                                                                                                                       |
-| `defaultLevel`          | `1`                               | Initial water level, meters                                                                                                               |
-| `waterColor`            | `#86cbf9`                         | Flood fill color when depth shading is off. Also changeable from the plugin UI                                                            |
-| `deepWaterColor`        | darkened `waterColor`             | Deep-water end of the linear depth-shading ramp. Also changeable from the plugin UI                                                       |
-| `depthColors`           | `[]`                              | Discrete depth classes (`{ maxDepth, color }`). Empty, omitted or `null` keeps the linear ramp. The user can switch to the ramp in the UI |
-| `layerOpacity`          | `0.6`                             | Initial overlay opacity (`0`–`1`)                                                                                                         |
-| `enableDepthShading`    | `false`                           | Start with depth shading on                                                                                                               |
-| `interpolate`           | `true`                            | Linear resampling of elevation tiles (smoother shoreline). `false` uses nearest-neighbour. Also changeable from the plugin UI             |
-| `smoothDepthColors`     | `true`                            | Start with **Mjuk övergång** on when Djupklasser is selected. The user can still toggle it                                                |
+| Option                  | Default                           | Description                                                                                                                                  |
+| ----------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `elevationUrl`          | _(empty)_                         | Tile URL template (`{z}/{x}/{y}`). Overlay is not created until this is set                                                                  |
+| `elevationEncoding`     | `terrarium`                       | `terrarium` or `mapbox`                                                                                                                      |
+| `crossOrigin`           | `anonymous`                       | CORS mode for elevation tiles (`anonymous`, `use-credentials`, or `null` to omit). Needed for the pointer readout                            |
+| `tileSize`              | `256`                             | XYZ tile size                                                                                                                                |
+| `minZoom`               | `0`                               | Lowest terrain `{z}` that exists. Lower Hajk zooms reuse these tiles                                                                         |
+| `maxZoom`               | `15`                              | Highest terrain `{z}` that exists. Higher Hajk zooms reuse these tiles                                                                       |
+| `terrainZoomByMapZoom`  | clamp to min/max                  | Optional Hajk zoom → terrain `{z}` mapping (array or breakpoints). Omit or `null` to use `minZoom`/`maxZoom`                                 |
+| `elevationExtent`       | map extent                        | DEM coverage `[minX, minY, maxX, maxY]`. Clips the tile grid and overlay; XYZ origin still comes from the map                                |
+| `elevationTileGrid`     | Map origin / extent / resolutions | Override the elevation pyramid's tile grid                                                                                                   |
+| `hideAtMinZoom`         | _(none)_                          | Hide the overlay at this OpenLayers zoom and below (stops tile loads). `1` hides zoom 0 and 1. Unset keeps water visible when zoomed out     |
+| `minMapZoom`            | _(none)_                          | Hide the overlay below this Hajk zoom. Unset so zooming out past `minZoom` still shows water (reuses that `{z}`)                             |
+| `maxResolution`         | derived from `minMapZoom`         | OpenLayers layer `maxResolution` (exclusive). Set this directly if you prefer resolution units                                               |
+| `maxResolutionSlack`    | `1`                               | Multiplier on the coarsest terrain resolution when deriving `maxResolution`. `1` uses the next coarser zoom                                  |
+| `attributions`          | _(empty)_                         | Shown in the map attribution control                                                                                                         |
+| `minLevel` / `maxLevel` | `0` / `10`                        | Slider range, meters. Max is also adjustable in the plugin under more settings (up to 100 m)                                                 |
+| `levelStep`             | `0.01`                            | Slider step, meters                                                                                                                          |
+| `defaultLevel`          | `1`                               | Initial water level, meters                                                                                                                  |
+| `waterColor`            | `#86cbf9`                         | Flood fill color when depth shading is off. Also changeable from the plugin UI                                                               |
+| `deepWaterColor`        | darkened `waterColor`             | Deep-water end of the linear depth-shading ramp. Also changeable from the plugin UI                                                          |
+| `depthColors`           | `[]`                              | Discrete depth classes (`{ maxDepth, color }`). Empty, omitted or `null` keeps the linear ramp. The user can switch to the ramp in the UI    |
+| `layerOpacity`          | `0.6`                             | Initial overlay opacity (`0`–`1`)                                                                                                            |
+| `enableDepthShading`    | `false`                           | Start with depth shading on                                                                                                                  |
+| `interpolate`           | `true`                            | Linear resampling of elevation tiles (smoother shoreline). `false` uses nearest-neighbour. Also changeable from the plugin UI                |
+| `smoothDepthColors`     | `true`                            | Start with **Mjuk övergång** on when Djupklasser is selected. The user can still toggle it                                                   |
 | `maxShadingDepth`       | `5`                               | Depth (m) that maps to `deepWaterColor` on the linear ramp. The Färgskala slider starts here; its maximum follows the water-level slider max |
-| `animationDurationMs`   | `8000`                            | Initial play-button duration from min to max level. Adjustable in the UI (1–30 s by default; max can be raised under more settings)       |
-| `showElevationReadout`  | `true`                            | Pointer elevation / depth readout                                                                                                         |
-| `minElevation`          | `-100`                            | Elevations at or below this are treated as nodata                                                                                         |
-| `maxElevation`          | `100`                             | Elevations at or above this are treated as nodata                                                                                         |
+| `animationDurationMs`   | `8000`                            | Initial play-button duration from min to max level. Adjustable in the UI (1–30 s by default; max can be raised under more settings)          |
+| `showElevationReadout`  | `true`                            | Pointer elevation / depth readout                                                                                                            |
+| `minElevation`          | `-100`                            | Elevations at or below this are treated as nodata                                                                                            |
+| `maxElevation`          | `100`                             | Elevations at or above this are treated as nodata                                                                                            |
 
 Configure the plugin from Admin → Kartor → Verktyg → Översvämning. The overlay is a system layer, so it does not appear in LayerSwitcher.
 

@@ -1,0 +1,15 @@
+{
+  "bookmarks": {
+    "add": "Lägg till",
+    "cookiesRequired": "Du har inte tillåtit funktionella kakor. För att kunna spara bokmärken måste du tillåta funktionella kakor.",
+    "deleteButton": "Radera",
+    "deleteConfirm": "Är du säker på att du vill radera bokmärket \"{{name}}\"?",
+    "deleteTitle": "Radera bokmärke",
+    "description": "Användarens bokmärken",
+    "intro": "Skapa ett bokmärke med kartans synliga lager, aktuella zoomnivå och utbredning.",
+    "name": "Namn",
+    "namePlaceholder": "Skriv bokmärkets namn",
+    "nameTaken": "Namnet upptaget. Ersätt bokmärke \"{{name}}\"?",
+    "title": "Bokmärken"
+  }
+}

@@ -4,6 +4,8 @@ import withSnackbar from "components/WithSnackbar";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { isMobile } from "../../utils/IsMobile";
+import { Trans } from "react-i18next";
+import i18n from "src/i18n";
 
 const StreetViewWindow = styled("div")(() => ({
   flex: 1,
@@ -43,10 +45,7 @@ class StreetViewView extends React.PureComponent {
       });
     });
     this.localObserver.subscribe("googleMapsApiLoadFailed", () => {
-      this.props.snackbar.show(
-        "Kunde inte ladda Google Maps. Kontakta systemadministratören och be om att kontrollera API-nyckeln.",
-        "error"
-      );
+      this.props.snackbar.show(i18n.t("streetView.loadFailed"), "error");
     });
   }
 
@@ -58,8 +57,10 @@ class StreetViewView extends React.PureComponent {
     if (!this.props.displayPanorama) {
       return (
         <Typography sx={{ padding: 2 }}>
-          Klicka i kartan för att aktivera street view. <br />
-          Förstora fönstret genom att trycka på symbolen i övre högra hörnet.
+          <Trans
+            i18nKey="streetView.instructions"
+            components={{ br: <br /> }}
+          />
         </Typography>
       );
     }

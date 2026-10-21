@@ -41,8 +41,6 @@ class Buffer extends React.PureComponent {
         type="Buffer"
         custom={{
           icon: <BufferIcon />,
-          title: "Buffra",
-          description: "Skapa en buffer runt objekt utvalda objekt i kartan",
           height: 650,
           width: 400,
           top: undefined,

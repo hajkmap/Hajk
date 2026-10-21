@@ -1,6 +1,7 @@
 import React, { useState, forwardRef } from "react";
 import { Paper, Switch } from "@mui/material";
 import { isMobile } from "../../utils/IsMobile";
+import i18n from "src/i18n";
 
 const LocationPopup = forwardRef(function LocationPopup({ model }, ref) {
   const [localFollow, setLocalFollow] = useState(false);
@@ -44,14 +45,14 @@ const LocationPopup = forwardRef(function LocationPopup({ model }, ref) {
         mb: isMobile ? 4 : 0,
       }}
     >
-      <span>Följ position</span>
+      <span>{i18n.t("location.follow")}</span>
       <Switch
         checked={localFollow}
         onChange={handleToggle}
         value="follow"
         color="primary"
       />
-      <span>Rotera automatiskt</span>
+      <span>{i18n.t("location.autoRotate")}</span>
       <Switch
         checked={localAutoRotate}
         onChange={handleAutoRotateToggle}

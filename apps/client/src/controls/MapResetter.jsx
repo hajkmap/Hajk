@@ -2,6 +2,7 @@ import React from "react";
 import HomeIcon from "@mui/icons-material/Home";
 
 import ControlButton from "components/ControlButton";
+import i18n from "src/i18n";
 
 /**
  * @summary Resets map to initial zoom level, centrum coordinate and active layers.
@@ -23,8 +24,8 @@ class MapResetter extends React.PureComponent {
   render() {
     return (
       <ControlButton
-        tooltip="Återställ kartan till startläget"
-        ariaLabel="Återställ kartan till startläget"
+        tooltip={i18n.t("controls.resetMap")}
+        ariaLabel={i18n.t("controls.resetMap")}
         onClick={this.handleClick}
       >
         <HomeIcon />

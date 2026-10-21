@@ -17,10 +17,10 @@ import {
   shouldShowNotice,
   thirdPartyOk,
 } from "../models/Cookie";
+import { useTranslation } from "react-i18next";
+import { configText } from "src/i18n";
 
-// Default settings for the cookie-notice text and url if none is supplied from the configuration.
-const DEFAULT_MESSAGE =
-  "Vi använder nödvändiga kakor (cookies) för att webbplatsen ska fungera på ett bra sätt för dig. Vi använder också funktionella kakor för att ge dig bästa möjliga funktion om du godkänner användningen av dessa.";
+// Default url if none is supplied from the configuration. The default message is cookieNotice.message.
 const DEFAULT_URL =
   "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/";
 
@@ -42,6 +42,7 @@ const LabeledCheckbox = ({ checked, disabled, label, onChange }) => {
 };
 
 function CookieNotice({ globalObserver, appModel }) {
+  const { t } = useTranslation();
   const { config } = appModel;
 
   // We should initialize the dialog:s open-state to whatever the manager states.
@@ -50,8 +51,10 @@ function CookieNotice({ globalObserver, appModel }) {
     React.useState(functionalOk);
   const [thirdPartChecked, setThirdPartChecked] = React.useState(thirdPartyOk);
 
-  const defaultCookieNoticeMessage =
-    config?.mapConfig?.map?.defaultCookieNoticeMessage || DEFAULT_MESSAGE;
+  const defaultCookieNoticeMessage = configText(
+    "cookieNotice.message",
+    config?.mapConfig?.map?.defaultCookieNoticeMessage
+  );
   const defaultCookieNoticeUrl =
     config?.mapConfig?.map?.defaultCookieNoticeUrl || DEFAULT_URL;
   const showThirdPartCheckbox =
@@ -143,7 +146,7 @@ function CookieNotice({ globalObserver, appModel }) {
             rel="noreferrer"
             target="_blank"
           >
-            {"Mer information om kakor"}
+            {t("cookieNotice.moreInfo")}
           </Link>
         </DialogContentText>
       </DialogContent>
@@ -165,14 +168,14 @@ function CookieNotice({ globalObserver, appModel }) {
           <LabeledCheckbox
             disabled={true}
             checked={true}
-            label={"Nödvändiga"}
+            label={t("cookieNotice.necessary")}
           />
           <LabeledCheckbox
             onChange={(event) => {
               setFunctionalChecked(event.target.checked);
             }}
             checked={functionalChecked}
-            label={"Funktionella"}
+            label={t("cookieNotice.functional")}
           />
           {showThirdPartCheckbox && (
             <LabeledCheckbox
@@ -180,7 +183,7 @@ function CookieNotice({ globalObserver, appModel }) {
                 setThirdPartChecked(event.target.checked);
               }}
               checked={thirdPartChecked}
-              label={"Tredjepart"}
+              label={t("cookieNotice.thirdParty")}
             />
           )}
         </FormGroup>
@@ -199,7 +202,7 @@ function CookieNotice({ globalObserver, appModel }) {
             variant="contained"
             onClick={handleAllowSelectedClick}
           >
-            {"Tillåt valda"}
+            {t("cookieNotice.allowSelected")}
           </Button>
           <Button
             color="primary"
@@ -207,7 +210,7 @@ function CookieNotice({ globalObserver, appModel }) {
             onClick={handleAllowAllClick}
             sx={{ mr: { sm: 2 } }}
           >
-            {"Tillåt Alla"}
+            {t("cookieNotice.allowAll")}
           </Button>
         </Box>
       </DialogActions>

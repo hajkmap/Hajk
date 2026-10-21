@@ -12,10 +12,11 @@ import {
 import { useTheme } from "@mui/material/styles";
 
 // Registers the <altcha-widget> web component, and its Swedish translation
+// (English is built in)
 import "altcha";
 import "altcha/i18n/sv";
+import { useTranslation } from "react-i18next";
 
-import { UI_STRINGS } from "./constants";
 import type { FeedbackViewProps } from "./types";
 
 type AltchaStateChangeEvent = CustomEvent<{ state: string; payload?: string }>;
@@ -27,6 +28,7 @@ function FeedbackView({
   maxLength,
 }: FeedbackViewProps) {
   const theme = useTheme();
+  const { t, i18n } = useTranslation();
   const [message, setMessage] = useState("");
   const [altcha, setAltcha] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
@@ -76,7 +78,7 @@ function FeedbackView({
           {thankYouText}
         </Alert>
         <Button variant="outlined" onClick={() => setSent(false)}>
-          {UI_STRINGS.sendAgain}
+          {t("feedback.sendAgain")}
         </Button>
       </Stack>
     );
@@ -100,7 +102,7 @@ function FeedbackView({
           </Typography>
         )}
         <TextField
-          label={UI_STRINGS.messageLabel}
+          label={t("feedback.messageLabel")}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           multiline
@@ -116,13 +118,13 @@ function FeedbackView({
           }}
         />
         <Typography variant="caption" color="text.secondary">
-          {UI_STRINGS.privacyNotice}
+          {t("feedback.privacyNotice")}
         </Typography>
         <altcha-widget
           key={widgetKey}
           ref={widgetRef}
           challenge={model.getChallengeUrl()}
-          language="sv"
+          language={i18n.resolvedLanguage === "sv" ? "sv" : "en"}
           style={widgetStyle}
         />
         {error && <Alert severity="error">{error}</Alert>}
@@ -131,7 +133,7 @@ function FeedbackView({
           variant="contained"
           disabled={!altcha || message.trim().length === 0 || sending}
         >
-          {sending ? UI_STRINGS.sending : UI_STRINGS.send}
+          {sending ? t("feedback.sending") : t("feedback.send")}
         </Button>
       </Stack>
     </Box>

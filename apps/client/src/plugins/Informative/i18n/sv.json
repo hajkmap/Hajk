@@ -1,0 +1,11 @@
+{
+  "informative": {
+    "description": "Läs mer om vad som planeras i kommunen",
+    "loadFailed": "Laddning av Informative-pluginet misslyckades. Pluginet verkar vara felaktigt konfigurerat. Var god kontakta systemadministratören.",
+    "map": "Karta",
+    "print": "Skriv ut",
+    "printFailed": "Det gick inte att skriva ut för tillfället, försök igen senare",
+    "tableOfContents": "Innehållsförteckning",
+    "title": "Översiktsplan"
+  }
+}

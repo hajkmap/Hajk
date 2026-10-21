@@ -129,13 +129,10 @@ const PropertyChecker: React.FC<PropertyCheckerProps> = (props) => {
   return (
     <BaseWindowPlugin
       {...props} // Pass on all the props...
-      type="propertychecker" // Unique name - each plugin needs one. Upper-case first letter, must be valid JS variable name.
+      type="PropertyChecker" // Unique name - each plugin needs one. Upper-case first letter, must be valid JS variable name.
       custom={{
         icon: <ChecklistIcon />, // Custom icon for this plugin
-        title: props.options.title || "Fastighetskontroll", // By keeping title and color in Dummy's state we can pass on
-        description:
-          props.options.description ||
-          "Klicka på en fastighet och få fram en lista över vad som gäller", // Shown on Widget button
+        // Title and description: "propertyChecker.title"/".description", see BaseWindowPlugin.
         // Do you want to add buttons to the plugin-header? That can be done as follows:
         customPanelHeaderButtons: [
           {

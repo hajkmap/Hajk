@@ -1,0 +1,50 @@
+{
+  "timeSlider": {
+    "description": "Visa information under olika tidsperioder",
+    "player": {
+      "backward": "Hoppa ett steg bakåt",
+      "backwardDisabled": "Du kan inte hoppa bakåt när spelaren är aktiv.",
+      "forward": "Hoppa ett steg framåt",
+      "forwardDisabled": "Du kan inte hoppa framåt när spelaren är aktiv.",
+      "reset": "Återställ tidslinjen",
+      "start": "Starta tidslinjen",
+      "stop": "Stoppa tidslinjen"
+    },
+    "print": {
+      "dialogText": "Det här kan ta en stund, speciellt om det är många bilder som ska skapas.",
+      "dialogTitle": "Dina bilder skapas",
+      "disabledTooltip": "Nuvarande inställningar gör att för många bilder kommer skrivas ut. Minska datumintervallet eller ändra upplösningen. ",
+      "enabledTooltip": "Starta utskriften",
+      "info_one": "Vid utskrift så kommer en bild skapas för varje \"steg\" i tidslinjen. Nuvarande inställningar kommer resultera i {{count}} bild.",
+      "info_other": "Vid utskrift så kommer en bild skapas för varje \"steg\" i tidslinjen. Nuvarande inställningar kommer resultera i {{count}} bilder.",
+      "print": "Skriv ut",
+      "range": "Utskriftsintervall",
+      "scale": "Skala",
+      "selectRange": "Välj utskriftsintervall:"
+    },
+    "resolution": "Upplösning",
+    "resolutions": {
+      "days": "Dag",
+      "months": "Månad",
+      "quarters": "Kvartal",
+      "years": "År"
+    },
+    "settings": {
+      "dateMissing": "Start- eller slutdatumet på lagret saknas!",
+      "hideLayer": "Dölj lager",
+      "layerOk": "Lagret ser okej ut!",
+      "layerStatus": "Lagerstatus: ",
+      "noLayers": "Inga tidslinje-lager kunde hittas. Kontakta systemadministratören.",
+      "resolutionHelp": "Ändra tidslinjens upplösning",
+      "settings": "Inställningar: ",
+      "showLayer": "Visa lager",
+      "speedFast": "Snabb (2 Hz)",
+      "speedHelp": "Ändra tidslinjens hastighet",
+      "speedMedium": "Medium (1 Hz)",
+      "speedSlow": "Långsam (0.5 Hz)",
+      "startEqualsEnd": "Start- och slutdatumet på lagret har samma värde!"
+    },
+    "settingsTitle": "Tidslinjeinställningar",
+    "title": "Tidslinje"
+  }
+}

@@ -1,6 +1,7 @@
 import { Box, Button, List, Typography } from "@mui/material";
 
 import CallMadeIcon from "@mui/icons-material/CallMade";
+import i18n from "src/i18n";
 
 export default function LayerItemInfo({ layer, app, chapters }) {
   const layerInfo = layer?.get("layerInfo") || {};
@@ -54,10 +55,7 @@ export default function LayerItemInfo({ layer, app, chapters }) {
       if (chaptersWithLayer.length > 0) {
         return (
           <>
-            <Typography>
-              Innehåll från denna kategori finns benämnt i följande kapitel i
-              översiktsplanen:
-            </Typography>
+            <Typography>{i18n.t("layerSwitcher.chaptersIntro")}</Typography>
             <List>
               {chaptersWithLayer.map((chapter, i) => {
                 return (
@@ -122,7 +120,9 @@ export default function LayerItemInfo({ layer, app, chapters }) {
           {renderChapterLinks()}
         </>
       ) : (
-        <Typography variant="body2">Ingen information tillgänglig</Typography>
+        <Typography variant="body2">
+          {i18n.t("layerSwitcher.noInfo")}
+        </Typography>
       )}
     </Box>
   );

@@ -8,9 +8,6 @@ import GetAppIcon from "@mui/icons-material/GetApp";
 
 class GeosuiteExport extends React.PureComponent {
   state = {
-    title: this.props.options.title ?? "Hämta data",
-    description:
-      this.props.options.description ?? "Hämta data med urvalsområde",
     color: null,
   };
 
@@ -47,9 +44,7 @@ class GeosuiteExport extends React.PureComponent {
         type="GeosuiteExport"
         custom={{
           icon: <GetAppIcon />,
-          title: this.state.title,
           color: this.state.color,
-          description: this.state.description,
           height: 800,
           width: 500,
           onWindowShow: this.onWindowShow,

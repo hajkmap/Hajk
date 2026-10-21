@@ -15,10 +15,10 @@ import { Circle, Fill, RegularShape, Stroke, Style } from "ol/style";
 import HelpIcon from "@mui/icons-material/Help";
 import AngleSnapping from "./AngleSnapping";
 import Segment from "./Segment";
+import i18n from "src/i18n";
 
 function Measurer(props) {
   const { map, app } = props;
-  const [state] = React.useState({});
   const currentHoverFeature = useRef(null);
   const [segmentsEnabled, setSegmentsEnabled] = useState(false);
   const [localObserver] = React.useState(Observer());
@@ -368,7 +368,7 @@ function Measurer(props) {
   const customHeaderButtons = [
     {
       icon: <HelpIcon />,
-      description: "Hjälp",
+      description: i18n.t("common.help"),
       onClickCallback: () => {
         localObserver.publish("show-help");
       },
@@ -385,8 +385,6 @@ function Measurer(props) {
       type="Measurer"
       custom={{
         icon: <MeasurerIcon />,
-        title: state.title || "Mät",
-        description: "Mät längder och ytor",
         height: "dynamic",
         width: 500,
         customPanelHeaderButtons: customHeaderButtons,

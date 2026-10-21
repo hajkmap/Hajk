@@ -14,6 +14,7 @@ import {
 
 import { Box } from "@mui/system";
 import { styled } from "@mui/material/styles";
+import i18n from "src/i18n";
 
 import type {
   DigitalPlanReportDialogProps,
@@ -39,11 +40,11 @@ export default function ReportDialog(props: DigitalPlanReportDialogProps) {
   // Helper: Prepare plain text version of the report, used for clipboard.
   const getPlainTextForClipboard = () => {
     return (
-      `DETALJPLAN ${digitalPlanKey}\n\n` +
+      `${i18n.t("propertyChecker.report.planTitleUpper", { plan: digitalPlanKey })}\n\n` +
       `${markerFeature.get(options.digitalPlanStatusAttribute)}: ${new Date(
         markerFeature.get(options.digitalPlanStatusDateAttribute)
       ).toLocaleDateString()}\n\n` +
-      "Granskning har gjorts mot följande planbestämmelser:\n\n" +
+      `${i18n.t("propertyChecker.report.regulationsIntro")}\n\n` +
       digitalPlansLayerSecondLevelOrder
         .map((useType: string) => {
           return (
@@ -61,9 +62,9 @@ export default function ReportDialog(props: DigitalPlanReportDialogProps) {
                   ` - ${r.regulationName}` +
                     `\n   ${r.regulationCaptionAsArray.join("\n   ")}` +
                     (getLayerNotesAsArray(r.id).length > 0
-                      ? `\n   Notering: ${getLayerNotesAsArray(r.id)?.join(
-                          " "
-                        )}`
+                      ? `\n   ${i18n.t("propertyChecker.report.note")} ${getLayerNotesAsArray(
+                          r.id
+                        )?.join(" ")}`
                       : "")
               )
               .join("\n")
@@ -71,23 +72,25 @@ export default function ReportDialog(props: DigitalPlanReportDialogProps) {
         })
         .join("\n\n") + // Finally, join the array into a string using new line as join character.
       "\n\n" +
-      "PLANENS SYFTE\n" +
+      `${i18n.t("propertyChecker.report.planPurpose").toUpperCase()}\n` +
       markerFeature.get(options.digitalPlanDescriptionAttribute) +
       "\n\n" +
       getUserDetailsText() +
       "\n\n" +
-      `Rapporten utgår från data som var känd per ${new Date().toLocaleDateString()}.`
+      i18n.t("propertyChecker.report.dataDate", {
+        date: new Date().toLocaleDateString(),
+      })
     );
   };
 
   // Helper: Prepare plain text version of the report, used for clipboard.
   const getHtmlFormattedTextForClipboard = () => {
     return (
-      `<h1>Detaljplan: ${digitalPlanKey}</h1>` +
+      `<h1>${i18n.t("propertyChecker.report.planTitleHtml", { plan: digitalPlanKey })}</h1>` +
       `<p>${markerFeature.get(options.digitalPlanStatusAttribute)}: ${new Date(
         markerFeature.get(options.digitalPlanStatusDateAttribute)
       ).toLocaleDateString()}</p>` +
-      "<h2>Granskning har gjorts mot följande planbestämmelser:</h2>" +
+      `<h2>${i18n.t("propertyChecker.report.regulationsIntro")}</h2>` +
       digitalPlansLayerSecondLevelOrder
         .map((useType: string) => {
           return (
@@ -108,7 +111,9 @@ export default function ReportDialog(props: DigitalPlanReportDialogProps) {
                     r.regulationCaptionAsArray.join("<br>") +
                     "<br>" +
                     (getLayerNotesAsArray(r.id).length > 0
-                      ? `Notering: ${getLayerNotesAsArray(r.id)
+                      ? `${i18n.t("propertyChecker.report.note")} ${getLayerNotesAsArray(
+                          r.id
+                        )
                           ?.map((s: string) => `${s}<br>`)
                           .join("")}`
                       : "") +
@@ -119,12 +124,12 @@ export default function ReportDialog(props: DigitalPlanReportDialogProps) {
           );
         })
         .join("") +
-      "<h2>Planens syfte</h2>" +
+      `<h2>${i18n.t("propertyChecker.report.planPurpose")}</h2>` +
       "<p>" +
       markerFeature.get(options.digitalPlanDescriptionAttribute) +
       "</p>" +
       `<p>${getUserDetailsText()}</p>` +
-      `<p>Rapporten utgår från data som var känd per ${new Date().toLocaleDateString()}.</p>`
+      `<p>${i18n.t("propertyChecker.report.dataDate", { date: new Date().toLocaleDateString() })}</p>`
     );
   };
 
@@ -144,7 +149,7 @@ export default function ReportDialog(props: DigitalPlanReportDialogProps) {
 
     navigator.clipboard.write(data).then(
       () => {
-        alert("Rapporten har kopierats till urklipp");
+        alert(i18n.t("propertyChecker.reportCopied"));
       },
       () => {}
     );
@@ -156,7 +161,10 @@ export default function ReportDialog(props: DigitalPlanReportDialogProps) {
       Object.hasOwn(userDetails, "displayName") &&
       Object.hasOwn(userDetails, "description")
     ) {
-      return `Granskningen genomfördes av ${userDetails.description} genom ${userDetails.displayName}.`;
+      return i18n.t("propertyChecker.report.reviewedBy", {
+        description: userDetails.description,
+        displayName: userDetails.displayName,
+      });
     } else {
       return "";
     }
@@ -185,7 +193,9 @@ export default function ReportDialog(props: DigitalPlanReportDialogProps) {
           e.stopPropagation();
         }}
       >
-        <DialogTitle variant="h4">Detaljplan {digitalPlanKey}</DialogTitle>
+        <DialogTitle variant="h4">
+          {i18n.t("propertyChecker.report.planTitle", { plan: digitalPlanKey })}
+        </DialogTitle>
         <DialogContent>
           <TextParagraph>
             {`${markerFeature.get(
@@ -195,7 +205,7 @@ export default function ReportDialog(props: DigitalPlanReportDialogProps) {
             ).toLocaleDateString()}`}
           </TextParagraph>
           <Typography gutterBottom variant="h5">
-            Granskning har gjorts mot följande planbestämmelser:
+            {i18n.t("propertyChecker.report.regulationsIntro")}
           </Typography>
           {digitalPlansLayerSecondLevelOrder.map(
             (useType: string, i: number) => {
@@ -242,7 +252,9 @@ export default function ReportDialog(props: DigitalPlanReportDialogProps) {
                                             variant="caption"
                                             sx={{ display: "block" }}
                                           >
-                                            {i === 0 && "Notering: "} {s}
+                                            {i === 0 &&
+                                              `${i18n.t("propertyChecker.report.note")} `}{" "}
+                                            {s}
                                           </Typography>
                                         )
                                       )}
@@ -261,30 +273,31 @@ export default function ReportDialog(props: DigitalPlanReportDialogProps) {
             }
           )}
           <Typography gutterBottom variant="h5">
-            Planens syfte
+            {i18n.t("propertyChecker.report.planPurpose")}
           </Typography>
           <TextParagraph>
             {markerFeature.get(options.digitalPlanDescriptionAttribute)}
           </TextParagraph>
           <Typography gutterBottom variant="h5">
-            Om rapporten
+            {i18n.t("propertyChecker.report.about")}
           </Typography>
           <TextParagraph>{getUserDetailsText()}</TextParagraph>
           <TextParagraph>
-            Rapporten utgår från data som var känd per{" "}
-            {new Date().toLocaleDateString()}.
+            {i18n.t("propertyChecker.report.dataDate", {
+              date: new Date().toLocaleDateString(),
+            })}
           </TextParagraph>
         </DialogContent>
         <DialogActions>
           <Button color="success" variant="contained" onClick={copyToClipboard}>
-            Kopiera till urklipp
+            {i18n.t("propertyChecker.copyToClipboard")}
           </Button>
           <Button
             onClick={() => {
               setReportDialogVisible(false);
             }}
           >
-            Stäng
+            {i18n.t("common.close")}
           </Button>
         </DialogActions>
       </BaseDialog>

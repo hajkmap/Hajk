@@ -1,5 +1,6 @@
 import IconButton from "@mui/material/IconButton";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
+import i18n from "src/i18n";
 
 /**
  * @summary Renders a Download button which on click downloads the current layer as KML
@@ -21,7 +22,7 @@ function DownloadLink({ index = 0, layer, enableDownloadLink = false }) {
   return enableDownloadLink
     ? layerName !== null && (
         <IconButton
-          aria-label="download"
+          aria-label={i18n.t("layerSwitcher.download")}
           onClick={handleDownloadClick}
           size="small"
         >

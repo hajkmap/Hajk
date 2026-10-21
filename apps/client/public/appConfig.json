@@ -1,18 +1,20 @@
 {
-  "mapserviceBase": "",
-  "defaultMap": "simpleMapAndLayersConfig",
+  "mapserviceBase": "http://localhost:3002/api/v2",
+  "defaultMap": "map_1",
+  "defaultLanguage": "sv",
+  "availableLanguages": [
+    "sv",
+    "en"
+  ],
   "availableTools": [
     "Anchor",
-    "AttributeEditor",
     "Bookmarks",
     "Buffer",
-    "CommandPalette",
     "Coordinates",
     "DocumentHandler",
     "Edit",
-    "Feedback",
-    "FloodSimulator",
     "FmeServer",
+    "FloodSimulator",
     "InfoDialog",
     "LayerComparer",
     "LayerSwitcher",
@@ -24,11 +26,30 @@
     "Search",
     "Sketch",
     "StreetView",
-    "TimeSlider"
+    "TimeSlider",
+    "Fir",
+    "Kir"
   ],
   "loadErrorTitle": "Ett fel har inträffat",
   "loadErrorMessage": "Fel när applikationen skulle läsas in. Du kan försöka att återställa applikationen genom att trycka på knappen nedan. Om felet kvarstår kan du kontakta systemansvarig.",
   "loadErrorReloadButtonText": "Återställ applikationen",
+  "hfetch": {
+    "defaultOptions": {
+      "credentials": "same-origin"
+    },
+    "useOptionOverrides": true,
+    "optionOverrides": {
+      "https://kommungis-utv.varberg.se/util/geoserver/*": {
+        "credentials": "include"
+      },
+      "https://kommungis.varberg.se/util/geoserver/*": {
+        "credentials": "include"
+      },
+      "https://kommungis-test.varberg.se/util/geoserver/*": {
+        "credentials": "include"
+      }
+    }
+  },
   "announcements": [
     {
       "id": 1,

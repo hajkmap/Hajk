@@ -35,6 +35,7 @@ import PrintList from "./PrintList";
 import TableOfContents from "./TableOfContents";
 import { getNormalizedMenuState } from "../utils/stateConverter";
 import { hasSubMenu } from "../utils/helpers";
+import i18n from "src/i18n";
 
 const GridGridContainer = styled(Grid)(({ theme }) => ({
   padding: theme.spacing(3),
@@ -934,7 +935,7 @@ class PrintWindow extends React.PureComponent {
             style={{ marginRight: "20px", marginLeft: "20px" }}
             justify="center"
           >
-            Skriv ut
+            {i18n.t("documentHandler.print.print")}
           </Typography>
         </Button>
       </GridFooterContainer>
@@ -947,11 +948,12 @@ class PrintWindow extends React.PureComponent {
         {createPortal(
           <BaseDialog disableEscapeKeyDown={true} open={this.state.pdfLoading}>
             <LinearProgress />
-            <DialogTitle>Din PDF skapas</DialogTitle>
+            <DialogTitle>
+              {i18n.t("documentHandler.print.creatingPdf")}
+            </DialogTitle>
             <DialogContent>
               <DialogContentText>
-                Det här kan ta en stund, speciellt om du har valt att skriva ut
-                många dokument.
+                {i18n.t("documentHandler.print.mayTakeAWhile")}
                 <br />
                 <br />
               </DialogContentText>
@@ -975,14 +977,16 @@ class PrintWindow extends React.PureComponent {
     return (
       <>
         <Typography align="center" variant="h6">
-          Skapa PDF
+          {i18n.t("documentHandler.print.createPdf")}
         </Typography>
         <GridSettingsContainer container>
-          <Typography variant="h6">Inställningar</Typography>
+          <Typography variant="h6">
+            {i18n.t("documentHandler.print.settings")}
+          </Typography>
 
           <Grid size={12}>
             <FormControlLabel
-              value="Välj alla dokument"
+              value="selectAllDocuments"
               control={
                 <Checkbox
                   color="primary"
@@ -992,12 +996,14 @@ class PrintWindow extends React.PureComponent {
                   }
                 />
               }
-              label="Välj alla dokument"
+              label={i18n.t("documentHandler.print.selectAll")}
               labelPlacement="end"
             />
           </Grid>
         </GridSettingsContainer>
-        <Typography variant="h6">Valt innehåll</Typography>
+        <Typography variant="h6">
+          {i18n.t("documentHandler.print.selectedContent")}
+        </Typography>
         <GridMiddleContainer container>
           <PrintList
             localObserver={localObserver}
@@ -1061,7 +1067,7 @@ class PrintWindow extends React.PureComponent {
           </StyledDialogContent>
           <DialogActions>
             <Button variant="contained" onClick={() => closeAttachmentModal()}>
-              <Typography variant="body2">Stäng</Typography>
+              <Typography variant="body2">{i18n.t("common.close")}</Typography>
             </Button>
           </DialogActions>
         </BaseDialog>
@@ -1084,8 +1090,10 @@ class PrintWindow extends React.PureComponent {
       const hasName = pdfLink.name !== "";
       const hasLink = pdfLink.link !== "";
       const disabled = !hasLink;
-      const name = hasName ? pdfLink.name : "Namn saknas";
-      const linkText = hasLink ? "Öppna" : "Länk saknas";
+      const name = hasName ? pdfLink.name : i18n.t("search.missingName");
+      const linkText = hasLink
+        ? i18n.t("documentHandler.print.open")
+        : i18n.t("documentHandler.print.linkMissing");
       const linkColor = hasLink ? "primary" : "text.secondary";
       const linkIcon = hasLink ? (
         <OpenInNewIcon sx={{ width: "15px" }} />
@@ -1122,7 +1130,9 @@ class PrintWindow extends React.PureComponent {
               </Button>
             )}
             {!hasLink && (
-              <Typography sx={{ fontStyle: "italic" }}>Länk saknas</Typography>
+              <Typography sx={{ fontStyle: "italic" }}>
+                {i18n.t("documentHandler.print.linkMissing")}
+              </Typography>
             )}
           </StyledListItemButton>
         </div>
@@ -1132,9 +1142,11 @@ class PrintWindow extends React.PureComponent {
     return (
       <>
         <Typography align="center" variant="h6">
-          Bilagor
+          {i18n.t("documentHandler.print.attachments")}
         </Typography>
-        <Typography variant="h6">Innehåll</Typography>
+        <Typography variant="h6">
+          {i18n.t("documentHandler.contents")}
+        </Typography>
         <GridMiddleContainer>
           <List>{pdfLinks.map(renderAttachment)}</List>
         </GridMiddleContainer>
@@ -1163,7 +1175,9 @@ class PrintWindow extends React.PureComponent {
                   startIcon={<ArrowBackIcon />}
                   onClick={togglePrintWindow}
                 >
-                  <Typography justify="center">Tillbaka</Typography>
+                  <Typography justify="center">
+                    {i18n.t("common.back")}
+                  </Typography>
                 </Button>
               </Grid>
               <StyledGrid size={4}>
@@ -1174,7 +1188,9 @@ class PrintWindow extends React.PureComponent {
                     endIcon={<ArrowForwardIcon />}
                     onClick={() => this.toggleDocumentsAttachments()}
                   >
-                    <Typography justify="center">Bilagor</Typography>
+                    <Typography justify="center">
+                      {i18n.t("documentHandler.print.attachments")}
+                    </Typography>
                   </Button>
                 )}
               </StyledGrid>
@@ -1191,7 +1207,9 @@ class PrintWindow extends React.PureComponent {
                   startIcon={<ArrowBackIcon />}
                   onClick={() => this.toggleDocumentsAttachments()}
                 >
-                  <Typography justify="center">Skapa Pdf</Typography>
+                  <Typography justify="center">
+                    {i18n.t("documentHandler.print.createPdf")}
+                  </Typography>
                 </Button>
               </Grid>
             </GridHeaderContainer>

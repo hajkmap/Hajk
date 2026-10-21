@@ -1,0 +1,50 @@
+{
+  "timeSlider": {
+    "description": "Show information for different time periods",
+    "player": {
+      "backward": "Step backward",
+      "backwardDisabled": "You can't step backward while the player is running.",
+      "forward": "Step forward",
+      "forwardDisabled": "You can't step forward while the player is running.",
+      "reset": "Reset the timeline",
+      "start": "Start the timeline",
+      "stop": "Stop the timeline"
+    },
+    "print": {
+      "dialogText": "This may take a while, especially if many images are being created.",
+      "dialogTitle": "Your images are being created",
+      "disabledTooltip": "The current settings would print too many images. Shorten the date range or change the resolution.",
+      "enabledTooltip": "Start printing",
+      "info_one": "When printing, one image is created for each \"step\" in the timeline. The current settings will result in {{count}} image.",
+      "info_other": "When printing, one image is created for each \"step\" in the timeline. The current settings will result in {{count}} images.",
+      "print": "Print",
+      "range": "Print range",
+      "scale": "Scale",
+      "selectRange": "Select print range:"
+    },
+    "resolution": "Resolution",
+    "resolutions": {
+      "days": "Day",
+      "months": "Month",
+      "quarters": "Quarter",
+      "years": "Year"
+    },
+    "settings": {
+      "dateMissing": "The layer's start or end date is missing!",
+      "hideLayer": "Hide layer",
+      "layerOk": "The layer looks OK!",
+      "layerStatus": "Layer status: ",
+      "noLayers": "No timeline layers could be found. Contact the system administrator.",
+      "resolutionHelp": "Change the timeline's resolution",
+      "settings": "Settings: ",
+      "showLayer": "Show layer",
+      "speedFast": "Fast (2 Hz)",
+      "speedHelp": "Change the timeline's speed",
+      "speedMedium": "Medium (1 Hz)",
+      "speedSlow": "Slow (0.5 Hz)",
+      "startEqualsEnd": "The layer's start and end dates are the same!"
+    },
+    "settingsTitle": "Timeline settings",
+    "title": "Timeline"
+  }
+}

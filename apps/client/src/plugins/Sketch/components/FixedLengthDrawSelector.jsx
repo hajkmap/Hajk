@@ -13,6 +13,7 @@ import {
 import HajkToolTip from "components/HajkToolTip";
 import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
+import i18n from "src/i18n";
 
 // Styled AccordionSummary to match other accordions in Sketch
 const StyledAccordionSummary = styled(AccordionSummary)(() => ({
@@ -121,8 +122,8 @@ const FixedLengthDrawSelector = (props) => {
       <HajkToolTip
         title={
           props.fixedLengthEnabled
-            ? "Klicka för att avaktivera fast längd och riktning"
-            : "Klicka för att rita segment med fast längd och riktning"
+            ? i18n.t("sketch.fixed.disableHint")
+            : i18n.t("sketch.fixed.enableHint")
         }
       >
         <StyledAccordionSummary>
@@ -131,7 +132,9 @@ const FixedLengthDrawSelector = (props) => {
             sx={{ justifyContent: "space-between", alignItems: "center" }}
             size={12}
           >
-            <Typography variant="button">Rita manuellt</Typography>
+            <Typography variant="button">
+              {i18n.t("sketch.fixed.drawManually")}
+            </Typography>
             <Switch
               checked={props.fixedLengthEnabled}
               onClick={handleSwitchClick}
@@ -146,9 +149,9 @@ const FixedLengthDrawSelector = (props) => {
         <Grid container>
           {/* Length input */}
           <Grid sx={{ mb: 2 }} size={12}>
-            <HajkToolTip title="Ange längden för varje segment i meter (0.1 - 100000m)">
+            <HajkToolTip title={i18n.t("sketch.fixed.lengthHint")}>
               <TextField
-                label="Segmentlängd (meter)"
+                label={i18n.t("sketch.fixed.length")}
                 variant="outlined"
                 fullWidth
                 type="number"
@@ -170,9 +173,9 @@ const FixedLengthDrawSelector = (props) => {
 
           {/* Angle input */}
           <Grid size={12}>
-            <HajkToolTip title="Ange riktningen i grader. 0° är norr, 90° är öst, 180° är syd, 270° är väst">
+            <HajkToolTip title={i18n.t("sketch.fixed.directionHint")}>
               <TextField
-                label="Riktning (grader)"
+                label={i18n.t("sketch.fixed.direction")}
                 variant="outlined"
                 fullWidth
                 type="number"
@@ -195,7 +198,7 @@ const FixedLengthDrawSelector = (props) => {
           {/* Action buttons */}
           <Grid container spacing={1} sx={{ mt: 2 }} size={12}>
             <Grid size={12}>
-              <HajkToolTip title="Klicka först i kartan för att sätta startpunkt, sedan klicka här för att lägga till varje segment">
+              <HajkToolTip title={i18n.t("sketch.fixed.addSegmentHint")}>
                 <span style={{ display: "block" }}>
                   <Button
                     variant="contained"
@@ -205,13 +208,13 @@ const FixedLengthDrawSelector = (props) => {
                     onClick={props.onAddSegment}
                     disabled={props.uiDisabled || !props.drawingActive}
                   >
-                    Lägg till segment
+                    {i18n.t("sketch.fixed.addSegment")}
                   </Button>
                 </span>
               </HajkToolTip>
             </Grid>
             <Grid size={12}>
-              <HajkToolTip title="Avsluta ritningen">
+              <HajkToolTip title={i18n.t("sketch.fixed.finishDrawingHint")}>
                 <span style={{ display: "block" }}>
                   <Button
                     variant="outlined"
@@ -221,7 +224,7 @@ const FixedLengthDrawSelector = (props) => {
                     onClick={props.onFinishDrawing}
                     disabled={props.uiDisabled || !props.drawingActive}
                   >
-                    Avsluta ritning
+                    {i18n.t("sketch.finishDrawing")}
                   </Button>
                 </span>
               </HajkToolTip>

@@ -11,11 +11,9 @@ import { Divider } from "@mui/material";
 
 import withSnackbar from "components/WithSnackbar";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
-import {
-  LOCATION_DENIED_SNACK_OPTIONS,
-  LOCATION_DENIED_SNACK_MESSAGE,
-} from "../Location/constants";
+import { LOCATION_DENIED_SNACK_OPTIONS } from "../Location/constants";
 
 const StyledGridContainer = styled(Grid)(({ theme }) => ({
   padding: theme.spacing(2),
@@ -38,7 +36,7 @@ class CoordinatesView extends React.PureComponent {
      */
     this.localObserver.subscribe("showSnackbar", () => {
       this.snackbarKey = this.props.enqueueSnackbar(
-        "Klicka i kartan för att välja position.",
+        i18n.t("coordinates.clickInMap"),
         {
           variant: "info",
           persist: true,
@@ -55,14 +53,14 @@ class CoordinatesView extends React.PureComponent {
           },
           action: (key) => (
             <Button
-              aria-label="close"
+              aria-label={i18n.t("common.close")}
               color="inherit"
               id={key}
               onClick={() => {
                 this.props.model.closeSnackbar();
               }}
             >
-              Stäng
+              {i18n.t("common.close")}
             </Button>
           ),
         }
@@ -75,7 +73,7 @@ class CoordinatesView extends React.PureComponent {
 
     this.localObserver.subscribe("location-permissions-denied", () => {
       this.props.enqueueSnackbar(
-        LOCATION_DENIED_SNACK_MESSAGE,
+        i18n.t("common.geolocationPermissionDenied"),
         LOCATION_DENIED_SNACK_OPTIONS
       );
     });
@@ -133,7 +131,7 @@ class CoordinatesView extends React.PureComponent {
             xs: 6,
           }}
         >
-          <HajkToolTip title="Rensa fält">
+          <HajkToolTip title={i18n.t("coordinates.clearFields")}>
             <Button
               fullWidth={true}
               variant="contained"
@@ -143,7 +141,7 @@ class CoordinatesView extends React.PureComponent {
                 this.props.model.resetCoords();
               }}
             >
-              Rensa
+              {i18n.t("search.results.clear")}
             </Button>
           </HajkToolTip>
         </Grid>
@@ -152,7 +150,7 @@ class CoordinatesView extends React.PureComponent {
             xs: 6,
           }}
         >
-          <HajkToolTip title="Min position">
+          <HajkToolTip title={i18n.t("coordinates.myPosition")}>
             <Button
               fullWidth={true}
               variant="contained"
@@ -162,7 +160,7 @@ class CoordinatesView extends React.PureComponent {
                 this.props.model.goToUserLocation();
               }}
             >
-              Min position
+              {i18n.t("coordinates.myPosition")}
             </Button>
           </HajkToolTip>
         </Grid>
@@ -171,7 +169,7 @@ class CoordinatesView extends React.PureComponent {
             xs: 6,
           }}
         >
-          <HajkToolTip title="Panorera till markering">
+          <HajkToolTip title={i18n.t("coordinates.panToMarkerTooltip")}>
             <Button
               fullWidth={true}
               variant="contained"
@@ -181,7 +179,7 @@ class CoordinatesView extends React.PureComponent {
                 this.props.model.centerOnMarker();
               }}
             >
-              Panorera
+              {i18n.t("coordinates.panToMarker")}
             </Button>
           </HajkToolTip>
         </Grid>
@@ -190,7 +188,7 @@ class CoordinatesView extends React.PureComponent {
             xs: 6,
           }}
         >
-          <HajkToolTip title="Zooma in till markering">
+          <HajkToolTip title={i18n.t("coordinates.zoomToMarkerTooltip")}>
             <Button
               fullWidth={true}
               variant="contained"
@@ -200,7 +198,7 @@ class CoordinatesView extends React.PureComponent {
                 this.props.model.zoomOnMarker();
               }}
             >
-              Zooma
+              {i18n.t("coordinates.zoomToMarker")}
             </Button>
           </HajkToolTip>
         </Grid>

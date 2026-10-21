@@ -6,6 +6,7 @@ import LayerGroup from "./LayerGroup";
 import QuickAccessView from "./QuickAccessView";
 import LayerListFilter from "./LayerListFilter";
 import { debounce } from "utils/debounce";
+import i18n from "src/i18n";
 
 // Layers Tab in the LayerSwitcher
 
@@ -174,7 +175,7 @@ const LayersTab = ({
             py: 1,
             px: 4,
           }}
-          primary="Inga resultat"
+          primary={i18n.t("common.noResults")}
           slotProps={{
             primary: {
               variant: "body1",

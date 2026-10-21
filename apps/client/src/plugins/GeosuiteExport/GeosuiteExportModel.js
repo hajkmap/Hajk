@@ -7,6 +7,7 @@ import { hfetch } from "../../utils/FetchWrapper";
 import { WFS } from "ol/format";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
+import i18n from "src/i18n";
 
 /**
  * GeosuiteExport plug-in, model class.
@@ -683,7 +684,7 @@ class GeosuiteExportModel {
 
   zipDocuments = (documents) => {
     const zip = new JSZip();
-    let deliveryInfo = "";
+    const deliveryInfo = [];
     const usedFileNames = [];
 
     documents.forEach((doc) => {
@@ -706,20 +707,22 @@ class GeosuiteExportModel {
           fileNameToUse = fileName + "(" + n + ")." + fileExtension;
         }
 
-        deliveryInfo =
-          deliveryInfo +
-          "Projekt: " +
-          doc.title +
-          "\nDokument: " +
-          fileNameToUse +
-          "\n\n";
+        deliveryInfo.push(
+          i18n.t("geosuiteExport.deliveryInfo", {
+            project: doc.title,
+            document: fileNameToUse,
+          })
+        );
 
         usedFileNames.push(fileNameToUse);
         zip.file(fileNameToUse, blob);
       }
     });
 
-    zip.file("Leveransinformation.txt", deliveryInfo); // Create text file and add information about documents
+    zip.file(
+      i18n.t("geosuiteExport.deliveryInfoFileName"),
+      deliveryInfo.map((info) => `${info}\n\n`).join("")
+    ); // Create text file and add information about documents
 
     zip
       .generateAsync({
