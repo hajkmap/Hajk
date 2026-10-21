@@ -20,6 +20,10 @@ reasoning, in AI_POLICY.md.
 This doesn't apply to trivial AI-assisted edits (e.g. autocomplete for a
 line or two, or wording fixes in docs).
 
+## Security vulnerabilities
+
+Please don't report security vulnerabilities in public issues. See [SECURITY.md](SECURITY.md) for how to report them privately.
+
 ## User documentation
 
 End-user documentation can be found in [Hajk's Wiki](https://github.com/hajkmap/Hajk/wiki). Writing user documentation is a very important way of contributing to the project and suits well for organizations that wish to contribute but lack coding capabilities.
