@@ -19,6 +19,17 @@ another plugin's area.
 At startup, all core and plugin files are bundled and merged. If a plugin and core define the same
 key, core wins.
 
+### Why plugins have their own `i18n/` folder
+
+- **Consistency**: every plugin, core or third-party, is translated the same way. A plugin's code
+  and its texts live together in the plugin folder.
+- **Third-party plugins**: drop the plugin folder into `src/plugins/` and its translations come
+  along. No core language file needs to be edited, so there are no merge conflicts with Hajk
+  updates.
+- **Ownership**: a plugin can only touch its own area, so plugins can't overwrite each other's
+  texts or core's.
+- **Removing a plugin** removes its texts too, with nothing left behind in the core files.
+
 ## Using translations in code
 
 Never hard-code user-facing text.
