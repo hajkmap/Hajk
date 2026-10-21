@@ -49,6 +49,10 @@ For some real-life examples, see the following solutions:
 - [Varberg municipality's map](https://karta.varberg.se)
 - [Uddevalla municipality's map](https://karta.uddevalla.se)
 
+## Security
+
+To report a vulnerability, see [SECURITY.md](SECURITY.md). If you are evaluating Hajk for your organisation, see the [Security FAQ](docs/security-faq.md).
+
 ## Community extensions
 
 Community extensions are additions developed by the community outside the scope of the core Hajk distribution. These can include anything from rewrites in other programming languages to customized integrations with specific business systems.
