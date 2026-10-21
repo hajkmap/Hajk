@@ -14,7 +14,9 @@ import { decodeCommas } from "../utils/StringCommaCoder";
 import { hfetch } from "../utils/FetchWrapper";
 
 const ESCAPE_CHAR = "!";
-const SINGLE_CHAR = ".";
+// Hajk never uses the single-char wildcard, but IsLike requires one. Use a char
+// that is rare in data, so common chars such as "." can be sent unescaped (#1844).
+const SINGLE_CHAR = "~";
 const WILDCARD_CHAR = "*";
 
 class SearchModel {
@@ -147,7 +149,7 @@ class SearchModel {
     const promises = [];
 
     // Will hold the end results
-    let rawResults = null;
+    let rawResults;
 
     // Ensure that we've cleaned obsolete AbortControllers before we put new ones there
     this.#controllers = [];
@@ -326,8 +328,12 @@ class SearchModel {
     });
   };
 
+  // Only the wildcard, single and escape chars are special in an OGC IsLike filter.
   #escapeSpecialChars = (string) => {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, "!$&"); // $& means the whole matched string
+    const specialChars = [ESCAPE_CHAR, WILDCARD_CHAR, SINGLE_CHAR];
+    return [...string]
+      .map((c) => (specialChars.includes(c) ? `${ESCAPE_CHAR}${c}` : c))
+      .join("");
   };
 
   getPossibleSearchCombinations = (searchString) => {
