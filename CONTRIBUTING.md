@@ -2,10 +2,12 @@
 
 ## Required tools
 
-- Latest LTS of NodeJS
+- NodeJS ≥ 22.18 (current LTS recommended)
 - Latest Git
 
 All apps reside inside the `apps/` directory. The Client UI (`client`), Admin UI (`admin`) and NodeJS backend (`backend`) applications can be built and deployed on any OS supported by recent Git and Node versions (tested on macOS, Windows and Linux).
+
+See [AGENTS.md](AGENTS.md) for an overview of the architecture and how to get the apps running locally (start order, ports and runtime config files).
 
 ## AI-assisted contributions
 
@@ -30,7 +32,9 @@ End-user documentation can be found in [Hajk's Wiki](https://github.com/hajkmap/
 
 ## Design guidelines
 
-Hajk is built using **Material Design** components from the [Material UI](https://material-ui.com/) project. Make sure to familiarize yourself with all the available components. It is crucial for the user experience that the design principles are followed throughout the system.
+Hajk is built using **Material Design** components from the [Material UI](https://mui.com/material-ui/) project. Make sure to familiarize yourself with all the available components. It is crucial for the user experience that the design principles are followed throughout the system.
+
+This applies primarily to the Client UI. The Admin UI is legacy (MUI v4 together with Ant Design) and should follow whatever patterns already exist in the part you're working on.
 
 ## Git workflow
 
@@ -58,11 +62,11 @@ In short, developing a new feature, would look something like:
 6. Code…
 7. Regularly commit changes to your branch with `git commit -S -m "A good comment, can be multiline."`. (Note, the `-S` flag [signs your commit](https://help.github.com/en/articles/signing-commits), and signing commits is something you really should be doing.)
 8. Regularly push your changes upstream (to GitHub) with `git push`
-9. **Regularly merge changes that other developers might be doing, from `develop` into your branch.** That means that you will incorporate recent changes and your local branch will stay up-to-date with the latest developments. **Please don't overlook it. This is a really important part.** You can do it like this: `git stash && git checkout develop && git fetch && git merge && git checkout feature/1234-blue-button && git merge develop && git stash apply`. (If you feel comfortable enough with Git, there are of course shorter way of doing this, such as directly merging the upstream remote branch.)
-10. Describe your change with a log entry in the CHANGELOG.md. Select the subsection below the **Unreleased** section based on the type of issue: **Added** for feature, **Fixed** for any bug fixes, **Changed** for changes in existing functionality, **Security** in case of vulnerabilities. See further at the very end of CHANGELOG.md.
+9. **Regularly merge changes that other developers might be doing, from `develop` into your branch.** That means that you will incorporate recent changes and your local branch will stay up-to-date with the latest developments. **Please don't overlook it. This is a really important part.** While on your feature branch, you can do it like this: `git fetch && git merge origin/develop`.
+10. Describe your change with a log entry in the CHANGELOG.md. Select the subsection below the **[unreleased]** section based on the type of change: **Breaking** for changes that require action from those upgrading, **Added** for new features, **Changed** for changes in existing functionality, **Deprecated** for soon-to-be removed features, **Removed** for now removed features, **Fixed** for any bug fixes, **Security** in case of vulnerabilities. See further at the very end of CHANGELOG.md.
     Format your new row like:
     - `area`: Short explanation of what the change resolves/adds. [#`issue-number`](https://github.com/hajkmap/Hajk/issues/`issue-number`)
-      - area: could be a specific feature in Hajk like Sketch, Print or Cookie or an app like Admin, Backend or Client or more generic like Core, Bug, Fix.
+      - area: the app(s) affected, i.e. Client, Admin or Backend, or a combination such as `Client + Admin`. Optionally followed by the specific feature, e.g. `Client: Sketch - …`.
       - issue-number: The number of your Hajk issue.
 11. When you're done coding, go to GitHub and create a new pull request. Make sure that you want to merge your branch into `develop`. If AI tools contributed substantially to your change, disclose this in the PR description as described in [AI_POLICY.md](AI_POLICY.md).
 12. Hajk maintainers will get notified when you create the PR. They will review your PR and either accept and merge your branch (as well as delete it from the remote, as it's no longer needed) or (if the code isn't considered ready) request changes. After a successful merge you will still have a copy of your feature branch locally, but it can be safely removed by running `git branch -d feature/1234-blue-button`. **PRs that skip the pre-approval or disclosure steps required for AI-assisted contributions may be closed without detailed review.**
@@ -73,6 +77,6 @@ Hajk uses **ESLint** and **Prettier** to enforce code formatting across the proj
 
 🔥 **Code that gets checked in must follow those rules.** 🔥
 
-The `client` and `backend` directories contain all necessary configuration files. The recommended way is to use an editor that has extensions for ESLint and Prettier installed. It is also highly recommended to make the editor run Prettier on each file save (i.e. in VSCode it can be controlled by the `formatOnSave: true` flag).
+The `client` and `backend` directories contain all necessary configuration files. Run `npm run lint:fix` in either of them before committing (the client also has `npm run format` for Prettier). The legacy `admin` app has no ESLint setup — use Prettier only.
 
-**For a simple guide on setting up VSCode with ESLint, Prettier and some , see [this presentation](https://github.com/hajkmap/Hajk/blob/master/dokumentation/VSCodeSetup.pdf)**. (Swedish only)
+The recommended way is to use an editor that has extensions for ESLint and Prettier installed. It is also highly recommended to make the editor run Prettier on each file save (i.e. in VSCode it can be controlled by the `formatOnSave: true` flag).
