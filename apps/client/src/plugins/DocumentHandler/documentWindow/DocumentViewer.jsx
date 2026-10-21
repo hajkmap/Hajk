@@ -5,15 +5,23 @@ import Grid from "@mui/material/Grid";
 import TableOfContents from "./TableOfContents";
 import Contents from "./Contents";
 import { delay } from "../../../utils/Delay";
+import { isMobile } from "../../../utils/IsMobile";
 import { animateScroll as scroll } from "react-scroll";
 import ScrollToTop from "./ScrollToTop";
 
-const GridContainer = styled(Grid)(() => ({
+const GridContainer = styled(Grid)(({ theme }) => ({
   maxHeight: "100%",
   overflowY: "auto",
   overflowX: "hidden",
   userSelect: "text",
   outline: "none",
+  // 38px clears the fixed scroll-to-top button. It stays on above xs even
+  // when that button is hidden (short documents, minimized window). xs uses
+  // 10px because the button is not shown there.
+  paddingBottom: "38px",
+  [theme.breakpoints.only("xs")]: {
+    paddingBottom: "10px",
+  },
 }));
 
 const ContentContainer = styled(Grid)(({ theme }) => ({
@@ -72,7 +80,7 @@ class DocumentViewer extends React.PureComponent {
 
     localObserver.subscribe("scroll-to-chapter", async (chapter) => {
       /* Delay so the chapter ref exists after a document switch.
-         Scroll only #documentViewer — scrollIntoView also moves
+         Set scrollTop on the scrollport — scrollIntoView also moves
          ancestor windows (react-rnd transform) and misaligns the header. */
       await delay(100);
       this.scrollChapterIntoView(chapter);
@@ -103,14 +111,40 @@ class DocumentViewer extends React.PureComponent {
     }
   };
 
+  // Same isMobile flag that picks Window vs WindowSheet. Desktop scrolls
+  // #documentViewer. Mobile scrolls the sheet, because the viewer grows
+  // with the document and is not the scrollport there. The scroller is the
+  // parent of .window-sheet-content, same as WindowSheet's scroll ref.
+  scrollContainer = () => {
+    const viewer = this.documentViewerRef.current;
+    if (!viewer) return null;
+    if (!isMobile) return viewer;
+    return viewer.closest(".window-sheet-content")?.parentElement ?? null;
+  };
+
   scrollChapterIntoView = (chapter) => {
-    const container = this.documentViewerRef.current;
     const target = chapter?.scrollRef?.current;
-    if (!container || !target) return;
-    const delta =
-      target.getBoundingClientRect().top -
-      container.getBoundingClientRect().top;
-    container.scrollTop += delta;
+    const container = this.scrollContainer();
+    if (!target || !container) return;
+
+    // Any focused element in the sheet makes mobile browsers scroll that
+    // element back into view after the chapter jump. Contents rows and
+    // in-document chapter links both do this.
+    if (isMobile) {
+      const active = document.activeElement;
+      if (active instanceof HTMLElement && container.contains(active)) {
+        active.blur();
+      }
+    }
+
+    const align = () => {
+      container.scrollTop +=
+        target.getBoundingClientRect().top -
+        container.getBoundingClientRect().top;
+    };
+
+    align();
+    if (isMobile) requestAnimationFrame(align);
   };
 
   scrollToTop = async () => {

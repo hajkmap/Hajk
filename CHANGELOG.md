@@ -59,6 +59,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Client: DocumentHandler - On mobile, chapter jumps scroll the bottom sheet so the chapter lines up. [#1933](https://github.com/hajkmap/Hajk/issues/1933)
+- Client: DocumentHandler - The scroll-to-top button stays half transparent until hover or focus, and document text can scroll clear of it. [#1933](https://github.com/hajkmap/Hajk/issues/1933)
 - Client: Search - Search phrases containing "." (e.g. "Kv.") or "!" now return results. Only the characters that are special in WFS IsLike filters are escaped now, and "." is no longer the single-char wildcard. [#1844](https://github.com/hajkmap/Hajk/issues/1844)
 - Client: Measurer - Measurements added with "Välj på kartan" get the same delete-hover highlight as drawn lines, polygons, and circles. [#1923](https://github.com/hajkmap/Hajk/issues/1923)
 - Client: Sketch - The tab for choosing an editable layer to save to, including the "Öppna Attributredigerare" button, is now hidden when AttributeEditor isn't available in the map, or when the user has no access to any of its editing services. [#1919](https://github.com/hajkmap/Hajk/issues/1919)
