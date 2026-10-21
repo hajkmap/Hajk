@@ -10,6 +10,7 @@ export default express
   .Router()
   .get("/", controller.getServices)
   .get("/projections", controller.getAllProjections)
+  .get("/deleted", controller.getDeletedServices)
   .get("/:id", controller.getServiceById)
   .get("/:id/layers/count", controller.getLayerCountByServiceId)
   .get("/:id/layers", controller.getLayersByServiceId)
@@ -17,6 +18,7 @@ export default express
   .get("/:id/maps", controller.getMapsByServiceId)
   .get("/:id/groups", controller.getGroupsByServiceId)
   .post("/", validatePayload(ServiceCreateSchema), controller.createService)
+  .post("/:id/restore", controller.restoreService)
   .patch("/:id", validatePayload(ServiceUpdateSchema), controller.updateService)
   .patch("/:id/health-status", controller.updateHealthStatus)
   .delete("/:id", controller.deleteService);

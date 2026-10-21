@@ -1,0 +1,199 @@
+import { useState } from "react";
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Typography,
+  useTheme,
+} from "@mui/material";
+import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
+import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
+
+import {
+  useDeletedServices,
+  useRestoreService,
+  type Service,
+} from "../../../api/services";
+import StyledDataGrid from "../../../components/data-grid";
+import DialogWrapper from "../../../components/flexible-dialog";
+
+export default function DeletedServicesList() {
+  const { t } = useTranslation();
+  const { palette } = useTheme();
+  const { data: services = [], isLoading, isError } = useDeletedServices();
+  const { mutateAsync: restoreService, isPending } = useRestoreService();
+  const [restoreTarget, setRestoreTarget] = useState<Service | null>(null);
+
+  const handleConfirmRestore = async () => {
+    if (!restoreTarget) return;
+
+    try {
+      const restored = await restoreService(restoreTarget.id);
+      const layerCount = restored.layerCount ?? 0;
+      toast.success(
+        t("deleted.services.restoreSuccess", {
+          name: restoreTarget.name,
+          count: layerCount,
+        }),
+        {
+          position: "bottom-left",
+          theme: palette.mode,
+          hideProgressBar: true,
+        },
+      );
+      setRestoreTarget(null);
+    } catch (error) {
+      console.error("Failed to restore service:", error);
+      toast.error(
+        t("deleted.services.restoreFailed", {
+          name: restoreTarget.name,
+        }),
+        {
+          position: "bottom-left",
+          theme: palette.mode,
+          hideProgressBar: true,
+        },
+      );
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+        <CircularProgress size={32} />
+      </Box>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Typography color="error" sx={{ py: 2 }}>
+        {t("deleted.services.loadFailed")}
+      </Typography>
+    );
+  }
+
+  if (services.length === 0) {
+    return (
+      <Box
+        sx={{
+          py: 6,
+          px: 2,
+          textAlign: "center",
+          color: "text.secondary",
+        }}
+      >
+        <Typography variant="body1">{t("deleted.empty")}</Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <>
+      <StyledDataGrid<Service>
+        storageKey="deleted-services"
+        rows={services}
+        getRowId={(row) => row.id}
+        customSx={{
+          height: "calc(100vh - 280px)",
+          minHeight: 320,
+        }}
+        columns={[
+          {
+            field: "name",
+            flex: 1,
+            headerName: t("common.name"),
+          },
+          {
+            field: "type",
+            flex: 0.4,
+            headerName: t("common.serviceType"),
+          },
+          {
+            field: "layerCount",
+            flex: 0.4,
+            headerName: t("deleted.services.layers"),
+            valueFormatter: (value: number | null | undefined) =>
+              value == null ? "0" : String(value),
+          },
+          {
+            field: "deletedAt",
+            headerName: t("deleted.deletedAt"),
+            flex: 0.7,
+            valueFormatter: (value: string | null | undefined) =>
+              value ? new Date(value).toLocaleString("sv-SE") : "",
+          },
+          {
+            field: "actions",
+            headerName: "",
+            sortable: false,
+            filterable: false,
+            width: 140,
+            align: "right",
+            headerAlign: "right",
+            renderCell: (params) => (
+              <Button
+                size="small"
+                startIcon={<RestoreFromTrashIcon fontSize="small" />}
+                disabled={isPending}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setRestoreTarget(params.row);
+                }}
+              >
+                {t("deleted.restore")}
+              </Button>
+            ),
+          },
+        ]}
+      />
+
+      <DialogWrapper
+        fullWidth
+        open={restoreTarget !== null}
+        title={t("deleted.services.restoreTitle", {
+          name: restoreTarget?.name ?? "",
+        })}
+        onClose={() => {
+          if (!isPending) setRestoreTarget(null);
+        }}
+        actions={
+          <>
+            <Button
+              variant="text"
+              onClick={() => setRestoreTarget(null)}
+              disabled={isPending}
+            >
+              {t("common.cancel")}
+            </Button>
+            <Button
+              variant="contained"
+              disabled={isPending}
+              onClick={() => void handleConfirmRestore()}
+              startIcon={
+                isPending ? (
+                  <CircularProgress color="inherit" size={18} />
+                ) : (
+                  <RestoreFromTrashIcon />
+                )
+              }
+            >
+              {t("deleted.restore")}
+            </Button>
+          </>
+        }
+      >
+        <Alert severity="info" sx={{ mb: 2 }}>
+          {t("deleted.services.restoreConfirm", {
+            count: restoreTarget?.layerCount ?? 0,
+          })}
+        </Alert>
+        <Alert severity="warning">
+          {t("deleted.services.restoreWarning")}
+        </Alert>
+      </DialogWrapper>
+    </>
+  );
+}

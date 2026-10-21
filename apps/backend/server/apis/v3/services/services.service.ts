@@ -20,9 +20,12 @@ const SERVICE_LAYER_LIST_SELECT = {
   selectedLayers: true,
 } as const;
 
-const SERVICE_LAYER_WHERE = (serviceId: string) => ({
+const SERVICE_LAYER_WHERE = (
+  serviceId: string,
+  deletedAt: Date | null = null
+) => ({
   serviceId,
-  deletedAt: null,
+  deletedAt,
 });
 
 class ServicesService {
@@ -66,8 +69,11 @@ class ServicesService {
     return service;
   }
 
-  async getLayerCountByServiceId(id: string) {
-    const where = SERVICE_LAYER_WHERE(id);
+  async getLayerCountByServiceId(
+    id: string,
+    options?: { deletedAt?: Date | null }
+  ) {
+    const where = SERVICE_LAYER_WHERE(id, options?.deletedAt ?? null);
     const [displayLayerCount, searchLayerCount, editingLayerCount] =
       await Promise.all([
         prisma.displayLayer.count({ where }),
@@ -436,6 +442,89 @@ class ServicesService {
           where: { id: service.metadataId },
         });
       }
+    });
+  }
+
+  async getDeletedServices() {
+    const services = await prisma.service.findMany({
+      where: { deletedAt: { not: null } },
+      orderBy: { deletedAt: "desc" },
+    });
+
+    return Promise.all(
+      services.map(async (service) => {
+        const { count: layerCount } = await this.getLayerCountByServiceId(
+          service.id,
+          { deletedAt: service.deletedAt }
+        );
+
+        return {
+          ...service,
+          layerCount,
+        };
+      })
+    );
+  }
+
+  async restoreService(id: string, userId?: string) {
+    const service = await prisma.service.findFirst({
+      where: { id, deletedAt: { not: null } },
+    });
+
+    if (!service || !service.deletedAt) {
+      throw new HajkError(
+        HttpStatusCodes.NOT_FOUND,
+        `No deleted service with id: ${id} could be found.`,
+        HajkStatusCodes.UNKNOWN_SERVICE_ID
+      );
+    }
+
+    const deletedAt = service.deletedAt;
+    const restoredAt = new Date();
+    const where = SERVICE_LAYER_WHERE(id, deletedAt);
+
+    return prisma.$transaction(async (transaction) => {
+      const [displayResult, searchResult, editingResult] = await Promise.all([
+        transaction.displayLayer.updateMany({
+          where,
+          data: {
+            deletedAt: null,
+            lastSavedBy: userId,
+            lastSavedDate: restoredAt,
+          },
+        }),
+        transaction.searchLayer.updateMany({
+          where,
+          data: {
+            deletedAt: null,
+            lastSavedBy: userId,
+            lastSavedDate: restoredAt,
+          },
+        }),
+        transaction.editingLayer.updateMany({
+          where,
+          data: {
+            deletedAt: null,
+            lastSavedBy: userId,
+            lastSavedDate: restoredAt,
+          },
+        }),
+      ]);
+
+      const restored = await transaction.service.update({
+        where: { id },
+        data: {
+          deletedAt: null,
+          lastSavedBy: userId,
+          lastSavedDate: restoredAt,
+        },
+      });
+
+      return {
+        ...restored,
+        layerCount:
+          displayResult.count + searchResult.count + editingResult.count,
+      };
     });
   }
 }

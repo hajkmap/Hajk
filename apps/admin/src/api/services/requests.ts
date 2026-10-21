@@ -389,6 +389,49 @@ export const deleteService = async (serviceId: string): Promise<void> => {
   }
 };
 
+export const getDeletedServices = async (): Promise<Service[]> => {
+  const internalApiClient = getApiClient();
+  try {
+    const response =
+      await internalApiClient.get<ServicesApiResponse>("/services/deleted");
+    if (!response.data) {
+      throw new Error("No deleted services data found");
+    }
+    return response.data.services;
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+    if (axiosError.response) {
+      throw new Error(
+        `Failed to fetch deleted services. ErrorId: ${axiosError.response.data.errorId}.`,
+      );
+    } else {
+      throw new Error("Failed to fetch deleted services.");
+    }
+  }
+};
+
+export const restoreService = async (serviceId: string): Promise<Service> => {
+  const internalApiClient = getApiClient();
+  try {
+    const response = await internalApiClient.post<Service>(
+      `/services/${serviceId}/restore`,
+    );
+    if (!response.data) {
+      throw new Error("No service data returned");
+    }
+    return response.data;
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+    if (axiosError.response) {
+      throw new Error(
+        `Failed to restore service. ErrorId: ${axiosError.response.data.errorId}.`,
+      );
+    } else {
+      throw new Error("Failed to restore service.");
+    }
+  }
+};
+
 const parseCapabilitiesFromXML = (
   xmlString: string,
   type = "WMS",
