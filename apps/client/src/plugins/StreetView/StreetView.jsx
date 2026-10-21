@@ -49,8 +49,6 @@ class StreetView extends React.PureComponent {
         type="StreetView"
         custom={{
           icon: <StreetviewIcon />,
-          title: "Gatuvy",
-          description: "Titta hur området ser ut från gatan",
           height: 300,
           width: 400,
           top: undefined,

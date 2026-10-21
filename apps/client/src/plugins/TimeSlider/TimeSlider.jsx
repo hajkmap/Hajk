@@ -13,10 +13,11 @@ import PrintIcon from "@mui/icons-material/Print";
 import PrintModel from "plugins/Print/PrintModel";
 
 import { DEFAULT_PRINT_OPTIONS } from "./constants";
+import { configText } from "src/i18n";
 
 class TimeSlider extends React.PureComponent {
   state = {
-    title: this.props.options.title || "Tidslinje",
+    title: configText("timeSlider.title", this.props.options.title),
     windowHidden: false,
     color: null,
     playing: false,
@@ -34,7 +35,7 @@ class TimeSlider extends React.PureComponent {
     this.localObserver = Observer();
     this.layers = this.getLayers(props.options.layers);
     this.defaultResolution = props.options.defaultResolution || "years";
-    this.originalTitle = this.props.options.title || "Tidslinje";
+    this.originalTitle = configText("timeSlider.title", props.options.title);
     this.bindSubscriptions();
 
     // Since we want to allow the user to print the time series, we need to initiate a print model!
@@ -84,7 +85,6 @@ class TimeSlider extends React.PureComponent {
           icon: <UpdateIcon />,
           title: this.state.title,
           color: this.state.color,
-          description: "Visa information under olika tidsperioder", // Shown on Widget button
           customPanelHeaderButtons: [
             {
               icon: <PrintIcon />,

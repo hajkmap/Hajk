@@ -1,12 +1,15 @@
 import React from "react";
 import FeatureStyleSelector from "./FeatureStyleSelector";
 import { Grid, TextField, Typography } from "@mui/material";
+import i18n from "src/i18n";
 
 const FeatureTextEditor = ({ text, onChange }) => {
   return (
     <Grid style={{ marginTop: 16 }} size={12}>
       <Grid style={{ marginBottom: 4 }} size={12}>
-        <Typography align="center">Text</Typography>
+        <Typography align="center">
+          {i18n.t("sketch.drawTypes.Text.label")}
+        </Typography>
       </Grid>
       <Grid size={12}>
         <TextField

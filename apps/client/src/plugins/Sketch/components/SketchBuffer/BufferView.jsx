@@ -12,6 +12,7 @@ import { Step, StepContent, StepLabel, Stepper } from "@mui/material";
 import { useSnackbar } from "notistack";
 import withSnackbar from "components/WithSnackbar";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({
   width: "100%",
@@ -73,12 +74,9 @@ const BufferView = (props) => {
   const handleNext = () => {
     if (contextValue.state.activeStep === 0) {
       if (state.highlightSource.getFeatures().length === 0) {
-        enqueueSnackbar(
-          "Du måste markera minst ett objekt i kartan för att kunna buffra",
-          {
-            variant: "error",
-          }
-        );
+        enqueueSnackbar(i18n.t("sketch.buffer.selectAtLeastOne"), {
+          variant: "error",
+        });
         return;
       }
       model.activateSelecting(false);
@@ -101,13 +99,13 @@ const BufferView = (props) => {
     let label = null;
     switch (contextValue.state.activeStep) {
       case 1:
-        label = "Buffra";
+        label = i18n.t("sketch.buffer.buffer");
         break;
       case 2:
-        label = "Börja om";
+        label = i18n.t("sketch.buffer.restart");
         break;
       default:
-        label = "Nästa";
+        label = i18n.t("common.next");
         break;
     }
     return label;
@@ -121,7 +119,7 @@ const BufferView = (props) => {
           disabled={contextValue.state.activeStep === 0}
           onClick={handlePrev}
         >
-          Föregående
+          {i18n.t("common.previous")}
         </Button>
       </Grid>
     );
@@ -141,7 +139,7 @@ const BufferView = (props) => {
               contextValue.setState((prevState) => ({ ...prevState }));
             }}
           >
-            <ClearIcon /> Rensa
+            <ClearIcon /> {i18n.t("search.results.clear")}
           </Button>
         </Grid>
       )
@@ -155,7 +153,7 @@ const BufferView = (props) => {
         orientation="vertical"
       >
         <Step key="1">
-          <StepLabel>Välj objekt att buffra</StepLabel>
+          <StepLabel>{i18n.t("sketch.buffer.selectStep")}</StepLabel>
           <StepContent>
             <Grid container spacing={2} direction="row">
               {renderClearButton()}
@@ -163,8 +161,8 @@ const BufferView = (props) => {
                 <HajkToolTip
                   title={
                     !toggleBufferBtn.toggle
-                      ? "Klicka här för att rita objekt"
-                      : "Klicka här för att välja objekt"
+                      ? i18n.t("sketch.buffer.clickToDraw")
+                      : i18n.t("sketch.buffer.clickToSelect")
                   }
                 >
                   <StyledToggleButton
@@ -175,12 +173,16 @@ const BufferView = (props) => {
                     {!toggleBufferBtn.toggle ? (
                       <>
                         <RemoveCircleIcon />{" "}
-                        <Box sx={{ mt: 0.4, ml: 0.2 }}>Slå av</Box>
+                        <Box sx={{ mt: 0.4, ml: 0.2 }}>
+                          {i18n.t("sketch.buffer.turnOff")}
+                        </Box>
                       </>
                     ) : (
                       <>
                         <AddIcon />
-                        <Box sx={{ mt: 0.4, ml: 0.2 }}>Välj objekt</Box>
+                        <Box sx={{ mt: 0.4, ml: 0.2 }}>
+                          {i18n.t("sketch.buffer.selectObjects")}
+                        </Box>
                       </>
                     )}
                   </StyledToggleButton>
@@ -201,7 +203,7 @@ const BufferView = (props) => {
           </StepContent>
         </Step>
         <Step key="2">
-          <StepLabel>Ange bufferavstånd</StepLabel>
+          <StepLabel>{i18n.t("sketch.buffer.distanceStep")}</StepLabel>
           <StepContent>
             <Grid container spacing={2} direction="row">
               <Grid size={12}>
@@ -210,7 +212,7 @@ const BufferView = (props) => {
                   fullWidth
                   value={contextValue.state.distance}
                   onChange={setDistance}
-                  label="Bufferavstånd (i meter)"
+                  label={i18n.t("sketch.buffer.distance")}
                 />
               </Grid>
               {renderPrevButton()}
@@ -225,14 +227,14 @@ const BufferView = (props) => {
                     model.bufferFeatures(contextValue.state.distance);
                   }}
                 >
-                  Buffra
+                  {i18n.t("sketch.buffer.buffer")}
                 </Button>
               </Grid>
             </Grid>
           </StepContent>
         </Step>
         <Step key="3">
-          <StepLabel>Klart</StepLabel>
+          <StepLabel>{i18n.t("sketch.buffer.done")}</StepLabel>
           <StepContent>
             <Grid container spacing={2} direction="row">
               {renderPrevButton()}
@@ -249,7 +251,7 @@ const BufferView = (props) => {
                     }));
                   }}
                 >
-                  Rensa
+                  {i18n.t("search.results.clear")}
                 </Button>
               </Grid>
               <Grid size={12}>
@@ -273,7 +275,7 @@ const BufferView = (props) => {
                     state.highlightSource.clear();
                   }}
                 >
-                  Börja om
+                  {i18n.t("sketch.buffer.restart")}
                 </Button>
               </Grid>
             </Grid>

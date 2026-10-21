@@ -21,6 +21,7 @@ import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
 import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
 import TopicOutlinedIcon from "@mui/icons-material/TopicOutlined";
 import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
+import i18n from "src/i18n";
 
 const QuickAccessView = ({
   show,
@@ -84,7 +85,7 @@ const QuickAccessView = ({
 
     // Show snackbar
     enqueueSnackbar &&
-      enqueueSnackbar(`Tända lager har nu lagts till i snabbåtkomst.`, {
+      enqueueSnackbar(i18n.t("layerSwitcher.visibleLayersAdded"), {
         variant: "success",
         anchorOrigin: { vertical: "bottom", horizontal: "center" },
       });
@@ -152,7 +153,7 @@ const QuickAccessView = ({
             </LsIconButton>
 
             <ListItemText
-              primary="Snabbåtkomst"
+              primary={i18n.t("layerSwitcher.quickAccess")}
               slotProps={{
                 primary: {
                   variant: "body1",
@@ -163,7 +164,7 @@ const QuickAccessView = ({
 
             <ListItemSecondaryAction sx={{ right: "4px" }}>
               {enableQuickAccessPresets && (
-                <HajkTooltip title="Teman">
+                <HajkTooltip title={i18n.t("layerSwitcher.themes")}>
                   <LsIconButton
                     id="quick-access-theme-button"
                     onClick={handleQuickAccessPresetsToggle}
@@ -206,10 +207,10 @@ const QuickAccessView = ({
         </Collapse>
         <ConfirmationDialog
           open={showDeleteConfirmation === true}
-          titleName="Rensa allt"
-          contentDescription="Alla lager i snabbåtkomst kommer nu att tas bort."
-          cancel="Avbryt"
-          confirm="Rensa"
+          titleName={i18n.t("layerSwitcher.clearAll")}
+          contentDescription={i18n.t("layerSwitcher.clearAllConfirm")}
+          cancel={i18n.t("common.cancel")}
+          confirm={i18n.t("search.results.clear")}
           handleConfirm={handleClearQuickAccessLayers}
           handleAbort={() => {
             setShowDeleteConfirmation(false);

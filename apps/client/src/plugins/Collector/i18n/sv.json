@@ -1,0 +1,29 @@
+{
+  "collector": {
+    "addLine": "Lägg till sträcka",
+    "addPoint": "Lägg till plats",
+    "addPolygon": "Lägg till område",
+    "clickToDraw": "Klicka i kartan för att rita objekt",
+    "collectAgain": "Tyck till igen",
+    "configurationMissing": "Nödvändig konfiguration saknas. Verktyget kan inte användas för tillfället.",
+    "description": "Vi vill veta vad du tycker!",
+    "invalidUrl": "Ange en giltig url. t.ex. https://www.example.com",
+    "line": "Sträcka",
+    "point": "Plats",
+    "polygon": "Område",
+    "saveErrorText": "Fel - din kommentar gick inte att spara.",
+    "saveFailed": "Det gick inte att spara, försök igen senare.",
+    "selectValue": "-Välj värde-",
+    "send": "Skicka",
+    "status": {
+      "deleted": "Antal borttagna objekt: {{number}}",
+      "failed": "Uppdateringen misslyckades: {{message}}",
+      "inserted": "Antal skapade objekt: {{number}}",
+      "noChanges": "Uppdateringen lyckades men det upptäcktes inte några ändringar.",
+      "succeeded": "Uppdateringen lyckades.",
+      "unknown": "Status för uppdateringen kunde inte avläsas ur svaret från servern.",
+      "updated": "Antal uppdaterade objekt: {{number}}"
+    },
+    "title": "Tyck till"
+  }
+}

@@ -13,6 +13,7 @@ import {
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import PrintList from "./PrintList";
+import i18n from "src/i18n";
 
 const StyledListItemIcon = styled(ListItemIcon)(({ theme }) => ({
   minWidth: theme.spacing(3),
@@ -50,12 +51,20 @@ class PrintListItem extends React.PureComponent {
 
     return expanded ? (
       <StyledCollapseIcon>
-        {!title && <span style={visuallyHidden}>Minimera submeny</span>}
+        {!title && (
+          <span style={visuallyHidden}>
+            {i18n.t("documentHandler.collapseSubmenu")}
+          </span>
+        )}
         <ExpandLess />
       </StyledCollapseIcon>
     ) : (
       <StyledCollapseIcon>
-        {!title && <span style={visuallyHidden}>Maximera submeny</span>}
+        {!title && (
+          <span style={visuallyHidden}>
+            {i18n.t("documentHandler.expandSubmenu")}
+          </span>
+        )}
         <ExpandMore />
       </StyledCollapseIcon>
     );

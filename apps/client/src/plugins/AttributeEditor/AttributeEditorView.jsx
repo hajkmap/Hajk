@@ -31,6 +31,8 @@ import { useSnackbar } from "notistack";
 import GeoJSON from "ol/format/GeoJSON";
 import Feature from "ol/Feature";
 import Point from "ol/geom/Point";
+import i18n from "src/i18n";
+import { getBrowserLocale } from "../../utils/locale";
 
 // Max geometry undo stack size to prevent memory leaks
 const MAX_GEOM_UNDO = 100;
@@ -147,7 +149,9 @@ export default function AttributeEditorView({
     const off = editBus.on("attrib:load-truncated", (ev) => {
       const { limit } = ev.detail || {};
       enqueueSnackbar(
-        `Lagret innehåller fler objekt än vad som hämtats (max ${Number(limit).toLocaleString("sv-SE")}). Endast de hämtade visas och kan redigeras.`,
+        i18n.t("attributeEditor.messages.loadTruncated", {
+          limit: Number(limit).toLocaleString(getBrowserLocale()),
+        }),
         { variant: "warning", autoHideDuration: 10000 }
       );
     });
@@ -156,7 +160,14 @@ export default function AttributeEditorView({
     const offErr = editBus.on("attrib:load-error", (ev) => {
       const { message } = ev.detail || {};
       enqueueSnackbar(
-        `Lagret kunde inte laddas${message ? `: ${message}` : ""}. Valet har återställts till "Ingen".`,
+        message
+          ? i18n.t("attributeEditor.messages.loadErrorWithMessage", {
+              message,
+              none: i18n.t("attributeEditor.toolbar.noLayer"),
+            })
+          : i18n.t("attributeEditor.messages.loadError", {
+              none: i18n.t("attributeEditor.toolbar.noLayer"),
+            }),
         { variant: "error", autoHideDuration: 10000 }
       );
     });
@@ -164,10 +175,10 @@ export default function AttributeEditorView({
     // plain sketch drawing instead of becoming a draft (see the guard in
     // AttributeEditor's addfeature handler) — explain that to the user.
     const offDrawWhileLoading = editBus.on("attrib:draw-while-loading", () => {
-      enqueueSnackbar(
-        "Lagret laddas fortfarande — objektet ligger kvar som vanlig ritning. Rita igen när lagret har laddats för att skapa ett nytt objekt i lagret.",
-        { variant: "info", autoHideDuration: 8000 }
-      );
+      enqueueSnackbar(i18n.t("attributeEditor.messages.drawWhileLoading"), {
+        variant: "info",
+        autoHideDuration: 8000,
+      });
     });
     return () => {
       off();
@@ -1015,7 +1026,7 @@ export default function AttributeEditorView({
       });
     }
     showNotification(
-      `${ids.length} ${ids.length === 1 ? "utkast" : "utkast"} skapade`
+      i18n.t("attributeEditor.messages.draftsCreated", { count: ids.length })
     );
   }, [
     tableSelectedIds,
@@ -1071,7 +1082,7 @@ export default function AttributeEditorView({
     }
 
     showNotification(
-      `${ids.length} ${ids.length === 1 ? "utkast" : "utkast"} skapade`
+      i18n.t("attributeEditor.messages.draftsCreated", { count: ids.length })
     );
   }, [
     selectedIds,
@@ -1088,7 +1099,7 @@ export default function AttributeEditorView({
 
   const addFeatureFromGps = React.useCallback(() => {
     if (!navigator.geolocation) {
-      enqueueSnackbar("Din webbläsare stöder inte GPS/platstjänster.", {
+      enqueueSnackbar(i18n.t("attributeEditor.gps.notSupported"), {
         variant: "error",
       });
       return;
@@ -1147,15 +1158,12 @@ export default function AttributeEditorView({
             .getView()
             .animate({ center: point.getCoordinates(), duration: 500 });
 
-          showNotification("Punkt skapad från GPS-position");
+          showNotification(i18n.t("attributeEditor.gps.created"));
         } catch (err) {
-          console.warn("Kunde inte skapa GPS-punkt:", err);
-          enqueueSnackbar(
-            "Ett oväntat fel uppstod vid skapande av GPS-punkt.",
-            {
-              variant: "error",
-            }
-          );
+          console.warn("Couldn't create GPS point:", err);
+          enqueueSnackbar(i18n.t("attributeEditor.gps.unexpectedError"), {
+            variant: "error",
+          });
         } finally {
           setGpsLoading(false);
         }
@@ -1163,22 +1171,19 @@ export default function AttributeEditorView({
       (error) => {
         setGpsLoading(false);
         if (error.code === 1) {
-          enqueueSnackbar(
-            "Åtkomst till platstjänster nekades. Tillåt platsåtkomst i webbläsarens inställningar.",
-            { variant: "warning" }
-          );
+          enqueueSnackbar(i18n.t("attributeEditor.gps.permissionDenied"), {
+            variant: "warning",
+          });
         } else if (error.code === 2) {
-          enqueueSnackbar(
-            "Kunde inte hämta din position. Kontrollera att platstjänster är aktiverade i systemets inställningar (kan vara begränsat av grupprincip/GPO).",
-            { variant: "error" }
-          );
+          enqueueSnackbar(i18n.t("attributeEditor.gps.positionUnavailable"), {
+            variant: "error",
+          });
         } else if (error.code === 3) {
-          enqueueSnackbar(
-            "GPS-förfrågan tog för lång tid. Försök igen eller kontrollera att platstjänster är aktiverade.",
-            { variant: "warning" }
-          );
+          enqueueSnackbar(i18n.t("attributeEditor.gps.timeout"), {
+            variant: "warning",
+          });
         } else {
-          enqueueSnackbar("Kunde inte hämta GPS-position.", {
+          enqueueSnackbar(i18n.t("attributeEditor.gps.failed"), {
             variant: "error",
           });
         }
@@ -1730,25 +1735,33 @@ export default function AttributeEditorView({
         !deletes.length &&
         !deletedDraftsCount
       ) {
-        showNotification("Inga ändringar att spara");
+        showNotification(i18n.t("attributeEditor.save.noChanges"));
         return true;
       }
 
       const totalDeletes = deletes.length + deletedDraftsCount;
       const summary = [
-        inserts.length && `${inserts.length} nya`,
-        updates.length && `${updates.length} uppdaterade`,
-        totalDeletes && `${totalDeletes} borttagna`,
+        inserts.length &&
+          i18n.t("attributeEditor.save.inserted", { number: inserts.length }),
+        updates.length &&
+          i18n.t("attributeEditor.save.updated", { number: updates.length }),
+        totalDeletes &&
+          i18n.t("attributeEditor.save.deleted", { number: totalDeletes }),
       ]
         .filter(Boolean)
         .join(", ");
 
       // If only deleted drafts (no server operations), just commit locally
       if (!inserts.length && !updates.length && !deletes.length) {
-        enqueueSnackbar(`✓ Sparat: ${deletedDraftsCount} borttagna`, {
-          variant: "success",
-          autoHideDuration: 3000,
-        });
+        enqueueSnackbar(
+          i18n.t("attributeEditor.save.savedDeletesOnly", {
+            number: deletedDraftsCount,
+          }),
+          {
+            variant: "success",
+            autoHideDuration: 3000,
+          }
+        );
 
         controller.commit();
 
@@ -1763,7 +1776,9 @@ export default function AttributeEditorView({
         return true;
       }
 
-      enqueueSnackbar(`Sparar: ${summary}...`, { variant: "info" });
+      enqueueSnackbar(i18n.t("attributeEditor.save.saving", { summary }), {
+        variant: "info",
+      });
 
       const featureCollection = model.getFeatureCollection();
       const detectedGeomName = featureCollection?.geometryName;
@@ -1790,24 +1805,42 @@ export default function AttributeEditorView({
           const totalDeletedCount = (result.deleted || 0) + deletedDraftsCount;
           const failureParts = [];
           if (failedInserts > 0)
-            failureParts.push(`${failedInserts} ny(a) kunde inte sparas`);
+            failureParts.push(
+              i18n.t("attributeEditor.save.failedInserts", {
+                number: failedInserts,
+              })
+            );
           if (failedUpdates > 0)
             failureParts.push(
-              `${failedUpdates} uppdatering(ar) kunde inte sparas`
+              i18n.t("attributeEditor.save.failedUpdates", {
+                number: failedUpdates,
+              })
             );
           if (failedDeletes > 0)
             failureParts.push(
-              `${failedDeletes} borttagning(ar) kunde inte sparas`
+              i18n.t("attributeEditor.save.failedDeletes", {
+                number: failedDeletes,
+              })
             );
 
-          let message = `⚠ Delvis sparat: ${result.inserted || 0} nya, ${result.updated || 0} uppdaterade, ${totalDeletedCount} borttagna\n`;
-          message += failureParts.join(", ");
-          message +=
-            "\nObjekten kan ha ändrats eller tagits bort av någon annan — kontrollera efter omläsningen.";
-
+          const lines = [
+            i18n.t("attributeEditor.save.partial", {
+              inserted: result.inserted || 0,
+              updated: result.updated || 0,
+              deleted: totalDeletedCount,
+            }),
+            failureParts.join(", "),
+            i18n.t("attributeEditor.save.partialHint"),
+          ];
           if (result.warning) {
-            message += `\n\nServermeddelande: ${result.warning}`;
+            lines.push(
+              "",
+              i18n.t("attributeEditor.save.serverMessage", {
+                message: result.warning,
+              })
+            );
           }
+          const message = lines.join("\n");
 
           enqueueSnackbar(message, {
             variant: "warning",
@@ -1817,7 +1850,11 @@ export default function AttributeEditorView({
         } else {
           const totalDeletedCount = (result.deleted || 0) + deletedDraftsCount;
           enqueueSnackbar(
-            `✓ Sparat: ${result.inserted || 0} nya, ${result.updated || 0} uppdaterade, ${totalDeletedCount} borttagna`,
+            i18n.t("attributeEditor.save.saved", {
+              inserted: result.inserted || 0,
+              updated: result.updated || 0,
+              deleted: totalDeletedCount,
+            }),
             { variant: "success", autoHideDuration: 5000 }
           );
         }
@@ -1878,11 +1915,11 @@ export default function AttributeEditorView({
           // cheerful "saved!" message.
           if (hasPartialFailure) {
             enqueueSnackbar(
-              "⚠ Delvis sparat, och omläsningen misslyckades — tabellen kan visa osparade värden. Tryck F5 och kontrollera dina ändringar.",
+              i18n.t("attributeEditor.save.partialReloadFailed"),
               { variant: "error", autoHideDuration: 15000 }
             );
           } else {
-            enqueueSnackbar("Data sparades! Tryck F5 för att se ändringarna.", {
+            enqueueSnackbar(i18n.t("attributeEditor.save.reloadFailed"), {
               variant: "warning",
               autoHideDuration: 10000,
             });
@@ -1894,10 +1931,15 @@ export default function AttributeEditorView({
         throw new Error(result.message || "Transaction failed");
       }
     } catch (error) {
-      enqueueSnackbar(`Fel vid sparande: ${error.message || "Okänt fel"}`, {
-        variant: "error",
-        autoHideDuration: 8000,
-      });
+      enqueueSnackbar(
+        i18n.t("attributeEditor.save.failed", {
+          message: error.message || i18n.t("attributeEditor.errors.unknown"),
+        }),
+        {
+          variant: "error",
+          autoHideDuration: 8000,
+        }
+      );
       return false;
     } finally {
       savingLockRef.current = false;
@@ -1943,22 +1985,29 @@ export default function AttributeEditorView({
         xlsx.utils.book_append_sheet(
           workbook,
           worksheet,
-          "Attributlista".slice(0, 30)
+          i18n.t("attributeEditor.excel.sheetName").slice(0, 30)
         );
 
         // Colons are invalid in Windows filenames — use dashes in the time part
         const timestamp = new Date().toLocaleString("sv-SE").replace(/:/g, "-");
-        const filename = `Attributlista-${timestamp}.xlsx`;
+        const filename = `${i18n.t("attributeEditor.excel.fileName")}-${timestamp}.xlsx`;
 
         xlsx.writeFile(workbook, filename);
 
-        enqueueSnackbar(`✓ Excel-fil skapad (${exportFeatures.length} rader)`, {
-          variant: "success",
-          autoHideDuration: 5000,
-        });
+        enqueueSnackbar(
+          i18n.t("attributeEditor.excel.created", {
+            count: exportFeatures.length,
+          }),
+          {
+            variant: "success",
+            autoHideDuration: 5000,
+          }
+        );
       } catch (error) {
         enqueueSnackbar(
-          `Fel vid Excel-export: ${error.message || "Okänt fel"}`,
+          i18n.t("attributeEditor.excel.failed", {
+            message: error.message || i18n.t("attributeEditor.errors.unknown"),
+          }),
           {
             variant: "error",
             autoHideDuration: 8000,
@@ -2023,7 +2072,9 @@ export default function AttributeEditorView({
       group.forEach(({ id }) => formUndoSnapshotsRef.current.delete(id));
 
       showNotification(
-        k > 1 ? `Ångrade formulärändringar (${k})` : "Ångrade formulärändring"
+        k > 1
+          ? i18n.t("attributeEditor.undo.formChanges", { number: k })
+          : i18n.t("attributeEditor.undo.formChange")
       );
       return;
     }
@@ -2046,7 +2097,7 @@ export default function AttributeEditorView({
           { id: tableLast.id, key: tableLast.key, value: tableLast.prevValue },
         ]);
         setTableUndoLocal((prev) => prev.slice(0, -1));
-        showNotification("Ångrade celländring");
+        showNotification(i18n.t("attributeEditor.undo.cellChange"));
         syncColumnFilterOnValueChange(
           tableLast.key,
           currentVal, // from
@@ -2082,7 +2133,7 @@ export default function AttributeEditorView({
           controller.batchEdit([{ id, key: "__geom__", value: null }]);
         }
 
-        showNotification("Ångrade geometriändring");
+        showNotification(i18n.t("attributeEditor.undo.geometryChange"));
       }
 
       return;
@@ -2812,8 +2863,10 @@ export default function AttributeEditorView({
     setFormUndoStack([]);
     showNotification(
       idsToUpdate.length > 1
-        ? `Ändringar buffrade för ${idsToUpdate.length} objekt`
-        : "Ändringar buffrade"
+        ? i18n.t("attributeEditor.messages.bufferedFor", {
+            count: idsToUpdate.length,
+          })
+        : i18n.t("attributeEditor.messages.buffered")
     );
     formUndoSnapshotsRef.current.clear();
   }
@@ -2930,7 +2983,7 @@ export default function AttributeEditorView({
 
     const geometryType = feature.getGeometry()?.getType?.();
     if (geometryType !== "Polygon" && geometryType !== "LineString") {
-      showNotification("Endast Polygon och LineString kan delas");
+      showNotification(i18n.t("attributeEditor.actions.splitOnlyPolygonLine"));
       return;
     }
 
@@ -2939,7 +2992,7 @@ export default function AttributeEditorView({
       geometryType,
     });
 
-    showNotification("Rita en linje som delar objektet");
+    showNotification(i18n.t("attributeEditor.split.drawLine"));
   }, [
     ui.mode,
     tableSelectedIds,
@@ -3006,16 +3059,18 @@ export default function AttributeEditorView({
         });
       }
 
-      showNotification(`Objektet delades i ${splitFeatures.length} delar`);
+      showNotification(
+        i18n.t("attributeEditor.split.done", { count: splitFeatures.length })
+      );
     });
 
     const offSplitError = editBus.on("sketch:split-error", (ev) => {
       const { message } = ev.detail || {};
-      showNotification(message || "Kunde inte dela objektet");
+      showNotification(message || i18n.t("attributeEditor.split.failed"));
     });
 
     const offSplitCancelled = editBus.on("sketch:split-cancelled", () => {
-      showNotification("Delning avbruten");
+      showNotification(i18n.t("attributeEditor.split.cancelled"));
     });
 
     return () => {
@@ -3115,7 +3170,7 @@ export default function AttributeEditorView({
       "sketch:split-multi-complete",
       (ev) => {
         const { count, newIds } = ev.detail || {};
-        showNotification(`Multi-objektet delades upp i ${count} delar`);
+        showNotification(i18n.t("attributeEditor.split.multiDone", { count }));
         if (newIds?.length > 0) {
           editBus.emit("attrib:select-ids", {
             ids: newIds,
@@ -3128,12 +3183,12 @@ export default function AttributeEditorView({
 
     const offSplitMultiError = editBus.on("sketch:split-multi-error", (ev) => {
       const { message } = ev.detail || {};
-      showNotification(message || "Kunde inte dela upp multi-objektet");
+      showNotification(message || i18n.t("attributeEditor.split.multiFailed"));
     });
 
     const offMergeComplete = editBus.on("sketch:merge-complete", (ev) => {
       const { newId } = ev.detail || {};
-      showNotification("Objekten slogs ihop till ett multi-objekt");
+      showNotification(i18n.t("attributeEditor.merge.done"));
       if (newId != null) {
         editBus.emit("attrib:select-ids", {
           ids: [newId],
@@ -3145,7 +3200,7 @@ export default function AttributeEditorView({
 
     const offMergeError = editBus.on("sketch:merge-error", (ev) => {
       const { message } = ev.detail || {};
-      showNotification(message || "Kunde inte slå ihop objekten");
+      showNotification(message || i18n.t("attributeEditor.merge.failed"));
     });
 
     return () => {
@@ -3195,7 +3250,9 @@ export default function AttributeEditorView({
       {serviceId === "NONE_ID" ? (
         <div style={s.paneWrap}>
           <div style={{ ...s.pane, gridColumn: "1 / -1" }}>
-            <div style={s.formEmpty}>Inget redigeringsbart lager vald.</div>
+            <div style={s.formEmpty}>
+              {i18n.t("attributeEditor.noLayerSelected")}
+            </div>
           </div>
         </div>
       ) : isMobile ? (

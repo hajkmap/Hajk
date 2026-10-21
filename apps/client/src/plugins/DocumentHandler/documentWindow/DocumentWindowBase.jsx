@@ -8,6 +8,7 @@ import Progress from "./Progress";
 import { CustomLink } from "../utils/ContentComponentFactory";
 import withSnackbar from "components/WithSnackbar";
 import PrintIcon from "@mui/icons-material/Print";
+import i18n from "src/i18n";
 
 class DocumentWindowBase extends React.PureComponent {
   snackbarKey = null;
@@ -41,7 +42,7 @@ class DocumentWindowBase extends React.PureComponent {
           this.scrollInDocument(headerIdentifier);
         },
         () => {
-          enqueueSnackbar("Kunde inte öppna dokumentet", {
+          enqueueSnackbar(i18n.t("documentHandler.couldNotOpenDocument"), {
             variant: "warning",
           });
 
@@ -55,7 +56,7 @@ class DocumentWindowBase extends React.PureComponent {
 
   displayMaplinkLoadingBar = () => {
     const { enqueueSnackbar } = this.props;
-    this.snackbarKey = enqueueSnackbar("Kartan laddar... ", {
+    this.snackbarKey = enqueueSnackbar(i18n.t("documentHandler.mapLoading"), {
       variant: "information",
       persist: true,
       preventDuplicate: true,
@@ -94,7 +95,9 @@ class DocumentWindowBase extends React.PureComponent {
       );
       // Must resolve with a value, even null will do, but something more helpful could be nice.
       // The reason we must do it is because this value is used in React's render, and undefined will not render.
-      infoClickEvent.resolve(<b>Could not render DocumentHandler link</b>);
+      infoClickEvent.resolve(
+        <b>{i18n.t("documentHandler.couldNotRenderLink")}</b>
+      );
     }
   };
 
@@ -165,8 +168,8 @@ class DocumentWindowBase extends React.PureComponent {
           {
             icon: <PrintIcon />,
             description: options.directPrint
-              ? "Skriv ut aktiv sida"
-              : "Öppna utskrift",
+              ? i18n.t("documentHandler.printActivePage")
+              : i18n.t("documentHandler.openPrint"),
             onClickCallback: togglePrintWindow,
           },
         ]
@@ -180,7 +183,7 @@ class DocumentWindowBase extends React.PureComponent {
           title: document?.documentTitle || options.windowTitle || "Documents",
           color: document?.documentColor || "#ffffff",
           customPanelHeaderButtons: customHeaderButtons,
-          description: "En kort beskrivning som visas i widgeten",
+          description: i18n.t("documentHandler.widgetDescription"),
           height: options.height || "auto",
           width: options.width || 600,
           scrollable: false,

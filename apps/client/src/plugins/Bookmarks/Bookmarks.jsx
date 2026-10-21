@@ -40,8 +40,6 @@ const Bookmarks = (props) => {
       type="Bookmarks"
       custom={{
         icon: <BookmarksIcon />,
-        title: "Bokmärken",
-        description: "Användarens bokmärken",
         height: 450,
         width: 400,
       }}

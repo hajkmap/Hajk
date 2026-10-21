@@ -15,6 +15,7 @@ import KeyboardDoubleArrowUpIcon from "@mui/icons-material/KeyboardDoubleArrowUp
 
 import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 const LayersTabActionsMenu = ({ scrollToTop, scrollToBottom }) => {
   // Element that we will anchor the options menu to is
@@ -66,7 +67,7 @@ const LayersTabActionsMenu = ({ scrollToTop, scrollToBottom }) => {
         onClick={handleShowMoreOptionsClick}
         sx={{ my: "3px", ml: "2px" }}
       >
-        <HajkToolTip title="Fler funktioner för Lagerhanteraren">
+        <HajkToolTip title={i18n.t("layerSwitcher.moreFunctions")}>
           <MoreVertOutlinedIcon />
         </HajkToolTip>
       </IconButton>
@@ -92,7 +93,7 @@ const LayersTabActionsMenu = ({ scrollToTop, scrollToBottom }) => {
           <ListItemIcon>
             <VisibilityOffIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Dölj alla aktiva lager</ListItemText>
+          <ListItemText>{i18n.t("controls.hideAllLayers")}</ListItemText>
         </MenuItem>
         <MenuItem
           onClick={(e) => {
@@ -105,7 +106,7 @@ const LayersTabActionsMenu = ({ scrollToTop, scrollToBottom }) => {
           <ListItemIcon>
             <KeyboardDoubleArrowUpIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Scrolla till toppen</ListItemText>
+          <ListItemText>{i18n.t("layerSwitcher.scrollToTop")}</ListItemText>
         </MenuItem>
         <MenuItem
           onClick={(e) => {
@@ -118,7 +119,7 @@ const LayersTabActionsMenu = ({ scrollToTop, scrollToBottom }) => {
           <ListItemIcon>
             <KeyboardDoubleArrowDownIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Scrolla till botten</ListItemText>
+          <ListItemText>{i18n.t("layerSwitcher.scrollToBottom")}</ListItemText>
         </MenuItem>
       </Menu>
     </>

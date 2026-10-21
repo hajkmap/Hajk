@@ -5,6 +5,7 @@ import QRCode from "qrcode";
 import HajkToolTip from "components/HajkToolTip";
 import ShareIcon from "@mui/icons-material/Share";
 import { useSnackbar } from "notistack";
+import { useTranslation } from "react-i18next";
 
 import Alert from "@mui/material/Alert";
 
@@ -50,6 +51,7 @@ const ResponsiveIcon = styled("span")(({ theme }) => ({
 const AnchorView = (props) => {
   const { globalObserver, model, options, enableAppStateInHash } = props;
   const { enqueueSnackbar } = useSnackbar();
+  const { t } = useTranslation();
 
   const [anchor, setAnchor] = useState("");
   const [cleanUrl, setCleanUrl] = useState(false);
@@ -110,11 +112,11 @@ const AnchorView = (props) => {
   const handleClickOnCopyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(anchor);
-      enqueueSnackbar("Kopiering till urklipp lyckades!", {
+      enqueueSnackbar(t("anchor.copySucceeded"), {
         variant: "info",
       });
     } catch {
-      enqueueSnackbar("Kopiering till urklipp misslyckades.", {
+      enqueueSnackbar(t("anchor.copyFailed"), {
         variant: "warning",
       });
     }
@@ -127,14 +129,13 @@ const AnchorView = (props) => {
     <Grid container direction="column" sx={{ maxWidth: 400 }}>
       <Grid>
         <StyledAlert icon={<ShareIcon />} variant="info">
-          Skapa en länk med kartans synliga lager, aktuella zoomnivå och
-          utbredning.
+          {t("anchor.intro")}
         </StyledAlert>
       </Grid>
       {allowCreatingCleanUrls && (
         <Grid sx={{ mb: 1.5, display: { xs: "none", sm: "block" } }}>
           <RadioGroup
-            aria-label="copy-url"
+            aria-label={t("anchor.linkType")}
             name="copy-url"
             onChange={toggleCleanUrl}
           >
@@ -142,13 +143,13 @@ const AnchorView = (props) => {
               checked={!cleanUrl}
               value="default"
               control={<Radio color="primary" />}
-              label="Skapa länk till karta"
+              label={t("anchor.linkToMap")}
             />
             <FormControlLabel
               checked={cleanUrl}
               value="clean"
               control={<Radio color="primary" />}
-              label="Skapa länk till karta utan verktyg etc."
+              label={t("anchor.linkToCleanMap")}
             />
           </RadioGroup>
         </Grid>
@@ -167,7 +168,7 @@ const AnchorView = (props) => {
         <Grid container spacing={2}>
           {canCopyToClipboard && (
             <Grid size={6} sx={{ display: "flex" }}>
-              <HajkToolTip title="Kopiera länk till urklipp">
+              <HajkToolTip title={t("anchor.copyLinkTooltip")}>
                 <Button
                   fullWidth
                   variant="contained"
@@ -186,13 +187,13 @@ const AnchorView = (props) => {
                   }}
                   onClick={handleClickOnCopyToClipboard}
                 >
-                  Kopiera länk
+                  {t("anchor.copyLink")}
                 </Button>
               </HajkToolTip>
             </Grid>
           )}
           <Grid size={canCopyToClipboard ? 6 : 12} sx={{ display: "flex" }}>
-            <HajkToolTip title="Öppna länk i nytt fönster">
+            <HajkToolTip title={t("anchor.openLinkTooltip")}>
               <Button
                 fullWidth
                 variant="contained"
@@ -212,7 +213,7 @@ const AnchorView = (props) => {
                   textAlign: "center",
                 }}
               >
-                Öppna länk
+                {t("anchor.openLink")}
               </Button>
             </HajkToolTip>
           </Grid>
@@ -236,7 +237,11 @@ const AnchorView = (props) => {
                   }}
                 >
                   {qrCode && (
-                    <img src={qrCode} alt="QR-kod" style={{ minHeight: 200 }} />
+                    <img
+                      src={qrCode}
+                      alt={t("anchor.qrCode")}
+                      style={{ minHeight: 200 }}
+                    />
                   )}
                 </Box>
               </Grid>

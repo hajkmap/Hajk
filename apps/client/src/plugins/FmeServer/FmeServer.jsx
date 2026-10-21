@@ -45,8 +45,6 @@ const FmeServer = (props) => {
       type="FmeServer"
       custom={{
         icon: <FmeIcon />,
-        title: "FME-server",
-        description: "Beställ jobb från FME-server.",
         height: "dynamic",
         width: 400,
         onWindowHide: onWindowHide,

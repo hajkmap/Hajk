@@ -11,6 +11,7 @@ import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import { Button, FormHelperText, Typography } from "@mui/material";
 import Chip from "@mui/material/Chip";
+import i18n from "src/i18n";
 
 const StyledGrid = styled(Grid)(({ theme }) => ({
   textAlign: "center",
@@ -189,8 +190,7 @@ class AttributeEditor extends React.Component {
       delete this.formErrors[name];
     } else {
       formValues[name] = "";
-      this.formErrors[name] =
-        "Ange en giltig url. t.ex. https://www.example.com";
+      this.formErrors[name] = i18n.t("edit.invalidUrl");
     }
     this.setState(
       {
@@ -553,7 +553,7 @@ class AttributeEditor extends React.Component {
                 }}
               >
                 <option value="" disabled>
-                  -Välj värde-
+                  {i18n.t("edit.selectValue")}
                 </option>
                 {options}
               </NativeSelect>
@@ -620,11 +620,7 @@ class AttributeEditor extends React.Component {
     // let's render a label that tells user to click on a feature to start
     // editing its attributes.
     if (!formValues && this.props.editSource?.simpleEditWorkflow === true)
-      return (
-        <Typography>
-          Klicka på ett objekt i kartan för att redigera dess attribut
-        </Typography>
-      );
+      return <Typography>{i18n.t("edit.clickFeatureToEdit")}</Typography>;
 
     const markup = this.props.editSource?.editableFields?.map((field, i) => {
       const valueMarkup = this.getValueMarkup(field, true);
@@ -652,13 +648,13 @@ class AttributeEditor extends React.Component {
           <Chip
             variant="outlined"
             color="primary"
-            label="Ange objektets attribut:"
+            label={i18n.t("edit.enterAttributes")}
           />
         </StyledGrid>
         <StyledGrid size={12}>
-          <p>Editerbara fält:</p>
+          <p>{i18n.t("edit.editableFields")}</p>
           {markup}
-          {markupNonEdit?.length > 2 ? "Icke-editerbara fält:" : ""}
+          {markupNonEdit?.length > 2 ? i18n.t("edit.nonEditableFields") : ""}
           {markupNonEdit}
         </StyledGrid>
         <StyledGrid size={12}>
@@ -668,7 +664,7 @@ class AttributeEditor extends React.Component {
             variant="contained"
             onClick={model.resetEditFeature}
           >
-            OK
+            {i18n.t("common.ok")}
           </Button>
         </StyledGrid>
       </>

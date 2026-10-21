@@ -39,6 +39,7 @@ import {
 import LocalStorageHelper from "../../../utils/LocalStorageHelper";
 import { BACKGROUND_LAYER_IDS } from "../../../constants/backgroundLayers";
 import LsIconButton from "./LsIconButton";
+import i18n from "src/i18n";
 
 function QuickAccessPresets({
   display,
@@ -194,7 +195,7 @@ function QuickAccessPresets({
       }
     });
 
-    enqueueSnackbar(`${title} har nu laddats till snabbåtkomst.`, {
+    enqueueSnackbar(i18n.t("layerSwitcher.loadedToQuickAccess", { title }), {
       variant: "success",
       anchorOrigin: { vertical: "bottom", horizontal: "center" },
     });
@@ -269,7 +270,7 @@ function QuickAccessPresets({
 
   // Function that finds a layer by id and returns caption
   const getBaseLayerName = (layers) => {
-    let backgroundLayerName = "Bakgrundskarta hittades inte";
+    let backgroundLayerName = i18n.t("layerSwitcher.backgroundNotFound");
     layers.forEach((layer) => {
       const mapLayer = map
         .getAllLayers()
@@ -280,11 +281,11 @@ function QuickAccessPresets({
         // A fake maplayer is in the package
         switch (layer.id) {
           case BACKGROUND_LAYER_IDS.BLACK:
-            backgroundLayerName = "Svart";
+            backgroundLayerName = i18n.t("backgroundLayers.black");
             break;
           case BACKGROUND_LAYER_IDS.WHITE:
           default:
-            backgroundLayerName = "Vit";
+            backgroundLayerName = i18n.t("backgroundLayers.white");
             break;
         }
       }
@@ -344,7 +345,9 @@ function QuickAccessPresets({
           {loadLpInfoConfirmation
             ? renderKeywords(loadLpInfoConfirmation.keywords)
             : null}
-          <DialogContentText sx={{ mt: 2, mb: 1 }}>Bakgrund</DialogContentText>
+          <DialogContentText sx={{ mt: 2, mb: 1 }}>
+            {i18n.t("layerSwitcher.tabs.background")}
+          </DialogContentText>
           <Stack direction="row" spacing={1}>
             <PublicOutlinedIcon fontSize="small"></PublicOutlinedIcon>
             <Typography>
@@ -354,18 +357,18 @@ function QuickAccessPresets({
           </Stack>
           <Divider sx={{ mt: 2 }} />
           <Typography sx={{ mt: 2, mb: 1 }}>
-            Vid laddning kommer aktuella lager i snabbåtkomst att ersättas med
-            temat. Alla tända lager i kartan släcks och ersätts med temats tända
-            lager.
+            {i18n.t("layerSwitcher.loadThemeHint")}
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleLoadConfirmationAbort}>Avbryt</Button>
+          <Button onClick={handleLoadConfirmationAbort}>
+            {i18n.t("common.cancel")}
+          </Button>
           <Button
             onClick={() => handleLoadConfirmation(true)}
             variant="contained"
           >
-            Ladda
+            {i18n.t("layerSwitcher.load")}
           </Button>
         </DialogActions>
       </BaseDialog>,
@@ -384,22 +387,26 @@ function QuickAccessPresets({
           e.stopPropagation();
         }}
       >
-        <DialogTitle>Ladda tema</DialogTitle>
+        <DialogTitle>{i18n.t("layerSwitcher.loadTheme")}</DialogTitle>
         <DialogContent>
           <Typography>
             {loadLpConfirmation
-              ? `Aktuella lager i snabbåtkomst kommer nu att ersättas med tema "${loadLpConfirmation.title}". Alla tända lager i kartan släcks och ersätts med temats tända lager.`
+              ? i18n.t("layerSwitcher.loadThemeConfirm", {
+                  title: loadLpConfirmation.title,
+                })
               : ""}
             <br></br>
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleLoadConfirmationAbort}>Avbryt</Button>
+          <Button onClick={handleLoadConfirmationAbort}>
+            {i18n.t("common.cancel")}
+          </Button>
           <Button
             onClick={() => handleLoadConfirmation(false)}
             variant="contained"
           >
-            Ladda
+            {i18n.t("layerSwitcher.load")}
           </Button>
         </DialogActions>
       </BaseDialog>,
@@ -418,11 +425,11 @@ function QuickAccessPresets({
           e.stopPropagation();
         }}
       >
-        <DialogTitle>Lager saknas</DialogTitle>
+        <DialogTitle>{i18n.t("layerSwitcher.missingLayersTitle")}</DialogTitle>
         <DialogContent>
           <Typography>
             {missingLayersConfirmation &&
-              `Följande lagerid:n kan inte hittas i kartans lagerlista:`}
+              i18n.t("layerSwitcher.missingLayersIntro")}
             <br></br>
           </Typography>
           <ul>
@@ -432,12 +439,14 @@ function QuickAccessPresets({
           </ul>
           <Typography>
             {missingLayersConfirmation &&
-              `Det kan bero på att lagret har utgått. Vänligen kontrollera och uppdatera lagerpaketet eller kontakta administratören av kartan.`}
+              i18n.t("layerSwitcher.missingLayersThemeHint")}
             <br></br>
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleMissingLayersConfirmationAbort}>Avbryt</Button>
+          <Button onClick={handleMissingLayersConfirmationAbort}>
+            {i18n.t("common.cancel")}
+          </Button>
           <Button
             onClick={() =>
               loadLayers(
@@ -447,7 +456,7 @@ function QuickAccessPresets({
             }
             variant="contained"
           >
-            Fortsätt
+            {i18n.t("common.continue")}
           </Button>
         </DialogActions>
       </BaseDialog>,
@@ -499,7 +508,7 @@ function QuickAccessPresets({
               open={tooltipOpen}
               onClose={handleClose}
               onOpen={handleOpen}
-              title="Tillbaka"
+              title={i18n.t("common.back")}
               slotProps={{ transition: { timeout: 0 } }}
             >
               <LsIconButton
@@ -510,10 +519,18 @@ function QuickAccessPresets({
               </LsIconButton>
             </HajkToolTip>
             <Box sx={{ flexGrow: 1, textAlign: "center" }}>
-              <Typography variant="subtitle1">Teman</Typography>
+              <Typography variant="subtitle1">
+                {i18n.t("layerSwitcher.themes")}
+              </Typography>
             </Box>
             <LsIconButton onClick={handleInfoButtonClick}>
-              <HajkToolTip title={infoIsActive ? "Dölj info" : "Visa info"}>
+              <HajkToolTip
+                title={
+                  infoIsActive
+                    ? i18n.t("layerSwitcher.hideInfo")
+                    : i18n.t("layerSwitcher.showInfo")
+                }
+              >
                 <InfoOutlinedIcon />
               </HajkToolTip>
             </LsIconButton>
@@ -546,7 +563,7 @@ function QuickAccessPresets({
               value={filter.query}
               onChange={(event) => handleFilterChange(event.target.value)}
               fullWidth
-              placeholder="Filtrera"
+              placeholder={i18n.t("search.results.filter")}
               variant="outlined"
               sx={(theme) => ({
                 background: "#fff",
@@ -576,9 +593,9 @@ function QuickAccessPresets({
             {!filter.list.length ? (
               <Typography sx={{ p: 2 }}>
                 {quickAccessPresetsArray.length === 0 ? (
-                  <span>Inga lagerpaket är konfigurerade</span>
+                  <span>{i18n.t("layerSwitcher.noThemes")}</span>
                 ) : (
-                  <span>Din filtrering gav inga resultat</span>
+                  <span>{i18n.t("layerSwitcher.filterNoResults")}</span>
                 )}
               </Typography>
             ) : (
@@ -617,7 +634,11 @@ function QuickAccessPresets({
                         right: "4px",
                       }}
                     >
-                      <HajkToolTip title={"Information om " + l.title}>
+                      <HajkToolTip
+                        title={i18n.t("layerSwitcher.informationAbout", {
+                          title: l.title,
+                        })}
+                      >
                         <LsIconButton
                           onClick={(e) => {
                             e.preventDefault();

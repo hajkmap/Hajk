@@ -15,6 +15,7 @@ import LinkIcon from "@mui/icons-material/Link";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import HajkToolTip from "components/HajkToolTip";
 import LsIconButton from "./LsIconButton";
+import i18n from "src/i18n";
 
 function GroupDetails({ display, groupDetails, app }) {
   // Because of a warning in dev console, we need special handling of tooltip for backbutton.
@@ -80,7 +81,7 @@ function GroupDetails({ display, groupDetails, app }) {
                 open={tooltipOpen}
                 onClose={handleClose}
                 onOpen={handleOpen}
-                title="Tillbaka"
+                title={i18n.t("common.back")}
                 slotProps={{ transition: { timeout: 0 } }}
               >
                 <LsIconButton onClick={handleBackButtonClick}>
@@ -126,7 +127,7 @@ function GroupDetails({ display, groupDetails, app }) {
                     href={groupDetails.infogroupopendatalink}
                     variant="body2"
                   >
-                    Öppna data
+                    {i18n.t("layerSwitcher.openData")}
                   </Link>
                 </ListItem>
               )}

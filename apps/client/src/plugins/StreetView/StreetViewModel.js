@@ -7,6 +7,7 @@ import Vector from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { imageBlob } from "./exports";
 import loadGoogleMapsApi from "../../utils/googleMapsLoader";
+import i18n from "src/i18n";
 
 class StreetViewModel {
   constructor(settings) {
@@ -201,13 +202,13 @@ class StreetViewModel {
       status === this.googleMapsApi.StreetViewStatus.OK &&
       this.activated === true
     ) {
-      this.imageDate = `Bild tagen: ${data.imageDate}`;
+      this.imageDate = i18n.t("streetView.imageDate", { date: data.imageDate });
       this.localObserver.publish("changeImageDate", this.imageDate);
       this.panorama.setPano(data.location.pano);
       this.panorama.setPov({ heading: 270, pitch: 0 });
       this.panorama.setVisible(true);
     } else {
-      this.imageDate = "Bild saknas för vald position.";
+      this.imageDate = i18n.t("streetView.noImage");
       this.localObserver.publish("changeImageDate", this.imageDate);
       this.panorama.setVisible(false);
     }

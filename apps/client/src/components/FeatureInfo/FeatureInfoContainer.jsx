@@ -17,6 +17,7 @@ import {
 
 import FeaturePropsParsing from "./FeaturePropsParsing";
 import { getInfoClickInfoFromLayerConfig } from "../../utils/InfoClickHelpers";
+import i18n from "src/i18n";
 
 const InfoContainer = styled(Grid)(() => ({
   height: "100%",
@@ -103,7 +104,7 @@ class FeatureInfoContainer extends React.PureComponent {
             fullWidth
             disabled={this.state.selectedIndex - 1 < 0}
             onClick={this.stepLeft}
-            aria-label="previous"
+            aria-label={i18n.t("common.previous")}
             id="step-left"
             sx={{ color: "primary.contrastText" }}
           >
@@ -115,7 +116,10 @@ class FeatureInfoContainer extends React.PureComponent {
             variant="button"
             sx={{ textAlign: "center", color: "primary.contrastText" }}
           >
-            {this.state.selectedIndex + 1} av {features.length}
+            {i18n.t("common.xOfY", {
+              current: this.state.selectedIndex + 1,
+              total: features.length,
+            })}
           </Typography>
         </Grid>
         <TogglerButtonLeftContainer>
@@ -123,7 +127,7 @@ class FeatureInfoContainer extends React.PureComponent {
             fullWidth
             disabled={this.state.selectedIndex + 1 >= features.length}
             onClick={this.stepRight}
-            aria-label="next"
+            aria-label={i18n.t("common.next")}
             id="step-right"
             sx={{ color: "primary.contrastText" }}
           >
@@ -155,7 +159,7 @@ class FeatureInfoContainer extends React.PureComponent {
 
     return (
       <StyledTableContainer component="div">
-        <Table size="small" aria-label="Table with infoclick details">
+        <Table size="small" aria-label={i18n.t("featureInfo.tableLabel")}>
           <TableBody>{tableBody}</TableBody>
         </Table>
       </StyledTableContainer>

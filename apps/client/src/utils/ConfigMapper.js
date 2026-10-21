@@ -1,4 +1,5 @@
 import { Projection } from "ol/proj";
+import i18n from "src/i18n";
 
 export default class ConfigMapper {
   constructor(proxy) {
@@ -70,7 +71,7 @@ export default class ConfigMapper {
       return args.layers.map((layer) => {
         return {
           url: getLegendUrl(layer),
-          description: "Teckenförklaring",
+          description: i18n.t("common.legend"),
         };
       });
     }
@@ -222,7 +223,7 @@ export default class ConfigMapper {
         propertyName: args.searchFields.join(","),
         displayName: args.displayFields
           ? args.displayFields
-          : args.searchFields[0] || "Sökträff",
+          : args.searchFields[0] || i18n.t("search.defaultHitName"),
         srsName: properties.mapConfig.map.projection || "EPSG:3006",
         serverType: config.options.serverType,
       };
@@ -435,7 +436,7 @@ export default class ConfigMapper {
         legend: [
           {
             url: getLegendUrl(args),
-            description: "Teckenförklaring",
+            description: i18n.t("common.legend"),
           },
         ],
         infoVisible: args.infoVisible || false,

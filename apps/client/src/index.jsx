@@ -20,6 +20,8 @@ import LocalStorageHelper from "./utils/LocalStorageHelper";
 import { getMergedSearchAndHashParams } from "./utils/getMergedSearchAndHashParams";
 import { AccessError, NotFoundError } from "./utils/CustomErrors";
 import { AVAILABLE_TOOLS } from "./constants";
+import { initI18n, resolveLanguage, configText } from "./i18n";
+import { setConfig as setCookieConfig } from "./models/Cookie";
 
 function ensureActiveToolsAreValid(availableTools = []) {
   // First check if there's a valid array
@@ -63,6 +65,11 @@ function ensureActiveToolsAreValid(availableTools = []) {
  */
 initHFetch();
 
+// Init i18n before anything else, so that startup errors can be translated
+// even if appConfig fails to load. The final language is resolved below,
+// once appConfig is loaded.
+await initI18n();
+
 // We must define appConfig outside of the try so it's available in catch
 // statement. If we fail at some point, we may still be able to use the
 // error message from appConfig (depending on if we manage to load it or not).
@@ -81,6 +88,11 @@ try {
 
   // Update hfetch with loaded config.
   initFetchWrapper(appConfig);
+
+  // Resolve the language from the URL or appConfig.defaultLanguage, so startup
+  // errors below are shown in the right language. The stored preference can't
+  // be used yet: cookie consent depends on the map config.
+  await resolveLanguage(appConfig, { useStoredLanguage: false });
 
   // Grab URL params and save for later use
   const initialURLParams = getMergedSearchAndHashParams();
@@ -155,6 +167,13 @@ try {
   // At this stage, we know for sure what activeMap is, so we can initiate the LocalStorageHelper
   LocalStorageHelper.setKeyName(config.activeMap);
 
+  // Configure the cookie manager now (App does it again later, with its observer), so that
+  // the stored language preference is only used if functional cookies are allowed.
+  setCookieConfig({ showCookieNotice: config.mapConfig.map.showCookieNotice });
+
+  // Resolve the final language (URL > stored preference > appConfig.defaultLanguage > sv)
+  await resolveLanguage(appConfig);
+
   // Use availableTools from appConfig, with an empty array as fallback if not provided.
   const availableTools = ensureActiveToolsAreValid(appConfig.availableTools);
 
@@ -173,26 +192,43 @@ try {
     loadErrorMessage,
     loadErrorReloadButtonText = "";
 
+  // appConfig's loadError* texts are admin-entered (assumed Swedish), see configText().
   if (error instanceof AccessError) {
-    loadErrorTitle = appConfig?.loadErrorAccessDeniedTitle || "Åtkomst nekad";
-    loadErrorMessage =
-      appConfig?.loadErrorAccessDeniedMessage ||
-      "Du har inte tillgång till den här kartan.";
+    loadErrorTitle = configText(
+      "startup.accessDeniedTitle",
+      appConfig?.loadErrorAccessDeniedTitle
+    );
+    loadErrorMessage = configText(
+      "startup.accessDeniedMessage",
+      appConfig?.loadErrorAccessDeniedMessage
+    );
   } else if (error instanceof NotFoundError) {
-    loadErrorTitle = appConfig?.loadErrorNotFoundTitle || "Kartan finns inte";
-    loadErrorMessage =
-      appConfig?.loadErrorNotFoundMessage ||
-      "Kartan som du försöker nå finns inte.";
+    loadErrorTitle = configText(
+      "startup.notFoundTitle",
+      appConfig?.loadErrorNotFoundTitle
+    );
+    loadErrorMessage = configText(
+      "startup.notFoundMessage",
+      appConfig?.loadErrorNotFoundMessage
+    );
     // Show the reset app button as a 404 might as well be caused by an erroneous `m` parameter
-    loadErrorReloadButtonText =
-      appConfig?.loadErrorReloadButtonText || "Återställ applikationen";
+    loadErrorReloadButtonText = configText(
+      "startup.reloadButton",
+      appConfig?.loadErrorReloadButtonText
+    );
   } else {
-    loadErrorTitle = appConfig?.loadErrorTitle || "Ett fel har inträffat";
-    loadErrorMessage =
-      appConfig?.loadErrorMessage ||
-      "Fel när applikationen skulle läsas in. Du kan försöka att återställa applikationen genom att trycka på knappen nedan. Om felet kvarstår kan du kontakta systemansvarig.";
-    loadErrorReloadButtonText =
-      appConfig?.loadErrorReloadButtonText || "Återställ applikationen";
+    loadErrorTitle = configText(
+      "startup.errorTitle",
+      appConfig?.loadErrorTitle
+    );
+    loadErrorMessage = configText(
+      "startup.errorMessage",
+      appConfig?.loadErrorMessage
+    );
+    loadErrorReloadButtonText = configText(
+      "startup.reloadButton",
+      appConfig?.loadErrorReloadButtonText
+    );
   }
 
   createRoot(document.getElementById("root")).render(

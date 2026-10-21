@@ -1,0 +1,43 @@
+{
+  "geosuiteExport": {
+    "boreholes": {
+      "deliveryInformation": "Delivery information",
+      "referenceSystem": "Reference system",
+      "title": "Borehole data in GeoSuite format"
+    },
+    "creatingZip": "Creating ZIP file...",
+    "deliveryInfo": "Project: {{project}}\nDocument: {{document}}",
+    "deliveryInfoFileName": "Delivery information.txt",
+    "description": "Get data within a selected area",
+    "documents": {
+      "title": "Geotechnical surveys"
+    },
+    "done": "Done",
+    "email": "Email address",
+    "entireProject": " Entire project",
+    "entireProjectCount": "Entire project ({{number}})",
+    "fetchingResults": "Fetching results...",
+    "finish": "Finish",
+    "nextStep": "Continue to the next step",
+    "noResultsSelectNewArea": "No results. Go back and select a new area.",
+    "order": "Order",
+    "previousStep": "Go back to the previous step",
+    "projectExportOptions": "Show project export options.",
+    "projectId": "Id: {{id}}",
+    "selectAll": "Select all",
+    "selectMore": "Select more",
+    "selectMoreProducts": "Select more products",
+    "startOver": "Start over",
+    "steps": {
+      "confirmation": "Confirmation",
+      "delivery": "Delivery options",
+      "selectArea": "Select area",
+      "selectProduct": "Select product"
+    },
+    "termsOfUse": "Terms of use",
+    "title": "Get data",
+    "withinArea": "Within selection",
+    "withinAreaCount": "Within selection ({{number}})",
+    "yourEmail": "Your email address"
+  }
+}

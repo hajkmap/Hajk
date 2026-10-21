@@ -5,6 +5,7 @@ import InformationWrapper from "./InformationWrapper";
 // We're gonna be checking the job status against this array of
 // FME-status messages (all of witch means the job failed).
 import { FME_FAIL_MESSAGES } from "../constants";
+import i18n from "src/i18n";
 
 const OrderPanel = (props) => {
   // Let's destruct the props.
@@ -14,8 +15,8 @@ const OrderPanel = (props) => {
   // We're gonna need some different information texts based on if the user
   // is supposed to supply an email or not.
   const informationText = shouldPromptForEmail
-    ? "Beställningen är redo att skickas! Fyll i din epost och klicka sedan på beställ-knappen."
-    : "Beställningen är redo att skickas! Klicka nedan för att skicka iväg den.";
+    ? i18n.t("fmeServer.order.readyWithEmail")
+    : i18n.t("fmeServer.order.ready");
 
   // Helper function to determine if a order has failed or not.
   function getOrderFailed(orderStatus) {
@@ -29,11 +30,11 @@ const OrderPanel = (props) => {
     const orderFailed = getOrderFailed(orderStatus);
     return (
       <InformationWrapper type={orderFailed ? "error" : "info"}>
-        <Typography>{`Din beställning är klar! ${
-          orderFailed
-            ? "Tyvärr så kunde FME inte slutföra beställningen. Kontakta systemadministratören."
-            : "Resultatet har skickats till din epost!"
-        }`}</Typography>
+        <Typography>
+          {orderFailed
+            ? i18n.t("fmeServer.order.failed")
+            : i18n.t("fmeServer.order.succeeded")}
+        </Typography>
       </InformationWrapper>
     );
   }
@@ -43,7 +44,7 @@ const OrderPanel = (props) => {
     return (
       <Grid container>
         <Grid size={12}>
-          <Typography>Din beställning bearbetas...</Typography>
+          <Typography>{i18n.t("fmeServer.order.processing")}</Typography>
         </Grid>
         <Grid size={12}>
           <LinearProgress />
@@ -71,7 +72,7 @@ const OrderPanel = (props) => {
         <TextField
           id={`fme-user-email`}
           size="small"
-          label="Epost"
+          label={i18n.t("fmeServer.order.email")}
           onChange={(e) => setUserEmail(e.target.value)}
           fullWidth
           value={userEmail}

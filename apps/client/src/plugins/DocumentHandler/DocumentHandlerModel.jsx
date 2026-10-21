@@ -369,7 +369,7 @@ export default class DocumentHandlerModel {
       return await response.json();
     } catch (err) {
       console.warn(
-        `Kunde inte parsa JSON-dokumentet ${title}, kontrollera så att filen finns och är en .json-fil `
+        `Could not parse the JSON document ${title}, check that the file exists and is a .json file`
       );
       throw new Error(err);
     }

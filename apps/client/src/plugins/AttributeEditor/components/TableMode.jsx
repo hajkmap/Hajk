@@ -24,6 +24,7 @@ import TableRow from "./TableRow";
 import { usePagination, SHOW_ALL_VALUE } from "../hooks/usePagination";
 import { useScrollToSelectedRow } from "../hooks/useScrollToSelectedRow";
 import { normalizeFilterValue } from "../helpers/helpers";
+import i18n from "src/i18n";
 
 const DEFAULT_WRAP_CH = 100;
 const SHOW_ALL_WARNING_THRESHOLD = 100;
@@ -72,24 +73,28 @@ const ColumnFilter = React.memo(function ColumnFilter({
     >
       <input
         style={s.filterSearch}
-        placeholder="Sök i värden…"
+        placeholder={i18n.t("attributeEditor.filter.searchValues")}
         value={q}
         onChange={(e) => {
           setQ(e.target.value);
           setShowAll(false);
         }}
-        aria-label="Sök i filtervärden"
+        aria-label={i18n.t("attributeEditor.filter.searchValuesAria")}
       />
       <div style={s.filterOverlayButtons}>
         <button style={s.btnSmall} onClick={onClearFilter}>
-          Rensa
+          {i18n.t("common.clear")}
         </button>
         <button style={s.btnSmall} onClick={onSelectFiltered}>
-          Välj filtrerade ({filtered.length})
+          {i18n.t("attributeEditor.filter.selectFiltered", {
+            number: filtered.length,
+          })}
         </button>
         {filtered.length > MAX_SHOWN && !showAll && (
           <button style={s.btnSmall} onClick={() => setShowAll(true)}>
-            Visa alla ({filtered.length})
+            {i18n.t("attributeEditor.filter.showAll", {
+              number: filtered.length,
+            })}
           </button>
         )}
       </div>
@@ -108,7 +113,11 @@ const ColumnFilter = React.memo(function ColumnFilter({
             </label>
           );
         })}
-        {filtered.length === 0 && <div style={s.listEmpty}>Inga träffar.</div>}
+        {filtered.length === 0 && (
+          <div style={s.listEmpty}>
+            {i18n.t("attributeEditor.filter.noHits")}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -443,18 +452,22 @@ export default function TableMode(props) {
   return (
     <div style={s.tableWrap}>
       <div style={s.tableHeaderBar}>
-        <span style={s.tableHeaderTitle}>Alla objekt</span>
+        <span style={s.tableHeaderTitle}>
+          {i18n.t("attributeEditor.table.allFeatures")}
+        </span>
         <div style={s.spacer} />
 
         <>
           {tablePendingDeletes.size > 0 && (
             <span style={s.toolbarStatsColor(theme.danger)}>
-              {tablePendingDeletes.size} markerade för radering
+              {i18n.t("attributeEditor.table.markedForDeletion", {
+                count: tablePendingDeletes.size,
+              })}
             </span>
           )}
           {tableHasPending && (
             <span style={s.toolbarStatsColor(theme.warning)}>
-              Osparade ändringar
+              {i18n.t("attributeEditor.unsavedChanges")}
             </span>
           )}
 
@@ -468,12 +481,12 @@ export default function TableMode(props) {
             onClick={addFeatureFromGps}
             title={
               !supportsPointGeometry
-                ? "GPS-punkt kräver ett lager med punktgeometri"
+                ? i18n.t("attributeEditor.actions.gpsNoPointLayer")
                 : gpsLoading
-                  ? "Hämtar GPS-position..."
-                  : "Skapa punkt från GPS-position"
+                  ? i18n.t("attributeEditor.actions.gpsLoading")
+                  : i18n.t("attributeEditor.actions.gpsCreate")
             }
-            aria-label="GPS-punkt"
+            aria-label={i18n.t("attributeEditor.actions.gpsPoint")}
           >
             {gpsLoading ? (
               <CircularProgress size={18} />
@@ -490,10 +503,12 @@ export default function TableMode(props) {
             onClick={() => exportToExcel(filteredAndSorted)}
             title={
               filteredAndSorted.length
-                ? `Exportera till Excel (${filteredAndSorted.length} rader)`
-                : "Inga rader att exportera"
+                ? i18n.t("attributeEditor.actions.exportExcelRows", {
+                    count: filteredAndSorted.length,
+                  })
+                : i18n.t("attributeEditor.actions.noRowsToExport")
             }
-            aria-label="Exportera till Excel"
+            aria-label={i18n.t("attributeEditor.actions.exportExcel")}
           >
             <DescriptionIcon fontSize="small" />
           </button>
@@ -509,12 +524,14 @@ export default function TableMode(props) {
             }}
             title={
               tableSelectedIds.size > 1
-                ? `Zooma till ${tableSelectedIds.size} objekt i kartan`
+                ? i18n.t("attributeEditor.actions.zoomToCount", {
+                    count: tableSelectedIds.size,
+                  })
                 : tableSelectedIds.size === 1
-                  ? "Zooma till valt objekt i kartan"
-                  : "Markera rader först"
+                  ? i18n.t("attributeEditor.actions.zoomToOne")
+                  : i18n.t("attributeEditor.actions.selectRowsFirst")
             }
-            aria-label="Zooma till valda"
+            aria-label={i18n.t("attributeEditor.actions.zoomToSelected")}
           >
             <CenterFocusStrongIcon fontSize="small" />
           </button>
@@ -524,12 +541,15 @@ export default function TableMode(props) {
             onClick={scrollToSelectedRow}
             title={
               tableSelectedIds.size > 1
-                ? `Visa markerad rad (${currentScrollIndex + 1}/${tableSelectedIds.size})`
+                ? i18n.t("attributeEditor.actions.showSelectedRowIndex", {
+                    index: currentScrollIndex + 1,
+                    total: tableSelectedIds.size,
+                  })
                 : tableSelectedIds.size === 1
-                  ? "Visa markerad rad i tabellen"
-                  : "Markera rader först"
+                  ? i18n.t("attributeEditor.actions.showSelectedRowInTable")
+                  : i18n.t("attributeEditor.actions.selectRowsFirst")
             }
-            aria-label="Visa markerad"
+            aria-label={i18n.t("attributeEditor.actions.showSelected")}
           >
             <VisibilityIcon fontSize="small" />
           </button>
@@ -539,10 +559,12 @@ export default function TableMode(props) {
             onClick={duplicateSelectedRows}
             title={
               tableSelectedIds.size
-                ? `Duplicera ${tableSelectedIds.size} markerade`
-                : "Markera rader först"
+                ? i18n.t("attributeEditor.actions.duplicateSelected", {
+                    count: tableSelectedIds.size,
+                  })
+                : i18n.t("attributeEditor.actions.selectRowsFirst")
             }
-            aria-label="Duplicera val"
+            aria-label={i18n.t("attributeEditor.actions.duplicate")}
           >
             <ContentCopyIcon fontSize="small" />
           </button>
@@ -557,12 +579,12 @@ export default function TableMode(props) {
             onClick={splitFeature}
             title={
               tableSelectedIds.size !== 1
-                ? "Markera exakt en rad för att dela"
+                ? i18n.t("attributeEditor.actions.splitSelectOneRow")
                 : !canSplitGeometry
-                  ? "Endast Polygon och LineString kan delas"
-                  : "Dela valt objekt med en klipplinje"
+                  ? i18n.t("attributeEditor.actions.splitOnlyPolygonLine")
+                  : i18n.t("attributeEditor.actions.splitWithLine")
             }
-            aria-label="Dela objekt"
+            aria-label={i18n.t("attributeEditor.actions.split")}
           >
             <CallSplitIcon fontSize="small" />
           </button>
@@ -577,17 +599,19 @@ export default function TableMode(props) {
             onClick={canSplitMultiFeature ? splitMultiFeature : mergeFeatures}
             title={
               canSplitMultiFeature
-                ? "Dela upp multi-objekt till enskilda objekt"
+                ? i18n.t("attributeEditor.actions.splitMultiTooltip")
                 : canMergeFeatures
-                  ? "Slå ihop markerade objekt till ett multi-objekt. Attribut kopieras från objektet som markerades först."
+                  ? i18n.t("attributeEditor.actions.mergeTooltip")
                   : tableSelectedIds.size === 1
-                    ? "Markera ett multi-objekt för att dela upp, eller flera rader för att slå ihop"
+                    ? i18n.t("attributeEditor.actions.splitOrMergeRows")
                     : tableSelectedIds.size < 2
-                      ? "Markera objekt för att dela upp eller slå ihop"
-                      : "Objekten måste ha samma geometrityp för att slås ihop"
+                      ? i18n.t("attributeEditor.actions.splitOrMergeSelect")
+                      : i18n.t("attributeEditor.actions.mergeSameType")
             }
             aria-label={
-              canSplitMultiFeature ? "Dela upp multi-objekt" : "Slå ihop objekt"
+              canSplitMultiFeature
+                ? i18n.t("attributeEditor.actions.splitMulti")
+                : i18n.t("attributeEditor.actions.merge")
             }
           >
             {canSplitMultiFeature ? (
@@ -603,10 +627,10 @@ export default function TableMode(props) {
             onClick={() => setDeleteState([...tableSelectedIds], "toggle")}
             title={
               tableSelectedIds.size
-                ? "Markera valda för radering"
-                : "Markera rader först"
+                ? i18n.t("attributeEditor.actions.markSelectedForDelete")
+                : i18n.t("attributeEditor.actions.selectRowsFirst")
             }
-            aria-label="Markera för radering"
+            aria-label={i18n.t("attributeEditor.actions.markForDelete")}
           >
             <DeleteOutlineIcon fontSize="small" />
           </button>
@@ -627,8 +651,8 @@ export default function TableMode(props) {
                 : s.iconBtnDisabled
             }
             onClick={undoLatestTableChange}
-            title="Ångra senaste ändring"
-            aria-label="Ångra senaste"
+            title={i18n.t("attributeEditor.actions.undoLatest")}
+            aria-label={i18n.t("attributeEditor.actions.undoLatestAria")}
           >
             <UndoIcon fontSize="small" />
           </button>
@@ -637,8 +661,8 @@ export default function TableMode(props) {
             style={!tableHasPending ? s.iconBtnDisabled : s.iconBtn}
             disabled={!tableHasPending}
             onClick={() => setSaveDialogOpen(true)}
-            title="Spara"
-            aria-label="Spara"
+            title={i18n.t("common.save")}
+            aria-label={i18n.t("common.save")}
           >
             <SaveIcon fontSize="small" />
           </button>
@@ -693,7 +717,7 @@ export default function TableMode(props) {
                         <div style={s.thControls}>
                           <button
                             onClick={() => toggleSort(f.key)}
-                            title="Klicka för att sortera"
+                            title={i18n.t("attributeEditor.table.clickToSort")}
                             style={s.sortButton}
                           >
                             {sort.key === f.key
@@ -726,8 +750,10 @@ export default function TableMode(props) {
                             style={s.filterButton(hasActiveFilter)}
                             title={
                               hasActiveFilter
-                                ? `Filter aktivt (${(columnFilters[f.key] || []).length} val)`
-                                : "Filtrera"
+                                ? i18n.t("attributeEditor.table.filterActive", {
+                                    number: (columnFilters[f.key] || []).length,
+                                  })
+                                : i18n.t("attributeEditor.table.filter")
                             }
                             aria-pressed={openFilterColumn === f.key}
                           >
@@ -752,7 +778,9 @@ export default function TableMode(props) {
                               style={s.descriptionIcon}
                               title={f.description}
                               onClick={(e) => e.stopPropagation()}
-                              aria-label={`Information om ${f.label}`}
+                              aria-label={i18n.t("attributeEditor.fieldInfo", {
+                                field: f.label,
+                              })}
                             >
                               <InfoOutlinedIcon style={{ fontSize: "16px" }} />
                             </button>
@@ -846,8 +874,13 @@ export default function TableMode(props) {
                             startW: w,
                           };
                         }}
-                        title="Dra för att ändra kolumnbredd"
-                        aria-label={`Ändra bredd för kolumn ${f.label}`}
+                        title={i18n.t("attributeEditor.table.resizeColumn")}
+                        aria-label={i18n.t(
+                          "attributeEditor.table.resizeColumnAria",
+                          {
+                            field: f.label,
+                          }
+                        )}
                       />
                     </th>
                   );
@@ -905,11 +938,11 @@ export default function TableMode(props) {
                     <span style={s.inlineFlexCenter}>
                       {props.isLoading ? (
                         <>
-                          Laddning pågår...
+                          {i18n.t("attributeEditor.loading")}
                           <CircularProgress size={16} />
                         </>
                       ) : (
-                        "Inga objekt i tjänsten"
+                        i18n.t("attributeEditor.noFeatures")
                       )}
                     </span>
                   </td>
@@ -924,15 +957,21 @@ export default function TableMode(props) {
         <div style={s.tableFooter}>
           <div style={s.paginationInfo}>
             {isShowingAll
-              ? `Visar alla ${totalRows} objekt`
-              : `Visar ${startIndex + 1}-${endIndex} av ${totalRows}`}
+              ? i18n.t("attributeEditor.table.showingAll", {
+                  count: totalRows,
+                })
+              : i18n.t("attributeEditor.table.showingRange", {
+                  from: startIndex + 1,
+                  to: endIndex,
+                  total: totalRows,
+                })}
           </div>
 
           <div style={s.spacer} />
 
           <div style={s.paginationControls}>
             <label style={s.rowsPerPageLabel}>
-              Rader per sida:
+              {i18n.t("attributeEditor.pagination.rowsPerPage")}
               <select
                 value={rowsPerPage}
                 onChange={handleRowsPerPageChange}
@@ -942,7 +981,9 @@ export default function TableMode(props) {
                 <option value={20}>20</option>
                 <option value={50}>50</option>
                 <option value={100}>100</option>
-                <option value={SHOW_ALL_VALUE}>Alla</option>
+                <option value={SHOW_ALL_VALUE}>
+                  {i18n.t("attributeEditor.pagination.all")}
+                </option>
               </select>
             </label>
 
@@ -950,8 +991,8 @@ export default function TableMode(props) {
               style={currentPage === 0 ? s.iconBtnDisabled : s.iconBtn}
               disabled={currentPage === 0}
               onClick={() => setCurrentPage(0)}
-              title="Första sidan"
-              aria-label="Första sidan"
+              title={i18n.t("attributeEditor.pagination.first")}
+              aria-label={i18n.t("attributeEditor.pagination.first")}
             >
               <FirstPageIcon fontSize="small" />
             </button>
@@ -960,14 +1001,17 @@ export default function TableMode(props) {
               style={currentPage === 0 ? s.iconBtnDisabled : s.iconBtn}
               disabled={currentPage === 0}
               onClick={() => setCurrentPage(currentPage - 1)}
-              title="Föregående sida"
-              aria-label="Föregående sida"
+              title={i18n.t("attributeEditor.pagination.previous")}
+              aria-label={i18n.t("attributeEditor.pagination.previous")}
             >
               <NavigateBeforeIcon fontSize="small" />
             </button>
 
             <span style={s.pageIndicator}>
-              Sida {currentPage + 1} av {totalPages}
+              {i18n.t("attributeEditor.pagination.page", {
+                page: currentPage + 1,
+                total: totalPages,
+              })}
             </span>
 
             <button
@@ -976,8 +1020,8 @@ export default function TableMode(props) {
               }
               disabled={currentPage >= totalPages - 1}
               onClick={() => setCurrentPage(currentPage + 1)}
-              title="Nästa sida"
-              aria-label="Nästa sida"
+              title={i18n.t("attributeEditor.pagination.next")}
+              aria-label={i18n.t("attributeEditor.pagination.next")}
             >
               <NavigateNextIcon fontSize="small" />
             </button>
@@ -988,8 +1032,8 @@ export default function TableMode(props) {
               }
               disabled={currentPage >= totalPages - 1}
               onClick={() => setCurrentPage(totalPages - 1)}
-              title="Sista sidan"
-              aria-label="Sista sidan"
+              title={i18n.t("attributeEditor.pagination.last")}
+              aria-label={i18n.t("attributeEditor.pagination.last")}
             >
               <LastPageIcon fontSize="small" />
             </button>
@@ -1004,17 +1048,17 @@ export default function TableMode(props) {
         onDiscard={onDiscard}
         summary={summary}
         saving={savingNow}
-        title="Spara ändringar"
-        body="Det finns osparade ändringar i tabellen. Vill du spara nu?"
-        primaryLabel="Spara"
+        title={i18n.t("attributeEditor.dialog.saveTitle")}
+        body={i18n.t("attributeEditor.dialog.saveBodyTable")}
+        primaryLabel={i18n.t("common.save")}
       />
 
       <ConfirmationDialog
         open={showAllConfirmOpen}
-        titleName="Visa alla objekt"
-        contentDescription="Om du väljer att visa alla objekt kan systemet bli långsammare. Vill du fortsätta?"
-        cancel="Avbryt"
-        confirm="Fortsätt"
+        titleName={i18n.t("attributeEditor.dialog.showAllTitle")}
+        contentDescription={i18n.t("attributeEditor.dialog.showAllText")}
+        cancel={i18n.t("common.cancel")}
+        confirm={i18n.t("common.continue")}
         handleConfirm={handleShowAllConfirm}
         handleAbort={handleShowAllAbort}
       />

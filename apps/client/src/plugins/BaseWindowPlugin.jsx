@@ -9,6 +9,7 @@ import Window from "../components/Window";
 import WindowSheet from "../components/WindowSheet";
 import Card from "../components/Card";
 import PluginControlButton from "../components/PluginControlButton";
+import { configText } from "src/i18n";
 
 const SHEET_MIN_HEIGHT = 54;
 
@@ -27,8 +28,21 @@ class BaseWindowPlugin extends React.PureComponent {
     // 'type' is basically a unique identifier for each plugin
     this.type = props.type.toLowerCase() || undefined;
 
+    // Translated defaults are looked up under the plugin's own key, e.g. "layerSwitcher.title".
+    // Admin texts (options.*) are assumed to be Swedish, see configText().
+    const i18nKey = props.type.charAt(0).toLowerCase() + props.type.slice(1);
+    this.title = configText(
+      `${i18nKey}.title`,
+      props.options.title,
+      props.custom.title || "Unnamed plugin"
+    );
+
     // There will be defaults in props.custom, so that each plugin has own default title/description
-    this.description = props.options.description || props.custom.description;
+    this.description = configText(
+      `${i18nKey}.description`,
+      props.options.description,
+      props.custom.description
+    );
 
     // Should Window be visible at start?
     const visibleAtStart =
@@ -41,7 +55,7 @@ class BaseWindowPlugin extends React.PureComponent {
     // Title and Color are kept in state and not as class properties. Keeping them in state
     // ensures re-render when new props arrive and update the state variables (see componentDidUpdate() too).
     this.state = {
-      title: props.options.title || props.custom.title || "Unnamed plugin",
+      title: this.title,
       color: props.options.color || props.custom.color || null,
       windowVisible: visibleAtStart,
     };
@@ -64,8 +78,7 @@ class BaseWindowPlugin extends React.PureComponent {
 
     // Title is a special case: we want to use the state.title and pass on to Window in order
     // to update Window's title dynamically. At the same time, we want all other occurrences,
-    // e.g. Widget or Drawer button's label to remain the same.
-    this.title = props.options.title || props.custom.title || "Unnamed plugin";
+    // e.g. Widget or Drawer button's label to remain the same (this.title, set above).
 
     // Try to get values from admin's option. Fallback to customs from Plugin defaults, or finally to hard-coded values.
     this.width = props.options.width || props.custom.width || 400;

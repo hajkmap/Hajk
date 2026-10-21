@@ -1,0 +1,410 @@
+{
+  "alert": {
+    "missingMessage": "Meddelande saknas",
+    "title": "Meddelande"
+  },
+  "app": {
+    "drawerContent": "Panelens innehåll",
+    "lockDrawer": "Lås fast verktygspanelen",
+    "mapTools": "Kartverktyg",
+    "unlockDrawer": "Lås upp verktygspanelen"
+  },
+  "backgroundLayers": {
+    "black": "Svart",
+    "legendLink": "Länk till teckenförklaring",
+    "moreInfo": "Här finns mer info",
+    "osmInfoText": "OpenStreetMap är en öppen, användargenererad karta där vem som helst kan bidra med information. Innehållet är inte kvalitetssäkrat, granskat eller godkänt av Lantmäteriet.",
+    "osmInfoTitle": "Om OpenStreetMap",
+    "osmVector": "OpenStreetMap (vektor)",
+    "osmVectorInfoText": "OpenStreetMap är en öppen, användargenererad karta där vem som helst kan bidra med information. Innehållet är inte kvalitetssäkrat, granskat eller godkänt av Lantmäteriet. Denna variant hämtas som vektordata och är därför skarp även på högupplösta skärmar.",
+    "osmVectorInfoTitle": "Om OpenStreetMap (vektor)",
+    "white": "Vit"
+  },
+  "card": {
+    "missingDescription": "Beskrivning saknas",
+    "missingTitle": "Titel saknas"
+  },
+  "common": {
+    "back": "Tillbaka",
+    "backToPreviousView": "Gå till föregående vy",
+    "breadcrumb": "Brödsmulor",
+    "cancel": "Avbryt",
+    "clear": "Rensa",
+    "close": "Stäng",
+    "continue": "Fortsätt",
+    "cookieSettings": "Cookie-inställningar",
+    "decimals_one": "{{count}} decimal",
+    "decimals_other": "{{count}} decimaler",
+    "delete": "Ta bort",
+    "demoLanguageSwitch": "Demo: byt språk",
+    "descriptionLabel": "Beskrivning",
+    "download": "Ladda ner",
+    "edit": "Redigera",
+    "errorTitle": "Felmeddelande",
+    "generalSettings": "Generella inställningar",
+    "geolocationPermissionDenied": "Du behöver tillåta att applikationen visar din position. För datorer: De flesta webbläsare har en lås-ikon i adressfältet som du kan klicka på för att tillåta Plats/Position.",
+    "help": "Hjälp",
+    "hits_one": "{{count}} träff",
+    "hits_other": "{{count}} träffar",
+    "info": "Info",
+    "key": "Nyckel",
+    "legend": "Teckenförklaring",
+    "loading": "Laddar...",
+    "next": "Nästa",
+    "no": "Nej",
+    "noResults": "Inga resultat",
+    "ok": "OK",
+    "previous": "Föregående",
+    "replace": "Ersätt",
+    "reset": "Återställ",
+    "save": "Spara",
+    "settings": "Inställningar",
+    "titleLabel": "Titel",
+    "undo": "Ångra",
+    "value": "Värde",
+    "xOfY": "{{current}} av {{total}}",
+    "yes": "Ja"
+  },
+  "confirmServiceSwitch": {
+    "clearDrawings": "Ta bort ritade objekt",
+    "drawingCount_one": "Du har {{count}} ritat objekt i kartan som inte är kopplat till något redigerbart lager.",
+    "drawingCount_other": "Du har {{count}} ritade objekt i kartan som inte är kopplade till något redigerbart lager.",
+    "keepDrawings": "Behåll ritade objekt (endast för referens)",
+    "note": "<strong>OBS:</strong> Ritade objekt och redigerbara lager är separata system. Om du behåller de ritade objekten kommer de finnas kvar i kartan men kan inte sparas tillsammans med redigerbart lager.",
+    "question": "Vad vill du göra?",
+    "selectingService": "Du är på väg att välja redigerbart lager <strong>{{name}}</strong>.",
+    "title": "Ritade objekt i kartan"
+  },
+  "controls": {
+    "activeMap": "Aktiv karta",
+    "clearMap": "Rensa kartan",
+    "currentMap": "Nuvarande karta: {{title}}",
+    "currentScale": "Nuvarande skala",
+    "externalLinksTitle": "Öppna koordinat i extern applikation",
+    "hideAllLayers": "Dölj alla aktiva lager",
+    "informationTitle": "Om kartan",
+    "presetDialogText": "Alla tända lager i kartan kommer nu att släckas. Snabbvalets fördefinierade lager tänds istället.",
+    "presetDialogTitle": "Visa snabbval",
+    "presetInvalidLink": "Länken till platsen är tyvärr felaktig. Kontakta administratören av karttjänsten för att åtgärda felet.",
+    "presetTitle": "Snabbval",
+    "recentlyUsedPlugins": "Senast använda verktyg",
+    "resetMap": "Återställ kartan till startläget",
+    "resetRotation": "Återställ rotation",
+    "showCookieNotice": "Visa cookie-meddelande",
+    "switchMap": "Byt karta",
+    "toggleAttribution": "Visa/dölj copyrightinformation för kartdata",
+    "toggleTheme": "Växla färgtema",
+    "toggleThemeTooltip": "Växla mellan mörkt och ljust färgtema",
+    "untitledMap": "Karta utan titel",
+    "zoomIn": "Zooma in",
+    "zoomOut": "Zooma ut"
+  },
+  "cookieNotice": {
+    "allowAll": "Tillåt alla",
+    "allowSelected": "Tillåt valda",
+    "functional": "Funktionella",
+    "message": "Vi använder nödvändiga kakor (cookies) för att webbplatsen ska fungera på ett bra sätt för dig. Vi använder också funktionella kakor för att ge dig bästa möjliga funktion om du godkänner användningen av dessa.",
+    "moreInfo": "Mer information om kakor",
+    "necessary": "Nödvändiga",
+    "thirdParty": "Tredjepart"
+  },
+  "editing": {
+    "editingService": "Redigerar {{name}}",
+    "noService": "Ingen"
+  },
+  "featureInfo": {
+    "tableLabel": "Tabell med objektets egenskaper"
+  },
+  "introduction": {
+    "buttonAbstract": "Öppna guidad tur",
+    "buttonTitle": "Introduktionsguide",
+    "chooseIntroduction": "Välj introduktion",
+    "done": "Avsluta",
+    "fullIntroduction": "Hela introduktionen",
+    "layerSearchExamples": [
+      "Badplatser",
+      "Lekplatser",
+      "Gymnasieskolor",
+      "Sevärdheter"
+    ],
+    "newIn": "Nytt i {{title}}",
+    "steps": {
+      "actionsMenu": {
+        "intro": "<b>Dölj alla aktiva lager:</b> stänger av alla lager på kartan. <br><br> <b>Scrolla till toppen:</b> hoppar till början av lagerlistan. <br><br> <b>Scrolla till botten:</b> hoppar till slutet av lagerlistan.",
+        "title": "Menyfunktioner"
+      },
+      "actionsMenuButton": {
+        "intro": "Klicka på menyknappen (de tre prickarna). <br><br> <b>I menyn finns funktioner för att:</b> dölja alla aktiva lager, hoppa till toppen av lagerlistan eller hoppa till botten av lagerlistan.",
+        "title": "Meny bredvid sökfältet"
+      },
+      "documentHandler": {
+        "intro": "Dokumenthanteraren används för att visa och hantera texter som är kopplade till kartan. Dokumenten är fristående och kan återanvändas i flera kartor.<br><br>Med Dokumenthanteraren kan du: <ul><li>Visa utförliga texter som är kopplade till kartbokmärken.</li><li>Kombinera text och karta genom att lägga till kartlänkar som motsvarar kartlager i kartan.</li></ul>",
+        "title": "Dokumenthanteraren"
+      },
+      "done": {
+        "intro": "Du har nu gått igenom hela introduktionen. Vill du ta en runda till?<br><br>Klicka på knappen i kartkontrollpanelen för att börja om från början.",
+        "title": "Introduktion avslutad 🎉"
+      },
+      "drawOrder": {
+        "intro": "Klicka på fliken Ritordning för att se och ändra lagrens ordning.",
+        "title": "Ritordning"
+      },
+      "editFavorites": {
+        "intro": "Knappen öppnar en vy där du kan hantera sparade favoriter.",
+        "title": "Redigera favoriter"
+      },
+      "favorites": {
+        "intro": "Klicka på favoriter-knappen. <br><br> Här kan du spara, redigera och ladda favoriter.{{note}}",
+        "noFavorites": "<br><br><i>Inga favoriter finns just nu. Lägg till en favorit för att aktivera den här delen av guiden.</i>",
+        "title": "Favoriter"
+      },
+      "favoritesList": {
+        "intro": "Här visas dina sparade favoriter. Klicka på en favorit för att ersätta befintliga lager med den.",
+        "title": "Favoritlista"
+      },
+      "favoritesMenu": {
+        "intro": "- <b>Spara till favoriter:</b> sparar en grupp av lager som favorit. Du kan anpassa titel och beskrivning. <br><br> - <b>Redigera favoriter:</b> hantera dina sparade favoriter. <br><br> - <b>Ladda favorit:</b> laddar vald favorit. Alla aktiva lager ersätts med favoritens lager.",
+        "title": "Favoritmeny"
+      },
+      "favoritesOptions": {
+        "intro": "<b>I menyn kan du:</b> visa information om favoriten, redigera den, ta bort den eller exportera den som en .json-fil.",
+        "title": "Alternativ för favoriter"
+      },
+      "favoritesOptionsMenu": {
+        "intro": "<b>Redigera:</b> ändra titel och beskrivning <br><br> <b>Ta bort:</b> tar bort favoriten från listan <br><br> <b>Exportera:</b> sparar favoriten som en .json-fil",
+        "title": "Meny för favoritens alternativ"
+      },
+      "hajk4": {
+        "intro": "Den här introduktionen visar hur den nya {{title}} fungerar. <br><br>Syftet är att illustrera de förändringar som tillkommit i Hajk 4. <br></br> <i>Observera att inga andra åtgärder, som att klicka på knappar eller använda andra funktioner i applikationen, är möjliga under introduktionen.</i>. <br><br> Följ med!",
+        "title": "Hajk 4"
+      },
+      "importFavorites": {
+        "intro": "Klicka för att importera favoriter från en .json-fil.",
+        "title": "Importera favoriter"
+      },
+      "layerDetails": {
+        "intro": "Klicka på knappen för att visa mer information om lagret.",
+        "title": "Mer information"
+      },
+      "layerGroup": {
+        "intro": "Pilen visar att det är en lagergrupp. Klicka för att se underliggande lager. <br><br> Notera att lagergrupper i <b>fetstil</b> innehåller aktiverade lager.",
+        "title": "Lagergrupp"
+      },
+      "layerInfo": {
+        "intro": "Här visas eventuell information kopplad till lagret.",
+        "title": "Information om lager"
+      },
+      "layerList": {
+        "intro": "I lagerlistan ser du alla lager som är tillgängliga i kartan. <br><br>Här kan du: <ul><li>söka efter lager</li><li>slå på eller stänga av lager</li><li>se information om varje lager</li></ul>",
+        "title": "Lagerlista"
+      },
+      "layerSearch": {
+        "intro": "Skriv in text i fältet för att söka efter lager.<br><br>Resultaten visas i lagerlistan nedanför.",
+        "title": "Sök lager"
+      },
+      "legend": {
+        "intro": "Knappen expanderar en sektion med teckenförklaring. <br><br> Klicka för att visa eller dölja den.",
+        "title": "Teckenförklaring"
+      },
+      "lockDrawer": {
+        "intro": "Klicka på knappen för att låsa fast sidomenyn.",
+        "title": "Lås fast sidomenyn"
+      },
+      "mapControls": {
+        "intro": "Längst till höger på skärmen finns kontrollknappar som du kan använda för att navigera i kartan.",
+        "title": "Kartkontroller"
+      },
+      "mapTools": {
+        "intro": "Kartverktygen har olika funktioner som hjälper dig att navigera i kartan.<br><br>Här visas de verktyg som är placerade i sidomenyn.<br><br>Verktygens placering kan ändras av administratörer.",
+        "title": "Kartverktyg"
+      },
+      "opacity": {
+        "intro": "Använd reglaget för att ändra lagrets transparens.",
+        "title": "Transparens"
+      },
+      "quickAccess": {
+        "intro": "Här listas och hanteras sparade lager för snabbåtkomst.",
+        "title": "Snabbåtkomst"
+      },
+      "quickAccessButton": {
+        "intro": "<b>Lägg till i snabbåtkomst:</b> lagret läggs till i snabbåtkomstmenyn under fliken Kartlager. <br><br> <b>Ta bort från snabbåtkomst:</b> lagret tas bort från snabbåtkomstmenyn under fliken Kartlager.",
+        "title": "Snabbåtkomst-knapp"
+      },
+      "quickAccessMenu": {
+        "intro": "<b>Lägg till aktiverade lager:</b> lägger till alla aktiverade lager i snabbåtkomst. <br><br> <b>Rensa allt:</b> tar bort alla lager från snabbåtkomst.",
+        "title": "Alternativ för snabbåtkomst"
+      },
+      "quickAccessMenuButton": {
+        "intro": "Klicka på menyknappen (de tre prickarna) i snabbåtkomst. <br><br> <b>I menyn finns funktioner för att:</b> <br> - lägga till aktiverade lager <br> - rensa allt",
+        "title": "Snabbåtkomst-meny"
+      },
+      "searchBar": {
+        "intro": "Sökverktyget hjälper dig att snabbt hitta rätt plats i kartan.",
+        "title": "Sökruta"
+      },
+      "searchOptions": {
+        "intro": "Här hittar du fler avancerade sökalternativ.",
+        "title": "Fler sökalternativ"
+      },
+      "searchToolsMenu": {
+        "intro": "Här kan du välja mellan olika sökverktyg för att göra din sökning.<br><br>Du kan också klicka på <b>Sökinställningar</b> för att öppna en separat meny.",
+        "title": "Meny för sökverktyg"
+      },
+      "systemLayerList": {
+        "intro": "Här kan du se och ändra ordningen för systemlager. <br><br> Dra och släpp lager för att ändra ordningen.",
+        "title": "Systemlager-lista"
+      },
+      "systemLayers": {
+        "intro": "Klicka för att visa systemlager i lagerlistan nedanför.<br><br>Systemlager är lager som skapas av verktyg, till exempel Ritaverktyget.",
+        "title": "Visa systemlager"
+      },
+      "tabs": {
+        "drawOrder": "- <b>Ritordning:</b> ändra ritordningen för aktiverade lager i kartan",
+        "intro": "Klicka här för att växla mellan olika vyer: <br><br> - <b>Kartlager:</b> visar lagerlistan med tillgängliga lager <br><br/> - <b>Bakgrund:</b> visar alla tillgängliga bakgrundslager <br><br/>{{drawOrder}}",
+        "title": "Flikar i {{title}}"
+      },
+      "themeList": {
+        "intro": "Här ser du de teman som finns i kartan. <br><br> Klicka på ett tema för att aktivera alla dess lager. <br><br> Du kan också söka efter teman i sökfältet.",
+        "title": "Temalista"
+      },
+      "themes": {
+        "intro": "Klicka på knappen för att visa teman. <br> Teman är fördefinierade lagergrupper skapade av administratörer.{{note}}",
+        "noThemes": "<br><br><i>Inga teman finns tillgängliga. Be en administratör att skapa teman för att använda den här funktionen.</i>",
+        "title": "Teman"
+      },
+      "toggleLayer": {
+        "intro": "Klicka i rutan för att slå på eller stänga av ett lager. Lagernamn i <b>fetstil</b> betyder att lagret är aktiverat.",
+        "title": "Tända eller släcka lager"
+      },
+      "toolPanel": {
+        "documentHandlerIntro": "<br /><br /><b>{{name}}:</b> är ett verktyg som används för att visa större mängder text i Hajk. Klicka på knappen för att visa sidomenyn.",
+        "intro": "<b>{{name}}:</b> här hittar du olika funktioner och verktyg som hjälper dig att interagera med kartan.{{documentHandler}}",
+        "title": "Verktygspanel"
+      },
+      "welcome": {
+        "intro": "Här får du en kort guide som visar dig runt i applikationen. Syftet är att ge en överblick över grundfunktionerna och de nyheter som tillkommit i Hajk 4. <br><br>Observera att inga andra åtgärder, som att klicka på knappar eller använda andra funktioner i applikationen, är möjliga under introduktionen. <br><br>👉 Följ med!",
+        "title": "Välkommen"
+      }
+    }
+  },
+  "mapClickViewer": {
+    "keyboardHint": "Tips: du kan bläddra bland resultaten med knapparna ← och → på tangentbordet",
+    "overview": "Översikt"
+  },
+  "search": {
+    "clearSearch": "Rensa sökning",
+    "defaultHitName": "Sökträff",
+    "doSearch": "Utför sökning",
+    "drawCircleHint": "Tryck i kartan där du vill ha centrumpunkten, dra sedan utåt och släpp.",
+    "drawPolygonHint": "Tryck en gång i kartan för varje nod i polygonen. Genomför sökningen genom att trycka på den sista noden en gång till.",
+    "exportName": "Sökexport",
+    "extentSearchFailed": "Ett problem uppstod vid sökning i området. Kontakta systemadministratören.",
+    "fetchFailed": "OBS: Kunde inte hämta data från: {{sources}}",
+    "hideResultList": "Dölj lista med sökresultat",
+    "hideResultsInMap": "Dölj sökresultat i kartan",
+    "inputLabel": "Sök i webbplatsens innehåll",
+    "missingDisplayFields": "Visningsfält saknas",
+    "missingName": "Namn saknas",
+    "moreTools": "Fler sökverktyg och inställningar",
+    "openMoreSettings": "Öppna dialog med fler inställningar",
+    "placeholder": "Sök",
+    "results": {
+      "addToSelection": "Lägg till i urval",
+      "backToAll": "Tillbaka till alla sökresultat",
+      "clear": "Rensa",
+      "clearFilter": "Rensa filtret",
+      "clearSelected": "Rensa alla selekterade objekt",
+      "download": "Ladda ner",
+      "downloadExcel": "Ladda ner till Excel",
+      "downloadFeatures": "Ladda ner objekten",
+      "downloadKml": "Ladda ner till KML",
+      "filter": "Filtrera",
+      "filterActive": "Filtret är aktivt",
+      "filterFieldLabel": "Textfält för att filtrera resultatet",
+      "filterResult": "Filtrera resultatet",
+      "filterResults": "Filtrera sökresultaten",
+      "hideTools": "Dölj verktyg",
+      "maxHitsReached": "Maximalt antal sökträffar har uppnåtts. Förfina sökningen för att säkerställa att viktig information inte missas.",
+      "noResults": "Sökningen gav inget resultat.",
+      "preview": "Förhandsvisning",
+      "removeFromSelection": "Ta bort från urval",
+      "showingResults_one": "Visar {{count}} resultat",
+      "showingResults_other": "Visar {{count}} resultat",
+      "showNextFeature": "Visa nästa objekt i resultatlistan",
+      "showPreviousFeature": "Visa föregående objekt i resultatlistan",
+      "showTools": "Visa verktyg",
+      "sort": "Sortera",
+      "sortAtoZ": "alfabetisk stigande",
+      "sortNumHits": "antal träffar",
+      "sortTooltip": "Sortera resultatet, sorterar nu enligt {{strategy}}",
+      "sortZtoA": "alfabetisk fallande",
+      "title": "Sökresultat",
+      "userSelected": "Markerade objekt"
+    },
+    "searchingInArea": "Söker i området",
+    "searchingWithObject": "Söker med objekt",
+    "selectHint": "Tryck på den yta i kartan där du vill genomföra en sökning. Håll in CTRL för att välja flera ytor.",
+    "settings": {
+      "activeSpatialFilter": "Kräv att hela objektet ryms inom sökområde",
+      "activeSpatialFilterTooltip": "Om aktivt kommer hela objektet (exempelvis en fastigheten) behöva rymmas inom sökområdet för att komma med i resultatet. Om inaktivt räcker det att endast en liten del av objektet ryms inom, eller nuddar vid, sökområdet.",
+      "caseSensitive": "Skiftlägeskänslighet",
+      "caseSensitiveTooltip": "Om aktivt kommer en sökning på 'a' inte ge träffar på 'A'. Inaktivera för att söka oberoende av gemener/versaler.",
+      "display": "Visning av resultat",
+      "general": "Generella sökinställningar",
+      "labelOnHighlight": "Visa textetikett i kartan",
+      "labelOnHighlightTooltip": "Om aktivt kommer en etikett att visas i kartan intill det markerade sökresultatet",
+      "limitSources": "Begränsa sökkällor",
+      "limitSourcesTooltip": "Slå på för att välja vilka datakällor som sökningen kommer göras i. Om reglaget är i off-läget kommer sökningen att ske i alla tillgängliga sökkällor.",
+      "spatial": "Spatiala sökinställningar",
+      "text": "Inställningar för textsökning",
+      "title": "Sökinställningar",
+      "visibleLayersOnly": "Sök endast i synliga lager",
+      "visibleLayersOnlyTooltip": "Om aktivt kommer sökningen att ske i lager som är inställda för sökning av systemadministratören och som är synliga.",
+      "wildcardAfter": "Wildcard efter",
+      "wildcardAfterTooltip": "Om aktivt kommer en sökning på 'väg' även ge träffar på exempelvis 'vägen'.",
+      "wildcardBefore": "Wildcard före",
+      "wildcardBeforeTooltip": "Om aktivt kommer en sökning på 'väg' även ge träffar på exempelvis 'storväg'."
+    },
+    "showResultList": "Visa lista med sökresultat",
+    "showResultsInMap": "Visa sökresultat i kartan",
+    "tools": {
+      "extent": "Sök inom vyn",
+      "extentTooltip": "Genomför en sökning i hela det område som kartan visar.",
+      "polygon": "Sök med polygon",
+      "polygonTooltip": "Genomför en sökning i ett område genom att rita en polygon.",
+      "radius": "Sök med radie",
+      "radiusTooltip": "Genomför en sökning i ett område genom att rita en cirkel",
+      "select": "Sök med objekt",
+      "selectTooltip": "Genomför en sökning genom att välja en eller flera områden i kartan.",
+      "settingsTooltip": "Ändra sökinställningarna."
+    },
+    "visibleLayersOnly": "{{placeholder}} (endast i synliga lager)"
+  },
+  "snackbar": {
+    "layerNotVisibleAtZoom": "Lagret '{{layer}}' är inte synligt vid aktuell zoomnivå.",
+    "layersNotVisibleAtZoom_one": "Lagret '{{layer}}' och {{count}} annat lager är inte synliga vid aktuell zoomnivå.",
+    "layersNotVisibleAtZoom_other": "Lagret '{{layer}}' och {{count}} andra lager är inte synliga vid aktuell zoomnivå."
+  },
+  "startup": {
+    "accessDeniedMessage": "Du har inte tillgång till den här kartan.",
+    "accessDeniedTitle": "Åtkomst nekad",
+    "errorMessage": "Fel när applikationen skulle läsas in. Du kan försöka att återställa applikationen genom att trycka på knappen nedan. Om felet kvarstår kan du kontakta systemansvarig.",
+    "errorTitle": "Ett fel har inträffat",
+    "notFoundMessage": "Kartan som du försöker nå finns inte.",
+    "notFoundTitle": "Kartan finns inte",
+    "reloadButton": "Återställ applikationen"
+  },
+  "transformer": {
+    "lineNotCrossed": "Linjen kunde inte delas - klipplinjen måste korsa linjen",
+    "polygonNotCrossedTwice": "Klipplinjen måste korsa polygonen på minst två ställen",
+    "polygonNotFullySplit": "Klipplinjen delade inte polygonen helt - se till att linjen korsar hela polygonen",
+    "polygonSplitFailed": "Kunde inte dela polygonen",
+    "unexpectedSplitResult": "Oväntat resultat vid delning av polygon",
+    "unsupportedGeometry": "Geometrityp {{geomType}} kan inte delas"
+  },
+  "window": {
+    "close": "Stäng fönster",
+    "maximize": "Maximera fönster",
+    "minimize": "Minimera fönster"
+  }
+}

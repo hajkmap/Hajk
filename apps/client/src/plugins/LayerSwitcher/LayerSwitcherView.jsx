@@ -12,6 +12,7 @@ import DrawOrder from "./components/DrawOrder";
 import QuickAccessPresets from "./components/QuickAccessPresets";
 import LayerItemDetails from "./components/LayerItemDetails";
 import GroupDetails from "./components/GroupDetails";
+import i18n from "src/i18n";
 
 const StyledAppBar = styled(AppBar)(() => ({
   zIndex: "1",
@@ -338,10 +339,13 @@ class LayersSwitcherView extends React.PureComponent {
             textColor="inherit"
             sx={{ "& .MuiBadge-badge": { right: -16, top: 8 } }}
           >
-            <Tab label="Kartlager" />
-            <Tab label="Bakgrund" />
+            <Tab label={i18n.t("layerSwitcher.tabs.layers")} />
+            <Tab label={i18n.t("layerSwitcher.tabs.background")} />
             {this.options.showDrawOrderView === true && (
-              <Tab id="draw-order-tab" label={"Ritordning"} />
+              <Tab
+                id="draw-order-tab"
+                label={i18n.t("layerSwitcher.tabs.drawOrder")}
+              />
             )}
           </Tabs>
         </StyledAppBar>

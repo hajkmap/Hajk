@@ -1,0 +1,7 @@
+{
+  "template": {
+    "description": "Short description that should be changed",
+    "hello": "Hello from the template view",
+    "title": "Change me"
+  }
+}

@@ -6,6 +6,7 @@ import { withTheme } from "@emotion/react";
 import { Grid, List, ListItemText, Button, Collapse } from "@mui/material";
 
 import ListItemButton from "@mui/material/ListItemButton";
+import i18n from "src/i18n";
 
 function NestedListItemRaw(props) {
   return (
@@ -137,7 +138,7 @@ class TableOfContents extends React.PureComponent {
   render() {
     const {
       activeDocument,
-      title = "Innehåll",
+      title = i18n.t("documentHandler.contents"),
       expanded = true,
       toggleCollapse,
     } = this.props;

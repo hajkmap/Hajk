@@ -6,13 +6,8 @@ import FeedbackView from "./FeedbackView";
 
 import FeedbackIcon from "@mui/icons-material/Feedback";
 
-import {
-  DEFAULT_DESCRIPTION,
-  DEFAULT_INSTRUCTION_TEXT,
-  DEFAULT_MAX_LENGTH,
-  DEFAULT_THANK_YOU_TEXT,
-  DEFAULT_TITLE,
-} from "./constants";
+import { DEFAULT_MAX_LENGTH } from "./constants";
+import { configText } from "src/i18n";
 import type { FeedbackProps } from "./types";
 
 /**
@@ -26,19 +21,22 @@ const Feedback: React.FC<FeedbackProps> = (props) => {
   return (
     <BaseWindowPlugin
       {...props}
-      type="feedback"
+      type="Feedback"
       custom={{
         icon: <FeedbackIcon />,
-        title: options.title || DEFAULT_TITLE,
-        description: options.description || DEFAULT_DESCRIPTION,
         height: "dynamic",
         width: 400,
       }}
     >
       <FeedbackView
         model={model}
-        instructionText={options.instructionText ?? DEFAULT_INSTRUCTION_TEXT}
-        thankYouText={options.thankYouText || DEFAULT_THANK_YOU_TEXT}
+        // An empty instruction text from Admin hides the instruction
+        instructionText={
+          options.instructionText === ""
+            ? ""
+            : configText("feedback.instructionText", options.instructionText)
+        }
+        thankYouText={configText("feedback.thankYouText", options.thankYouText)}
         maxLength={
           Number.isInteger(options.maxLength) && options.maxLength! > 0
             ? options.maxLength!

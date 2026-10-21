@@ -10,6 +10,7 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
+import i18n from "src/i18n";
 
 /**
  * Modal dialog for selecting features when multiple features overlap
@@ -132,10 +133,12 @@ export default function FeaturePickerDialog({
       <DialogTitle>
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <Typography variant="h6" component="span">
-            Välj objekt
+            {i18n.t("attributeEditor.picker.title")}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {features.length} objekt överlappar
+            {i18n.t("attributeEditor.picker.overlapping", {
+              count: features.length,
+            })}
           </Typography>
         </Box>
       </DialogTitle>
@@ -160,7 +163,9 @@ export default function FeaturePickerDialog({
             }
             label={
               <Typography variant="body2" fontWeight={600}>
-                Markera alla ({features.length})
+                {i18n.t("attributeEditor.picker.selectAll", {
+                  number: features.length,
+                })}
               </Typography>
             }
           />
@@ -206,7 +211,7 @@ export default function FeaturePickerDialog({
                   />
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography variant="subtitle2" fontWeight={600}>
-                      ID: {id}
+                      {i18n.t("attributeEditor.picker.id", { id })}
                     </Typography>
 
                     {props.length > 0 ? (
@@ -239,7 +244,7 @@ export default function FeaturePickerDialog({
                         fontStyle="italic"
                         sx={{ mt: 0.5 }}
                       >
-                        Inga attribut att visa
+                        {i18n.t("attributeEditor.noAttributes")}
                       </Typography>
                     )}
                   </Box>
@@ -263,13 +268,13 @@ export default function FeaturePickerDialog({
             }
             label={
               <Typography variant="body2">
-                Lägg till i befintlig markering
+                {i18n.t("attributeEditor.picker.addToSelection")}
               </Typography>
             }
           />
         )}
         <Button onClick={onClose} color="inherit">
-          Avbryt
+          {i18n.t("common.cancel")}
         </Button>
         <Button
           onClick={handleConfirm}
@@ -277,7 +282,11 @@ export default function FeaturePickerDialog({
           disabled={selectedIds.size === 0}
           sx={{ minWidth: 120 }}
         >
-          Markera {selectedIds.size > 0 ? `(${selectedIds.size})` : ""}
+          {selectedIds.size > 0
+            ? i18n.t("attributeEditor.picker.selectCount", {
+                number: selectedIds.size,
+              })
+            : i18n.t("attributeEditor.picker.select")}
         </Button>
       </DialogActions>
     </Dialog>

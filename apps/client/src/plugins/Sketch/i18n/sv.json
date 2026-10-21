@@ -1,0 +1,311 @@
+{
+  "sketch": {
+    "activities": {
+      "ADD": {
+        "information": "Lägg till objekt genom att rita i kartan. Börja med att välja vilken typ av objekt du vill rita nedan. Observera att export till GPX-format endast stödjer punkter och linjer.",
+        "tooltip": "Lägg till nya objekt."
+      },
+      "DELETE": {
+        "information": "Klicka på det rit-objekt som du vill ta bort, eller klicka på knappen nedan för att ta bort alla rit-objekt.",
+        "tooltip": "Ta bort objekt."
+      },
+      "EDIT": {
+        "information": "Redigera noder (radera nod med alt-klick), byt ritordning, eller ändra färg på ritade objekt.",
+        "tooltip": "Redigera existerande objekt."
+      },
+      "MOVE": {
+        "information": "Klicka på det objekt i kartan som du vill flytta för att aktivera \"flytt-läge\". Dra sedan objektet till rätt plats.",
+        "tooltip": "Flytta existerande objekt."
+      },
+      "OGC": {
+        "information": "Här kan du välja ett redigeringsbart lager kopplat till en kartserver.",
+        "tooltip": "Välj redigerbart lager att spara till."
+      },
+      "SAVE": {
+        "information": "Behöver du ta en paus? Spara det du har ritat och fortsätt senare. Tänk på att enbart de objekt som syns i kartan sparas.",
+        "tooltip": "Spara ritade objekt."
+      },
+      "SETTINGS": {
+        "information": "Här kan du ändra verktygets inställningar.",
+        "tooltip": "Ändra om objektens mått ska synas etc."
+      },
+      "UPLOAD": {
+        "information": "Importera eller exportera ritobjekt i .kml/.gpx/.geojson-format. Använd knapparna nedan, eller dra in en fil direkt till kartan.",
+        "tooltip": "Ladda ned eller ladda upp ritade objekt."
+      }
+    },
+    "buffer": {
+      "buffer": "Buffra",
+      "clickToDraw": "Klicka här för att rita objekt",
+      "clickToSelect": "Klicka här för att välja objekt",
+      "distance": "Bufferavstånd (i meter)",
+      "distanceStep": "Ange bufferavstånd",
+      "done": "Klart",
+      "restart": "Börja om",
+      "selectAtLeastOne": "Du måste markera minst ett objekt i kartan för att kunna buffra",
+      "selectObjects": "Välj objekt",
+      "selectStep": "Välj objekt att buffra",
+      "turnOff": "Slå av"
+    },
+    "delete": {
+      "cookiesRequired": "Det ser ut som att du har valt att inte tillåta funktionella kakor. På grund av detta så kan du inte se dina senast borttagna objekt. Klicka nedan för att ändra inställningarna.",
+      "deleteAll": "Ta bort alla ritobjekt",
+      "recentlyDeleted": "Senast borttagna:",
+      "restoreHint": "Klicka för att återställa ritobjektet."
+    },
+    "deleteButton": "Radera",
+    "description": "Skapa dina helt egna geometrier!",
+    "drawingsRemovedServiceSelected": "Ritade objekt borttagna. Redigeringsbart lager valt.",
+    "drawTypes": {
+      "Arrow": {
+        "label": "Pil",
+        "tooltip": "Rita en pil i kartan genom att klicka en gång per nod, avsluta med ett dubbelklick."
+      },
+      "Circle": {
+        "label": "Cirkel",
+        "tooltip": "Rita en cirkel i kartan genom att klicka en gång där cirkeln ska börja, dra sedan till önskad storlek och släpp."
+      },
+      "LineString": {
+        "label": "Linje",
+        "tooltip": "Rita en linje i kartan genom att klicka en gång per nod, avsluta med ett dubbelklick."
+      },
+      "Point": {
+        "label": "Punkt",
+        "tooltip": "Infoga en punkt i kartan genom att klicka där du vill ha punkten."
+      },
+      "Polygon": {
+        "label": "Polygon",
+        "tooltip": "Rita en polygon i kartan genom att klicka en gång per nod, avsluta med ett dubbelklick."
+      },
+      "Rectangle": {
+        "label": "Rektangel",
+        "tooltip": "Rita en rektangel i kartan genom att klicka en gång där rektangeln ska börja, dra sedan till önskad storlek och släpp."
+      },
+      "Select": {
+        "label": "Välj i kartan",
+        "tooltip": "Klicka på ett existerande objekt i kartan och kopiera in det i ritlagret."
+      },
+      "Text": {
+        "label": "Text",
+        "tooltip": "Infoga text i kartan genom att klicka där du vill ha texten."
+      }
+    },
+    "edit": {
+      "allowNodeEditing": "Tillåt redigering av noder",
+      "arrange": "Ordna",
+      "bringForward": "Flytta framåt",
+      "bringToFront": "Placera längst fram",
+      "clickObjectHint": "Klicka på ett objekt i kartan för att ändra dess utseende eller för att byta dess ritordning.",
+      "disableNodeEditingHint": "Avaktivera redigering av noder för att enklare kunna selektera objekt i kartan för redigering av färg etc.",
+      "duplicate": "Duplicera",
+      "duplicateHint": "Klicka för att duplicera det markerade objektet.",
+      "enableNodeEditingHint": "Aktivera för att kunna redigera objektens utbredning i kartan.",
+      "managedByService": "Detta objekt hanteras av redigerbart lager.",
+      "sendBackward": "Flytta bakåt",
+      "sendToBack": "Placera längst bak"
+    },
+    "enterText": "Ange text",
+    "explode": {
+      "failed": "Kunde inte dela upp objektet",
+      "notFound": "Kunde inte hitta objektet att dela upp",
+      "notMulti": "Objektet är inte en multi-feature"
+    },
+    "finishDrawing": "Avsluta ritning",
+    "fixed": {
+      "addSegment": "Lägg till segment",
+      "addSegmentHint": "Klicka först i kartan för att sätta startpunkt, sedan klicka här för att lägga till varje segment",
+      "direction": "Riktning (grader)",
+      "directionHint": "Ange riktningen i grader. 0° är norr, 90° är öst, 180° är syd, 270° är väst",
+      "disableHint": "Klicka för att avaktivera fast längd och riktning",
+      "drawManually": "Rita manuellt",
+      "enableHint": "Klicka för att rita segment med fast längd och riktning",
+      "finishDrawingHint": "Avsluta ritningen",
+      "length": "Segmentlängd (meter)",
+      "lengthHint": "Ange längden för varje segment i meter (0.1 - 100000m)"
+    },
+    "layerNotFound": "Kunde inte hitta Sketch-lagret",
+    "merge": {
+      "failed": "Kunde inte slå ihop objekten. Kontrollera att alla objekt har samma geometrityp.",
+      "needTwo": "Minst två objekt krävs för att slå ihop",
+      "notEnough": "Kunde inte hitta tillräckligt många objekt"
+    },
+    "move": {
+      "allowFreeMove": "Tillåt fri förflyttning",
+      "direction": "Förflyttningsriktning (grader)",
+      "directionHint": "Ange i vilken riktning du vill flytta objekten. 0 grader är rakt norrut, 90 grader är rakt åt öster, osv.",
+      "disableFreeMoveHint": "Avaktivera för att inte tillåta förflyttning av objekten i kartan.",
+      "distance": "Förflyttningsavstånd (meter)",
+      "distanceHint": "Ange hur många meter du vill flytta objekten.",
+      "enableFreeMoveHint": "Aktivera för att tillåta förflyttning av objekten i kartan.",
+      "fixedMove": "Fast förflyttning",
+      "move": "Flytta",
+      "rotate": "Rotera",
+      "rotateHint": "Ange hur många grader du ska rotera objekten."
+    },
+    "multi": {
+      "drawnParts": "Ritade delar:",
+      "finishAndSave": "Avsluta multi-ritningen och spara objektet",
+      "finishHint": "Klicka för att avsluta multi-ritning",
+      "startHint": "Klicka för att rita flera delar som blir ett gemensamt objekt (t.ex. MultiPolygon)",
+      "title": "Multi-ritning"
+    },
+    "ogc": {
+      "chooseLayer": "Välj redigerbart lager att spara till",
+      "openAttributeEditor": "Öppna Attributredigerare"
+    },
+    "pixels_one": "{{count}} pixel",
+    "pixels_other": "{{count}} pixlar",
+    "prompts": {
+      "ArrowHelp": "En pil skapas genom att klicka på en position för varje nod, avsluta med dubbelklick.",
+      "CircleHelp": "Du kan skapa en cirkel genom att klicka med en bestämd radie, eller dra för att få en önskad radie.",
+      "DELETEHelp": "Klicka på ett objekt för att radera det från din skiss.",
+      "EDITHelp": "Klicka på ett objekt för att ändra dess utseende eller ritordning.",
+      "LineStringHelp": "Skapa linjer genom att klicka på en position för varje nod, avsluta med dubbelklick.",
+      "MOVEHelp": "Klicka på ett objekt för att förflytta det.",
+      "MultiDrawHelp": "Rita flera separata delar som blir ett gemensamt objekt (MultiPolygon/MultiLineString/MultiPoint). Klicka 'Avsluta multi-ritning' när du är klar.",
+      "OGCHelp": "Här kan du aktivera redigeringsbart lager att spara till.",
+      "PointHelp": "Klicka på en position för att infoga en punkt.",
+      "PolygonHelp": "Skapa en polygon genom att klicka på en position för varje nod, avsluta med dubbelklick.",
+      "RectangleHelp": "Skapa en rektangel genom att hålla vänsterklick med musen och dra över en yta för att få en önskad storlek.",
+      "SAVEHelp": "Här kan du spara en arbetsyta för att fortsätta ditt arbete senare. För att spara över en äldre arbetsyta, ange samma namn.",
+      "saveNoFeatures": "Kunde inte skapa arbetsyta, inga ritobjekt hittades.",
+      "saveOverflow": "Objekten kunde inte sparas. Arbetsytan för många objekt.",
+      "saveSuccess": "Arbetsytan sparades utan problem.",
+      "SelectHelp": "Klicka på ett existerande objekt i kartan och kopiera in det i ritlagret.",
+      "TextHelp": "Klicka på en position för att infoga text."
+    },
+    "save": {
+      "cookiesRequired": "Det ser ut som att du har valt att inte tillåta funktionella kakor. På grund av detta så kan du inte spara dina rit-objekt. Klicka nedan för att ändra inställningarna.",
+      "deleteConfirm": "Är du säker på att du vill radera arbetsytan? Detta går inte att ångra.",
+      "deleteHint": "Klicka för att radera arbetsytan.",
+      "deleteTitle": "Radera arbetsyta",
+      "lastUpdated": "Arbetsytan uppdaterades senast {{date}}",
+      "loadHint": "Klicka för att läsa in objekten.",
+      "maxReached": "Maximalt antal arbetsytor har sparats. Ta bort eller skriv över en genom att ange ett av namnen i listan nedan.",
+      "minLength": "Minst fyra tecken måste anges för att en arbetsyta ska kunna skapas.",
+      "nameHint": "Ange ett namn så att arbetsytan kan identifieras senare.",
+      "nameTaken": "Namnet upptaget. Ersätt arbetsyta \"{{name}}\"?",
+      "noneFound": "Inga sparade arbetsytor hittades.",
+      "saved": "Sparade arbetsytor:",
+      "saveHint": "Klicka för att spara de ritobjekt som finns i kartan."
+    },
+    "selectFeaturesToCopy": "Välj de objekt du vill kopiera",
+    "serviceSelectedDrawingsKept_one": "Redigeringsbart lager valt. {{count}} ritat objekt finns kvar i kartan.",
+    "serviceSelectedDrawingsKept_other": "Redigeringsbart lager valt. {{count}} ritade objekt finns kvar i kartan.",
+    "settings": {
+      "areaUnit": "Mätenhet, areal",
+      "areaUnitHelp": "Välj enhet för mätning av areal.",
+      "enableTextForLength": "Aktivera text på objekten om du vill visa objektens längd",
+      "enableTextForPerimeter": "Aktivera text på objekten om du vill visa objektens omkrets/radie.",
+      "helperTextsLabel": "Hjälptexter aktiverade",
+      "helperTextsOff": "Slå av om du vill dölja hjälptexter.",
+      "helperTextsOn": "Slå på om du vill visa hjälptexter.",
+      "kinkMarkersLabel": "Visa geometrifel",
+      "kinkMarkersOff": "Slå av om du vill dölja röda markeringar där geometrin korsar sig själv. Varningar om självkorsningar visas alltid.",
+      "kinkMarkersOn": "Slå på om du vill visa röda markeringar där geometrin korsar sig själv. Varningar om självkorsningar visas alltid.",
+      "lengthUnit": "Mätenhet, längd",
+      "lengthUnitHelp": "Välj enhet för mätning av längd.",
+      "measurement": "Mätinställningar",
+      "pointPrecision": "Mätprecision, punkter",
+      "pointPrecisionHelp": "Välj med vilken precision koordinaterna på punkter ska visas.",
+      "precision": "Mätprecision",
+      "precisionHelp": "Välj med vilken precision mätvärdena ska presenteras.",
+      "showAreaLabel": "Visa area",
+      "showAreaOff": "Slå av om du vill dölja area på objekten.",
+      "showAreaOn": "Slå på om du vill visa area på objekten.",
+      "showLengthLabel": "Visa längd",
+      "showLengthOff": "Slå av om du vill dölja längd på objekten.",
+      "showLengthOn": "Slå på om du vill visa längd på objekten.",
+      "showPerimeterLabel": "Visa omkrets/radie",
+      "showPerimeterOff": "Slå av om du vill dölja omkrets/radie på objekten.",
+      "showPerimeterOn": "Slå på om du vill visa omkrets/radie på objekten.",
+      "showTextLabel": "Visa text på objekten",
+      "showTextOff": "Slå av om du vill dölja text på objekten.",
+      "showTextOn": "Slå på om du vill visa text på objekten.",
+      "snapLabel": "Snappning aktiverad",
+      "snapOff": "Slå av snappning. När snappning är påslaget kommer ritverktyget att automatiskt fästa vid närliggande punkter och linjer.",
+      "snapOn": "Slå på snappning. När snappning är påslaget kommer ritverktyget att automatiskt fästa vid närliggande punkter och linjer.",
+      "snapTolerance": "Snappningsavstånd",
+      "snapToleranceHelp": "Välj hur känslig snappningen ska vara. Högre värde betyder att snappning aktiveras på längre avstånd."
+    },
+    "split": {
+      "failed": "Kunde inte dela objektet",
+      "notFound": "Kunde inte hitta objektet att dela"
+    },
+    "strokeTypes": {
+      "dashed": {
+        "label": "Streckad",
+        "tooltip": "Streckad linje."
+      },
+      "dotted": {
+        "label": "Punktad",
+        "tooltip": "Punktad linje."
+      },
+      "none": {
+        "label": "Ingen",
+        "tooltip": "Ingen linje."
+      },
+      "solid": {
+        "label": "Heldragen",
+        "tooltip": "Heldragen linje."
+      }
+    },
+    "style": {
+      "appearance": "Utseende",
+      "background": "Färg - bakgrund",
+      "changeHint": "Klicka här för att ändra {{name}}.",
+      "color": "Färg",
+      "fill": "Fyllnad",
+      "foreground": "Färg - förgrund",
+      "large": "Stor",
+      "line": "Linje",
+      "lineType": "Linjetyp",
+      "medium": "Mellan",
+      "radius": "Radie (m)",
+      "reset": "Återställ utseendet till standardinställningar",
+      "size": "Storlek",
+      "small": "Liten",
+      "textSize": "Textstorlek",
+      "variant": "Variant",
+      "widthAndColor": "Bredd och färg"
+    },
+    "title": "Rita",
+    "titleHint": "Ange en titel som kan användas för att identifiera objektet.",
+    "type": "Typ",
+    "units": {
+      "AUTO": "Automatisk",
+      "HECTARE": "Hektar (ha)",
+      "KM": "Kilometer (km)",
+      "KM2": "Kvadratkilometer (km²)",
+      "M": "Meter (m)",
+      "M2": "Kvadratmeter (m²)"
+    },
+    "upload": {
+      "chooseFiles": "Välj filer",
+      "chooseFilesHint": "Välj en eller flera .kml-, .gpx- eller .geojson-filer",
+      "exportGeoJson": "Exportera till GeoJSON",
+      "exportGeoJsonHint": "Klicka för att exportera alla ritobjekt till en .geojson-fil. GeoJSON stödjer alla typer av geometrier och bevarar stilar. Cirklar exporteras som polygoner.",
+      "exportGpx": "Exportera till GPX",
+      "exportGpxHint": "Klicka för att exportera alla ritobjekt till en .gpx-fil. GPX stödjer endast punkter (waypoints) och linjer (tracks/routes). Polygoner och andra komplexa geometrier kommer att exkluderas.",
+      "exportKml": "Exportera till KML",
+      "exportKmlHint": "Klicka för att exportera alla ritobjekt till en .kml-fil. KML stödjer alla typer av geometrier inklusive polygoner, linjer, punkter och text.",
+      "hideLabels": "Klicka här för att dölja objektens etiketter.",
+      "hideObjects": "Klicka för att dölja objekten från kartan.",
+      "import": "Importera ritobjekt",
+      "importFailed": "Kunde inte importera \"{{fileName}}\". Filen är skadad eller har fel format.",
+      "importHint": "Klicka för att öppna en dialog där du kan välja en .kml-, .gpx- eller .geojson-fil från din dator.",
+      "readError": "Ett fel uppstod vid inläsning av filerna.",
+      "removeImported": "Klicka för att ta bort de importerade objekten.",
+      "showLabels": "Klicka här för att visa objektens etiketter.",
+      "showObjects": "Klicka för att visa objekten i kartan.",
+      "unsupportedFiles": "Hajk stödjer endast .kml-, .gpx- och .geojson-filer. En eller flera filer ignorerades.",
+      "uploadedFiles": "Uppladdade filer"
+    },
+    "validation": {
+      "lineKinks_one": "Linjen har {{count}} självkorsning. Var god kontrollera och rätta geometrin.",
+      "lineKinks_other": "Linjen har {{count}} självkorsningar. Var god kontrollera och rätta geometrin.",
+      "polygonKinks_one": "Polygonen har {{count}} självkorsning. Var god kontrollera och rätta geometrin.",
+      "polygonKinks_other": "Polygonen har {{count}} självkorsningar. Var god kontrollera och rätta geometrin."
+    }
+  }
+}

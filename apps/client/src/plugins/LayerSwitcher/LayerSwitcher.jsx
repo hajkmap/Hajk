@@ -27,8 +27,6 @@ export default class LayerSwitcher extends React.PureComponent {
         type="LayerSwitcher"
         custom={{
           icon: <LayersIcon />,
-          title: "Visa",
-          description: "Välj vad du vill se i kartan",
           height: "auto",
           width: 400,
           scrollable: false,

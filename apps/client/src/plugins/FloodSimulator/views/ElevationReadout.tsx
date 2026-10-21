@@ -15,7 +15,7 @@ function ElevationReadout({ readout }: ElevationReadoutProps) {
 
   return (
     <Box
-      aria-label={`${UI_STRINGS.readoutElevationLabel} ${elevation}, ${UI_STRINGS.readoutDepthLabel} ${depth}`}
+      aria-label={UI_STRINGS.readoutAriaLabel(elevation, depth)}
       aria-live="polite"
       sx={{
         px: { xs: 1.5, sm: 2 },

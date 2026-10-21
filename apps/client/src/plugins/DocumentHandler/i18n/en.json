@@ -1,0 +1,34 @@
+{
+  "documentHandler": {
+    "chapterLink": "Link to a chapter in a document",
+    "collapseSubmenu": "Collapse submenu",
+    "contents": "Contents",
+    "couldNotOpenDocument": "Couldn't open the document",
+    "couldNotRenderLink": "Couldn't show the document link",
+    "documentLink": "Link to a document",
+    "drawerButtonTitle": "Menu",
+    "drawerTitle": "Comprehensive plan",
+    "expandSubmenu": "Expand submenu",
+    "externalLink": "Link that opens in another window",
+    "mapLink": "Link that applies changes to the map",
+    "mapLoading": "The map is loading...",
+    "openPrint": "Open print",
+    "print": {
+      "attachments": "Attachments",
+      "createPdf": "Create PDF",
+      "creatingPdf": "Your PDF is being created",
+      "linkMissing": "Link missing",
+      "mayTakeAWhile": "This may take a while, especially if you've chosen to print many documents.",
+      "open": "Open",
+      "print": "Print",
+      "selectAll": "Select all documents",
+      "selectedContent": "Selected content",
+      "settings": "Settings"
+    },
+    "printActivePage": "Print active page",
+    "scrollToTop": "Scroll to the top of the document",
+    "skipToMainMenu": "To the website's main menu",
+    "tableOfContents": "Table of contents",
+    "widgetDescription": "A short description shown in the widget"
+  }
+}

@@ -7,6 +7,7 @@ import { applyStyle, applyBackground } from "ol-mapbox-style";
 import { mapDirectionToAngle } from "../../utils/mapDirectionToAngle";
 import { easeOut } from "ol/easing";
 import { BACKGROUND_LAYER_IDS } from "../../constants/backgroundLayers";
+import i18n from "src/i18n";
 
 const DEFAULT_OSM_VECTOR_STYLE_URL =
   "https://tiles.openfreemap.org/styles/liberty";
@@ -21,9 +22,9 @@ export function createWhiteLayer(appModel) {
     layerType: "base",
     rotateMap: "n",
     name: BACKGROUND_LAYER_IDS.WHITE,
-    caption: "Vit",
+    caption: i18n.t("backgroundLayers.white"),
     layerInfo: {
-      caption: "Vit",
+      caption: i18n.t("backgroundLayers.white"),
       layerType: "base",
     },
   });
@@ -46,9 +47,9 @@ export function createBlackLayer(appModel) {
     layerType: "base",
     rotateMap: "n",
     name: BACKGROUND_LAYER_IDS.BLACK,
-    caption: "Svart",
+    caption: i18n.t("backgroundLayers.black"),
     layerInfo: {
-      caption: "Svart",
+      caption: i18n.t("backgroundLayers.black"),
       layerType: "base",
     },
   });
@@ -85,13 +86,12 @@ export function createOSMLayer(appModel) {
     name: BACKGROUND_LAYER_IDS.OSM,
     caption: "OpenStreetMap",
     layerInfo: {
-      infoText:
-        "OpenStreetMap är en öppen, användargenererad karta där vem som helst kan bidra med information. Innehållet är inte kvalitetssäkrat, granskat eller godkänt av Lantmäteriet.",
-      infoTitle: "Om OpenStreetMap",
+      infoText: i18n.t("backgroundLayers.osmInfoText"),
+      infoTitle: i18n.t("backgroundLayers.osmInfoTitle"),
       infoUrl:
         "https://wiki.openstreetmap.org/wiki/OpenStreetMap_Carto/Symbols",
-      infoUrlText: "Länk till teckenförklaring",
-      information: "Här finns mer info",
+      infoUrlText: i18n.t("backgroundLayers.legendLink"),
+      information: i18n.t("backgroundLayers.moreInfo"),
       layerType: "base",
       hideExpandArrow: false,
       showAttributeTableButton: false,
@@ -155,15 +155,14 @@ export function createOSMVectorLayer(appModel) {
     layerType: "base",
     rotateMap: "n", // OpenStreetMap should be rotated to North
     name: BACKGROUND_LAYER_IDS.OSM_VECTOR,
-    caption: "OpenStreetMap (vektor)",
+    caption: i18n.t("backgroundLayers.osmVector"),
     layerInfo: {
-      infoText:
-        "OpenStreetMap är en öppen, användargenererad karta där vem som helst kan bidra med information. Innehållet är inte kvalitetssäkrat, granskat eller godkänt av Lantmäteriet. Denna variant hämtas som vektordata och är därför skarp även på högupplösta skärmar.",
-      infoTitle: "Om OpenStreetMap (vektor)",
+      infoText: i18n.t("backgroundLayers.osmVectorInfoText"),
+      infoTitle: i18n.t("backgroundLayers.osmVectorInfoTitle"),
       infoUrl:
         "https://wiki.openstreetmap.org/wiki/OpenStreetMap_Carto/Symbols",
-      infoUrlText: "Länk till teckenförklaring",
-      information: "Här finns mer info",
+      infoUrlText: i18n.t("backgroundLayers.legendLink"),
+      information: i18n.t("backgroundLayers.moreInfo"),
       layerType: "base",
       hideExpandArrow: false,
       showAttributeTableButton: false,
@@ -173,7 +172,7 @@ export function createOSMVectorLayer(appModel) {
   applyStyle(osmVectorLayer, styleUrl)
     .then(() => applyBackground(osmVectorLayer, styleUrl))
     .catch((error) => {
-      console.error("Kunde inte läsa in OSM-vektorstilen:", error);
+      console.error("Could not load the OSM vector style:", error);
     });
 
   osmVectorLayer.on("change:visible", (e) => {

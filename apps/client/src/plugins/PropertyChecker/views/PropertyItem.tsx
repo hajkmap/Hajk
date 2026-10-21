@@ -14,6 +14,7 @@ import { Box } from "@mui/system";
 
 import TabContentLayerChecker from "./LayerChecker/TabContentView";
 import TabContentDigitalPlanChecker from "./DigitalPlanChecker/TabContentView";
+import i18n from "src/i18n";
 
 import type { PropertyItemProps, LayerNotes } from "../types";
 
@@ -56,8 +57,12 @@ function PropertyItem({
               value={selectedTab}
               variant="fullWidth"
             >
-              <Tab label={`${features.features.length} lager`} />
-              <Tab label="Planbestämmelser" />
+              <Tab
+                label={i18n.t("propertyChecker.layerCount", {
+                  count: features.features.length,
+                })}
+              />
+              <Tab label={i18n.t("propertyChecker.planProvisions")} />
             </Tabs>
           )}
           {showLayerTab && (

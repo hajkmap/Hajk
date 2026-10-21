@@ -1,6 +1,7 @@
 import FeatureStyle from "./FeatureStyle";
 import { createXML } from "../../../utils/KMLWriter";
 import { saveAs } from "file-saver";
+import i18n from "src/i18n";
 
 import { Circle as CircleStyle, Icon } from "ol/style";
 import { fromCircle } from "ol/geom/Polygon";
@@ -101,12 +102,13 @@ export default class KmlExport {
     });
 
     if (features.length > 0) {
-      const postData = createXML(transformed, "Sökexport");
+      const exportName = i18n.t("search.exportName");
+      const postData = createXML(transformed, exportName);
       saveAs(
         new Blob([postData], {
           type: "application/vnd.google-earth.kml+xml;charset=utf-8",
         }),
-        `Sökexport - ${new Date().toLocaleString()}.kml`
+        `${exportName} - ${new Date().toLocaleString()}.kml`
       );
     }
   };

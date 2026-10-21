@@ -25,6 +25,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import i18n from "src/i18n";
 
 // Sort favorites by title and, for equal titles, by saved date (newest first)
 const sortFavorites = (favorites) =>
@@ -197,7 +198,7 @@ function Favorites({
       });
     }
 
-    enqueueSnackbar(`${title} har nu laddats till snabbåtkomst.`, {
+    enqueueSnackbar(i18n.t("layerSwitcher.loadedToQuickAccess", { title }), {
       variant: "success",
       anchorOrigin: { vertical: "bottom", horizontal: "center" },
     });
@@ -276,13 +277,10 @@ function Favorites({
     });
 
     if (layers.length === 0) {
-      enqueueSnackbar(
-        "Inga lager i snabbåtkomst tillagda, därmed inget att spara.",
-        {
-          variant: "warning",
-          anchorOrigin: { vertical: "bottom", horizontal: "center" },
-        }
-      );
+      enqueueSnackbar(i18n.t("layerSwitcher.nothingToSave"), {
+        variant: "warning",
+        anchorOrigin: { vertical: "bottom", horizontal: "center" },
+      });
       return;
     }
 
@@ -343,10 +341,13 @@ function Favorites({
     setTitle("");
     setDescription("");
 
-    enqueueSnackbar(`${metadata.title} har lagts till i favoriter.`, {
-      variant: "success",
-      anchorOrigin: { vertical: "bottom", horizontal: "center" },
-    });
+    enqueueSnackbar(
+      i18n.t("layerSwitcher.favoriteAdded", { title: metadata.title }),
+      {
+        variant: "success",
+        anchorOrigin: { vertical: "bottom", horizontal: "center" },
+      }
+    );
   };
 
   const handleRemoveFavorite = (selectedFavorite) => {
@@ -356,10 +357,15 @@ function Favorites({
     favoritesArray = favoritesArray.filter((f) => f !== selectedFavorite);
     // And set to state
     handleSetFavorites(favoritesArray);
-    enqueueSnackbar(`${selectedFavorite.metadata.title} har tagits bort.`, {
-      variant: "success",
-      anchorOrigin: { vertical: "bottom", horizontal: "center" },
-    });
+    enqueueSnackbar(
+      i18n.t("layerSwitcher.favoriteRemoved", {
+        title: selectedFavorite.metadata.title,
+      }),
+      {
+        variant: "success",
+        anchorOrigin: { vertical: "bottom", horizontal: "center" },
+      }
+    );
   };
 
   // Handles edit favorite title and description
@@ -382,7 +388,7 @@ function Favorites({
     // And set to state
     handleSetFavorites(favoritesArray);
 
-    enqueueSnackbar(`Favoriten uppdaterades utan problem`, {
+    enqueueSnackbar(i18n.t("layerSwitcher.favoriteUpdated"), {
       variant: "success",
       anchorOrigin: { vertical: "bottom", horizontal: "center" },
     });
@@ -397,7 +403,7 @@ function Favorites({
     const favoritesArray = [...favorites];
     favoritesArray.push(parsedFavorites);
     handleSetFavorites(favoritesArray);
-    enqueueSnackbar(`Favoriten importerades utan problem`, {
+    enqueueSnackbar(i18n.t("layerSwitcher.favoriteImported"), {
       variant: "success",
       anchorOrigin: { vertical: "bottom", horizontal: "center" },
     });
@@ -461,11 +467,11 @@ function Favorites({
           e.stopPropagation();
         }}
       >
-        <DialogTitle>Lager saknas</DialogTitle>
+        <DialogTitle>{i18n.t("layerSwitcher.missingLayersTitle")}</DialogTitle>
         <DialogContent>
           <Typography>
             {missingLayersConfirmation &&
-              `Följande lagerid:n kan inte hittas i kartans lagerlista:`}
+              i18n.t("layerSwitcher.missingLayersIntro")}
             <br></br>
           </Typography>
           <ul>
@@ -475,7 +481,7 @@ function Favorites({
           </ul>
           <Typography>
             {missingLayersConfirmation &&
-              `Det kan bero på att lagret har utgått. Vänligen kontrollera och uppdatera favoriten.`}
+              i18n.t("layerSwitcher.missingLayersFavoriteHint")}
             <br></br>
           </Typography>
         </DialogContent>
@@ -486,7 +492,7 @@ function Favorites({
               handleMissingLayersConfirmationAbort();
             }}
           >
-            Avbryt
+            {i18n.t("common.cancel")}
           </Button>
           <Button
             onClick={(e) => {
@@ -498,7 +504,7 @@ function Favorites({
             }}
             variant="contained"
           >
-            Fortsätt
+            {i18n.t("common.continue")}
           </Button>
         </DialogActions>
       </BaseDialog>,
@@ -519,17 +525,16 @@ function Favorites({
         }}
       >
         <DialogTitle id="saveFavorite-dialog-title">
-          Spara till favoriter
+          {i18n.t("layerSwitcher.saveToFavorites")}
         </DialogTitle>
         <DialogContent>
           <Typography id="save-favorite-dialog-description" sx={{ mb: 1 }}>
-            Spara aktuell snabbåtkomst som en favorit lokalt på din enhet så att
-            du kan använda den senare.
+            {i18n.t("layerSwitcher.saveFavoriteIntro")}
           </Typography>
           <TextField
             fullWidth
             id="save-favorite-title"
-            label="Titel"
+            label={i18n.t("common.titleLabel")}
             variant="standard"
             sx={{ mb: 1 }}
             value={title}
@@ -538,7 +543,7 @@ function Favorites({
           <TextField
             fullWidth
             id="save-favorite-description"
-            label="Beskrivning"
+            label={i18n.t("common.descriptionLabel")}
             multiline
             maxRows={4}
             variant="standard"
@@ -553,7 +558,7 @@ function Favorites({
               setSaveFavoriteDialog(!saveFavoriteDialog);
             }}
           >
-            Avbryt
+            {i18n.t("common.cancel")}
           </Button>
           <Button
             variant="contained"
@@ -563,7 +568,7 @@ function Favorites({
               handleSaveFavorite();
             }}
           >
-            Spara
+            {i18n.t("common.save")}
           </Button>
         </DialogActions>
       </BaseDialog>,
@@ -582,11 +587,10 @@ function Favorites({
       {domReady && renderFavoritesView()}
       <ConfirmationDialog
         open={loadDialog}
-        titleName={"Ladda favorit"}
-        contentDescription="Vid laddning ersätts lagren i snabbåtkomst. Alla tända lager i
-				kartan släcks och ersätts med favoritens tända lager."
-        cancel={"Avbryt"}
-        confirm={"Ladda"}
+        titleName={i18n.t("layerSwitcher.loadFavorite")}
+        contentDescription={i18n.t("layerSwitcher.loadFavoriteHint")}
+        cancel={i18n.t("common.cancel")}
+        confirm={i18n.t("layerSwitcher.load")}
         handleConfirm={loadFavorite}
         handleAbort={() => {
           setLoadDialog(!loadDialog);
@@ -594,9 +598,9 @@ function Favorites({
       />
       <ConfirmationDialog
         open={openNoLayersAlert}
-        titleName={"Spara till favoriter"}
-        contentDescription="Det finns inga lager i snabbåtkomst. Vänligen lägg till lager för att spara till favoriter."
-        cancel={"Stäng"}
+        titleName={i18n.t("layerSwitcher.saveToFavorites")}
+        contentDescription={i18n.t("layerSwitcher.noLayersToSave")}
+        cancel={i18n.t("common.close")}
         handleAbort={() => {
           setOpenNoLayersAlert(false);
         }}

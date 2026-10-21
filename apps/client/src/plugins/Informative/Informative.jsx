@@ -50,8 +50,6 @@ class Informative extends React.PureComponent {
         custom={{
           open: this.open, // Expose open() so it can be used from other plugins (LayerSwitcher/BreadCrumbs uses this)
           icon: <SatelliteIcon />,
-          title: "Översiktsplan",
-          description: "Läs mer om vad som planeras i kommunen",
           height: "auto",
           width: 640,
         }}

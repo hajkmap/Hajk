@@ -13,6 +13,7 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import AddBoxIcon from "@mui/icons-material/AddBox";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 export default function CQLFilter({ layer }) {
   const operatorOptions = ["=", "!=", ">", "<", ">=", "<=", "LIKE", "ILIKE"];
@@ -235,7 +236,7 @@ export default function CQLFilter({ layer }) {
   return (
     <Stack spacing={1}>
       <Typography sx={{ flexGrow: 1, flexBasis: "25%" }} variant="subtitle2">
-        Attributbaserad filtrering
+        {i18n.t("layerSwitcher.cql.title")}
       </Typography>
       {rows.map((row, i) => (
         <Stack
@@ -277,7 +278,7 @@ export default function CQLFilter({ layer }) {
           )}
 
           {/* ( toggle */}
-          <Tooltip title="Lägg till/ta bort vänsterparentes">
+          <Tooltip title={i18n.t("layerSwitcher.cql.toggleLeftParen")}>
             <span>
               <IconButton
                 size="small"
@@ -325,7 +326,7 @@ export default function CQLFilter({ layer }) {
               sx={{ height: 30, width: "30%" }}
             >
               <MenuItem value="">
-                <em>Välj fältnamn</em>
+                <em>{i18n.t("layerSwitcher.cql.chooseField")}</em>
               </MenuItem>
               {fieldNames.map((name) => (
                 <MenuItem key={name} value={name}>
@@ -337,7 +338,7 @@ export default function CQLFilter({ layer }) {
             <OutlinedInput
               size="small"
               value={row.field}
-              placeholder="Fältnamn..."
+              placeholder={i18n.t("layerSwitcher.cql.fieldPlaceholder")}
               onChange={(e) => updateRow(i, "field", e.target.value)}
               disabled={disabled}
               sx={{ height: 30, width: "30%" }}
@@ -363,13 +364,13 @@ export default function CQLFilter({ layer }) {
           <OutlinedInput
             style={{ height: 30, width: "30%" }}
             value={row.value}
-            placeholder="Värde..."
+            placeholder={i18n.t("layerSwitcher.cql.valuePlaceholder")}
             onChange={(e) => updateRow(i, "value", e.target.value)}
             disabled={disabled}
           />
 
           {/* ) toggle */}
-          <Tooltip title="Lägg till/ta bort högerparentes">
+          <Tooltip title={i18n.t("layerSwitcher.cql.toggleRightParen")}>
             <span>
               <IconButton
                 size="small"
@@ -409,7 +410,7 @@ export default function CQLFilter({ layer }) {
 
           {/* Remove row */}
           {i > 0 && (
-            <Tooltip title="Ta bort det här villkor">
+            <Tooltip title={i18n.t("layerSwitcher.cql.removeCondition")}>
               <span>
                 <IconButton
                   size="small"
@@ -425,7 +426,7 @@ export default function CQLFilter({ layer }) {
         </Stack>
       ))}
       {/* Add row */}
-      <Tooltip title="Lägg till ett villkor">
+      <Tooltip title={i18n.t("layerSwitcher.cql.addCondition")}>
         <span>
           <IconButton
             size="small"
@@ -447,7 +448,7 @@ export default function CQLFilter({ layer }) {
         }}
       >
         <Typography sx={{ flexGrow: 1, flexBasis: "25%" }} variant="subtitle2">
-          Filtreringstillstånd
+          {i18n.t("layerSwitcher.cql.state")}
         </Typography>
 
         <OutlinedInput
@@ -462,7 +463,7 @@ export default function CQLFilter({ layer }) {
           disabled={disabled}
           endAdornment={
             <InputAdornment position="end">
-              <HajkToolTip title="Tryck för att ladda om lagret med angivet filter">
+              <HajkToolTip title={i18n.t("layerSwitcher.cql.reload")}>
                 <span>
                   <IconButton
                     edge="end"

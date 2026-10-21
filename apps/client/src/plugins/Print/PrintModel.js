@@ -60,6 +60,7 @@ import { buildLayout } from "./PrintLayout";
 import { renderToPdf } from "./PdfRenderer";
 import { renderToPng } from "./PngRenderer";
 import { buildLegendPdfPages, getLegendInfoForLayer } from "./LegendUtil";
+import i18n from "src/i18n";
 
 export default class PrintModel {
   constructor(settings) {
@@ -959,7 +960,7 @@ export default class PrintModel {
             windowUrl
           );
 
-          const fileName = `Kartexport - ${new Date().toLocaleString()}`;
+          const fileName = `${i18n.t("print.fileName")} - ${new Date().toLocaleString()}`;
           const blob = await this.saveOutput({
             elements,
             options,

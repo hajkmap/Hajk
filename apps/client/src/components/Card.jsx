@@ -7,6 +7,7 @@ import {
   CardActionArea,
   Avatar,
 } from "@mui/material";
+import i18n from "src/i18n";
 
 const StyledCard = styled(MUICard)(({ theme }) => ({
   marginBottom: theme.spacing(1),
@@ -40,10 +41,10 @@ class Card extends React.PureComponent {
 
   render() {
     const {
-      abstract = "Beskrivning saknas",
+      abstract = i18n.t("card.missingDescription"),
       icon,
       onClick,
-      title = "Titel saknas",
+      title = i18n.t("card.missingTitle"),
     } = this.props;
 
     return (

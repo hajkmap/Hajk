@@ -1,6 +1,11 @@
 {
   "mapserviceBase": "",
   "defaultMap": "simpleMapAndLayersConfig",
+  "defaultLanguage": "sv",
+  "availableLanguages": [
+    "sv",
+    "en"
+  ],
   "availableTools": [
     "Anchor",
     "AttributeEditor",

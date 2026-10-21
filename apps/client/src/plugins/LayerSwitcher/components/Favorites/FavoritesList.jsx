@@ -26,6 +26,7 @@ import {
 
 import LayersOutlinedIcon from "@mui/icons-material/LayersOutlined";
 import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
+import i18n from "src/i18n";
 
 function FavoritesList({
   favorites,
@@ -112,7 +113,7 @@ function FavoritesList({
 
   // Function that finds a layer by id and returns caption
   const getBaseLayerName = (layers) => {
-    let backgroundLayerName = "Bakgrundskarta hittades inte";
+    let backgroundLayerName = i18n.t("layerSwitcher.backgroundNotFound");
     layers.forEach((layer) => {
       const mapLayer = map
         .getAllLayers()
@@ -123,11 +124,11 @@ function FavoritesList({
         // A fake maplayer is in the package
         switch (layer.id) {
           case BACKGROUND_LAYER_IDS.BLACK:
-            backgroundLayerName = "Svart";
+            backgroundLayerName = i18n.t("backgroundLayers.black");
             break;
           case BACKGROUND_LAYER_IDS.WHITE:
           default:
-            backgroundLayerName = "Vit";
+            backgroundLayerName = i18n.t("backgroundLayers.white");
             break;
         }
       }
@@ -159,7 +160,9 @@ function FavoritesList({
           <Typography>
             {selectedItem ? selectedItem.metadata.description : ""}
           </Typography>
-          <DialogContentText sx={{ mt: 2, mb: 1 }}>Bakgrund</DialogContentText>
+          <DialogContentText sx={{ mt: 2, mb: 1 }}>
+            {i18n.t("layerSwitcher.tabs.background")}
+          </DialogContentText>
           <Stack direction="row" spacing={1}>
             <PublicOutlinedIcon fontSize="small"></PublicOutlinedIcon>
             <Typography>
@@ -168,8 +171,7 @@ function FavoritesList({
           </Stack>
           <Divider sx={{ mt: 2 }} />
           <Typography sx={{ mt: 2, mb: 1 }}>
-            Vid laddning ersätts lagren i snabbåtkomst. Alla tända lager i
-            kartan släcks och ersätts med favoritens tända lager.
+            {i18n.t("layerSwitcher.loadFavoriteHint")}
           </Typography>
         </DialogContent>
         <DialogActions>
@@ -179,7 +181,7 @@ function FavoritesList({
               setInfoAlert(false);
             }}
           >
-            Avbryt
+            {i18n.t("common.cancel")}
           </Button>
           <Button
             onClick={(e) => {
@@ -189,7 +191,7 @@ function FavoritesList({
             }}
             variant="contained"
           >
-            Ladda
+            {i18n.t("layerSwitcher.load")}
           </Button>
         </DialogActions>
       </BaseDialog>,
@@ -210,12 +212,14 @@ function FavoritesList({
           e.stopPropagation();
         }}
       >
-        <DialogTitle id="editalert-dialog-title">Redigera</DialogTitle>
+        <DialogTitle id="editalert-dialog-title">
+          {i18n.t("common.edit")}
+        </DialogTitle>
         <DialogContent>
           <TextField
             fullWidth
             id="edit-workspace-title"
-            label="Titel"
+            label={i18n.t("common.titleLabel")}
             variant="standard"
             sx={{ mb: 1 }}
             value={editTitle}
@@ -224,7 +228,7 @@ function FavoritesList({
           <TextField
             fullWidth
             id="edit-workspace-description"
-            label="Beskrivning"
+            label={i18n.t("common.descriptionLabel")}
             multiline
             maxRows={4}
             variant="standard"
@@ -239,7 +243,7 @@ function FavoritesList({
               setEditAlert(!editAlert);
             }}
           >
-            Avbryt
+            {i18n.t("common.cancel")}
           </Button>
           <Button
             variant="contained"
@@ -248,7 +252,7 @@ function FavoritesList({
               handleEditFavorite();
             }}
           >
-            Spara
+            {i18n.t("common.save")}
           </Button>
         </DialogActions>
       </BaseDialog>,
@@ -262,12 +266,10 @@ function FavoritesList({
     return (
       <Stack spacing={2} sx={{ p: 2 }}>
         <Typography variant="body2">
-          Det ser ut som att du har valt att inte tillåta funktionella kakor. På
-          grund av detta så kan du inte se dina sparade favoriter eller lägga
-          till nya.
+          {i18n.t("layerSwitcher.favoritesCookiesRequired")}
         </Typography>
         <Typography variant="body2">
-          Klicka nedan för att ändra inställningarna.
+          {i18n.t("layerSwitcher.clickToChangeSettings")}
         </Typography>
         <Button
           fullWidth
@@ -277,7 +279,7 @@ function FavoritesList({
             cookieSettingCallback();
           }}
         >
-          Cookie-inställningar
+          {i18n.t("common.cookieSettings")}
         </Button>
       </Stack>
     );
@@ -288,7 +290,9 @@ function FavoritesList({
       {functionalCookiesOk ? (
         <List id="favorites-list-view" dense sx={{ p: 0 }}>
           {!favorites.length ? (
-            <Typography sx={{ p: 2 }}>Inga favoriter finns sparade</Typography>
+            <Typography sx={{ p: 2 }}>
+              {i18n.t("layerSwitcher.noFavorites")}
+            </Typography>
           ) : (
             favorites.map((favorite, index) => {
               return (
@@ -348,12 +352,14 @@ function FavoritesList({
       )}
       <ConfirmationDialog
         open={removeAlert}
-        titleName={"Ta bort"}
-        contentDescription={`Du kommer att ta bort "${
-          selectedItem?.metadata.title
-        }, ${parseDate(selectedItem?.metadata.savedAt)}" permanent.`}
-        cancel={"Avbryt"}
-        confirm={"Ta bort"}
+        titleName={i18n.t("common.delete")}
+        contentDescription={i18n.t("layerSwitcher.deleteFavoriteConfirm", {
+          name: `${selectedItem?.metadata.title}, ${parseDate(
+            selectedItem?.metadata.savedAt
+          )}`,
+        })}
+        cancel={i18n.t("common.cancel")}
+        confirm={i18n.t("common.delete")}
         handleConfirm={handleRemoveFavorite}
         handleAbort={() => {
           setRemoveAlert(!removeAlert);

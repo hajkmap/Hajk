@@ -13,6 +13,7 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import IconWarning from "@mui/icons-material/Warning";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 import type { FeatureItemProps, ControlledLayer } from "../../types";
 import { usePropertyCheckerContext } from "../../context";
@@ -158,7 +159,7 @@ const FeatureItem = (props: FeatureItemProps) => {
           }}
         >
           {loadStatus === "loaderror" ? (
-            <HajkToolTip title="Lagret kunde inte laddas in. Kartservern svarar inte.">
+            <HajkToolTip title={i18n.t("propertyChecker.layerLoadError")}>
               <IconButton
                 disableFocusRipple
                 disableRipple
@@ -171,7 +172,7 @@ const FeatureItem = (props: FeatureItemProps) => {
             </HajkToolTip>
           ) : (
             <HajkToolTip
-              title={showTooltips ? "Slå på/av lagret i kartan" : ""}
+              title={showTooltips ? i18n.t("propertyChecker.toggleLayer") : ""}
             >
               <Switch
                 size="small"
@@ -203,7 +204,11 @@ const FeatureItem = (props: FeatureItemProps) => {
         >
           {options.enableCheckLayerReport && (
             <HajkToolTip
-              title={showTooltips ? "Inkludera lagret i rapport" : ""}
+              title={
+                showTooltips
+                  ? i18n.t("propertyChecker.includeLayerInReport")
+                  : ""
+              }
             >
               <Checkbox
                 size="small"
@@ -222,13 +227,13 @@ const FeatureItem = (props: FeatureItemProps) => {
           )}
           {hasExpandContent && (
             <HajkToolTip
-              title={showTooltips ? "Visa detaljer och noteringar" : ""}
+              title={showTooltips ? i18n.t("propertyChecker.showDetails") : ""}
             >
               <IconButton
                 size="small"
                 onClick={handleExpandClick}
                 aria-expanded={expanded}
-                aria-label="Visa noteringar"
+                aria-label={i18n.t("propertyChecker.showNotes")}
               >
                 <ExpandMoreIcon
                   sx={{
@@ -260,7 +265,7 @@ const FeatureItem = (props: FeatureItemProps) => {
           )}
           {options.enableCheckLayerReport && (
             <TextField
-              label="Notering"
+              label={i18n.t("propertyChecker.noteLabel")}
               multiline
               fullWidth
               size="small"

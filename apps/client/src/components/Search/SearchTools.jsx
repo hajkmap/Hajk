@@ -8,6 +8,7 @@ import { visuallyHidden } from "@mui/utils";
 import Dialog from "../Dialog/Dialog";
 import SearchSettings from "./SearchSettings";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 class SearchTools extends React.PureComponent {
   state = {
@@ -77,8 +78,8 @@ class SearchTools extends React.PureComponent {
                 enabledSearchOptions={enabledSearchOptions}
               />
             ),
-            headerText: "Sökinställningar",
-            buttonText: "OK",
+            headerText: i18n.t("search.settings.title"),
+            buttonText: i18n.t("common.ok"),
             useLegacyNonMarkdownRenderer: true,
           }}
           open={settingsDialog}
@@ -101,7 +102,7 @@ class SearchTools extends React.PureComponent {
     return (
       <>
         {this.renderSettingsDialog()}
-        <HajkToolTip title="Fler sökverktyg och inställningar">
+        <HajkToolTip title={i18n.t("search.moreTools")}>
           <IconButton
             id="search-options-button"
             aria-haspopup="true"
@@ -115,7 +116,7 @@ class SearchTools extends React.PureComponent {
             }
           >
             <span style={visuallyHidden}>
-              Öppna dialog med fler inställningar
+              {i18n.t("search.openMoreSettings")}
             </span>
             <MoreVertIcon />
           </IconButton>

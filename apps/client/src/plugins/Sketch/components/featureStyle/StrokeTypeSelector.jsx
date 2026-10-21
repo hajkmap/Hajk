@@ -2,6 +2,7 @@ import { Grid, MenuItem, Paper } from "@mui/material";
 import { TextField, Typography } from "@mui/material";
 import { STROKE_TYPES } from "../../constants";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 const StrokeTypeSelector = (props) => {
   // This filter is used to remove the "none" strokeType from the select when the activeDrawType is anything but "Circle" or "Polygon"
@@ -27,7 +28,9 @@ const StrokeTypeSelector = (props) => {
       <Grid container>
         {props.includeContainer !== false ? (
           <Grid size={12}>
-            <Typography variant="caption">Linjetyp</Typography>
+            <Typography variant="caption">
+              {i18n.t("sketch.style.lineType")}
+            </Typography>
           </Grid>
         ) : null}
         <TextField

@@ -5,10 +5,23 @@ import {
   createTheme,
 } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
+import { svSE as coreSvSE, enUS as coreEnUS } from "@mui/material/locale";
+import {
+  svSE as dataGridSvSE,
+  enUS as dataGridEnUS,
+} from "@mui/x-data-grid/locales";
 import App from "./App";
+import i18n from "src/i18n";
 
 import { deepMerge } from "../utils/DeepMerge";
 import { functionalOk as functionalCookieOk } from "../models/Cookie";
+
+// MUI's built-in texts (DataGrid, Pagination, Autocomplete…) per Hajk language.
+// Languages not listed here get MUI's English defaults.
+const MUI_LOCALES = {
+  sv: [coreSvSE, dataGridSvSE],
+  en: [coreEnUS, dataGridEnUS],
+};
 
 /**
  * @summary Helper, used to determine if user's browser prefers dark mode.
@@ -197,7 +210,8 @@ const HajkThemeProvider = ({ activeTools, config, customTheme }) => {
   };
 
   // Take the theme object from state and generate a MUI-theme
-  const muiTheme = createTheme(theme);
+  // The language is fixed for the page's lifetime (switching reloads the page).
+  const muiTheme = createTheme(theme, ...(MUI_LOCALES[i18n.language] ?? []));
 
   // Render, pass through some stuff into App.
   return (

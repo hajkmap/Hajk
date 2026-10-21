@@ -25,5 +25,5 @@
       "plugins/*": ["./src/plugins/*"]
     }
   },
-  "include": ["src", "vite.config.ts", "prebuild.js"] // Added prebuild.js as it's outside `src/` and can be missed once we decide to type-check the JS files too
+  "include": ["src", "vite.config.ts", "i18next.config.ts", "prebuild.js"] // Added prebuild.js as it's outside `src/` and can be missed once we decide to type-check the JS files too
 }

@@ -1,6 +1,7 @@
 import React from "react";
 import { Grid, TextField, Typography } from "@mui/material";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 const FeatureTitleEditor = ({ feature, model, drawModel }) => {
   const [title, setTitle] = React.useState("");
@@ -18,10 +19,10 @@ const FeatureTitleEditor = ({ feature, model, drawModel }) => {
   return feature.get("DRAW_METHOD") !== "Text" ? (
     <Grid style={{ marginTop: 16 }} size={12}>
       <Grid style={{ marginBottom: 4 }} size={12}>
-        <Typography align="center">Titel</Typography>
+        <Typography align="center">{i18n.t("common.titleLabel")}</Typography>
       </Grid>
       <Grid size={12}>
-        <HajkToolTip title="Angle en titel som kan användas för att identifiera objektet.">
+        <HajkToolTip title={i18n.t("sketch.titleHint")}>
           <TextField
             fullWidth
             value={title}

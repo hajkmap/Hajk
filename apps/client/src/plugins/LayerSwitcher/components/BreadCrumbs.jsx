@@ -18,6 +18,7 @@ import { horizontalScrollDragManager } from "../HorizontalScrollMenuDragManager"
 
 // Import styles for the horizontal scrolling menu. Required after react-horizontal-scrolling-menu v8.2.0 for some reason.
 import "react-horizontal-scrolling-menu/dist/styles.css";
+import i18n from "src/i18n";
 
 // A HOC that pipes isMobile to the children. See this as a proposed
 // solution. It is not pretty, but if we move this to a separate file
@@ -202,7 +203,7 @@ class BreadCrumbs extends Component {
     return (
       <MobileRoot>
         <MobileHeader>
-          <Typography>Innehåll i kartan</Typography>
+          <Typography>{i18n.t("layerSwitcher.mapContent")}</Typography>
           <IconButton onClick={this.toggle} size="small">
             {open ? <RemoveCircleIcon /> : <AddCircleIcon />}
           </IconButton>
@@ -221,15 +222,12 @@ class BreadCrumbs extends Component {
                 }}
               >
                 <Button variant="contained" onClick={this.clear}>
-                  Ta bort allt innehåll
+                  {i18n.t("layerSwitcher.removeAllContent")}
                   <VisibilityOffIcon sx={{ marginLeft: 2 }} />
                 </Button>
               </Grid>
             ) : (
-              <Typography>
-                Använd sökfunktionen eller innehållsmenyn för att visa
-                information i kartan.
-              </Typography>
+              <Typography>{i18n.t("layerSwitcher.noContentHint")}</Typography>
             )}
             {layers.map((layer, index) => (
               <MobileBreadCrumbWrapper key={`${layer.get("caption")}-${index}`}>

@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import HajkToolTip from "components/HajkToolTip";
 import CheckIcon from "@mui/icons-material/Check";
+import i18n from "src/i18n";
 
 // Styled AccordionSummary to match FeatureStyleAccordion
 const StyledAccordionSummary = styled(AccordionSummary)(() => ({
@@ -58,8 +59,8 @@ const MultiDrawSelector = (props) => {
       <HajkToolTip
         title={
           multiDrawEnabled
-            ? "Klicka för att avsluta multi-ritning"
-            : "Klicka för att rita flera delar som blir ett gemensamt objekt (t.ex. MultiPolygon)"
+            ? i18n.t("sketch.multi.finishHint")
+            : i18n.t("sketch.multi.startHint")
         }
       >
         <StyledAccordionSummary>
@@ -68,7 +69,9 @@ const MultiDrawSelector = (props) => {
             sx={{ justifyContent: "space-between", alignItems: "center" }}
             size={12}
           >
-            <Typography variant="button">Multi-ritning</Typography>
+            <Typography variant="button">
+              {i18n.t("sketch.multi.title")}
+            </Typography>
             <Switch
               checked={multiDrawEnabled}
               onClick={handleSwitchClick}
@@ -87,7 +90,7 @@ const MultiDrawSelector = (props) => {
             size={12}
           >
             <Typography variant="body2" color="text.secondary">
-              Ritade delar:
+              {i18n.t("sketch.multi.drawnParts")}
             </Typography>
             <Chip
               label={multiDrawPartCount}
@@ -97,7 +100,7 @@ const MultiDrawSelector = (props) => {
           </Grid>
 
           <Grid size={12} style={{ marginTop: 8 }}>
-            <HajkToolTip title="Avsluta multi-ritningen och spara objektet">
+            <HajkToolTip title={i18n.t("sketch.multi.finishAndSave")}>
               <span style={{ display: "block" }}>
                 <Button
                   variant="contained"
@@ -107,7 +110,7 @@ const MultiDrawSelector = (props) => {
                   onClick={onFinishMultiDraw}
                   disabled={uiDisabled || multiDrawPartCount === 0}
                 >
-                  Avsluta ritning
+                  {i18n.t("sketch.finishDrawing")}
                 </Button>
               </span>
             </HajkToolTip>

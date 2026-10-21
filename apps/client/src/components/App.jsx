@@ -21,6 +21,7 @@ import CookieNotice from "./CookieNotice";
 import Introduction from "./Introduction/Introduction";
 import Announcement from "./Announcement/Announcement";
 import Alert from "./Alert";
+import DemoLanguageSwitcher from "./DemoLanguageSwitcher";
 import PluginWindows from "./PluginWindows";
 import SimpleDialog from "./SimpleDialog";
 import MapClickViewer from "./MapClickViewer/MapClickViewer";
@@ -62,6 +63,7 @@ import MapIcon from "@mui/icons-material/Map";
 import MenuIcon from "@mui/icons-material/Menu";
 import ThemeToggler from "../controls/ThemeToggler";
 import HajkToolTip from "components/HajkToolTip";
+import i18n, { setLanguage, configText } from "src/i18n";
 
 // A global that holds our windows, for use see components/Window.js
 document.windows = [];
@@ -528,11 +530,14 @@ class App extends React.PureComponent {
             this.globalObserver.publish("core.addDrawerToggleButton", {
               value: "plugins",
               ButtonIcon: ButtonIcon,
-              caption:
-                this.props.config.mapConfig.map?.drawerButtonTitle ??
-                "Kartverktyg",
-              drawerTitle:
-                this.props.config.mapConfig.map?.drawerTitle ?? "Kartverktyg",
+              caption: configText(
+                "app.mapTools",
+                this.props.config.mapConfig.map?.drawerButtonTitle
+              ),
+              drawerTitle: configText(
+                "app.mapTools",
+                this.props.config.mapConfig.map?.drawerTitle
+              ),
               order: 0,
               // If no plugins render **directly** in Drawer, but some **might**
               // render there occasionally, let's ensure to hide the Tools button on
@@ -566,6 +571,12 @@ class App extends React.PureComponent {
       layerControl: this.appModel.layerControl,
       dirtyLayers: {},
     };
+
+    // Defined after the spread above, so the getter isn't flattened into a value.
+    Object.defineProperties(window.hajkPublicApi, {
+      language: { get: () => i18n.language, enumerable: true },
+      setLanguage: { value: setLanguage, enumerable: true },
+    });
 
     // Register a handle to prevent pinch zoom on mobile devices.
     document.body.addEventListener(
@@ -1047,8 +1058,9 @@ class App extends React.PureComponent {
               <Box sx={{ display: { xs: "none", md: "block" } }}>
                 <HajkToolTip
                   title={
-                    (this.state.drawerPermanent ? "Lås upp" : "Lås fast") +
-                    " verktygspanelen"
+                    this.state.drawerPermanent
+                      ? i18n.t("app.unlockDrawer")
+                      : i18n.t("app.lockDrawer")
                   }
                 >
                   <IconButton
@@ -1262,9 +1274,10 @@ class App extends React.PureComponent {
             open={this.state.alert}
             message={this.state.alertMessage}
             parent={this}
-            title="Meddelande"
+            title={i18n.t("alert.title")}
           />
           <SrShortcuts globalObserver={this.globalObserver}></SrShortcuts>
+          <DemoLanguageSwitcher />
           {this.renderDrawer()}
           <AppBox
             id="appBox"

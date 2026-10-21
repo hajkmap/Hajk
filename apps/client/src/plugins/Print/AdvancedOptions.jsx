@@ -19,6 +19,7 @@ import PaletteIcon from "@mui/icons-material/Palette";
 import { TwitterPicker as ColorPicker } from "react-color";
 import HajkToolTip from "components/HajkToolTip";
 import { MAP_TEXT_AVAILABLE_COLORS } from "./constants";
+import i18n from "src/i18n";
 
 const Root = styled(Grid)(() => ({
   display: "flex",
@@ -117,12 +118,20 @@ class AdvancedOptions extends React.PureComponent {
           id: name,
         }}
       >
-        <MenuItem value={"topLeft"}>Uppe till vänster</MenuItem>
-        <MenuItem value={"topRight"}>Uppe till höger</MenuItem>
+        <MenuItem value={"topLeft"}>
+          {i18n.t("print.placement.topLeft")}
+        </MenuItem>
+        <MenuItem value={"topRight"}>
+          {i18n.t("print.placement.topRight")}
+        </MenuItem>
         {this.allowBottomRightPlacement() && (
-          <MenuItem value={"bottomRight"}>Nere till höger</MenuItem>
+          <MenuItem value={"bottomRight"}>
+            {i18n.t("print.placement.bottomRight")}
+          </MenuItem>
         )}
-        <MenuItem value={"bottomLeft"}>Nere till vänster</MenuItem>
+        <MenuItem value={"bottomLeft"}>
+          {i18n.t("print.placement.bottomLeft")}
+        </MenuItem>
       </Select>
     );
   };
@@ -138,8 +147,8 @@ class AdvancedOptions extends React.PureComponent {
           id: name,
         }}
       >
-        <MenuItem value={true}>Ja</MenuItem>
-        <MenuItem value={false}>Nej</MenuItem>
+        <MenuItem value={true}>{i18n.t("common.yes")}</MenuItem>
+        <MenuItem value={false}>{i18n.t("common.no")}</MenuItem>
       </Select>
     );
   };
@@ -174,8 +183,8 @@ class AdvancedOptions extends React.PureComponent {
                 value={mapTitle}
                 fullWidth={true}
                 onChange={handleChange}
-                label="Valfri titel"
-                placeholder="Kan lämnas tomt"
+                label={i18n.t("print.optionalTitle")}
+                placeholder={i18n.t("print.canBeEmpty")}
                 variant="standard"
                 slotProps={{
                   input: {
@@ -192,7 +201,7 @@ class AdvancedOptions extends React.PureComponent {
                           badgeContent=" "
                           variant="dot"
                         >
-                          <HajkToolTip title="Titelfärg påverkar inte kartans etiketter utan styr endast färgen för kringliggande texter, så som titel, copyrighttext, etc.">
+                          <HajkToolTip title={i18n.t("print.textColorHint")}>
                             <IconButton
                               id="mapTextColor"
                               onClick={this.toggleColorPicker}
@@ -217,8 +226,8 @@ class AdvancedOptions extends React.PureComponent {
                 value={printComment}
                 fullWidth={true}
                 onChange={handleChange}
-                label="Valfri kommentar"
-                placeholder="Kan lämnas tomt"
+                label={i18n.t("print.optionalComment")}
+                placeholder={i18n.t("print.canBeEmpty")}
                 variant="standard"
                 slotProps={{
                   input: {
@@ -232,7 +241,7 @@ class AdvancedOptions extends React.PureComponent {
           <FormControlContainer size={12}>
             <FormControl fullWidth={true} error={!printOptionsOk}>
               <InputLabel variant="standard" htmlFor="resolution">
-                Upplösning (DPI)
+                {i18n.t("print.resolution")}
               </InputLabel>
               <Select
                 variant="standard"
@@ -252,10 +261,7 @@ class AdvancedOptions extends React.PureComponent {
                 })}
               </Select>
               {!printOptionsOk && (
-                <FormHelperText>
-                  Bilden kommer inte kunna skrivas ut korrekt. Testa med en
-                  lägre upplösning eller mindre skala.
-                </FormHelperText>
+                <FormHelperText>{i18n.t("print.cannotPrint")}</FormHelperText>
               )}
             </FormControl>
           </FormControlContainer>
@@ -263,7 +269,7 @@ class AdvancedOptions extends React.PureComponent {
             <Grid sx={{ paddingRight: "10px" }} size={6}>
               <FormControl fullWidth={true}>
                 <InputLabel variant="standard" htmlFor="includeNorthArrow">
-                  Inkludera norrpil
+                  {i18n.t("print.includeNorthArrow")}
                 </InputLabel>
                 {this.renderIncludeSelect(
                   includeNorthArrow,
@@ -278,7 +284,7 @@ class AdvancedOptions extends React.PureComponent {
                 error={this.placementOverlaps.northArrow}
               >
                 <InputLabel variant="standard" htmlFor="northArrowPlacement">
-                  Placering
+                  {i18n.t("print.placement.label")}
                 </InputLabel>
                 {this.renderPlacementSelect(
                   northArrowPlacement,
@@ -293,7 +299,7 @@ class AdvancedOptions extends React.PureComponent {
             <Grid sx={{ paddingRight: "10px" }} size={6}>
               <FormControl fullWidth={true}>
                 <InputLabel variant="standard" htmlFor="includeScaleBar">
-                  Inkludera skalstock
+                  {i18n.t("print.includeScaleBar")}
                 </InputLabel>
                 {this.renderIncludeSelect(
                   includeScaleBar,
@@ -308,7 +314,7 @@ class AdvancedOptions extends React.PureComponent {
                 error={this.placementOverlaps.scaleBar}
               >
                 <InputLabel variant="standard" htmlFor="scaleBarPlacement">
-                  Placering
+                  {i18n.t("print.placement.label")}
                 </InputLabel>
                 {this.renderPlacementSelect(
                   scaleBarPlacement,
@@ -323,7 +329,7 @@ class AdvancedOptions extends React.PureComponent {
             <Grid sx={{ paddingRight: "10px" }} size={6}>
               <FormControl fullWidth={true}>
                 <InputLabel variant="standard" htmlFor="includeLogo">
-                  Inkludera logotyp
+                  {i18n.t("print.includeLogo")}
                 </InputLabel>
                 {this.renderIncludeSelect(
                   includeLogo,
@@ -338,7 +344,7 @@ class AdvancedOptions extends React.PureComponent {
                 error={this.placementOverlaps.logoType}
               >
                 <InputLabel variant="standard" htmlFor="logoPlacement">
-                  Placering
+                  {i18n.t("print.placement.label")}
                 </InputLabel>
                 {this.renderPlacementSelect(
                   logoPlacement,
@@ -355,7 +361,7 @@ class AdvancedOptions extends React.PureComponent {
               <Grid sx={{ paddingRight: "10px" }} size={6}>
                 <FormControl fullWidth={true}>
                   <InputLabel variant="standard" htmlFor="includeQrCode">
-                    Inkludera qr-kod
+                    {i18n.t("print.includeQrCode")}
                   </InputLabel>
                   {this.renderIncludeSelect(
                     includeQrCode,
@@ -370,7 +376,7 @@ class AdvancedOptions extends React.PureComponent {
                   error={this.placementOverlaps.qrCode}
                 >
                   <InputLabel variant="standard" htmlFor="qrCodePlacement">
-                    Placering
+                    {i18n.t("print.placement.label")}
                   </InputLabel>
                   {this.renderPlacementSelect(
                     qrCodePlacement,
@@ -383,8 +389,7 @@ class AdvancedOptions extends React.PureComponent {
               <Grid size={12}>
                 {showOverlapWarning && (
                   <FormHelperText error={true}>
-                    Bilden kommer inte kunna skrivas ut korrekt. Placeringsvalen
-                    överlappar.
+                    {i18n.t("print.placementsOverlap")}
                   </FormHelperText>
                 )}
               </Grid>
@@ -403,7 +408,7 @@ class AdvancedOptions extends React.PureComponent {
                         onChange={handleChange}
                       />
                     }
-                    label="Inkludera teckenförklaring i PDF"
+                    label={i18n.t("print.includeLegend")}
                   />
                 </Grid>
               </FormControlContainer>

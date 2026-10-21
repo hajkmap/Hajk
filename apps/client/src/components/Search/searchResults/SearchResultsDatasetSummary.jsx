@@ -2,6 +2,7 @@ import React from "react";
 import { Typography, Chip, Grid } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 const SummaryContainer = styled(Grid)(({ theme }) => ({
   minHeight: 42,
@@ -55,8 +56,10 @@ class SearchResultsDatasetSummary extends React.PureComponent {
 
     const displayWarning = this.shouldDisplayWarning();
     const toolTipTitle = displayWarning
-      ? `Maximalt antal sökträffar har uppnåtts. Förfina sökningen för att säkerställa att viktig information inte missas.`
-      : `Visar ${numberOfResultsToDisplay} resultat`;
+      ? i18n.t("search.results.maxHitsReached")
+      : i18n.t("search.results.showingResults", {
+          count: numberOfResultsToDisplay,
+        });
 
     return (
       <>

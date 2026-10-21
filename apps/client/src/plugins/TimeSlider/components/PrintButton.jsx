@@ -1,6 +1,6 @@
 import { Button, Grid } from "@mui/material";
-import { PRINT_DISABLED_TOOLTIP, PRINT_ENABLED_TOOLTIP } from "../constants";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 export default function PrintButton({ disabled, onClick }) {
   return (
@@ -13,11 +13,15 @@ export default function PrintButton({ disabled, onClick }) {
       }}
     >
       <HajkToolTip
-        title={disabled ? PRINT_DISABLED_TOOLTIP : PRINT_ENABLED_TOOLTIP}
+        title={
+          disabled
+            ? i18n.t("timeSlider.print.disabledTooltip")
+            : i18n.t("timeSlider.print.enabledTooltip")
+        }
       >
         <span>
           <Button variant="contained" onClick={onClick} disabled={disabled}>
-            Skriv ut
+            {i18n.t("timeSlider.print.print")}
           </Button>
         </span>
       </HajkToolTip>
