@@ -39,9 +39,54 @@ i18n.t("print.creatingImages");
 - **Rich text**: `<Trans i18nKey="…" components={{ strong: <strong /> }} />`.
 - **Module-level constants**: use a getter, `get label() { return i18n.t("…"); }`, so the text is
   translated when it's read rather than at import time.
-- **Admin-configurable texts**: text entered in Admin is assumed to be Swedish. Use
-  `configText("<area>.<key>", options.x)` instead of `options.x || "Svensk standardtext"`. Under
-  `sv` the admin text wins. Under other languages the translated default wins.
+- **Admin-configurable texts**: use `configText()`, see below.
+
+## Texts from Admin
+
+Text entered in Admin (stored in `App_Data/*.json`) has no language tag, so the client assumes it
+is **Swedish**. Admin even pre-fills Swedish defaults in its tool forms.
+
+### Texts with a client default: `configText()`
+
+Many admin texts (tool titles and descriptions, button labels, placeholders, `appConfig.json`'s
+`loadError*` texts…) also have a default in the client. Use `configText()` for these instead of
+`options.x || "Svensk standardtext"`:
+
+```js
+import { configText } from "src/i18n";
+
+this.title = configText("controls.informationTitle", this.options.title);
+```
+
+The text shown is picked like this:
+
+| Active language                        | Shown                                                    |
+| -------------------------------------- | -------------------------------------------------------- |
+| `sv`                                   | The admin text. The `sv` default if Admin left it empty. |
+| Other, and the key is translated in it | The translated default. The admin text is ignored.       |
+| Other, but the key has no value in it  | The admin text, rather than a generic Swedish default.   |
+
+An optional third argument is a hard-coded fallback, used only if the key has no Swedish value
+either (e.g. a plugin that isn't migrated yet).
+
+The trade-off: a custom title set in Admin, e.g. "Skriv ut karta" for Print, is only shown in
+Swedish. In English the tool is called "Print", the client's own translation.
+
+### Plugin titles and descriptions
+
+`BaseWindowPlugin` does this for every window plugin, so plugins don't need to. It looks up
+`<pluginType>.title` and `<pluginType>.description` (the plugin type with a lower-case first
+letter, e.g. `layerSwitcher.title`), with `options.title`/`options.description` as the admin value.
+
+These keys are only read at runtime, so `preservePatterns` in `i18next.config.ts` keeps
+`*.title` and `*.description` from being removed by `i18n:extract`. Add them to the plugin's
+`i18n/<lang>.json` by hand.
+
+### Texts without a client default
+
+Admin texts that have no client default, such as layer names, layer switcher groups, info click
+templates, document content and search source names, are shown as entered in every language.
+They can't be translated in the client.
 
 ## Which language is shown
 
