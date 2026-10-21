@@ -8,6 +8,8 @@ import VectorSource from "ol/source/Vector";
 
 import { Style, Icon, Fill, Stroke, Circle } from "ol/style";
 
+import { getGPXClickInfo } from "./layers/gpx";
+import { getKMLClickInfo } from "./layers/kml";
 import AppModel from "./AppModel";
 import { hfetch } from "../utils/FetchWrapper";
 import { getInfoClickInfoFromLayerConfig } from "../utils/InfoClickHelpers";
@@ -292,14 +294,16 @@ export default class MapClickModel {
             // layers. But we want to group features from the same layer together.
             // So the first step is to get a unique ID for the layer that the
             // current feature belongs to. We create it by combining the layer's name…
+            const gpxInfo = getGPXClickInfo(feature, layer);
+            const kmlInfo = getKMLClickInfo(feature, layer);
+            const fileInfo = gpxInfo ?? kmlInfo;
             const layerName = this.#getLayerNameFromVectorFeature(
               feature,
               layer
             );
-
-            // …with the OL layer's UID property.
             const layerUid = layer?.ol_uid;
             const layerId =
+              fileInfo?.layerId ??
               layerName + (layerUid !== undefined && "." + layerUid);
 
             // Next, check if we already have this layer in our collection…
@@ -316,18 +320,22 @@ export default class MapClickModel {
             } else {
               // Else, create the return object…
               const r = {
+                gpxType: gpxInfo?.gpxType,
+                kmlType: kmlInfo?.kmlType,
                 layerId: layerId, // Unique layer id, used above
                 type: "QueryableLayerResults",
                 features: [feature], // Create a new Array, add the current feature
                 numHits: 1, // Duh…
                 displayName:
+                  fileInfo?.displayName ||
                   layer.get("layerInfo")?.caption ||
                   layer.get("caption") ||
                   "Unnamed vector layer",
                 infoclickDefinition:
-                  layer.get("layerInfo")?.information ||
-                  layer.get("information") ||
-                  "",
+                  fileInfo?.infoclickDefinition ??
+                  (layer.get("layerInfo")?.information ||
+                    layer.get("information") ||
+                    ""),
                 infoclickIcon:
                   layer.get("layerInfo")?.infoclickIcon ||
                   layer.get("infoclickIcon") ||

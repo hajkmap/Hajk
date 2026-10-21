@@ -54,6 +54,10 @@ function setDocumentTitleFromConfig(mapConfig) {
 }
 
 function normalizeLayersConfig(appModel, layers) {
+  layers.gpxlayers = appModel.config.layersConfig.gpxlayers || [];
+  layers.gpxlayers.forEach((l) => (l.type = "gpx"));
+  layers.kmllayers = appModel.config.layersConfig.kmllayers || [];
+  layers.kmllayers.forEach((l) => (l.type = "kml"));
   layers.wmslayers = appModel.config.layersConfig.wmslayers || [];
   layers.wfslayers = appModel.config.layersConfig.wfslayers || [];
   layers.wfstlayers = appModel.config.layersConfig.wfstlayers || [];
@@ -68,6 +72,8 @@ function normalizeLayersConfig(appModel, layers) {
   layers.arcgislayers.forEach((l) => (l.type = "arcgis"));
 
   const allLayers = [
+    ...layers.gpxlayers,
+    ...layers.kmllayers,
     ...layers.wmslayers,
     ...layers.wmtslayers,
     ...layers.vectorlayers,

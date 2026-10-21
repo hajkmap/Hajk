@@ -9,6 +9,8 @@
     "url_layer_settings_extended": "http://localhost:3002/api/v2/settings/extendedwmslayer",
     "url_wmtslayer_settings": "http://localhost:3002/api/v2/settings/wmtslayer",
     "url_arcgislayer_settings": "http://localhost:3002/api/v2/settings/arcgislayer",
+    "url_gpxlayer_settings": "http://localhost:3002/api/v2/settings/gpxlayer",
+    "url_kmllayer_settings": "http://localhost:3002/api/v2/settings/kmllayer",
     "url_vectorlayer_settings": "http://localhost:3002/api/v2/settings/vectorlayer",
     "default_server_type": "geoserver",
     "url_default_server": "https://opengeodata.goteborg.se/services/stadskarta/wms/v4",

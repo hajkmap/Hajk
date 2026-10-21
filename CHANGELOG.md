@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Client + Admin + Backend: Direct GPX layers with waypoint, route and track styles, generated legends and separate Markdown infobox templates. See [configuration documentation](docs/gpx-layers.md).
+- Client + Admin + Backend: Direct KML layers that keep the file's own styles unless an Admin override is saved, with legends for overridden geometry types and separate Markdown infobox templates. Overrides apply in both Client and Admin preview; ExtendedData cannot replace feature geometry. See [configuration documentation](docs/kml-layers.md).
+
 - Client: `window.hajkPublicApi.pluginControl` opens and closes plugin windows from the console or an embedder: `pluginControl.show("anchor")` and `pluginControl.hide("anchor")`. The name is the plugin type; InfoDialog instances use `infodialog.<name>`.
 - Client: Measurer/Sketch - Angle snapping can be repeated while Ctrl/Cmd is held. Clicking a green snap guide removes that guide and draws a new one from the clicked point. [#1923](https://github.com/hajkmap/Hajk/issues/1923)
 - Client: Measurer/Sketch - Angle snapping guides no longer pull the cursor off drawn edges: real features (drawn or WFS) always win over the green guides, segment labels are no longer snap targets, and points where a guide crosses an edge are shown and snappable. [#1923](https://github.com/hajkmap/Hajk/issues/1923)

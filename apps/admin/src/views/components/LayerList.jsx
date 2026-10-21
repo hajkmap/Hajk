@@ -22,7 +22,7 @@ class LayerList extends Component {
     for (let i = 0; i < layerTypes.length; i++) {
       for (let j = 0; j < this.layersConfig[layerTypes[i]].length; j++) {
         if (
-          Number(this.layersConfig[layerTypes[i]][j].id) === Number(layerId)
+          String(this.layersConfig[layerTypes[i]][j].id) === String(layerId)
         ) {
           found = this.layersConfig[layerTypes[i]][j].caption;
           break;
@@ -44,7 +44,7 @@ class LayerList extends Component {
             name: this.lookup(layer.id),
           };
         })
-        .filter((layer) => layer.name !== undefined)
+        .filter((layer) => layer.name !== undefined),
     );
   }
 
@@ -67,7 +67,7 @@ class LayerList extends Component {
 
     function readMapConfig(mapConfig) {
       var layerSwitcherConfig = mapConfig.tools.find(
-          (tool) => tool.type === "layerswitcher"
+          (tool) => tool.type === "layerswitcher",
         ),
         layers = this.flattern(layerSwitcherConfig.options.groups);
 
@@ -84,7 +84,7 @@ class LayerList extends Component {
         (mapConfig) => {
           readMapConfig.call(this, mapConfig);
           this.props.onLoaded(layersConfig);
-        }
+        },
       );
     });
 
@@ -103,7 +103,7 @@ class LayerList extends Component {
       {
         checkedLayers: checkedLayers,
       },
-      () => this.props.onUpdate(this.state.checkedLayers)
+      () => this.props.onUpdate(this.state.checkedLayers),
     );
   }
 
@@ -114,7 +114,7 @@ class LayerList extends Component {
           var checked = false;
           if (Array.isArray(this.props.chapter.layers)) {
             checked = !!this.props.chapter.layers.find(
-              (layerId) => Number(layerId) === Number(layer.id)
+              (layerId) => Number(layerId) === Number(layer.id),
             );
           }
           return (

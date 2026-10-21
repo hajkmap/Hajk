@@ -26,12 +26,25 @@ const Markdown = (props) => {
   const { featurePropsParsing } = useMapClickViewerContext();
 
   useEffect(() => {
+    const externalFile = featureCollection.gpxType || featureCollection.kmlType;
+    const properties = externalFile
+      ? feature.getProperties()
+      : featurePropsParsing.extractPropertiesFromJson(feature.getProperties());
+    if (externalFile) {
+      // GPX and KML are external data. Encode punctuation as character references
+      // so even templates allowing HTML cannot turn attribute text into HTML or Markdown.
+      for (const key of Object.keys(properties)) {
+        if (typeof properties[key] === "string")
+          properties[key] = properties[key].replace(
+            /[&<>"'`\[\](){}!*_\\]/g,
+            (char) => `&#${char.charCodeAt(0)};`
+          );
+      }
+    }
     featurePropsParsing
       .setMarkdownAndProperties({
         markdown: featureCollection.infoclickDefinition,
-        properties: featurePropsParsing.extractPropertiesFromJson(
-          feature.getProperties()
-        ),
+        properties,
       })
       .mergeFeaturePropsWithMarkdown()
       .then((MarkdownComponent) => {

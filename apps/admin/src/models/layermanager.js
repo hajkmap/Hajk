@@ -90,6 +90,10 @@ var manager = Model.extend({
         return this.get("config").url_wmtslayer_settings;
       case "ArcGIS":
         return this.get("config").url_arcgislayer_settings;
+      case "GPX":
+        return this.get("config").url_gpxlayer_settings || this.get("config").url_vectorlayer_settings.replace(/vectorlayer$/, "gpxlayer");
+      case "KML":
+        return this.get("config").url_kmllayer_settings || this.get("config").url_vectorlayer_settings.replace(/vectorlayer$/, "kmllayer");
       case "Vector":
         return this.get("config").url_vectorlayer_settings;
       default:
@@ -126,6 +130,8 @@ var manager = Model.extend({
           layers = layers.concat(data.vectorlayers);
         }
 
+        layers = layers.concat((data.gpxlayers || []).map((l) => ({ ...l, type: "GPX" })));
+        layers = layers.concat((data.kmllayers || []).map((l) => ({ ...l, type: "KML" })));
         layers.sort((a, b) => {
           var d1 = parseInt(a.date, 10),
             d2 = parseInt(b.date, 10);
@@ -178,6 +184,7 @@ var manager = Model.extend({
       body: JSON.stringify(layer),
     })
       .then((response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         callback(true);
       })
       .catch((error) => {

@@ -5,6 +5,8 @@ import TileWMS from "ol/source/TileWMS";
 import TileGrid from "ol/tilegrid/TileGrid";
 import VectorSource from "ol/source/Vector";
 import { Vector as VectorLayer } from "ol/layer";
+import GPX from "ol/format/GPX";
+import KML from "ol/format/KML";
 import GeoJSON from "ol/format/GeoJSON.js";
 import { transform } from "ol/proj";
 import { Fill, Text, Stroke, Icon, Circle, Style } from "ol/style";
@@ -123,6 +125,83 @@ function createStyle(layer, feature) {
 
   return [new Style(getStyleObj())];
 }
+
+const KML_SIMPLE_TYPES = {
+  Point: "point",
+  MultiPoint: "point",
+  LineString: "line",
+  MultiLineString: "line",
+  Polygon: "polygon",
+  MultiPolygon: "polygon",
+};
+
+function kmlGeometryType(geometry) {
+  if (!geometry) return null;
+  const simple = KML_SIMPLE_TYPES[geometry.getType()];
+  if (simple) return simple;
+  if (geometry.getType() !== "GeometryCollection") return "collection";
+  const kinds = new Set();
+  const visit = (part) => {
+    if (part.getType() === "GeometryCollection") {
+      part.getGeometries().forEach(visit);
+      return;
+    }
+    const kind = KML_SIMPLE_TYPES[part.getType()];
+    if (kind) kinds.add(kind);
+  };
+  visit(geometry);
+  return kinds.size === 1 ? [...kinds][0] : "collection";
+}
+
+function kmlColorWithOpacity(color, opacity) {
+  const match = /^#([0-9a-f]{6})$/i.exec(String(color).trim());
+  const alpha = Number(opacity);
+  if (!match || !Number.isFinite(alpha)) return color;
+  const hex = match[1];
+  return `rgba(${parseInt(hex.slice(0, 2), 16)},${parseInt(hex.slice(2, 4), 16)},${parseInt(hex.slice(4, 6), 16)},${alpha})`;
+}
+
+function kmlHasStyle(config, fields) {
+  return fields.every((key) => config[key] != null && config[key] !== "");
+}
+
+function kmlOverrideStyles(config) {
+  const styles = {};
+  if (kmlHasStyle(config, ["pointColor", "pointRadius"]))
+    styles.point = new Style({
+      zIndex: 1,
+      image: new Circle({
+        radius: config.pointRadius,
+        fill: new Fill({ color: config.pointColor }),
+      }),
+    });
+  if (kmlHasStyle(config, ["lineColor", "lineWidth"]))
+    styles.line = new Style({
+      stroke: new Stroke({ color: config.lineColor, width: config.lineWidth }),
+    });
+  if (
+    kmlHasStyle(config, [
+      "polygonStrokeColor",
+      "polygonStrokeWidth",
+      "polygonFillColor",
+      "polygonFillOpacity",
+    ])
+  )
+    styles.polygon = new Style({
+      stroke: new Stroke({
+        color: config.polygonStrokeColor,
+        width: config.polygonStrokeWidth,
+      }),
+      fill: new Fill({
+        color: kmlColorWithOpacity(
+          config.polygonFillColor,
+          config.polygonFillOpacity,
+        ),
+      }),
+    });
+  return styles;
+}
+
 class OpenLayersMap {
   constructor(settings) {
     var center = [0, 0],
@@ -147,7 +226,7 @@ class OpenLayersMap {
     this.definitions = this.coordinateSystemLoader.getDefinitions();
 
     var definition = this.definitions.find(
-      (definition) => definition.code === this.mapSettings.projection
+      (definition) => definition.code === this.mapSettings.projection,
     );
 
     if (definition) {
@@ -225,6 +304,131 @@ class OpenLayersMap {
     this.layersConfig = layersConfig;
     this.addWmsLayers(this.layersConfig.wmslayers);
     this.addVectorLayers(this.layersConfig.vectorlayers);
+    this.addGPXLayers(this.layersConfig.gpxlayers || []);
+    this.addKMLLayers(this.layersConfig.kmllayers || []);
+  }
+
+  addKMLLayers(layers) {
+    layers.forEach((config) => {
+      let loaded = false;
+      let pending = false;
+      const source = new VectorSource({ attributions: config.attribution });
+      const overrides = kmlOverrideStyles(config);
+      const layer = new VectorLayer({
+        id: config.id,
+        visible: false,
+        source,
+        opacity: config.opacity == null ? 1 : config.opacity,
+        maxResolution:
+          config.minZoom >= 0
+            ? this.map.getView().getResolutionForZoom(config.minZoom)
+            : undefined,
+        minResolution:
+          config.maxZoom >= 0
+            ? this.map.getView().getResolutionForZoom(config.maxZoom)
+            : undefined,
+        zIndex: config.drawOrder,
+        style: (feature, resolution) => {
+          const override = overrides[kmlGeometryType(feature.getGeometry())];
+          if (override) return override;
+          const featureStyle = feature.getStyle();
+          return typeof featureStyle === "function"
+            ? featureStyle(feature, resolution)
+            : featureStyle;
+        },
+      });
+      layer.on("change:visible", async () => {
+        if (!layer.getVisible() || loaded || pending) return;
+        pending = true;
+        try {
+          const response = await hfetch(config.url);
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          source.addFeatures(
+            new KML({ extractStyles: true, showPointNames: true })
+              .readFeatures(await response.text(), {
+                featureProjection: this.map.getView().getProjection(),
+              })
+              .filter((feature) => feature.getGeometry())
+              .map((feature) => {
+                const override =
+                  overrides[kmlGeometryType(feature.getGeometry())];
+                if (override) feature.setStyle(override);
+                return feature;
+              }),
+          );
+          loaded = true;
+        } catch (error) {
+          console.error(`Could not preview KML layer ${config.caption}`, error);
+        } finally {
+          pending = false;
+        }
+      });
+      this.map.addLayer(layer);
+    });
+  }
+
+  addGPXLayers(layers) {
+    layers.forEach((config) => {
+      let loaded = false;
+      let pending = false;
+      const source = new VectorSource({ attributions: config.attribution });
+      const styles = {
+        Point: new Style({
+          zIndex: 1,
+          image: new Circle({
+            radius: config.waypointRadius || 6,
+            fill: new Fill({ color: config.waypointColor || "#008000" }),
+          }),
+        }),
+        LineString: new Style({
+          stroke: new Stroke({
+            color: config.routeColor || "#ffa500",
+            width: config.routeWidth || 3,
+          }),
+        }),
+        MultiLineString: new Style({
+          stroke: new Stroke({
+            color: config.trackColor || "#0000ff",
+            width: config.trackWidth || 3,
+          }),
+        }),
+      };
+      const layer = new VectorLayer({
+        id: config.id,
+        visible: false,
+        source,
+        opacity: config.opacity == null ? 1 : config.opacity,
+        maxResolution:
+          config.minZoom >= 0
+            ? this.map.getView().getResolutionForZoom(config.minZoom)
+            : undefined,
+        minResolution:
+          config.maxZoom >= 0
+            ? this.map.getView().getResolutionForZoom(config.maxZoom)
+            : undefined,
+        zIndex: config.drawOrder,
+        style: (feature) => styles[feature.getGeometry().getType()],
+      });
+      layer.on("change:visible", async () => {
+        if (!layer.getVisible() || loaded || pending) return;
+        pending = true;
+        try {
+          const response = await hfetch(config.url);
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          source.addFeatures(
+            new GPX().readFeatures(await response.text(), {
+              featureProjection: this.map.getView().getProjection(),
+            }),
+          );
+          loaded = true;
+        } catch (error) {
+          console.error(`Could not preview GPX layer ${config.caption}`, error);
+        } finally {
+          pending = false;
+        }
+      });
+      this.map.addLayer(layer);
+    });
   }
 
   addWmsLayers(layers) {
@@ -287,7 +491,7 @@ class OpenLayersMap {
                 feature
                   .getGeometry()
                   .setCoordinates(
-                    coords.map((coord) => transform(coord, from, to))
+                    coords.map((coord) => transform(coord, from, to)),
                   );
                 break;
               case "Polygon":

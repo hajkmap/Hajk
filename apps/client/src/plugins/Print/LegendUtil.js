@@ -80,6 +80,17 @@ export const buildGetLegendGraphicUrl = ({
 
 // Build legend metadata for a WMS layer.
 export const getLegendInfoForLayer = (layer) => {
+  if (layer?.get?.("gpx") || layer?.get?.("kml")) {
+    return {
+      name: layer.get("name"),
+      caption: layer.get("caption"),
+      entries: (layer.get("layerInfo")?.legend || []).map((entry) => ({
+        sublayer: entry.description,
+        configuredUrl: entry.url,
+        getLegendGraphicUrl: entry.url,
+      })),
+    };
+  }
   if (!isWmsLayer(layer)) return null;
 
   const source = layer.getSource();
@@ -262,7 +273,7 @@ const loadLayerImages = async (entries, sizeConstraints) => {
 const toLegendInfo = (layerOrInfo) => {
   if (!layerOrInfo) return null;
   if (typeof layerOrInfo.getSource !== "function") return layerOrInfo;
-  return isWmsLayer(layerOrInfo) ? getLegendInfoForLayer(layerOrInfo) : null;
+  return getLegendInfoForLayer(layerOrInfo);
 };
 
 // Build extra PDF pages with layer legends.

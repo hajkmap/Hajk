@@ -1,4 +1,6 @@
 import ConfigMapper from "../../utils/ConfigMapper";
+import GPXLayer from "../layers/GPXLayer";
+import KMLLayer from "../layers/KMLLayer";
 import WMSLayer from "../layers/WMSLayer";
 import WMTSLayer from "../layers/WMTSLayer";
 import WFSVectorLayer from "../layers/VectorLayer";
@@ -63,6 +65,26 @@ export function addMapLayer(appModel, layer) {
         layerConfig.options,
         appModel.config.appConfig.proxy,
         appModel.map
+      );
+      appModel.map.addLayer(layerItem.layer);
+      break;
+    case "gpx":
+      layerConfig = configMapper.mapGPXConfig(layer);
+      layerItem = new GPXLayer(
+        layerConfig.options,
+        appModel.config.appConfig.proxy,
+        appModel.map,
+        appModel.globalObserver
+      );
+      appModel.map.addLayer(layerItem.layer);
+      break;
+    case "kml":
+      layerConfig = configMapper.mapKMLConfig(layer);
+      layerItem = new KMLLayer(
+        layerConfig.options,
+        appModel.config.appConfig.proxy,
+        appModel.map,
+        appModel.globalObserver
       );
       appModel.map.addLayer(layerItem.layer);
       break;

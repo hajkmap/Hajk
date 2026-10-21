@@ -322,6 +322,32 @@ export default class ConfigMapper {
     return config;
   }
 
+  mapGPXConfig(args) {
+    return {
+      type: "gpx",
+      options: {
+        ...args,
+        name: args.id,
+        visible: args.visibleAtStart === true,
+        zIndex: args.drawOrder,
+        opacity: args.opacity ?? 1,
+      },
+    };
+  }
+
+  mapKMLConfig(args) {
+    return {
+      type: "kml",
+      options: {
+        ...args,
+        name: args.id,
+        visible: args.visibleAtStart === true,
+        zIndex: args.drawOrder,
+        opacity: args.opacity ?? 1,
+      },
+    };
+  }
+
   mapVectorConfig(args) {
     var config = {
       type: "vector",

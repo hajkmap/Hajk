@@ -2286,6 +2286,8 @@
       "zIndex": null
     }
   ],
+  "gpxlayers": [],
+  "kmllayers": [],
   "vectorlayers": [],
   "wfstlayers": [],
   "arcgislayers": []

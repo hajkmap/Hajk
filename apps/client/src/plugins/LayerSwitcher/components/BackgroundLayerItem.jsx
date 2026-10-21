@@ -29,11 +29,18 @@ function BackgroundLayerItem({
   draggable,
 }) {
   // WmsLayer load status, shows warning icon if !ok
-  const [wmsLayerLoadStatus, setWmsLayerLoadStatus] = useState("ok");
+  const [wmsLayerLoadStatus, setWmsLayerLoadStatus] = useState(
+    layer?.get("gpxLoadError") || layer?.get("kmlLoadError")
+      ? "loaderror"
+      : "ok"
+  );
 
   useEffect(() => {
     const handleLoadStatusChange = (d) => {
-      if (wmsLayerLoadStatus !== "loaderror" && layer.get("name") === d.id) {
+      if (
+        (d.gpx || d.kml || wmsLayerLoadStatus !== "loaderror") &&
+        layer.get("name") === d.id
+      ) {
         setWmsLayerLoadStatus(d.status);
       }
     };
@@ -152,7 +159,13 @@ function BackgroundLayerItem({
               transform: "none",
             }}
           >
-            {wmsLayerLoadStatus === "loaderror" && <BtnLayerWarning />}
+            {wmsLayerLoadStatus === "loaderror" && (
+              <BtnLayerWarning
+                message={
+                  layer?.get("gpxLoadError") || layer?.get("kmlLoadError")
+                }
+              />
+            )}
             {isFakeMapLayer !== true && (
               <BtnShowDetails onClick={(e) => showLayerDetails(e)} />
             )}

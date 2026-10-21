@@ -79,6 +79,19 @@ class SettingsService {
         );
       }
 
+      if (
+        (type === "gpxlayer" || type === "kmllayer") &&
+        ![newLayer.url, newLayer.caption].every(
+          (value) => typeof value === "string" && value.trim()
+        )
+      ) {
+        const error = new Error(
+          `${type === "kmllayer" ? "KML" : "GPX"} URL and caption are required.`
+        );
+        error.statusCode = 400;
+        throw error;
+      }
+
       // Will hold HTTP status (201 for created, 200 for updated layers),
       // see https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.6
       let status = null;
@@ -92,7 +105,9 @@ class SettingsService {
 
       // Store contains multiple layer types (wmslayers, wfslayers, etc).
       // We're only interested in one type.
-      const layersType = layersStore[type];
+      const layersType =
+        layersStore[type] ??
+        (type === "gpxlayers" || type === "kmllayers" ? [] : undefined);
       if (layersType === undefined) {
         throw new Error(`Layer type "${type}" not found in layers database.`);
       }
@@ -163,7 +178,9 @@ class SettingsService {
 
       // Store contains multiple layer types (wmslayers, wfslayers, etc).
       // We're only interested in one type.
-      const layersType = layersStore[type];
+      const layersType =
+        layersStore[type] ??
+        (type === "gpxlayers" || type === "kmllayers" ? [] : undefined);
       if (layersType === undefined) {
         throw new Error(`Layer type "${type}" not found in layers database`);
       }

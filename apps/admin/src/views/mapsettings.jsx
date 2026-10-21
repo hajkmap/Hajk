@@ -776,7 +776,9 @@ class Menu extends Component {
             layers = data.wmslayers
               .concat(data.wmtslayers)
               .concat(data.arcgislayers)
-              .concat(data.vectorlayers);
+              .concat(data.vectorlayers)
+              .concat((data.gpxlayers || []).map((l) => ({ ...l, type: "GPX" })))
+              .concat((data.kmllayers || []).map((l) => ({ ...l, type: "KML" })));
             layers.sort((a, b) => {
               var d1 = parseInt(a.date, 10),
                 d2 = parseInt(b.date, 10);

@@ -894,6 +894,15 @@ export default class PrintModel {
       // time the PDF renderer runs.
       const legendInfosForPdf = options.includeLegendsInPdf
         ? this.getVisibleTileAndImageLayers()
+            .concat(
+              this.map
+                .getAllLayers()
+                .filter(
+                  (layer) =>
+                    (layer.get("gpx") || layer.get("kml")) &&
+                    layer.isVisible(this.map.getView())
+                )
+            )
             .map((layer) => getLegendInfoForLayer(layer))
             .filter(Boolean)
         : [];

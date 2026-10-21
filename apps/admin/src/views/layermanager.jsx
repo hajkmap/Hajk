@@ -5,6 +5,8 @@ import Alert from "../views/alert.jsx";
 import WMSLayerForm from "./layerforms/wmslayerform.jsx";
 import WMTSLayerForm from "./layerforms/wmtslayerform.jsx";
 import ArcGISLayerForm from "./layerforms/arcgislayerform.jsx";
+import GPXLayerForm from "./layerforms/gpxlayerform.jsx";
+import KMLLayerForm from "./layerforms/kmllayerform.jsx";
 import VectorLayerForm from "./layerforms/vectorlayerform.jsx";
 import Button from "@material-ui/core/Button";
 import SaveIcon from "@material-ui/icons/SaveSharp";
@@ -157,6 +159,16 @@ class Manager extends Component {
   }
 
   loadLayer(e, layer) {
+    if (layer.type === "GPX") {
+      this.setState({ mode: "edit", layerType: "GPX" }, () =>
+        this.refs.GPXLayerForm.loadLayer(layer),
+      );
+    }
+    if (layer.type === "KML") {
+      this.setState({ mode: "edit", layerType: "KML" }, () =>
+        this.refs.KMLLayerForm.loadLayer(layer),
+      );
+    }
     if (layer.type === "ArcGIS") {
       this.setState({
         mode: "edit",
@@ -544,6 +556,12 @@ class Manager extends Component {
         case "ArcGIS":
           displayType = "(ArcGIS)";
           break;
+        case "GPX":
+          displayType = "(GPX)";
+          break;
+        case "KML":
+          displayType = "(KML)";
+          break;
         case "Vector":
           displayType = "(Vektor)";
           break;
@@ -558,9 +576,10 @@ class Manager extends Component {
               {layer.internalLayerName?.length > 0
                 ? layer.internalLayerName
                 : layer.caption}{" "}
-              
             </span>
-            <span style={{ fontSize: "x-small" }}>{displayType} ID: {layer.id}</span>
+            <span style={{ fontSize: "x-small" }}>
+              {displayType} ID: {layer.id}
+            </span>
           </div>
           <div className="options-box">
             <i
@@ -680,6 +699,10 @@ class Manager extends Component {
 
   renderForm() {
     switch (this.state.layerType) {
+      case "GPX":
+        return <GPXLayerForm ref="GPXLayerForm" parent={this} />;
+      case "KML":
+        return <KMLLayerForm ref="KMLLayerForm" parent={this} />;
       case "WMS":
         return (
           <WMSLayerForm
@@ -853,6 +876,8 @@ class Manager extends Component {
                 <option>WMS</option>
                 <option>WMTS</option>
                 <option>ArcGIS</option>
+                <option value="GPX">GPX</option>
+                <option value="KML">KML</option>
                 <option value="Vector">Vektor</option>
               </select>
             </p>

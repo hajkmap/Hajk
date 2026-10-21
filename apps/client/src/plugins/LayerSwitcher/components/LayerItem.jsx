@@ -131,7 +131,12 @@ function LayerItem({
   isExclusive,
 }) {
   // WmsLayer load status, shows warning icon if !ok
-  const [wmsLayerLoadStatus, setWmsLayerLoadStatus] = useState("ok");
+  const [wmsLayerLoadStatus, setWmsLayerLoadStatus] = useState(
+    layerConfig?.olLayer?.get("gpxLoadError") ||
+      layerConfig?.olLayer?.get("kmlLoadError")
+      ? "loaderror"
+      : "ok"
+  );
   // State that toggles legend collapse
   const [legendIsActive, setLegendIsActive] = useState(false);
   // Track if the label layer is active
@@ -214,7 +219,10 @@ function LayerItem({
 
   useEffect(() => {
     const handleLoadStatusChange = (d) => {
-      if (wmsLayerLoadStatus !== "loaderror" && layerId === d.id) {
+      if (
+        (d.gpx || d.kml || wmsLayerLoadStatus !== "loaderror") &&
+        layerId === d.id
+      ) {
         setWmsLayerLoadStatus(d.status);
       }
     };
@@ -275,7 +283,13 @@ function LayerItem({
    * @return {external:ReactElement}
    */
   const renderStatusIcon = () => {
-    return wmsLayerLoadStatus === "loaderror" && <BtnLayerWarning />;
+    return (
+      wmsLayerLoadStatus === "loaderror" && (
+        <BtnLayerWarning
+          message={olLayer?.get("gpxLoadError") || olLayer?.get("kmlLoadError")}
+        />
+      )
+    );
   };
 
   // Show layer details action
