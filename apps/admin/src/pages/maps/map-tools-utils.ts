@@ -1,10 +1,14 @@
 import type { ToolOnMap, ToolWindowPosition, ToolZone } from "../../api/maps";
 import type { Tool } from "../../api/tools";
 import { getMapToolFieldConfig, type MapToolFieldConfig } from "./map-tool-field-config";
+import {
+  TOOL_PLACEMENT_ZONES,
+  type ToolColumnOrder,
+} from "./map-tools-layout";
 
 const ID_DELIMITER = "::";
 
-/** Tool membership in a placement zone (list only — no DnD tree). */
+/** One tool inside a placement column. */
 export interface ToolZoneItem {
   id: string;
   type: "tool";
@@ -186,6 +190,45 @@ export function targetToZoneKey(target: ToolZone): ToolZoneKey {
   return TARGET_TO_ZONE[target];
 }
 
+export function toolIdFromZoneItemId(id: string): number {
+  const parts = String(id).split(ID_DELIMITER);
+  return Number(parts[parts.length - 1]);
+}
+
+/** Active tools in each column, sorted the way the placement board shows them. */
+export function activeColumnOrder(
+  zones: ToolZones,
+  activeToolIds: Set<number>,
+  indexes: Record<number, number>,
+): ToolColumnOrder {
+  const order: ToolColumnOrder = {
+    drawer: [],
+    widgetLeft: [],
+    widgetRight: [],
+    controlButton: [],
+  };
+  const seen = new Set<number>();
+
+  for (const zone of TOOL_PLACEMENT_ZONES) {
+    const rows: { toolId: number; index: number; position: number }[] = [];
+    zones[targetToZoneKey(zone)].forEach((item, position) => {
+      const toolId = toolIdFromZoneItemId(item.id);
+      if (!Number.isFinite(toolId) || seen.has(toolId)) return;
+      if (!activeToolIds.has(toolId)) return;
+      seen.add(toolId);
+      rows.push({
+        toolId,
+        index: indexes[toolId] ?? 0,
+        position,
+      });
+    });
+    rows.sort((a, b) => a.index - b.index || a.position - b.position);
+    order[zone] = rows.map((row) => row.toolId);
+  }
+
+  return order;
+}
+
 export function moveToolToZone(
   zones: ToolZones,
   toolId: number,
@@ -213,6 +256,31 @@ export function moveToolToZone(
       canHaveChildren: false,
     },
   ];
+
+  return next;
+}
+
+/** Rebuilds every placement column so membership and order match `orderedByTarget`. */
+export function applyOrderedToolsToZones(
+  orderedByTarget: Record<ToolZone, number[]>,
+  displayName: (toolId: number) => string,
+): ToolZones {
+  const next: ToolZones = {
+    drawer: [],
+    widgetLeft: [],
+    widgetRight: [],
+    control: [],
+  };
+
+  (Object.keys(TARGET_TO_ZONE) as ToolZone[]).forEach((target) => {
+    const zoneKey = TARGET_TO_ZONE[target];
+    next[zoneKey] = (orderedByTarget[target] ?? []).map((toolId) => ({
+      id: `tool${ID_DELIMITER}${toolId}`,
+      name: displayName(toolId),
+      type: "tool" as const,
+      canHaveChildren: false,
+    }));
+  });
 
   return next;
 }
@@ -357,7 +425,6 @@ export function zonesToToolsPayload(
 
   for (const toolId of [...allToolIds].sort((a, b) => a - b)) {
     const existing = mapToolsById.get(toolId);
-    const isActive = activeToolIds.has(toolId);
     const toolType = resolveToolType(toolId, mapToolsById, toolTypesById);
     const fields = getMapToolFieldConfig(toolType);
     const options = buildToolPayloadOptions(
@@ -366,16 +433,9 @@ export function zonesToToolsPayload(
       windowSizes[toolId],
     );
 
-    let target: string | null = null;
-    if (fields.target) {
-      if (isActive) {
-        const zone = findToolZoneForId(zones, toolId);
-        target = zone ? ZONE_TO_TARGET[zone] : null;
-      } else {
-        target =
-          inactiveTargets[toolId] ?? (existing?.target ?? null);
-      }
-    }
+    const zoneKey = findToolZoneForId(zones, toolId);
+    const isActive = activeToolIds.has(toolId) && zoneKey != null;
+    const target = isActive && zoneKey ? ZONE_TO_TARGET[zoneKey] : null;
 
     const index = fields.index
       ? (indexes[toolId] ?? existing?.index ?? 0)
@@ -498,12 +558,7 @@ export function toolsDraftSignature(
     number[]
   >;
   (Object.keys(zoneLayout) as ToolZoneKey[]).forEach((zone) => {
-    if (toolTypesById.size > 0) {
-      zoneLayout[zone] = zoneLayout[zone].filter((toolId) =>
-        getMapToolFieldConfig(toolTypesById.get(toolId) ?? "").target,
-      );
-    }
-    // Placement tab only persists zone membership (target), not order.
+    // Placement persists which column a tool is in, not the visual order.
     zoneLayout[zone].sort((a, b) => a - b);
   });
 
@@ -554,10 +609,7 @@ export function toolZonesSignature(zones: ToolZones): string {
   };
 
   (Object.keys(layout) as ToolZoneKey[]).forEach((zone) => {
-    layout[zone] = zones[zone].map((item) => {
-      const parts = String(item.id).split(ID_DELIMITER);
-      return Number(parts[parts.length - 1]);
-    });
+    layout[zone] = zones[zone].map((item) => toolIdFromZoneItemId(item.id));
   });
 
   return JSON.stringify(layout);

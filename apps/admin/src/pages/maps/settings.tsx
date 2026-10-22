@@ -61,16 +61,17 @@ import {
   EMPTY_TOOL_ZONES,
   buildToolTypesById,
   buildToolsDraftState,
-  findToolZoneForId,
   getCatalogToolDisplayName,
   getMapToolFieldConfig,
   getToolDisplayName,
   isToolsDraftDirty,
   mapToolsToZones,
+  activeColumnOrder,
+  applyOrderedToolsToZones,
   moveToolToZone,
   removeToolFromZones,
   targetToZoneKey,
-  zoneKeyToTarget,
+  toolIdFromZoneItemId,
   zonesToToolsPayload,
   type MapToolsDraftState,
   type ToolWindowSize,
@@ -81,6 +82,7 @@ import {
   findToolPlacement,
   getTakenIndexesForPlacement,
 } from "./tool-placement-indexes";
+import { type ToolColumnOrder } from "./map-tools-layout";
 import { useProjections } from "../../api/services";
 import { isLayerTreeConflict } from "../../api/layer-tree";
 import useAppStateStore from "../../store/use-app-state-store";
@@ -355,12 +357,7 @@ export default function MapSettings() {
 
         const deactivateTool = (id: number) => {
           nextActiveToolIds.delete(id);
-          const zone = findToolZoneForId(nextZones, id);
-          if (zone) {
-            nextInactiveTargets[id] = zoneKeyToTarget(zone);
-          } else {
-            delete nextInactiveTargets[id];
-          }
+          delete nextInactiveTargets[id];
           nextZones = removeToolFromZones(nextZones, id);
           clearDraftOnlyToolMeta(id);
         };
@@ -446,60 +443,6 @@ export default function MapSettings() {
     ],
   );
 
-  const setToolTarget = useCallback(
-    (toolId: number, target: ToolZone | null) => {
-      setToolsDraft((prev) => {
-        const base = resolveToolsDraft(prev);
-        if (!base.activeToolIds.has(toolId)) return prev;
-
-        const currentIndex =
-          base.indexes[toolId] ??
-          mapTools?.find((tool) => tool.toolId === toolId)?.index ??
-          null;
-
-        // Reject moves into any placement zone where this tool's order is
-        // already taken (drawer, widgetLeft, widgetRight, controlButton).
-        if (
-          target != null &&
-          currentIndex != null &&
-          (target === "drawer" ||
-            target === "widgetLeft" ||
-            target === "widgetRight" ||
-            target === "controlButton")
-        ) {
-          const taken = getTakenIndexesForPlacement(
-            target,
-            base.indexes,
-            base.zones,
-            base.activeToolIds,
-            toolTypesById,
-            toolId,
-            mapTools ?? [],
-          );
-          if (taken.has(currentIndex)) {
-            return prev;
-          }
-        }
-
-        return {
-          mapName: mapName ?? "",
-          zones: moveToolToZone(
-            base.zones,
-            toolId,
-            resolveToolName(toolId),
-            target ? targetToZoneKey(target) : null,
-          ),
-          activeToolIds: new Set(base.activeToolIds),
-          windowPositions: { ...base.windowPositions },
-          windowSizes: { ...base.windowSizes },
-          indexes: { ...base.indexes },
-          inactiveTargets: { ...base.inactiveTargets },
-        };
-      });
-    },
-    [mapName, mapTools, resolveToolsDraft, resolveToolName, toolTypesById],
-  );
-
   const setToolWindowPosition = useCallback(
     (toolId: number, position: ToolWindowPosition) => {
       setToolsDraft((prev) => {
@@ -557,44 +500,122 @@ export default function MapSettings() {
     [mapName, resolveToolsDraft, applyToolsDraft],
   );
 
-  const setToolIndex = useCallback(
-    (toolId: number, index: number) => {
+  const addToolToPlacement = useCallback(
+    (toolId: number, target: ToolZone) => {
       const base = resolveToolsDraft(toolsDraftRef.current);
-      if (!base.activeToolIds.has(toolId) && base.indexes[toolId] == null) {
-        return;
-      }
-      if (base.indexes[toolId] === index) return;
+      const nextActiveToolIds = new Set(base.activeToolIds);
+      let nextZones = base.zones;
+      const nextWindowPositions = { ...base.windowPositions };
+      const nextWindowSizes = { ...base.windowSizes };
+      const nextIndexes = { ...base.indexes };
+      const nextInactiveTargets = { ...base.inactiveTargets };
+      const mapToolIds = new Set((mapTools ?? []).map((tool) => tool.toolId));
 
-      const placement = findToolPlacement(
+      const clearDraftOnlyToolMeta = (id: number) => {
+        if (mapToolIds.has(id) || nextInactiveTargets[id] != null) return;
+        delete nextWindowPositions[id];
+        delete nextWindowSizes[id];
+        delete nextIndexes[id];
+      };
+
+      const deactivateTool = (id: number) => {
+        nextActiveToolIds.delete(id);
+        delete nextInactiveTargets[id];
+        nextZones = removeToolFromZones(nextZones, id);
+        clearDraftOnlyToolMeta(id);
+      };
+
+      const toolType = toolTypesById.get(toolId) ?? "";
+      if (toolType) {
+        for (const activeId of [...nextActiveToolIds]) {
+          if (activeId !== toolId && toolTypesById.get(activeId) === toolType) {
+            deactivateTool(activeId);
+          }
+        }
+      }
+
+      nextActiveToolIds.add(toolId);
+      delete nextInactiveTargets[toolId];
+
+      const fields = getMapToolFieldConfig(toolType);
+      if (fields.windowPosition && !nextWindowPositions[toolId]) {
+        nextWindowPositions[toolId] = "right";
+      }
+
+      nextZones = moveToolToZone(
+        nextZones,
         toolId,
-        base.zones,
-        base.activeToolIds,
+        resolveToolName(toolId),
+        targetToZoneKey(target),
       );
-      const taken = getTakenIndexesForPlacement(
-        placement,
-        base.indexes,
-        base.zones,
-        base.activeToolIds,
-        toolTypesById,
-        toolId,
-        mapTools ?? [],
-      );
-      if (taken.has(index)) return;
+
+      const zoneKey = targetToZoneKey(target);
+      let maxIndex = -1;
+      for (const item of nextZones[zoneKey]) {
+        const id = toolIdFromZoneItemId(item.id);
+        if (id === toolId || !Number.isFinite(id)) continue;
+        const index = nextIndexes[id];
+        if (index != null && index > maxIndex) maxIndex = index;
+      }
+      nextIndexes[toolId] = maxIndex + 1;
 
       applyToolsDraft({
         mapName: mapName ?? "",
-        zones: base.zones,
-        activeToolIds: new Set(base.activeToolIds),
-        windowPositions: { ...base.windowPositions },
-        windowSizes: { ...base.windowSizes },
-        indexes: {
-          ...base.indexes,
-          [toolId]: index,
-        },
-        inactiveTargets: { ...base.inactiveTargets },
+        zones: nextZones,
+        activeToolIds: nextActiveToolIds,
+        windowPositions: nextWindowPositions,
+        windowSizes: nextWindowSizes,
+        indexes: nextIndexes,
+        inactiveTargets: nextInactiveTargets,
       });
     },
-    [mapName, mapTools, resolveToolsDraft, applyToolsDraft, toolTypesById],
+    [
+      applyToolsDraft,
+      mapName,
+      mapTools,
+      resolveToolName,
+      resolveToolsDraft,
+      toolTypesById,
+    ],
+  );
+
+  const commitToolColumns = useCallback(
+    (orderedByZone: ToolColumnOrder) => {
+      const base = resolveToolsDraft(toolsDraftRef.current);
+      const nextIndexes = { ...base.indexes };
+      const nextActive = new Set(base.activeToolIds);
+      const nextInactive = { ...base.inactiveTargets };
+      const previous = activeColumnOrder(
+        base.zones,
+        base.activeToolIds,
+        base.indexes,
+      );
+
+      (Object.keys(orderedByZone) as ToolZone[]).forEach((zone) => {
+        const nextIds = orderedByZone[zone];
+        const previousIds = previous[zone];
+        const unchanged =
+          previousIds.length === nextIds.length &&
+          previousIds.every((toolId, index) => toolId === nextIds[index]);
+
+        nextIds.forEach((toolId, index) => {
+          if (!unchanged) nextIndexes[toolId] = index;
+          nextActive.add(toolId);
+          delete nextInactive[toolId];
+        });
+      });
+
+      applyToolsDraft({
+        mapName: mapName ?? "",
+        zones: applyOrderedToolsToZones(orderedByZone, resolveToolName),
+        activeToolIds: nextActive,
+        windowPositions: { ...base.windowPositions },
+        windowSizes: { ...base.windowSizes },
+        indexes: nextIndexes,
+        inactiveTargets: nextInactive,
+      });
+    },
+    [applyToolsDraft, mapName, resolveToolName, resolveToolsDraft],
   );
 
   const mapFormBaseline = useMemo(
@@ -787,7 +808,7 @@ export default function MapSettings() {
         lastSavedDate={map?.lastSavedDate}
         isDirty={mapSettingsDirty && !savePending}
         sidebarExtra={
-          mapLayersMoveZoneVisible ? (
+          mapLayersMoveZoneVisible || activeTab === "tools" ? (
             <Box
               ref={mapLayersMoveZoneHostRef}
               sx={{
@@ -800,7 +821,7 @@ export default function MapSettings() {
         }
         warning={
           <Box sx={{ mt: 1 }}>
-            {mapLayersMoveZoneVisible ? (
+            {mapLayersMoveZoneVisible || activeTab === "tools" ? (
               <Box>
                 <Box sx={{ display: "flex", justifyContent: "center" }}>
                   <IconButton
@@ -953,12 +974,13 @@ export default function MapSettings() {
             windowSizes={windowSizes}
             indexes={indexes}
             onToggleToolActive={toggleToolActive}
-            onToolTargetChange={setToolTarget}
+            onAddToolToPlacement={addToolToPlacement}
+            onCommitToolColumns={commitToolColumns}
             onToolWindowPositionChange={setToolWindowPosition}
             onToolWindowSizeChange={setToolWindowSize}
-            onToolIndexChange={setToolIndex}
             flushPendingEditsRef={flushMapToolEditsRef}
             onPendingWindowSizeDirtyChange={setHasPendingWindowSizeInput}
+            moveZoneHostRef={mapLayersMoveZoneHostRef}
           />
         )}
       </FormActionPanel>

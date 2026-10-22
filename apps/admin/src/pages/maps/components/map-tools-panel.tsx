@@ -1,9 +1,10 @@
-import { type MutableRefObject } from "react";
+import { type MutableRefObject, type RefObject } from "react";
 import { Box, CircularProgress } from "@mui/material";
 import type { ToolOnMap, ToolWindowPosition, ToolZone } from "../../../api/maps";
 import type { Tool } from "../../../api/tools";
 import { useTools } from "../../../api/tools";
 import type { ToolZones, ToolWindowSize } from "../map-tools-utils";
+import type { ToolColumnOrder } from "../map-tools-layout";
 import MapToolsList from "./map-tools-list";
 
 interface MapToolsPanelProps {
@@ -15,7 +16,8 @@ interface MapToolsPanelProps {
   windowSizes: Record<number, ToolWindowSize>;
   indexes: Record<number, number>;
   onToggleToolActive: (toolId: number, active: boolean) => void;
-  onToolTargetChange: (toolId: number, target: ToolZone | null) => void;
+  onAddToolToPlacement: (toolId: number, target: ToolZone) => void;
+  onCommitToolColumns: (order: ToolColumnOrder) => void;
   onToolWindowPositionChange: (
     toolId: number,
     position: ToolWindowPosition,
@@ -24,9 +26,9 @@ interface MapToolsPanelProps {
     toolId: number,
     size: Partial<ToolWindowSize>,
   ) => void;
-  onToolIndexChange: (toolId: number, index: number) => void;
   flushPendingEditsRef?: MutableRefObject<(() => void) | null>;
   onPendingWindowSizeDirtyChange?: (pending: boolean) => void;
+  moveZoneHostRef?: RefObject<HTMLDivElement | null>;
 }
 
 export default function MapToolsPanel({
@@ -38,12 +40,13 @@ export default function MapToolsPanel({
   windowSizes,
   indexes,
   onToggleToolActive,
-  onToolTargetChange,
+  onAddToolToPlacement,
+  onCommitToolColumns,
   onToolWindowPositionChange,
   onToolWindowSizeChange,
-  onToolIndexChange,
   flushPendingEditsRef,
   onPendingWindowSizeDirtyChange,
+  moveZoneHostRef,
 }: MapToolsPanelProps) {
   const { data: catalogToolsQuery } = useTools();
   const catalogTools = catalogToolsProp ?? catalogToolsQuery;
@@ -67,12 +70,13 @@ export default function MapToolsPanel({
         windowSizes={windowSizes}
         indexes={indexes}
         onToggleActive={onToggleToolActive}
-        onTargetChange={onToolTargetChange}
+        onAddTool={onAddToolToPlacement}
+        onCommitColumns={onCommitToolColumns}
         onWindowPositionChange={onToolWindowPositionChange}
         onWindowSizeChange={onToolWindowSizeChange}
-        onIndexChange={onToolIndexChange}
         flushPendingEditsRef={flushPendingEditsRef}
         onPendingWindowSizeDirtyChange={onPendingWindowSizeDirtyChange}
+        moveZoneHostRef={moveZoneHostRef}
       />
     </Box>
   );
