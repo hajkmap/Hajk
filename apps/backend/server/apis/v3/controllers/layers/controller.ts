@@ -77,6 +77,16 @@ class LayersController {
     res.status(HttpStatusCodes.NO_CONTENT).send();
   }
 
+  async getDeletedLayers(_: Request, res: Response) {
+    const layers = await LayerService.getDeletedLayers();
+    res.status(HttpStatusCodes.OK).json({ count: layers.length, layers });
+  }
+
+  async restoreLayer(req: Request, res: Response) {
+    const layer = await LayerService.restoreLayer(req.params.id, req.user?.id);
+    res.status(HttpStatusCodes.OK).json(layer);
+  }
+
   async getUsageSummary(_: Request, res: Response) {
     const summary = await LayerService.getUsageSummary();
     res.status(HttpStatusCodes.OK).json({ summary });

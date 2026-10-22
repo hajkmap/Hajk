@@ -74,8 +74,26 @@ export interface Layer {
   options: Record<string, unknown>;
 }
 
+export interface DeletedLayer {
+  id: string;
+  name: string;
+  layerKind: LayerKind;
+  serviceId: string;
+  serviceName: string;
+  serviceDeleted: boolean;
+  deletedAt: string | null;
+  lastSavedDate?: string | null;
+}
+
 export interface LayersApiResponse {
   layers: Layer[];
+  count?: number;
+  error: string;
+  errorId: string;
+}
+
+export interface DeletedLayersApiResponse {
+  layers: DeletedLayer[];
   count?: number;
   error: string;
   errorId: string;

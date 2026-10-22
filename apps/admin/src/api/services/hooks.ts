@@ -205,6 +205,7 @@ export const useRestoreService = () => {
     mutationFn: (serviceId: string) => restoreService(serviceId),
     onSuccess: (_data, serviceId) => {
       void queryClient.invalidateQueries({ queryKey: ["deletedServices"] });
+      void queryClient.invalidateQueries({ queryKey: ["deletedLayers"] });
       void queryClient.invalidateQueries({ queryKey: ["services"] });
       void queryClient.invalidateQueries({ queryKey: ["services", serviceId] });
       void queryClient.invalidateQueries({

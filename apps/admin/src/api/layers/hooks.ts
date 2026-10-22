@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-query";
 import {
   Layer,
+  DeletedLayer,
   LayersApiResponse,
   LayerTypesApiResponse,
   LayerUpdateInput,
@@ -21,6 +22,8 @@ import {
   getLayersByType,
   createLayer,
   deleteLayer,
+  getDeletedLayers,
+  restoreLayer,
   updateLayer,
   getServiceByLayerId,
   createAndUpdateRoleOnLayer,
@@ -36,6 +39,13 @@ export const useLayers = (): UseQueryResult<Layer[]> => {
   return useQuery({
     queryKey: ["layers"],
     queryFn: getLayers,
+  });
+};
+
+export const useDeletedLayers = (): UseQueryResult<DeletedLayer[]> => {
+  return useQuery({
+    queryKey: ["deletedLayers"],
+    queryFn: getDeletedLayers,
   });
 };
 
@@ -135,6 +145,7 @@ export const useDeleteLayer = (serviceId: string) => {
     mutationFn: (layerId: string) => deleteLayer(layerId),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["layers"] });
+      void queryClient.invalidateQueries({ queryKey: ["deletedLayers"] });
       void queryClient.invalidateQueries({ queryKey: ["layersUsageSummary"] });
       void queryClient.invalidateQueries({
         queryKey: ["services", "layers", serviceId],
@@ -142,6 +153,23 @@ export const useDeleteLayer = (serviceId: string) => {
       void queryClient.invalidateQueries({
         queryKey: ["services", "layers", serviceId, "count"],
       });
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+};
+
+export const useRestoreLayer = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (layerId: string) => restoreLayer(layerId),
+    onSuccess: (_data, layerId) => {
+      void queryClient.invalidateQueries({ queryKey: ["deletedLayers"] });
+      void queryClient.invalidateQueries({ queryKey: ["layers"] });
+      void queryClient.invalidateQueries({ queryKey: ["layers", layerId] });
+      void queryClient.invalidateQueries({ queryKey: ["layersUsageSummary"] });
+      void queryClient.invalidateQueries({ queryKey: ["services", "layers"] });
     },
     onError: (error) => {
       console.error(error);

@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import Page from "../../layouts/root/components/page";
 import { SettingsPageTabs } from "../../components/settings-page-tabs";
 import DeletedServicesList from "./components/deleted-services-list";
+import DeletedLayersList from "./components/deleted-layers-list";
 import DeletedThemesList from "./components/deleted-themes-list";
 
 type DeletedTab =
@@ -30,8 +31,9 @@ export default function DeletedItemsPage() {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<DeletedTab>("all");
   const showServices = activeTab === "all" || activeTab === "services";
+  const showLayers = activeTab === "all" || activeTab === "layers";
   const showThemes = activeTab === "all" || activeTab === "themes";
-  const showEmpty = !showServices && !showThemes;
+  const showEmpty = !showServices && !showLayers && !showThemes;
 
   return (
     <Page title={t("deleted.title")}>
@@ -44,6 +46,7 @@ export default function DeletedItemsPage() {
         />
 
         {showServices ? <DeletedServicesList /> : null}
+        {showLayers ? <DeletedLayersList /> : null}
         {showThemes ? <DeletedThemesList /> : null}
         {showEmpty ? (
           <Box

@@ -1,6 +1,8 @@
 import {
   Layer,
   LayersApiResponse,
+  DeletedLayer,
+  DeletedLayersApiResponse,
   LayerTypesApiResponse,
   LayerCreateInput,
   LayerCreationError,
@@ -267,6 +269,49 @@ export const deleteLayer = async (layerId: string): Promise<void> => {
       );
     } else {
       throw new Error("Failed to delete layer");
+    }
+  }
+};
+
+export const getDeletedLayers = async (): Promise<DeletedLayer[]> => {
+  const internalApiClient = getApiClient();
+  try {
+    const response =
+      await internalApiClient.get<DeletedLayersApiResponse>("/layers/deleted");
+    if (!response.data) {
+      throw new Error("No deleted layers data found");
+    }
+    return response.data.layers;
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+    if (axiosError.response) {
+      throw new Error(
+        `Failed to fetch deleted layers. ErrorId: ${axiosError.response.data.errorId}.`,
+      );
+    } else {
+      throw new Error("Failed to fetch deleted layers.");
+    }
+  }
+};
+
+export const restoreLayer = async (layerId: string): Promise<Layer> => {
+  const internalApiClient = getApiClient();
+  try {
+    const response = await internalApiClient.post<Layer>(
+      `/layers/${layerId}/restore`,
+    );
+    if (!response.data) {
+      throw new Error("No layer data returned");
+    }
+    return response.data;
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+    if (axiosError.response) {
+      throw new Error(
+        `Failed to restore layer. ErrorId: ${axiosError.response.data.errorId}.`,
+      );
+    } else {
+      throw new Error("Failed to restore layer.");
     }
   }
 };

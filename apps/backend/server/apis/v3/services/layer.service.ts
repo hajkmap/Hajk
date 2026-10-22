@@ -147,6 +147,41 @@ async function resolveLayerKind(id: string): Promise<LayerKind | null> {
   return null;
 }
 
+async function resolveDeletedLayerKind(
+  id: string
+): Promise<LayerKind | null> {
+  const display = await prisma.displayLayer.findFirst({
+    where: { id, deletedAt: { not: null } },
+    select: { id: true },
+  });
+  if (display) return "display";
+
+  const search = await prisma.searchLayer.findFirst({
+    where: { id, deletedAt: { not: null } },
+    select: { id: true },
+  });
+  if (search) return "search";
+
+  const editing = await prisma.editingLayer.findFirst({
+    where: { id, deletedAt: { not: null } },
+    select: { id: true },
+  });
+  if (editing) return "editing";
+
+  return null;
+}
+
+type DeletedLayerListItem = {
+  id: string;
+  name: string;
+  layerKind: LayerKind;
+  serviceId: string;
+  serviceName: string;
+  serviceDeleted: boolean;
+  deletedAt: Date | null;
+  lastSavedDate: Date | null;
+};
+
 class LayerService {
   constructor() {
     logger.debug("Initiating Layer Service");
@@ -597,6 +632,152 @@ class LayerService {
   async deleteLayer(id: string) {
     await prisma.$transaction(async (transaction) => {
       await this.deleteLayerInTransaction(transaction, id);
+    });
+  }
+
+  async getDeletedLayers(): Promise<DeletedLayerListItem[]> {
+    const serviceSelect = {
+      id: true,
+      name: true,
+      deletedAt: true,
+    } as const;
+
+    const [displayLayers, searchLayers, editingLayers] = await Promise.all([
+      prisma.displayLayer.findMany({
+        where: { deletedAt: { not: null } },
+        select: {
+          id: true,
+          name: true,
+          serviceId: true,
+          deletedAt: true,
+          lastSavedDate: true,
+          service: { select: serviceSelect },
+        },
+      }),
+      prisma.searchLayer.findMany({
+        where: { deletedAt: { not: null } },
+        select: {
+          id: true,
+          name: true,
+          serviceId: true,
+          deletedAt: true,
+          lastSavedDate: true,
+          service: { select: serviceSelect },
+        },
+      }),
+      prisma.editingLayer.findMany({
+        where: { deletedAt: { not: null } },
+        select: {
+          id: true,
+          name: true,
+          serviceId: true,
+          deletedAt: true,
+          lastSavedDate: true,
+          service: { select: serviceSelect },
+        },
+      }),
+    ]);
+
+    const toItem = (
+      layer: {
+        id: string;
+        name: string;
+        serviceId: string;
+        deletedAt: Date | null;
+        lastSavedDate: Date | null;
+        service: { id: string; name: string; deletedAt: Date | null };
+      },
+      layerKind: LayerKind
+    ): DeletedLayerListItem => ({
+      id: layer.id,
+      name: layer.name,
+      layerKind,
+      serviceId: layer.serviceId,
+      serviceName: layer.service.name,
+      serviceDeleted: layer.service.deletedAt != null,
+      deletedAt: layer.deletedAt,
+      lastSavedDate: layer.lastSavedDate,
+    });
+
+    return [
+      ...displayLayers.map((layer) => toItem(layer, "display")),
+      ...searchLayers.map((layer) => toItem(layer, "search")),
+      ...editingLayers.map((layer) => toItem(layer, "editing")),
+    ].sort((a, b) => {
+      const aTime = a.deletedAt?.getTime() ?? 0;
+      const bTime = b.deletedAt?.getTime() ?? 0;
+      return bTime - aTime;
+    });
+  }
+
+  async restoreLayer(id: string, userId?: string) {
+    const kind = await resolveDeletedLayerKind(id);
+    if (!kind) {
+      throw new HajkError(
+        HttpStatusCodes.NOT_FOUND,
+        `No deleted layer with id: ${id} could be found.`,
+        HajkStatusCodes.UNKNOWN_LAYER_ID
+      );
+    }
+
+    const serviceInclude = {
+      service: { select: { id: true, name: true, deletedAt: true } },
+    } as const;
+
+    const layer =
+      kind === "display"
+        ? await prisma.displayLayer.findFirst({
+            where: { id, deletedAt: { not: null } },
+            include: serviceInclude,
+          })
+        : kind === "search"
+          ? await prisma.searchLayer.findFirst({
+              where: { id, deletedAt: { not: null } },
+              include: serviceInclude,
+            })
+          : await prisma.editingLayer.findFirst({
+              where: { id, deletedAt: { not: null } },
+              include: serviceInclude,
+            });
+
+    if (!layer) {
+      throw new HajkError(
+        HttpStatusCodes.NOT_FOUND,
+        `No deleted layer with id: ${id} could be found.`,
+        HajkStatusCodes.UNKNOWN_LAYER_ID
+      );
+    }
+
+    if (layer.service.deletedAt != null) {
+      throw new HajkError(
+        HttpStatusCodes.CONFLICT,
+        `Cannot restore layer "${layer.name}" while its service "${layer.service.name}" is deleted. Restore the service first.`,
+        HajkStatusCodes.UNKNOWN_SERVICE_ID
+      );
+    }
+
+    const restoredAt = new Date();
+    const restoreData = {
+      deletedAt: null,
+      lastSavedBy: userId,
+      lastSavedDate: restoredAt,
+    };
+
+    if (kind === "display") {
+      return prisma.displayLayer.update({
+        where: { id },
+        data: restoreData,
+      });
+    }
+    if (kind === "search") {
+      return prisma.searchLayer.update({
+        where: { id },
+        data: restoreData,
+      });
+    }
+    return prisma.editingLayer.update({
+      where: { id },
+      data: restoreData,
     });
   }
 
