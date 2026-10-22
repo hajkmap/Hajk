@@ -11,6 +11,7 @@ export interface Group {
   createdDate?: string;
   lastSavedBy?: string;
   lastSavedDate?: string;
+  deletedAt?: string | null;
   /** From GET /groups — composition summary for list views. */
   layerCount?: number;
   nestedGroupCount?: number;

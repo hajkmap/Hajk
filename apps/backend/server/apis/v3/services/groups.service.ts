@@ -278,12 +278,67 @@ class GroupsService {
       await transaction.layerInstance.deleteMany({ where: { groupId: id } });
       await transaction.roleOnGroup.deleteMany({ where: { groupId: id } });
 
+      await transaction.mapTreeItem.deleteMany({ where: { groupId: id } });
+      await transaction.mapGroupSetting.deleteMany({ where: { groupId: id } });
+      await transaction.mapLayerSetting.deleteMany({ where: { groupId: id } });
+      await transaction.mapGroupException.deleteMany({
+        where: {
+          OR: [{ groupId: id }, { childGroupId: id }],
+        },
+      });
+
+      await transaction.groupNestedItem.deleteMany({
+        where: {
+          OR: [
+            { ownerGroupId: id },
+            { groupId: id },
+            { childGroupId: id },
+          ],
+        },
+      });
+      await transaction.groupItem.deleteMany({
+        where: {
+          OR: [{ groupId: id }, { childGroupId: id }],
+        },
+      });
+
       const deletedAt = new Date();
 
       await transaction.group.updateMany({
         where: { id, deletedAt: null },
         data: { deletedAt, lastSavedDate: deletedAt },
       });
+    });
+  }
+
+  async getDeletedGroups() {
+    return prisma.group.findMany({
+      where: { deletedAt: { not: null } },
+      orderBy: { deletedAt: "desc" },
+    });
+  }
+
+  async restoreGroup(id: string, userId?: string) {
+    const group = await prisma.group.findFirst({
+      where: { id, deletedAt: { not: null } },
+    });
+
+    if (!group) {
+      throw new HajkError(
+        HttpStatusCodes.NOT_FOUND,
+        `No deleted group with id: ${id} could be found.`,
+        HajkStatusCodes.UNKNOWN_GROUP_ID
+      );
+    }
+
+    return prisma.group.update({
+      where: { id },
+      data: {
+        deletedAt: null,
+        lastSavedBy: userId,
+        lastSavedDate: new Date(),
+      },
+      include: groupInclude,
     });
   }
 }

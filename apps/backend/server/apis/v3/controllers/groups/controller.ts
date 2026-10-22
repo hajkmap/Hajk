@@ -70,6 +70,16 @@ class GroupsController {
     await GroupsService.deleteGroup(req.params.id);
     res.status(HttpStatusCodes.NO_CONTENT).send();
   });
+
+  getDeletedGroups = asyncHandler(async (_: Request, res: Response) => {
+    const groups = await GroupsService.getDeletedGroups();
+    res.status(HttpStatusCodes.OK).json({ count: groups.length, groups });
+  });
+
+  restoreGroup = asyncHandler(async (req: Request, res: Response) => {
+    const group = await GroupsService.restoreGroup(req.params.id, req.user?.id);
+    res.status(HttpStatusCodes.OK).json(group);
+  });
 }
 
 export default new GroupsController();

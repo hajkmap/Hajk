@@ -6,6 +6,7 @@ import Page from "../../layouts/root/components/page";
 import { SettingsPageTabs } from "../../components/settings-page-tabs";
 import DeletedServicesList from "./components/deleted-services-list";
 import DeletedLayersList from "./components/deleted-layers-list";
+import DeletedGroupsList from "./components/deleted-groups-list";
 import DeletedThemesList from "./components/deleted-themes-list";
 
 type DeletedTab =
@@ -32,8 +33,10 @@ export default function DeletedItemsPage() {
   const [activeTab, setActiveTab] = useState<DeletedTab>("all");
   const showServices = activeTab === "all" || activeTab === "services";
   const showLayers = activeTab === "all" || activeTab === "layers";
+  const showGroups = activeTab === "all" || activeTab === "groups";
   const showThemes = activeTab === "all" || activeTab === "themes";
-  const showEmpty = !showServices && !showLayers && !showThemes;
+  const showEmpty =
+    !showServices && !showLayers && !showGroups && !showThemes;
 
   return (
     <Page title={t("deleted.title")}>
@@ -47,6 +50,7 @@ export default function DeletedItemsPage() {
 
         {showServices ? <DeletedServicesList /> : null}
         {showLayers ? <DeletedLayersList /> : null}
+        {showGroups ? <DeletedGroupsList /> : null}
         {showThemes ? <DeletedThemesList /> : null}
         {showEmpty ? (
           <Box

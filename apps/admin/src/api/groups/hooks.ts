@@ -9,9 +9,11 @@ import {
   getGroups,
   getGroupById,
   getMapsByGroupId,
+  getDeletedGroups,
   createGroup,
   updateGroup,
   deleteGroup,
+  restoreGroup,
 } from "./requests";
 import { Group, GroupCreateInput, UpdateGroupVariables } from "./types";
 import { Map } from "../maps";
@@ -20,6 +22,13 @@ export const useGroups = (): UseQueryResult<Group[]> => {
   return useQuery({
     queryKey: ["groups"],
     queryFn: getGroups,
+  });
+};
+
+export const useDeletedGroups = (): UseQueryResult<Group[]> => {
+  return useQuery({
+    queryKey: ["deletedGroups"],
+    queryFn: getDeletedGroups,
   });
 };
 
@@ -89,8 +98,28 @@ export const useDeleteGroup = (): UseMutationResult<void, Error, string> => {
     mutationFn: deleteGroup,
     onSuccess: (_, groupId) => {
       void queryClient.invalidateQueries({ queryKey: ["groups"] });
+      void queryClient.invalidateQueries({ queryKey: ["deletedGroups"] });
       queryClient.removeQueries({ queryKey: ["groups", groupId] });
       queryClient.removeQueries({ queryKey: ["mapsByGroupId", groupId] });
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+};
+
+export const useRestoreGroup = (): UseMutationResult<Group, Error, string> => {
+  const queryClient = useQueryClient();
+
+  return useMutation<Group, Error, string>({
+    mutationFn: restoreGroup,
+    onSuccess: (_data, groupId) => {
+      void queryClient.invalidateQueries({ queryKey: ["deletedGroups"] });
+      void queryClient.invalidateQueries({ queryKey: ["groups"] });
+      void queryClient.invalidateQueries({ queryKey: ["groups", groupId] });
+      void queryClient.invalidateQueries({
+        queryKey: ["mapsByGroupId", groupId],
+      });
     },
     onError: (error) => {
       console.error(error);

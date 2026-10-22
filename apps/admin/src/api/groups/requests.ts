@@ -141,3 +141,46 @@ export const deleteGroup = async (groupId: string): Promise<void> => {
     }
   }
 };
+
+export const getDeletedGroups = async (): Promise<Group[]> => {
+  const internalApiClient = getApiClient();
+  try {
+    const response =
+      await internalApiClient.get<GroupsApiResponse>("/groups/deleted");
+    if (!response.data) {
+      throw new Error("No deleted groups data found");
+    }
+    return response.data.groups;
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+    if (axiosError.response) {
+      throw new Error(
+        `Failed to fetch deleted groups. ErrorId: ${axiosError.response.data.errorId}.`,
+      );
+    } else {
+      throw new Error("Failed to fetch deleted groups.");
+    }
+  }
+};
+
+export const restoreGroup = async (groupId: string): Promise<Group> => {
+  const internalApiClient = getApiClient();
+  try {
+    const response = await internalApiClient.post<Group>(
+      `/groups/${groupId}/restore`,
+    );
+    if (!response.data) {
+      throw new Error("No group data returned");
+    }
+    return response.data;
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+    if (axiosError.response) {
+      throw new Error(
+        `Failed to restore group. ErrorId: ${axiosError.response.data.errorId}.`,
+      );
+    } else {
+      throw new Error("Failed to restore group.");
+    }
+  }
+};
