@@ -27,6 +27,8 @@ const MAP_TOOL_FIELD_OVERRIDES: Record<string, Partial<MapToolFieldConfig>> = {
     windowPosition: false,
     windowWidth: false,
     windowHeight: false,
+    // The map always draws this button at the bottom of the controls.
+    index: false,
   },
   documenthandler: {
     target: false,
@@ -48,6 +50,14 @@ const MAP_TOOL_FIELD_OVERRIDES: Record<string, Partial<MapToolFieldConfig>> = {
     windowHeight: false,
   },
   search: {
+    target: false,
+    windowPosition: false,
+    windowWidth: false,
+    windowHeight: false,
+    index: false,
+  },
+  // Opens from the keyboard. The stored target and index are not a placement.
+  commandpalette: {
     target: false,
     windowPosition: false,
     windowWidth: false,

@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import {
   TextField,
   FormControl,
@@ -11,12 +12,14 @@ import {
   Box,
   Chip,
   OutlinedInput,
+  alpha,
 } from "@mui/material";
 import {
   Control,
   Controller,
   FieldValues,
   UseFormRegister,
+  useWatch,
 } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import FormPanel from "../../../components/form-components/form-panel";
@@ -45,6 +48,9 @@ interface MapSettingsFormProps {
   getValues: () => FieldValues;
   defaultCoordinates: string[];
   projectionOptions: { title: string; value: string }[];
+  /** Map-tools board asked to show this field. `highlightTick` changes on every request. */
+  highlightField?: string | null;
+  highlightTick?: number;
 }
 
 function MapCheckboxField({
@@ -71,21 +77,35 @@ function MapCheckboxField({
       searchTerm={settingsSearchTerm}
       allValues={showSettingsSearchUi ? getValues() : undefined}
     >
-      <FormControlLabel
-        control={
-          <Controller
-            name={name}
-            control={control}
-            render={({ field }) => (
-              <Checkbox
-                checked={Boolean(field.value)}
-                onChange={(e) => field.onChange(e.target.checked)}
-              />
-            )}
-          />
-        }
-        label={t(labelKey as never)}
-      />
+      <Box
+        data-map-setting={name}
+        sx={{
+          width: "fit-content",
+          maxWidth: "100%",
+          borderRadius: 1,
+          "&[data-highlighted='true']": {
+            bgcolor: (theme) => alpha(theme.palette.warning.main, 0.22),
+            boxShadow: (theme) =>
+              `0 0 0 2px ${alpha(theme.palette.warning.main, 0.9)}`,
+          },
+        }}
+      >
+        <FormControlLabel
+          control={
+            <Controller
+              name={name}
+              control={control}
+              render={({ field }) => (
+                <Checkbox
+                  checked={Boolean(field.value)}
+                  onChange={(e) => field.onChange(e.target.checked)}
+                />
+              )}
+            />
+          }
+          label={t(labelKey as never)}
+        />
+      </Box>
     </SettingsSearchField>
   );
 }
@@ -142,9 +162,43 @@ export default function MapSettingsForm({
   getValues,
   defaultCoordinates,
   projectionOptions,
+  highlightField = null,
+  highlightTick = 0,
 }: MapSettingsFormProps) {
   const { t } = useTranslation();
   const settingsSearchLabels = useSettingsSearchLabels();
+  const rootRef = useRef<HTMLDivElement>(null);
+  const handledHighlightTick = useRef(0);
+  const mapSelectorOn =
+    useWatch({ control, name: "options.mapselector" }) === true;
+
+  useEffect(() => {
+    if (!highlightField || highlightTick === 0) return;
+    if (highlightTick === handledHighlightTick.current) return;
+    const root = rootRef.current;
+    if (!root) return;
+    const node = root.querySelector(
+      `[data-map-setting="${CSS.escape(highlightField)}"]`,
+    );
+    if (!(node instanceof HTMLElement)) return;
+
+    handledHighlightTick.current = highlightTick;
+    const tick = String(highlightTick);
+    root
+      .querySelector("[data-highlighted='true']")
+      ?.removeAttribute("data-highlighted");
+    node.setAttribute("data-highlighted", "true");
+    node.dataset.highlightTick = tick;
+    window.requestAnimationFrame(() => {
+      if (node.dataset.highlightTick !== tick) return;
+      node.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+    window.setTimeout(() => {
+      if (node.dataset.highlightTick !== tick) return;
+      node.removeAttribute("data-highlighted");
+      delete node.dataset.highlightTick;
+    }, 3200);
+  }, [activeSection, highlightField, highlightTick]);
 
   const showMapSection = activeSection === "map" || showSettingsSearchUi;
   const showControlsSection =
@@ -162,7 +216,7 @@ export default function MapSettingsForm({
       : defaultCoordinates.map((value) => ({ title: value, value }));
 
   return (
-    <>
+    <Box ref={rootRef}>
       {showMapSection && (
         <>
           <SearchablePanel
@@ -644,6 +698,7 @@ export default function MapSettingsForm({
             keywords={[
               ...settingsSearchLabels(
                 "map.mapselector",
+                "map.mapSelectorStyle",
                 "map.mapcleaner",
                 "map.mapresetter",
                 "map.showThemeToggler",
@@ -656,6 +711,7 @@ export default function MapSettingsForm({
             ]}
             fields={[
               "options.mapselector",
+              "options.mapSelectorStyle",
               "options.mapcleaner",
               "options.mapresetter",
               "options.showThemeToggler",
@@ -677,6 +733,52 @@ export default function MapSettingsForm({
                       showSettingsSearchUi={showSettingsSearchUi}
                       getValues={getValues}
                     />
+                    {mapSelectorOn ? (
+                      <Box
+                        data-map-setting="options.mapSelectorStyle"
+                        sx={{
+                          pl: 4,
+                          pr: 1,
+                          pb: 1,
+                          width: "fit-content",
+                          maxWidth: "100%",
+                          borderRadius: 1,
+                          "&[data-highlighted='true']": {
+                            bgcolor: (theme) =>
+                              alpha(theme.palette.warning.main, 0.22),
+                            boxShadow: (theme) =>
+                              `0 0 0 2px ${alpha(theme.palette.warning.main, 0.9)}`,
+                          },
+                        }}
+                      >
+                        <Controller
+                          name="options.mapSelectorStyle"
+                          control={control}
+                          render={({ field }) => (
+                            <SelectWithHelp
+                              labelKey="map.mapSelectorStyle"
+                              helpKey="map.mapSelectorStyleHelp"
+                              fullWidth={false}
+                              {...field}
+                              value={
+                                field.value === "dropdown" ? "dropdown" : "button"
+                              }
+                              onChange={(event) =>
+                                field.onChange(event.target.value)
+                              }
+                              sx={{ minWidth: 280 }}
+                            >
+                              <MenuItem value="button">
+                                {t("map.mapSelectorStyleButton")}
+                              </MenuItem>
+                              <MenuItem value="dropdown">
+                                {t("map.mapSelectorStyleDropdown")}
+                              </MenuItem>
+                            </SelectWithHelp>
+                          )}
+                        />
+                      </Box>
+                    ) : null}
                     <MapCheckboxField
                       name="options.mapcleaner"
                       labelKey="map.mapcleaner"
@@ -1262,6 +1364,6 @@ export default function MapSettingsForm({
           </SearchablePanel>
         </>
       )}
-    </>
+    </Box>
   );
 }

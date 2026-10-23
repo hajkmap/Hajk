@@ -41,6 +41,7 @@ export const DEFAULT_MAP_OPTIONS: Record<string, unknown> = {
 
   // Controls
   mapselector: false,
+  mapSelectorStyle: "button",
   mapcleaner: false,
   mapresetter: false,
   showThemeToggler: false,

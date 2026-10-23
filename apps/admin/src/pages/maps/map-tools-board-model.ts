@@ -6,6 +6,7 @@ import {
   getCatalogToolDisplayName,
   getCatalogToolWindowSize,
   getToolDisplayName,
+  isFixedControlTool,
   type ToolWindowSize,
   type ToolZones,
 } from "./map-tools-utils";
@@ -99,9 +100,23 @@ export function buildToolBoard(
     widgetRight: [],
     controlButton: [],
   } as Record<ToolZone, BoardTool[]>;
-  const order = activeColumnOrder(toolZones, activeToolIds, indexes);
+  const sourceOrder = activeColumnOrder(toolZones, activeToolIds, indexes);
+  const order = {
+    drawer: [],
+    widgetLeft: [],
+    widgetRight: [],
+    controlButton: [],
+  } as ToolColumnOrder;
+  const canPlace = (toolId: number) =>
+    getMapToolFieldConfig(
+      catalogToolsById.get(toolId)?.type ??
+        mapToolsById.get(toolId)?.tool.type ??
+        "",
+    ).target;
   for (const zone of TOOL_PLACEMENT_ZONES) {
-    columns[zone] = order[zone].map((toolId) =>
+    const ids = sourceOrder[zone].filter(canPlace);
+    order[zone] = ids;
+    columns[zone] = ids.map((toolId) =>
       describeTool(
         toolId,
         catalogToolsById,
@@ -120,13 +135,15 @@ export function toolsAvailableToAdd(
   catalogTools: Tool[],
   activeToolIds: Set<number>,
   order: ToolColumnOrder,
+  zone: ToolZone,
 ): AddableTool[] {
-  const placedIds = new Set<number>();
-  for (const zone of TOOL_PLACEMENT_ZONES) {
-    for (const toolId of order[zone]) {
-      placedIds.add(toolId);
-    }
-  }
+  const placedIds = new Set<number>([
+    ...order.drawer,
+    ...order.widgetLeft,
+    ...order.widgetRight,
+    ...order.controlButton,
+    ...activeToolIds,
+  ]);
 
   return catalogTools
     .map((tool) => {
@@ -139,7 +156,13 @@ export function toolsAvailableToAdd(
         placement: null,
       };
     })
-    .filter((tool) => Number.isFinite(tool.toolId) && !placedIds.has(tool.toolId))
+    .filter((tool) => {
+      if (!Number.isFinite(tool.toolId) || placedIds.has(tool.toolId)) {
+        return false;
+      }
+      if (getMapToolFieldConfig(tool.type).target) return true;
+      return zone === "controlButton" && isFixedControlTool(tool.type);
+    })
     .sort((a, b) =>
       a.title.localeCompare(b.title, undefined, { sensitivity: "base" }),
     );

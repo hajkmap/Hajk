@@ -37,6 +37,62 @@ export const coordinatesDefaults: Record<string, unknown> = {
   transformations: [],
 };
 
+// Command palette opens from the keyboard. target and index are not a placement.
+export const commandpaletteDefaults: Record<string, unknown> = {
+  visibleForGroups: [],
+};
+
+// Matches the legacy feedback tool options. Window placement is per map.
+export const feedbackDefaults: Record<string, unknown> = {
+  visibleAtStart: false,
+  visibleAtStartMobile: false,
+  visibleForGroups: [],
+  title: "Tyck till",
+  description: "Skicka synpunkter till oss",
+  instructionText:
+    "Har du synpunkter på kartan eller dess innehåll? Skriv dem här.",
+  thankYouText: "Tack för din återkoppling!",
+  maxLength: 2000,
+};
+
+// Matches FloodSimulator DEFAULT_OPTIONS. Empty optional fields stay unset.
+export const floodsimulatorDefaults: Record<string, unknown> = {
+  visibleAtStart: false,
+  visibleForGroups: [],
+  title: "Översvämning",
+  description: "Simulera en stigande vattennivå",
+  elevationUrl: "",
+  elevationEncoding: "terrarium",
+  crossOrigin: "anonymous",
+  tileSize: 256,
+  minZoom: 0,
+  maxZoom: 15,
+  attributions: "",
+  minLevel: 0,
+  maxLevel: 10,
+  levelStep: 0.01,
+  defaultLevel: 1,
+  animationDurationMs: 8000,
+  showElevationReadout: true,
+  minElevation: -100,
+  maxElevation: 100,
+  waterColor: "#86cbf9",
+  deepWaterColor: "#283d4b",
+  depthColors: [],
+  layerOpacity: 0.6,
+  enableDepthShading: false,
+  interpolate: true,
+  smoothDepthColors: true,
+  maxShadingDepth: 5,
+  maxResolutionSlack: 1,
+  elevationExtent: null,
+  elevationTileGrid: null,
+  terrainZoomByMapZoom: null,
+  hideAtMinZoom: null,
+  minMapZoom: null,
+  maxResolution: null,
+};
+
 // ExternalLinks isn't a BaseWindowPlugin (client controls/ExternalLinks.jsx)
 // — no window placement, instruction tooltip, or visibleAtStart to configure.
 export const externalLinksDefaults: Record<string, unknown> = {
@@ -265,6 +321,9 @@ const toolOptionDefaults: Record<string, Record<string, unknown>> = {
   buffer: bufferDefaults,
   fmeserver: fmeserverDefaults,
   externalLinks: externalLinksDefaults,
+  commandpalette: commandpaletteDefaults,
+  feedback: feedbackDefaults,
+  floodsimulator: floodsimulatorDefaults,
 };
 
 export const getToolOptionDefaults = (

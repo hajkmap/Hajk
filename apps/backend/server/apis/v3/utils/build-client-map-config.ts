@@ -149,6 +149,8 @@ function translateMapOptionsToClient(
 
     // Controls
     mapselector: toBoolOrUndefined(options.mapselector),
+    mapSelectorStyle:
+      options.mapSelectorStyle === "dropdown" ? "dropdown" : "button",
     mapcleaner: toBoolOrUndefined(options.mapcleaner),
     mapresetter: toBoolOrUndefined(options.mapresetter),
     showThemeToggler: toBoolOrUndefined(options.showThemeToggler),

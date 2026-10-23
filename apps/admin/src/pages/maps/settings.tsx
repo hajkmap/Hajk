@@ -31,7 +31,7 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
-import { FieldValues, useForm } from "react-hook-form";
+import { FieldValues, useForm, useWatch } from "react-hook-form";
 import {
   useMapByName,
   useUpdateMap,
@@ -57,6 +57,7 @@ import MapContentPanel from "./components/map-content-panel";
 import { useTools } from "../../api/tools";
 import type { ToolWindowPosition, ToolZone } from "../../api/maps";
 import MapToolsPanel from "./components/map-tools-panel";
+import type { MapControlVisibility } from "./components/map-tools-list";
 import {
   EMPTY_TOOL_ZONES,
   buildToolTypesById,
@@ -199,6 +200,20 @@ export default function MapSettings() {
   };
 
   const [settingsSearchQuery, setSettingsSearchQuery] = useState("");
+  const [settingFocus, setSettingFocus] = useState<{
+    field: string;
+    tick: number;
+  } | null>(null);
+  const locateMapSetting = (setting: {
+    section: "controls" | "content";
+    field: string;
+  }) => {
+    setSettingFocus((current) => ({
+      field: setting.field,
+      tick: (current?.tick ?? 0) + 1,
+    }));
+    setSettingsSection(setting.section);
+  };
   const showSettingsSearchUi =
     activeTab === "settings" && settingsSection === "search";
   const settingsSearchTerm = showSettingsSearchUi ? settingsSearchQuery : "";
@@ -526,6 +541,7 @@ export default function MapSettings() {
       };
 
       const toolType = toolTypesById.get(toolId) ?? "";
+      const fields = getMapToolFieldConfig(toolType);
       if (toolType) {
         for (const activeId of [...nextActiveToolIds]) {
           if (activeId !== toolId && toolTypesById.get(activeId) === toolType) {
@@ -537,27 +553,28 @@ export default function MapSettings() {
       nextActiveToolIds.add(toolId);
       delete nextInactiveTargets[toolId];
 
-      const fields = getMapToolFieldConfig(toolType);
       if (fields.windowPosition && !nextWindowPositions[toolId]) {
         nextWindowPositions[toolId] = "right";
       }
 
-      nextZones = moveToolToZone(
-        nextZones,
-        toolId,
-        resolveToolName(toolId),
-        targetToZoneKey(target),
-      );
+      if (fields.target) {
+        nextZones = moveToolToZone(
+          nextZones,
+          toolId,
+          resolveToolName(toolId),
+          targetToZoneKey(target),
+        );
 
-      const zoneKey = targetToZoneKey(target);
-      let maxIndex = -1;
-      for (const item of nextZones[zoneKey]) {
-        const id = toolIdFromZoneItemId(item.id);
-        if (id === toolId || !Number.isFinite(id)) continue;
-        const index = nextIndexes[id];
-        if (index != null && index > maxIndex) maxIndex = index;
+        const zoneKey = targetToZoneKey(target);
+        let maxIndex = -1;
+        for (const item of nextZones[zoneKey]) {
+          const id = toolIdFromZoneItemId(item.id);
+          if (id === toolId || !Number.isFinite(id)) continue;
+          const index = nextIndexes[id];
+          if (index != null && index > maxIndex) maxIndex = index;
+        }
+        nextIndexes[toolId] = maxIndex + 1;
       }
-      nextIndexes[toolId] = maxIndex + 1;
 
       applyToolsDraft({
         mapName: mapName ?? "",
@@ -646,6 +663,54 @@ export default function MapSettings() {
     reValidateMode: "onChange",
     values: formBaseline ?? undefined,
   });
+
+  const cookieButtonOn =
+    useWatch({ control, name: "options.showCookieNoticeButton" }) === true;
+  const userAvatarOn =
+    useWatch({ control, name: "options.showUserAvatar" }) === true;
+  const introductionEnabledOn =
+    useWatch({ control, name: "options.introductionEnabled" }) === true;
+  const introductionButtonOn =
+    useWatch({
+      control,
+      name: "options.introductionShowControlButton",
+    }) === true;
+  const introductionOn = introductionEnabledOn && introductionButtonOn;
+  const mapResetterOn =
+    useWatch({ control, name: "options.mapresetter" }) === true;
+  const mapSelectorOn =
+    useWatch({ control, name: "options.mapselector" }) === true;
+  const mapSelectorIsButton =
+    useWatch({ control, name: "options.mapSelectorStyle" }) !== "dropdown";
+  const mapCleanerOn =
+    useWatch({ control, name: "options.mapcleaner" }) === true;
+  const themeTogglerOn =
+    useWatch({ control, name: "options.showThemeToggler" }) === true;
+  const recentPluginsOn =
+    useWatch({ control, name: "options.showRecentlyUsedPlugins" }) === true;
+  const mapControls = useMemo<MapControlVisibility>(
+    () => ({
+      showCookieNoticeButton: cookieButtonOn,
+      showUserAvatar: userAvatarOn,
+      showIntroductionButton: introductionOn,
+      mapresetter: mapResetterOn,
+      showMapSelectorButton: mapSelectorOn && mapSelectorIsButton,
+      mapcleaner: mapCleanerOn,
+      showThemeToggler: themeTogglerOn,
+      showRecentlyUsedPlugins: recentPluginsOn,
+    }),
+    [
+      cookieButtonOn,
+      introductionOn,
+      mapCleanerOn,
+      mapSelectorIsButton,
+      mapResetterOn,
+      mapSelectorOn,
+      recentPluginsOn,
+      themeTogglerOn,
+      userAvatarOn,
+    ],
+  );
 
   const mapSettingsDirty = useMemo(
     () => isDirty || toolsDirty || hasPendingWindowSizeInput || layerTreeDirty,
@@ -947,6 +1012,8 @@ export default function MapSettings() {
               getValues={getValues}
               defaultCoordinates={defaultCoordinates}
               projectionOptions={projectionOptions}
+              highlightField={settingFocus?.field ?? null}
+              highlightTick={settingFocus?.tick ?? 0}
             />
           </FormContainer>
         </Box>
@@ -981,6 +1048,8 @@ export default function MapSettings() {
             flushPendingEditsRef={flushMapToolEditsRef}
             onPendingWindowSizeDirtyChange={setHasPendingWindowSizeInput}
             moveZoneHostRef={mapLayersMoveZoneHostRef}
+            mapControls={mapControls}
+            onLocateSetting={locateMapSetting}
           />
         )}
       </FormActionPanel>

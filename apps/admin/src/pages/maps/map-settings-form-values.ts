@@ -122,6 +122,8 @@ function buildOptionsFormValues(
     legendOptions: options.legendOptions ?? "",
     crossOrigin: options.crossOrigin ?? "anonymous",
     mapselector: fromOptionFlag(options.mapselector),
+    mapSelectorStyle:
+      options.mapSelectorStyle === "dropdown" ? "dropdown" : "button",
     mapcleaner: fromOptionFlag(options.mapcleaner),
     mapresetter: fromOptionFlag(options.mapresetter),
     showThemeToggler: fromOptionFlag(options.showThemeToggler),
@@ -220,6 +222,8 @@ function formOptionsFromValues(data: FieldValues): Record<string, string> {
     legendOptions: toStringValue(options.legendOptions, ""),
     crossOrigin: toStringValue(options.crossOrigin, "anonymous"),
     mapselector: toOptionFlag(options.mapselector),
+    mapSelectorStyle:
+      options.mapSelectorStyle === "dropdown" ? "dropdown" : "button",
     mapcleaner: toOptionFlag(options.mapcleaner),
     mapresetter: toOptionFlag(options.mapresetter),
     showThemeToggler: toOptionFlag(options.showThemeToggler),

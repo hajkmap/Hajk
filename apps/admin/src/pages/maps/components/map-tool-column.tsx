@@ -6,6 +6,7 @@ import {
   Tooltip,
   Typography,
   alpha,
+  useTheme,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ViewSidebarOutlinedIcon from "@mui/icons-material/ViewSidebarOutlined";
@@ -24,6 +25,26 @@ import {
 } from "../map-tools-layout";
 import type { BoardTool } from "../map-tools-board-model";
 import MapToolCard from "./map-tool-card";
+import MapToolFixedRow from "./map-tool-fixed-row";
+import MapToolZoneHelp from "./map-tool-zone-help";
+
+/** A map setting that draws this control button. */
+export interface FixedControlSetting {
+  section: "controls" | "content";
+  field: string;
+}
+
+export interface FixedControlItem {
+  id: string;
+  label: string;
+  /** Set when this row is a tool that can be turned on, but not moved. */
+  toolId?: number;
+  active?: boolean;
+  /** The tool has its own settings page. The row stays locked. */
+  toolSettings?: boolean;
+  /** The map setting this button comes from. */
+  setting?: FixedControlSetting;
+}
 
 const ZONE_META: Record<
   ToolZone,
@@ -65,6 +86,21 @@ interface MapToolColumnProps {
   moveZoneToolIds?: number[];
   onClickPick?: (toolId: number) => void;
   onClickPlaceAt?: (index: number) => void;
+  /** Map buttons drawn above the tools. Their order is fixed. */
+  fixedBefore?: FixedControlItem[];
+  /** Map buttons drawn below the tools. Their order is fixed. */
+  fixedAfter?: FixedControlItem[];
+  onLocateSetting?: (setting: FixedControlSetting) => void;
+  /** The pointer is on a locked row, so the tool cannot be placed there. */
+  onRejectPlace?: (toolId: number) => void;
+}
+
+function showSettingHandler(
+  setting: FixedControlSetting | undefined,
+  onLocateSetting: ((setting: FixedControlSetting) => void) | undefined,
+): (() => void) | undefined {
+  if (setting == null || onLocateSetting == null) return undefined;
+  return () => onLocateSetting(setting);
 }
 
 function orderIndexForVisibleDrop(
@@ -89,19 +125,151 @@ function dropIndexForPointer(body: HTMLElement, clientY: number): number {
 }
 
 function hideDropCue(line: HTMLElement | null, edge: HTMLElement | null) {
-  if (line) line.style.opacity = "0";
-  if (edge) edge.style.opacity = "0";
+  if (line) {
+    line.style.opacity = "0";
+    line.style.removeProperty("background-color");
+    delete line.dataset.invalid;
+  }
+  if (edge) {
+    edge.style.opacity = "0";
+    edge.style.visibility = "hidden";
+  }
+}
+
+function fixedRows(body: HTMLElement): HTMLElement[] {
+  return [...body.querySelectorAll<HTMLElement>("[data-fixed-row]")];
+}
+
+/**
+ * The half of a locked block that touches the tool list is a real drop slot:
+ * under the last locked row above the tools, or above the first locked row
+ * below them. A red line there says the drop is blocked when it is not.
+ */
+function facesToolList(
+  band: HTMLElement[],
+  cards: HTMLElement[],
+  clientY: number,
+): boolean {
+  if (cards.length === 0 || band.length === 0) return false;
+  const firstTop = cards[0].getBoundingClientRect().top;
+  const lastBottom = cards[cards.length - 1].getBoundingClientRect().bottom;
+  const bandTop = band[0].getBoundingClientRect().top;
+  const bandBottom = band[band.length - 1].getBoundingClientRect().bottom;
+  if (bandBottom <= firstTop + 1) {
+    const edge = band[band.length - 1].getBoundingClientRect();
+    return clientY >= edge.top + edge.height / 2;
+  }
+  if (bandTop >= lastBottom - 1) {
+    const edge = band[0].getBoundingClientRect();
+    return clientY <= edge.top + edge.height / 2;
+  }
+  return false;
+}
+
+/**
+ * Locked rows sit outside the tool cards, so a pointer on them used to count
+ * as "before the first tool" or "after the last tool" and draw the blue line
+ * as well as the red one. The whole locked block, including the gaps between
+ * its rows, is one rejected region, except the edge that faces the tool list.
+ */
+function rejectedRow(body: HTMLElement, clientY: number): HTMLElement | null {
+  const rows = fixedRows(body);
+  if (rows.length === 0) return null;
+
+  const cards = [...body.querySelectorAll<HTMLElement>("[data-tool-card]")];
+  const bands: HTMLElement[][] = [];
+  if (cards.length === 0) {
+    bands.push(rows);
+  } else {
+    const firstTop = cards[0].getBoundingClientRect().top;
+    const lastBottom = cards[cards.length - 1].getBoundingClientRect().bottom;
+    const before = rows.filter(
+      (row) => row.getBoundingClientRect().bottom <= firstTop + 1,
+    );
+    const after = rows.filter(
+      (row) => row.getBoundingClientRect().top >= lastBottom - 1,
+    );
+    if (before.length > 0) bands.push(before);
+    if (after.length > 0) bands.push(after);
+  }
+
+  for (const band of bands) {
+    const top = band[0].getBoundingClientRect().top;
+    const bottom = band[band.length - 1].getBoundingClientRect().bottom;
+    if (clientY < top || clientY > bottom) continue;
+    if (facesToolList(band, cards, clientY)) return null;
+    const hit = band.find((row) => {
+      const rect = row.getBoundingClientRect();
+      return clientY >= rect.top && clientY <= rect.bottom;
+    });
+    if (hit) return hit;
+    return band.reduce((nearest, row) => {
+      const mid = (item: HTMLElement) => {
+        const rect = item.getBoundingClientRect();
+        return rect.top + rect.height / 2;
+      };
+      return Math.abs(clientY - mid(row)) < Math.abs(clientY - mid(nearest))
+        ? row
+        : nearest;
+    });
+  }
+  return null;
+}
+
+function lockedNeighbor(
+  row: HTMLElement,
+  side: "above" | "below",
+): HTMLElement | null {
+  const sibling =
+    side === "above" ? row.previousElementSibling : row.nextElementSibling;
+  return sibling instanceof HTMLElement && sibling.hasAttribute("data-fixed-row")
+    ? sibling
+    : null;
+}
+
+/** One red line in the gap beside a locked row. The blue end line stays hidden. */
+function showRejectedCue(
+  body: HTMLElement,
+  line: HTMLElement,
+  edge: HTMLElement,
+  row: HTMLElement,
+  clientY: number,
+) {
+  edge.style.opacity = "0";
+  edge.style.visibility = "hidden";
+  const rect = row.getBoundingClientRect();
+  const bodyRect = body.getBoundingClientRect();
+  const above = clientY < rect.top + rect.height / 2;
+  const neighbor = lockedNeighbor(row, above ? "above" : "below");
+  // The shared gap has one midpoint. Marking the bottom of this row and the
+  // top of the next row draws two lines a few pixels apart.
+  const y = neighbor
+    ? (above
+        ? neighbor.getBoundingClientRect().bottom + rect.top
+        : rect.bottom + neighbor.getBoundingClientRect().top) /
+        2 -
+      bodyRect.top
+    : (above ? rect.top : rect.bottom) - bodyRect.top;
+  line.dataset.invalid = "true";
+  if (line.dataset.errorColor) {
+    line.style.setProperty("background-color", line.dataset.errorColor, "important");
+  }
+  line.style.transform = `translateY(${Math.max(0, y - 1.5)}px)`;
+  line.style.opacity = "1";
 }
 
 /**
  * Draws a thin line between tools, or a labelled pill at the first and last
- * slot. Both are absolutely positioned so the list never changes height.
+ * slot. A pill is skipped when a fixed row already sits on that edge, because
+ * it would cover that row. Both are absolutely positioned so the list never
+ * changes height.
  */
 function showDropCue(
   body: HTMLElement,
   line: HTMLElement,
   edge: HTMLElement,
   index: number,
+  fixedEdges: { before: boolean; after: boolean },
 ) {
   const cards = body.querySelectorAll<HTMLElement>("[data-tool-card]");
   if (cards.length === 0) {
@@ -114,8 +282,13 @@ function showDropCue(
   const y = atEnd
     ? cards[cards.length - 1].getBoundingClientRect().bottom - bodyRect.top
     : cards[index].getBoundingClientRect().top - bodyRect.top;
+  const pillBlocked =
+    (index === 0 && fixedEdges.before) || (atEnd && fixedEdges.after);
 
-  if (index === 0 || atEnd) {
+  delete line.dataset.invalid;
+  line.style.removeProperty("background-color");
+  if ((index === 0 || atEnd) && !pillBlocked) {
+    edge.style.visibility = "visible";
     line.style.opacity = "0";
     edge.textContent =
       (index === 0 ? edge.dataset.topLabel : edge.dataset.bottomLabel) ?? "";
@@ -130,6 +303,7 @@ function showDropCue(
   }
 
   edge.style.opacity = "0";
+  edge.style.visibility = "hidden";
   line.style.transform = `translateY(${Math.max(0, y - 2)}px)`;
   line.style.opacity = "1";
 }
@@ -150,8 +324,13 @@ function MapToolColumn({
   moveZoneToolIds = [],
   onClickPick,
   onClickPlaceAt,
+  fixedBefore = [],
+  fixedAfter = [],
+  onLocateSetting,
+  onRejectPlace,
 }: MapToolColumnProps) {
   const { t } = useTranslation();
+  const theme = useTheme();
   const bodyRef = useRef<HTMLDivElement>(null);
   const indicatorRef = useRef<HTMLDivElement>(null);
   const edgeCueRef = useRef<HTMLDivElement>(null);
@@ -169,6 +348,11 @@ function MapToolColumn({
         const line = indicatorRef.current;
         const edge = edgeCueRef.current;
         if (!offset || !body || !line || !edge) return;
+        const fixed = rejectedRow(body, offset.y);
+        if (fixed) {
+          showRejectedCue(body, line, edge, fixed, offset.y);
+          return;
+        }
         const visibleIndex = dropIndexForPointer(body, offset.y);
         const index = orderIndexForVisibleDrop(
           order[zone],
@@ -179,11 +363,18 @@ function MapToolColumn({
           hideDropCue(line, edge);
           return;
         }
-        showDropCue(body, line, edge, visibleIndex);
+        showDropCue(body, line, edge, visibleIndex, {
+          before: fixedBefore.length > 0,
+          after: fixedAfter.length > 0,
+        });
       },
       drop: (item: MapToolDragItem, monitor) => {
         const offset = monitor.getClientOffset();
         const body = bodyRef.current;
+        if (offset && body && rejectedRow(body, offset.y)) {
+          onRejectPlace?.(item.toolId);
+          return;
+        }
         const visibleIndex =
           offset && body ? dropIndexForPointer(body, offset.y) : tools.length;
         onDropTool(
@@ -196,7 +387,15 @@ function MapToolColumn({
         isOver: monitor.isOver(),
       }),
     }),
-    [onDropTool, order, tools, zone],
+    [
+      fixedAfter.length,
+      fixedBefore.length,
+      onDropTool,
+      onRejectPlace,
+      order,
+      tools,
+      zone,
+    ],
   );
 
   useEffect(() => {
@@ -219,7 +418,7 @@ function MapToolColumn({
     if (!monitor.isDragging() || monitor.getItemType() !== MAP_TOOL_DND_TYPE) {
       return null;
     }
-    const item = monitor.getItem() as MapToolDragItem | null;
+    const item = monitor.getItem<MapToolDragItem | null>();
     return item?.toolId ?? null;
   });
   const movingToolId = dragItemId ?? (clickPlaceActive ? clickPlaceToolId : null);
@@ -234,6 +433,12 @@ function MapToolColumn({
       const line = indicatorRef.current;
       const edge = edgeCueRef.current;
       if (!body || !line || !edge || clickPlaceToolId == null) return;
+      const fixed = rejectedRow(body, clientY);
+      if (fixed) {
+        clickPlaceIndexRef.current = null;
+        showRejectedCue(body, line, edge, fixed, clientY);
+        return;
+      }
       const visibleIndex = dropIndexForPointer(body, clientY);
       const orderIndex = orderIndexForVisibleDrop(
         order[zone],
@@ -248,9 +453,20 @@ function MapToolColumn({
         return;
       }
       clickPlaceIndexRef.current = orderIndex;
-      showDropCue(body, line, edge, visibleIndex);
+      showDropCue(body, line, edge, visibleIndex, {
+        before: fixedBefore.length > 0,
+        after: fixedAfter.length > 0,
+      });
     },
-    [clickPlaceToolId, hideClickPlaceLine, order, tools, zone],
+    [
+      clickPlaceToolId,
+      fixedAfter.length,
+      fixedBefore.length,
+      hideClickPlaceLine,
+      order,
+      tools,
+      zone,
+    ],
   );
 
   useEffect(() => {
@@ -317,19 +533,34 @@ function MapToolColumn({
         >
           <ZoneIcon sx={{ fontSize: 18 }} />
         </Box>
-        <Typography
-          component="h3"
+        <Box
           sx={{
-            fontWeight: 700,
-            fontSize: "0.95rem",
-            lineHeight: 1.25,
+            display: "flex",
+            alignItems: "center",
+            gap: 0.25,
             flex: 1,
             minWidth: 0,
-            wordBreak: "break-word",
           }}
         >
-          {title}
-        </Typography>
+          <Typography
+            component="h3"
+            sx={{
+              fontWeight: 700,
+              fontSize: "0.95rem",
+              lineHeight: 1.25,
+              minWidth: 0,
+              wordBreak: "break-word",
+            }}
+          >
+            {title}
+          </Typography>
+          <MapToolZoneHelp
+            zone={zone}
+            accent={meta.accent}
+            title={title}
+            disabled={movingToolId != null}
+          />
+        </Box>
         <Chip
           size="small"
           label={tools.length}
@@ -379,13 +610,17 @@ function MapToolColumn({
             if (!moveZoneToolIds.includes(cardToolId)) onClickPick?.(cardToolId);
             return;
           }
-          if (!clickPlaceActive) return;
+          if (!clickPlaceActive || clickPlaceToolId == null) return;
           hideClickPlaceLine();
+          const body = bodyRef.current;
+          if (body && rejectedRow(body, event.clientY)) {
+            onRejectPlace?.(clickPlaceToolId);
+            return;
+          }
           if (tools.length === 0) {
             placeAtOrderIndex(0);
             return;
           }
-          const body = bodyRef.current;
           if (!body) return;
           const visibleIndex = dropIndexForPointer(body, event.clientY);
           placeAtOrderIndex(
@@ -397,8 +632,8 @@ function MapToolColumn({
           flex: 1,
           minHeight: 96,
           px: 1.25,
-          pt: tools.length > 0 ? 4 : 1.25,
-          pb: tools.length > 0 ? 4 : 1.25,
+          pt: tools.length > 0 && fixedBefore.length === 0 ? 4 : 1.25,
+          pb: tools.length > 0 && fixedAfter.length === 0 ? 4 : 1.25,
           display: "flex",
           flexDirection: "column",
           gap: 1,
@@ -407,6 +642,7 @@ function MapToolColumn({
       >
         <Box
           ref={indicatorRef}
+          data-error-color={theme.palette.error.main}
           sx={{
             position: "absolute",
             left: 10,
@@ -415,6 +651,7 @@ function MapToolColumn({
             height: 3,
             borderRadius: 99,
             bgcolor: "primary.main",
+            "&[data-invalid='true']": { bgcolor: "error.main" },
             opacity: 0,
             pointerEvents: "none",
             zIndex: 2,
@@ -423,8 +660,8 @@ function MapToolColumn({
         <Box
           ref={edgeCueRef}
           aria-hidden
-          data-top-label={t("maps.toolsDropAtTop")}
-          data-bottom-label={t("maps.toolsDropAtBottom")}
+          data-top-label={t("layerTree.clickPlace.first")}
+          data-bottom-label={t("layerTree.clickPlace.last")}
           sx={{
             position: "absolute",
             left: 10,
@@ -447,6 +684,22 @@ function MapToolColumn({
             zIndex: 3,
           }}
         />
+        {fixedBefore.map((item) => {
+          const toolId = item.toolId;
+          return (
+            <MapToolFixedRow
+              key={item.id}
+              label={item.label}
+              onRemove={toolId != null ? () => onRemove(toolId) : undefined}
+              onShowSetting={showSettingHandler(item.setting, onLocateSetting)}
+              onOpenToolSettings={
+                item.toolSettings && toolId != null
+                  ? () => onOpenSettings(toolId)
+                  : undefined
+              }
+            />
+          );
+        })}
         {tools.length === 0 ? (
           <Box
             sx={{
@@ -493,6 +746,22 @@ function MapToolColumn({
             />
           ))
         )}
+        {fixedAfter.map((item) => {
+          const toolId = item.toolId;
+          return (
+            <MapToolFixedRow
+              key={item.id}
+              label={item.label}
+              onRemove={toolId != null ? () => onRemove(toolId) : undefined}
+              onShowSetting={showSettingHandler(item.setting, onLocateSetting)}
+              onOpenToolSettings={
+                item.toolSettings && toolId != null
+                  ? () => onOpenSettings(toolId)
+                  : undefined
+              }
+            />
+          );
+        })}
       </Box>
     </Box>
   );

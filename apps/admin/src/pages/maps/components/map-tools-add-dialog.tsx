@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import {
   Box,
   Button,
-  Chip,
   Collapse,
   Dialog,
   DialogActions,
@@ -22,7 +21,7 @@ import type { AddableTool } from "../map-tools-board-model";
 
 export interface PlacedToolOfType {
   title: string;
-  zone: ToolZone;
+  zone: ToolZone | "unplaced";
 }
 
 interface MapToolsAddDialogProps {
@@ -149,25 +148,9 @@ function MapToolsAddDialog({
                   }}
                 >
                   <Box sx={{ minWidth: 0, flex: 1 }}>
-                    <Box
-                      sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0 }}
-                    >
-                      <Typography noWrap sx={{ fontWeight: 600, minWidth: 0 }}>
-                        {hasTitle ? tool.title : tool.type}
-                      </Typography>
-                      {placed ? null : (
-                        <Chip
-                          size="small"
-                          variant="outlined"
-                          label={t("maps.toolPlacement.unplaced")}
-                          sx={{
-                            height: 20,
-                            flexShrink: 0,
-                            "& .MuiChip-label": { px: 0.75 },
-                          }}
-                        />
-                      )}
-                    </Box>
+                    <Typography noWrap sx={{ fontWeight: 600, minWidth: 0 }}>
+                      {hasTitle ? tool.title : tool.type}
+                    </Typography>
                     {hasTitle ? (
                       <Typography
                         noWrap

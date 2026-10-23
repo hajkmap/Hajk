@@ -5,7 +5,10 @@ import type { Tool } from "../../../api/tools";
 import { useTools } from "../../../api/tools";
 import type { ToolZones, ToolWindowSize } from "../map-tools-utils";
 import type { ToolColumnOrder } from "../map-tools-layout";
-import MapToolsList from "./map-tools-list";
+import type { FixedControlSetting } from "./map-tool-column";
+import MapToolsList, {
+  type MapControlVisibility,
+} from "./map-tools-list";
 
 interface MapToolsPanelProps {
   mapTools: ToolOnMap[] | undefined;
@@ -29,6 +32,8 @@ interface MapToolsPanelProps {
   flushPendingEditsRef?: MutableRefObject<(() => void) | null>;
   onPendingWindowSizeDirtyChange?: (pending: boolean) => void;
   moveZoneHostRef?: RefObject<HTMLDivElement | null>;
+  mapControls?: MapControlVisibility;
+  onLocateSetting?: (setting: FixedControlSetting) => void;
 }
 
 export default function MapToolsPanel({
@@ -47,6 +52,8 @@ export default function MapToolsPanel({
   flushPendingEditsRef,
   onPendingWindowSizeDirtyChange,
   moveZoneHostRef,
+  mapControls,
+  onLocateSetting,
 }: MapToolsPanelProps) {
   const { data: catalogToolsQuery } = useTools();
   const catalogTools = catalogToolsProp ?? catalogToolsQuery;
@@ -77,6 +84,8 @@ export default function MapToolsPanel({
         flushPendingEditsRef={flushPendingEditsRef}
         onPendingWindowSizeDirtyChange={onPendingWindowSizeDirtyChange}
         moveZoneHostRef={moveZoneHostRef}
+        mapControls={mapControls}
+        onLocateSetting={onLocateSetting}
       />
     </Box>
   );

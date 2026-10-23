@@ -17,14 +17,35 @@ import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import type { ToolOnMap, ToolWindowPosition, ToolZone } from "../../../api/maps";
 import type { Tool } from "../../../api/tools";
-import { getCatalogToolDisplayName, type ToolWindowSize, type ToolZones } from "../map-tools-utils";
+import { getMapToolFieldConfig } from "../map-tool-field-config";
+import {
+  getCatalogToolDisplayName,
+  getToolDisplayName,
+  type ToolWindowSize,
+  type ToolZones,
+} from "../map-tools-utils";
 import {
   TOOL_PLACEMENT_ZONES,
   placementAfterMove,
   type ToolColumnOrder,
 } from "../map-tools-layout";
-import { buildToolBoard, toolsAvailableToAdd } from "../map-tools-board-model";
-import MapToolColumn from "./map-tool-column";
+import {
+  buildToolBoard,
+  toolsAvailableToAdd,
+  type AddableTool,
+} from "../map-tools-board-model";
+import MapToolColumn, {
+  type FixedControlItem,
+  type FixedControlSetting,
+} from "./map-tool-column";
+import MapToolsUnplaced from "./map-tools-unplaced";
+
+interface UnplacedBoardTool {
+  toolId: number;
+  title: string;
+  type: string;
+  active: boolean;
+}
 import MapToolsAddDialog, {
   type PlacedToolOfType,
 } from "./map-tools-add-dialog";
@@ -51,6 +72,86 @@ interface MapToolsListProps {
   flushPendingEditsRef?: MutableRefObject<(() => void) | null>;
   onPendingWindowSizeDirtyChange?: (pending: boolean) => void;
   moveZoneHostRef?: RefObject<HTMLDivElement | null>;
+  /** Map settings that draw a control button in a fixed place. */
+  mapControls?: MapControlVisibility;
+  onLocateSetting?: (setting: FixedControlSetting) => void;
+}
+
+export interface MapControlVisibility {
+  showCookieNoticeButton: boolean;
+  showUserAvatar: boolean;
+  showIntroductionButton: boolean;
+  mapresetter: boolean;
+  showMapSelectorButton: boolean;
+  mapcleaner: boolean;
+  showThemeToggler: boolean;
+  showRecentlyUsedPlugins: boolean;
+}
+
+function listUnplacedTools(
+  catalogTools: Tool[],
+  mapTools: ToolOnMap[],
+  activeToolIds: Set<number>,
+): UnplacedBoardTool[] {
+  const byId = new Map<number, UnplacedBoardTool>();
+
+  const consider = (toolId: number, type: string, title: string) => {
+    if (!Number.isFinite(toolId) || getMapToolFieldConfig(type).target) return;
+    const nextTitle = title.trim() || type;
+    const current = byId.get(toolId);
+    if (current) {
+      if (title.trim()) current.title = nextTitle;
+      return;
+    }
+    byId.set(toolId, {
+      toolId,
+      title: nextTitle,
+      type,
+      active: activeToolIds.has(toolId),
+    });
+  };
+
+  for (const tool of catalogTools) {
+    consider(Number(tool.id), tool.type, getCatalogToolDisplayName(tool));
+  }
+  for (const tool of mapTools) {
+    consider(tool.toolId, tool.tool.type, getToolDisplayName(tool));
+  }
+
+  return [...byId.values()].sort((a, b) =>
+    a.title.localeCompare(b.title, undefined, { sensitivity: "base" }),
+  );
+}
+
+function toolsAvailableWithoutPlacement(
+  catalogTools: Tool[],
+  activeToolIds: Set<number>,
+): AddableTool[] {
+  return catalogTools
+    .flatMap((tool) => {
+      const toolId = Number(tool.id);
+      if (!Number.isFinite(toolId) || activeToolIds.has(toolId)) return [];
+      if (getMapToolFieldConfig(tool.type).target) return [];
+      if (
+        tool.type === "information" ||
+        tool.type === "preset" ||
+        tool.type === "externalLinks"
+      ) {
+        return [];
+      }
+      return [
+        {
+          toolId,
+          title: getCatalogToolDisplayName(tool),
+          type: tool.type,
+          active: false,
+          placement: null,
+        },
+      ];
+    })
+    .sort((a, b) =>
+      a.title.localeCompare(b.title, undefined, { sensitivity: "base" }),
+    );
 }
 
 function notifyPendingDirtyAfterPaint(
@@ -79,11 +180,15 @@ function MapToolsList({
   flushPendingEditsRef,
   onPendingWindowSizeDirtyChange,
   moveZoneHostRef,
+  mapControls,
+  onLocateSetting,
 }: MapToolsListProps) {
   const { t } = useTranslation();
   const theme = useTheme();
   const navigate = useNavigate();
-  const [addTarget, setAddTarget] = useState<ToolZone | null>(null);
+  const [addTarget, setAddTarget] = useState<ToolZone | "unplaced" | null>(
+    null,
+  );
   const [armedToolId, setArmedToolId] = useState<number | null>(null);
   const [interactionMode, setInteractionMode] =
     useState<MapToolsInteractionMode>("drag");
@@ -188,6 +293,113 @@ function MapToolsList({
     ],
   );
 
+  const unplacedTools = useMemo((): UnplacedBoardTool[] => {
+    return listUnplacedTools(catalogTools, mapTools, activeToolIds);
+  }, [activeToolIds, catalogTools, mapTools]);
+
+  const fixedControls = useMemo(() => {
+    const before: FixedControlItem[] = [
+      { id: "zoom", label: t("maps.toolsFixedZoom") },
+    ];
+    const after: FixedControlItem[] = [];
+    if (!mapControls) return { before, after };
+
+    if (mapControls.showCookieNoticeButton) {
+      before.push({
+        id: "cookie",
+        label: t("maps.toolsFixedCookie"),
+        setting: {
+          section: "content",
+          field: "options.showCookieNoticeButton",
+        },
+      });
+    }
+    if (mapControls.showUserAvatar) {
+      before.push({
+        id: "user",
+        label: t("maps.toolsFixedUser"),
+        setting: { section: "controls", field: "options.showUserAvatar" },
+      });
+    }
+    if (mapControls.showIntroductionButton) {
+      after.push({
+        id: "introduction",
+        label: t("maps.toolsFixedIntroduction"),
+        setting: {
+          section: "content",
+          field: "options.introductionShowControlButton",
+        },
+      });
+    }
+    if (mapControls.mapresetter) {
+      after.push({
+        id: "reset",
+        label: t("maps.toolsFixedReset"),
+        setting: { section: "controls", field: "options.mapresetter" },
+      });
+    }
+    if (mapControls.showMapSelectorButton) {
+      after.push({
+        id: "map-selector",
+        label: t("maps.toolsFixedMapSelector"),
+        setting: { section: "controls", field: "options.mapSelectorStyle" },
+      });
+    }
+    if (mapControls.mapcleaner) {
+      after.push({
+        id: "cleaner",
+        label: t("maps.toolsFixedCleaner"),
+        setting: { section: "controls", field: "options.mapcleaner" },
+      });
+    }
+    for (const tool of unplacedTools) {
+      if (!tool.active || tool.type !== "preset") continue;
+      after.push({
+        id: `preset-${tool.toolId}`,
+        label: tool.title,
+        toolId: tool.toolId,
+        active: tool.active,
+        toolSettings: true,
+      });
+    }
+    for (const tool of unplacedTools) {
+      if (!tool.active || tool.type !== "externalLinks") continue;
+      after.push({
+        id: `links-${tool.toolId}`,
+        label: tool.title,
+        toolId: tool.toolId,
+        active: tool.active,
+      });
+    }
+    if (mapControls.showThemeToggler) {
+      after.push({
+        id: "theme",
+        label: t("maps.toolsFixedTheme"),
+        setting: { section: "controls", field: "options.showThemeToggler" },
+      });
+    }
+    for (const tool of unplacedTools) {
+      if (!tool.active || tool.type !== "information") continue;
+      after.push({
+        id: `info-${tool.toolId}`,
+        label: tool.title,
+        toolId: tool.toolId,
+        active: tool.active,
+      });
+    }
+    if (mapControls.showRecentlyUsedPlugins) {
+      after.push({
+        id: "recent",
+        label: t("maps.toolsFixedRecent"),
+        setting: {
+          section: "controls",
+          field: "options.showRecentlyUsedPlugins",
+        },
+      });
+    }
+    return { before, after };
+  }, [mapControls, t, unplacedTools]);
+
   const catalogToolsById = useMemo(
     () => new Map(catalogTools.map((tool) => [Number(tool.id), tool])),
     [catalogTools],
@@ -195,7 +407,15 @@ function MapToolsList({
 
   const addableTools = useMemo(() => {
     if (addTarget == null) return [];
-    return toolsAvailableToAdd(catalogTools, activeToolIds, board.order);
+    if (addTarget === "unplaced") {
+      return toolsAvailableWithoutPlacement(catalogTools, activeToolIds);
+    }
+    return toolsAvailableToAdd(
+      catalogTools,
+      activeToolIds,
+      board.order,
+      addTarget,
+    );
   }, [activeToolIds, addTarget, board.order, catalogTools]);
 
   const placedByType = useMemo(() => {
@@ -207,8 +427,19 @@ function MapToolsList({
         }
       }
     }
+    for (const tool of unplacedTools) {
+      if (!tool.active || byType.has(tool.type)) continue;
+      const fixedControl =
+        tool.type === "information" ||
+        tool.type === "preset" ||
+        tool.type === "externalLinks";
+      byType.set(tool.type, {
+        title: tool.title,
+        zone: fixedControl ? "controlButton" : "unplaced",
+      });
+    }
     return byType;
-  }, [board]);
+  }, [board, unplacedTools]);
 
   const zoneTools = useMemo(() => {
     if (parkedToolIds.length === 0) return [];
@@ -249,6 +480,29 @@ function MapToolsList({
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [armedToolId, parkedToolIds.length]);
+
+  const warnCannotPlace = useCallback(
+    (toolId: number) => {
+      let name = String(toolId);
+      for (const zone of TOOL_PLACEMENT_ZONES) {
+        const tool = board.columns[zone].find((item) => item.toolId === toolId);
+        if (tool) {
+          name = tool.title;
+          break;
+        }
+      }
+      if (name === String(toolId)) {
+        const catalog = catalogToolsById.get(toolId);
+        if (catalog) name = getCatalogToolDisplayName(catalog);
+      }
+      toast.warning(t("layerTree.problem.notHere", { name }), {
+        position: "bottom-left",
+        theme: theme.palette.mode,
+        hideProgressBar: true,
+      });
+    },
+    [board.columns, catalogToolsById, t, theme.palette.mode],
+  );
 
   const handleDropTool = useCallback(
     (toolId: number, zone: ToolZone, index: number) => {
@@ -336,10 +590,11 @@ function MapToolsList({
     (toolId: number) => {
       if (addTarget == null) return;
       warnIfDuplicateType(toolId);
-      onAddTool(toolId, addTarget);
+      if (addTarget === "unplaced") onToggleActive(toolId, true);
+      else onAddTool(toolId, addTarget);
       setAddTarget(null);
     },
-    [addTarget, onAddTool, warnIfDuplicateType],
+    [addTarget, onAddTool, onToggleActive, warnIfDuplicateType],
   );
 
   const handleRemove = useCallback(
@@ -358,11 +613,16 @@ function MapToolsList({
     [navigate],
   );
 
-  const dialogTitle = addTarget
-    ? t("maps.toolsAddToPlacement", {
-        placement: t(`maps.toolPlacement.${addTarget}`),
-      })
-    : "";
+  const dialogTitle =
+    addTarget == null
+      ? ""
+      : t("maps.toolsAddToPlacement", {
+          placement: t(
+            addTarget === "unplaced"
+              ? "maps.toolsUnplacedTitle"
+              : `maps.toolPlacement.${addTarget}`,
+          ),
+        });
 
   const cardHandlers = {
     onRemove: handleRemove,
@@ -381,6 +641,25 @@ function MapToolsList({
       >
         {t("maps.toolsBoardHelp")}
       </Typography>
+      {unplacedTools.some(
+        (tool) =>
+          tool.type !== "information" &&
+          tool.type !== "preset" &&
+          tool.type !== "externalLinks",
+      ) ? (
+        <MapToolsUnplaced
+          tools={unplacedTools.filter(
+            (tool) =>
+              tool.active &&
+              tool.type !== "information" &&
+              tool.type !== "preset" &&
+              tool.type !== "externalLinks",
+          )}
+          onAdd={() => setAddTarget("unplaced")}
+          onOpenSettings={openSettings}
+          onRemove={(toolId: number) => onToggleActive(toolId, false)}
+        />
+      ) : null}
       <DndProvider backend={MultiBackend} options={dndOptions}>
         <Box
           sx={{
@@ -411,6 +690,10 @@ function MapToolsList({
               onClickPlaceAt={(index: number) =>
                 handleClickPlaceAt(zone, index)
               }
+              fixedBefore={zone === "controlButton" ? fixedControls.before : []}
+              fixedAfter={zone === "controlButton" ? fixedControls.after : []}
+              onLocateSetting={onLocateSetting}
+              onRejectPlace={warnCannotPlace}
               {...cardHandlers}
             />
           ))}

@@ -16,6 +16,9 @@ import CoordinatesRenderer from "./render-coordinates";
 import BufferRenderer from "./render-buffer";
 import FmeServerRenderer from "./render-fmeserver";
 import ExternalLinksRenderer from "./render-externallinks";
+import CommandPaletteRenderer from "./render-commandpalette";
+import FeedbackRenderer from "./render-feedback";
+import FloodSimulatorRenderer from "./render-floodsimulator";
 import React from "react";
 import { Control, FieldValues, UseFormSetValue } from "react-hook-form";
 import { Tool } from "../../../api/tools";
@@ -48,6 +51,11 @@ const toolRenderers: Record<string, React.ComponentType<ToolRendererProps>> = {
   fmeserver: FmeServerRenderer as React.ComponentType<ToolRendererProps>,
   externalLinks:
     ExternalLinksRenderer as React.ComponentType<ToolRendererProps>,
+  commandpalette:
+    CommandPaletteRenderer as React.ComponentType<ToolRendererProps>,
+  feedback: FeedbackRenderer as React.ComponentType<ToolRendererProps>,
+  floodsimulator:
+    FloodSimulatorRenderer as React.ComponentType<ToolRendererProps>,
 };
 
 interface RenderToolProps {

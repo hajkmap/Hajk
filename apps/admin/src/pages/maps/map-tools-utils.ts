@@ -1,6 +1,15 @@
 import type { ToolOnMap, ToolWindowPosition, ToolZone } from "../../api/maps";
 import type { Tool } from "../../api/tools";
 import { getMapToolFieldConfig, type MapToolFieldConfig } from "./map-tool-field-config";
+
+/** Control-button tools with no placement. Several of one type may be on the map. */
+export function isFixedControlTool(toolType: string): boolean {
+  return (
+    toolType === "information" ||
+    toolType === "preset" ||
+    toolType === "externalLinks"
+  );
+}
 import {
   TOOL_PLACEMENT_ZONES,
   type ToolColumnOrder,
@@ -434,8 +443,12 @@ export function zonesToToolsPayload(
     );
 
     const zoneKey = findToolZoneForId(zones, toolId);
-    const isActive = activeToolIds.has(toolId) && zoneKey != null;
-    const target = isActive && zoneKey ? ZONE_TO_TARGET[zoneKey] : null;
+    // Tools without a placement stay active on their own. A column is not required.
+    const isActive = fields.target
+      ? activeToolIds.has(toolId) && zoneKey != null
+      : activeToolIds.has(toolId);
+    const target =
+      fields.target && isActive && zoneKey ? ZONE_TO_TARGET[zoneKey] : null;
 
     const index = fields.index
       ? (indexes[toolId] ?? existing?.index ?? 0)
