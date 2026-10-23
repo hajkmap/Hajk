@@ -445,15 +445,12 @@ function LayerItem({
               }}
             >
               {renderStatusIcon()}
-              {!(allSubLayers?.length > 1) &&
-                (layerInfo?.hasLabelStyle ||
-                  layerInfo?.layersInfo?.[allSubLayers?.[0]]
-                    ?.hasLabelStyle) && (
-                  <BtnToggleLayerLabel
-                    active={showingLabelLayer}
-                    onClick={toggleLabelLayer}
-                  />
-                )}
+              {olLayer?.get("hasLabelStyle") === true && (
+                <BtnToggleLayerLabel
+                  active={showingLabelLayer}
+                  onClick={toggleLabelLayer}
+                />
+              )}
               {!toggleable && !draggable ? (
                 <LsIconButton size="small">
                   <HajkToolTip title="Bakgrundskartan ligger låst längst ner i ritordningen">

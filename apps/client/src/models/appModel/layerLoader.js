@@ -6,7 +6,7 @@ import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { Icon, Fill, Stroke, Style } from "ol/style";
 import { BACKGROUND_LAYER_IDS } from "../../constants/backgroundLayers";
-import { getLabelStyleName } from "../../utils/labelStyle";
+import { getLabelStyleName, layerHasLabelStyle } from "../../utils/labelStyle";
 
 export function addMapLayer(appModel, layer) {
   const configMapper = new ConfigMapper(appModel.config.appConfig.proxy);
@@ -23,8 +23,8 @@ export function addMapLayer(appModel, layer) {
         appModel.globalObserver
       );
 
-      if (layer.hasLabelStyle === true) {
-        layerItem.layer.set("hasLabelStyle", true);
+      // Note: the "hasLabelStyle" prop itself is set by WMSLayer (via ConfigMapper)
+      if (layerHasLabelStyle(layer)) {
         // Store the layername so we can access it before wms layer changes
         // ex when switching labels
         layerItem.layer.set("wmsLayerName", layer.layers?.[0] || layer.name); // ← Store it!
@@ -144,8 +144,7 @@ function applyUrlOverridesToLayer(
     });
 
     layer._requestLabelLayer =
-      layer.hasLabelStyle === true &&
-      layersFromParams.includes(`${layer.id}_l`);
+      layerHasLabelStyle(layer) && layersFromParams.includes(`${layer.id}_l`);
 
     // groupLayersFromParams is an object where keys are layer IDs and values are
     // the sublayers that should be active for this given layer. A layer's key will
