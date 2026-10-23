@@ -12,6 +12,7 @@ import {
 export default express
   .Router()
   .get("/", MapsController.getMaps)
+  .get("/deleted", MapsController.getDeletedMaps)
   .post("/", validatePayload(MapCreateSchema), MapsController.createMap)
   .patch(
     "/:mapName",
@@ -19,6 +20,7 @@ export default express
     MapsController.updateMap
   )
   .delete("/:mapName", MapsController.deleteMap)
+  .post("/:mapName/restore", MapsController.restoreMap)
   .post(
     "/:mapName/duplicate",
     validatePayload(MapDuplicateSchema),

@@ -7,6 +7,7 @@ import { SettingsPageTabs } from "../../components/settings-page-tabs";
 import DeletedServicesList from "./components/deleted-services-list";
 import DeletedLayersList from "./components/deleted-layers-list";
 import DeletedGroupsList from "./components/deleted-groups-list";
+import DeletedMapsList from "./components/deleted-maps-list";
 import DeletedThemesList from "./components/deleted-themes-list";
 
 type DeletedTab =
@@ -31,12 +32,13 @@ const DELETED_TABS: { key: DeletedTab; labelKey: string }[] = [
 export default function DeletedItemsPage() {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<DeletedTab>("all");
+  const showMaps = activeTab === "all" || activeTab === "maps";
   const showServices = activeTab === "all" || activeTab === "services";
   const showLayers = activeTab === "all" || activeTab === "layers";
   const showGroups = activeTab === "all" || activeTab === "groups";
   const showThemes = activeTab === "all" || activeTab === "themes";
   const showEmpty =
-    !showServices && !showLayers && !showGroups && !showThemes;
+    !showMaps && !showServices && !showLayers && !showGroups && !showThemes;
 
   return (
     <Page title={t("deleted.title")}>
@@ -48,6 +50,7 @@ export default function DeletedItemsPage() {
           tabs={DELETED_TABS}
         />
 
+        {showMaps ? <DeletedMapsList /> : null}
         {showServices ? <DeletedServicesList /> : null}
         {showLayers ? <DeletedLayersList /> : null}
         {showGroups ? <DeletedGroupsList /> : null}

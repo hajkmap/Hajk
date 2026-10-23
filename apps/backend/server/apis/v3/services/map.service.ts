@@ -686,6 +686,71 @@ class MapService {
     ]);
   }
 
+  async getDeletedMaps() {
+    const maps = await prisma.map.findMany({
+      where: { deletedAt: { not: null } },
+      orderBy: { deletedAt: "desc" },
+    });
+
+    return Promise.all(
+      maps.map(async (map) => {
+        const themeCount = await prisma.theme.count({
+          where: {
+            mapName: map.name,
+            deletedAt: map.deletedAt,
+          },
+        });
+
+        return {
+          ...map,
+          themeCount,
+        };
+      })
+    );
+  }
+
+  async restoreMap(mapName: string, userId?: string) {
+    const map = await prisma.map.findFirst({
+      where: { name: mapName, deletedAt: { not: null } },
+    });
+
+    if (!map || !map.deletedAt) {
+      throw new HajkError(
+        HttpStatusCodes.NOT_FOUND,
+        `No deleted map with name: ${mapName} could be found.`,
+        HajkStatusCodes.UNKNOWN_MAP_NAME
+      );
+    }
+
+    const deletedAt = map.deletedAt;
+    const restoredAt = new Date();
+
+    return prisma.$transaction(async (transaction) => {
+      const themeResult = await transaction.theme.updateMany({
+        where: { mapName, deletedAt },
+        data: {
+          deletedAt: null,
+          lastSavedBy: userId,
+          lastSavedDate: restoredAt,
+        },
+      });
+
+      const restored = await transaction.map.update({
+        where: { id: map.id },
+        data: {
+          deletedAt: null,
+          lastSavedBy: userId,
+          lastSavedDate: restoredAt,
+        },
+      });
+
+      return {
+        ...restored,
+        themeCount: themeResult.count,
+      };
+    });
+  }
+
   async duplicateMap(
     sourceMapName: string,
     newName: string,

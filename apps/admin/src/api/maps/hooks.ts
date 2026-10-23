@@ -14,6 +14,8 @@ import {
   updateMapLayers,
   createMap,
   deleteMap,
+  getDeletedMaps,
+  restoreMap,
   duplicateMap,
   updateMap,
 } from "./requests";
@@ -32,6 +34,13 @@ export const useMaps = (): UseQueryResult<MapRecord[]> => {
   return useQuery({
     queryKey: ["maps"],
     queryFn: getMaps,
+  });
+};
+
+export const useDeletedMaps = (): UseQueryResult<MapRecord[]> => {
+  return useQuery({
+    queryKey: ["deletedMaps"],
+    queryFn: getDeletedMaps,
   });
 };
 
@@ -207,6 +216,25 @@ export const useDeleteMap = () => {
     mutationFn: (mapName: string) => deleteMap(mapName),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["maps"] });
+      void queryClient.invalidateQueries({ queryKey: ["deletedMaps"] });
+      void queryClient.invalidateQueries({ queryKey: ["deletedThemes"] });
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+};
+
+export const useRestoreMap = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (mapName: string) => restoreMap(mapName),
+    onSuccess: (_data, mapName) => {
+      void queryClient.invalidateQueries({ queryKey: ["deletedMaps"] });
+      void queryClient.invalidateQueries({ queryKey: ["deletedThemes"] });
+      void queryClient.invalidateQueries({ queryKey: ["maps"] });
+      void queryClient.invalidateQueries({ queryKey: ["maps", mapName] });
+      void queryClient.invalidateQueries({ queryKey: ["themes", mapName] });
     },
     onError: (error) => {
       console.error(error);

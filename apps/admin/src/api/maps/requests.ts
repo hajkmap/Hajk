@@ -262,6 +262,49 @@ export const deleteMap = async (mapName: string): Promise<void> => {
   }
 };
 
+export const getDeletedMaps = async (): Promise<MapRecord[]> => {
+  const internalApiClient = getApiClient();
+  try {
+    const response =
+      await internalApiClient.get<MapsApiResponse>("/maps/deleted");
+    if (!response.data) {
+      throw new Error("No deleted maps data found");
+    }
+    return response.data.maps;
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+    if (axiosError.response) {
+      throw new Error(
+        `Failed to fetch deleted maps. ErrorId: ${axiosError.response.data.errorId}.`,
+      );
+    } else {
+      throw new Error("Failed to fetch deleted maps.");
+    }
+  }
+};
+
+export const restoreMap = async (mapName: string): Promise<MapRecord> => {
+  const internalApiClient = getApiClient();
+  try {
+    const response = await internalApiClient.post<MapRecord>(
+      `/maps/${encodeURIComponent(mapName)}/restore`,
+    );
+    if (!response.data) {
+      throw new Error("No map data returned");
+    }
+    return response.data;
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+    if (axiosError.response) {
+      throw new Error(
+        `Failed to restore map. ErrorId: ${axiosError.response.data.errorId}.`,
+      );
+    } else {
+      throw new Error("Failed to restore map.");
+    }
+  }
+};
+
 /**
  * Duplicates a map via backend `POST /maps/:mapName/duplicate`.
  * On 4xx/5xx, rejects with the Axios error so callers can read `response.data`.

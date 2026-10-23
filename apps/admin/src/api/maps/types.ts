@@ -14,11 +14,13 @@ export interface Map {
   createdDate?: string;
   lastSavedBy?: string;
   lastSavedDate?: string;
+  deletedAt?: string | null;
   /** Content counts from GET /maps (K6). */
   layerCount?: number;
   groupCount?: number;
   toolCount?: number;
   projectionCount?: number;
+  themeCount?: number;
 }
 
 /**

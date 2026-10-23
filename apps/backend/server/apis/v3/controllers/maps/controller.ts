@@ -94,6 +94,16 @@ class MapsController {
     res.status(HttpStatusCodes.NO_CONTENT).send();
   }
 
+  async getDeletedMaps(_: Request, res: Response) {
+    const maps = await MapService.getDeletedMaps();
+    res.status(HttpStatusCodes.OK).json({ count: maps.length, maps });
+  }
+
+  async restoreMap(req: Request, res: Response) {
+    const map = await MapService.restoreMap(req.params.mapName, req.user?.id);
+    res.status(HttpStatusCodes.OK).json(map);
+  }
+
   async duplicateMap(req: Request, res: Response) {
     const { name, includeLayers, includeGroups, includeTools } = req.body as {
       name: string;
