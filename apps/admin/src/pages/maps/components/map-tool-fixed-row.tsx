@@ -7,6 +7,8 @@ import { useTranslation } from "react-i18next";
 
 interface MapToolFixedRowProps {
   label: string;
+  /** Place in the column, including the locked rows above. */
+  orderNumber?: number;
   /** Removes the tool from the map. The row still cannot be moved. */
   onRemove?: () => void;
   /** Opens the map setting that turns this button on. */
@@ -18,6 +20,7 @@ interface MapToolFixedRowProps {
 /** A map button whose order is fixed. It is shown, and it cannot be moved. */
 export default function MapToolFixedRow({
   label,
+  orderNumber,
   onRemove,
   onShowSetting,
   onOpenToolSettings,
@@ -55,6 +58,26 @@ export default function MapToolFixedRow({
         <LockOutlinedIcon
           sx={{ fontSize: 16, color: "text.disabled", flexShrink: 0 }}
         />
+        {orderNumber != null ? (
+          <Box
+            sx={{
+              minWidth: 20,
+              height: 20,
+              px: 0.5,
+              borderRadius: 10,
+              display: "grid",
+              placeItems: "center",
+              flexShrink: 0,
+              bgcolor: "action.selected",
+              color: "text.secondary",
+              fontSize: "0.7rem",
+              fontWeight: 700,
+              fontVariantNumeric: "tabular-nums",
+            }}
+          >
+            {orderNumber}
+          </Box>
+        ) : null}
         <Typography
           variant="body2"
           noWrap

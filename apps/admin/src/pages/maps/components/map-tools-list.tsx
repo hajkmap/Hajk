@@ -481,6 +481,18 @@ function MapToolsList({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [armedToolId, parkedToolIds.length]);
 
+  const heldToolName = useCallback(
+    (toolId: number) => {
+      for (const zone of TOOL_PLACEMENT_ZONES) {
+        const tool = board.columns[zone].find((item) => item.toolId === toolId);
+        if (tool) return tool.title;
+      }
+      const catalog = catalogToolsById.get(toolId);
+      return catalog ? getCatalogToolDisplayName(catalog) : String(toolId);
+    },
+    [board.columns, catalogToolsById],
+  );
+
   const warnCannotPlace = useCallback(
     (toolId: number) => {
       let name = String(toolId);
@@ -659,6 +671,25 @@ function MapToolsList({
           onOpenSettings={openSettings}
           onRemove={(toolId: number) => onToggleActive(toolId, false)}
         />
+      ) : null}
+      {clickMode && armedToolId != null ? (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            px: 1.5,
+            py: 0.75,
+            mb: 2,
+            borderRadius: 1,
+            bgcolor: "action.selected",
+          }}
+        >
+          <Typography variant="body2" sx={{ flex: 1, minWidth: 0 }} noWrap>
+            {t("layerTree.clickPlace.holding", {
+              name: heldToolName(armedToolId),
+            })}
+          </Typography>
+        </Box>
       ) : null}
       <DndProvider backend={MultiBackend} options={dndOptions}>
         <Box

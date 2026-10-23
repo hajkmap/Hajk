@@ -684,11 +684,12 @@ function MapToolColumn({
             zIndex: 3,
           }}
         />
-        {fixedBefore.map((item) => {
+        {fixedBefore.map((item, index) => {
           const toolId = item.toolId;
           return (
             <MapToolFixedRow
               key={item.id}
+              orderNumber={index + 1}
               label={item.label}
               onRemove={toolId != null ? () => onRemove(toolId) : undefined}
               onShowSetting={showSettingHandler(item.setting, onLocateSetting)}
@@ -728,7 +729,7 @@ function MapToolColumn({
             <MapToolCard
               key={tool.toolId}
               tool={tool}
-              orderNumber={index + 1}
+              orderNumber={fixedBefore.length + index + 1}
               clickPicked={
                 tool.toolId ===
                 (dragItemId != null && moveZoneToolIds.includes(dragItemId)
@@ -746,11 +747,12 @@ function MapToolColumn({
             />
           ))
         )}
-        {fixedAfter.map((item) => {
+        {fixedAfter.map((item, index) => {
           const toolId = item.toolId;
           return (
             <MapToolFixedRow
               key={item.id}
+              orderNumber={fixedBefore.length + tools.length + index + 1}
               label={item.label}
               onRemove={toolId != null ? () => onRemove(toolId) : undefined}
               onShowSetting={showSettingHandler(item.setting, onLocateSetting)}
