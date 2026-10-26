@@ -28,7 +28,6 @@ import LsRadioButton from "./LsRadioButton";
 import { useMapZoom } from "../LayerSwitcherProvider";
 import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
 import { getIsMobile } from "../LayerSwitcherUtils";
-import { getLabelStyleName } from "../../../utils/labelStyle";
 
 const getLayerToggleState = (isToggled, isSemiToggled, isVisibleAtZoom) => {
   if (!isToggled) {
@@ -88,32 +87,6 @@ const LayerLegendIcon = ({
   );
 };
 
-const applyLabelStyle = (olLayer) => {
-  if (!olLayer) return;
-  if (olLayer.get("allSubLayers")?.length > 1) return; // Multi-sublayer group layers handle labels per-sublayer
-
-  const source = olLayer.getSource?.();
-  if (!source || typeof source.updateParams !== "function") return;
-
-  const currentParams = source.getParams?.() || {};
-
-  // Get stored layer name
-  const layerName = olLayer.get("wmsLayerName") || currentParams.LAYERS;
-
-  if (!layerName) return;
-
-  const isActive = !!olLayer.get("useLabelStyle");
-  const baseStyle = olLayer.get("initialStyles") || "";
-
-  source.updateParams({
-    ...currentParams,
-    LAYERS: layerName,
-    STYLES: isActive
-      ? getLabelStyleName(olLayer.layersInfo, layerName)
-      : baseStyle,
-  });
-};
-
 function LayerItem({
   layerState,
   layerConfig,
@@ -165,29 +138,13 @@ function LayerItem({
     olLayer.set("useLabelStyle", newValue);
   };
 
-  // Save the initial styles in "initialStyles" once when olLayer is ready
-  useEffect(() => {
-    if (!olLayer) return;
-
-    const source = olLayer.getSource?.();
-    if (!source) return;
-
-    const params = source.getParams?.() || {};
-
-    // Store original style once
-    if (olLayer.get("initialStyles") == null) {
-      olLayer.set("initialStyles", params.STYLES || "");
-    }
-  }, [olLayer]);
-
-  // Sync showingLabelLayer state with olLayer property and apply styles
+  // Sync showingLabelLayer state with olLayer property. The WMS STYLES param
+  // itself is updated by WMSLayer's own change:useLabelStyle listener.
   useEffect(() => {
     if (!olLayer) return;
 
     const update = () => {
-      const active = !!olLayer.get("useLabelStyle");
-      setShowingLabelLayer(active);
-      applyLabelStyle(olLayer);
+      setShowingLabelLayer(!!olLayer.get("useLabelStyle"));
     };
 
     // Initial sync on mount or layer change
@@ -200,17 +157,6 @@ function LayerItem({
       olLayer.un("change:useLabelStyle", update);
     };
   }, [olLayer, layerId]);
-
-  // Apply label style when layer becomes visible (in case it was set while hidden)
-  useEffect(() => {
-    if (!olLayer) return;
-    if (!layerIsToggled) return;
-
-    // Wait for OL state to be ready
-    requestAnimationFrame(() => {
-      applyLabelStyle(olLayer);
-    });
-  }, [layerIsToggled, olLayer]);
 
   useEffect(() => {
     const handleLoadStatusChange = (d) => {

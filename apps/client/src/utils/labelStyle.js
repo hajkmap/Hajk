@@ -11,6 +11,34 @@ export const getLabelStyleName = (layersInfo, layerName) =>
   layersInfo?.[layerName]?.labelStyle || `${layerName}_labels`;
 
 /**
+ * Sets the WMS STYLES param of a single-sublayer layer to match its
+ * `useLabelStyle` flag (label style when on, `initialStyles` when off).
+ * WMSLayer calls this on every `change:useLabelStyle`, so callers only need
+ * to set the flag. Multi-sublayer group layers handle labels per sublayer.
+ *
+ * @param {import("ol/layer/Base").default} olLayer
+ */
+export const applyLabelStyle = (olLayer) => {
+  if (!olLayer) return;
+  if (olLayer.get("allSubLayers")?.length > 1) return;
+
+  const source = olLayer.getSource?.();
+  if (!source || typeof source.updateParams !== "function") return;
+
+  const currentParams = source.getParams?.() || {};
+  const layerName = olLayer.get("wmsLayerName") || currentParams.LAYERS;
+  if (!layerName) return;
+
+  source.updateParams({
+    ...currentParams,
+    LAYERS: layerName,
+    STYLES: olLayer.get("useLabelStyle")
+      ? getLabelStyleName(olLayer.layersInfo, layerName)
+      : olLayer.get("initialStyles") || "",
+  });
+};
+
+/**
  * Returns true if a WMS layer (raw config, as in layers.json) supports the
  * dynamic label toggle (and thus the `_l` suffix in the `l` URL param). Only
  * single-sublayer layers qualify; group layers handle labels per sublayer.
