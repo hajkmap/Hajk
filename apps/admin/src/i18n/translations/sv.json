@@ -88,7 +88,7 @@
     "deleted.layers.restoreFailed": "Kunde inte återställa lagret \"{{name}}\".",
     "deleted.groups.loadFailed": "Kunde inte ladda borttagna grupper.",
     "deleted.groups.restoreTitle": "Återställ gruppen \"{{name}}\"?",
-    "deleted.groups.restoreWarning": "Kartplaceringar, innehåll och roller återställs inte. Gruppen måste sättas upp igen vid behov.",
+    "deleted.groups.restoreWarning": "Kartplaceringar och roller återställs inte. Gruppen måste placeras på kartor igen vid behov.",
     "deleted.groups.restoreSuccess": "Gruppen \"{{name}}\" återställdes.",
     "deleted.groups.restoreFailed": "Kunde inte återställa gruppen \"{{name}}\".",
     "deleted.maps.loadFailed": "Kunde inte ladda borttagna kartor.",

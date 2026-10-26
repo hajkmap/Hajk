@@ -90,7 +90,7 @@
     "deleted.layers.restoreFailed": "Failed to restore layer \"{{name}}\".",
     "deleted.groups.loadFailed": "Failed to load deleted groups.",
     "deleted.groups.restoreTitle": "Restore the group \"{{name}}\"?",
-    "deleted.groups.restoreWarning": "Map placements, content, and roles are not restored. The group must be set up again if needed.",
+    "deleted.groups.restoreWarning": "Map placements and roles are not restored. The group must be placed on maps again if needed.",
     "deleted.groups.restoreSuccess": "Group \"{{name}}\" was restored.",
     "deleted.groups.restoreFailed": "Failed to restore group \"{{name}}\".",
     "deleted.maps.loadFailed": "Failed to load deleted maps.",
