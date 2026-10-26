@@ -165,7 +165,7 @@ const mapPlacementFilter = (
   mapName: string
 ): Prisma.LayerInstanceWhereInput => ({
   // Instances are per map, even when several maps share a layerswitcher group.
-  map: { name: mapName },
+  map: { name: mapName, deletedAt: null },
 });
 
 function appendSearchLayerToWfs(

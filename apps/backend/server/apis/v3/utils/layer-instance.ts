@@ -115,7 +115,10 @@ export function activeLayerInstancesForMapWhere(
   mapName: string
 ): Prisma.LayerInstanceWhereInput {
   return {
-    AND: [activeLayerInstanceWhere, { map: { name: mapName } }],
+    AND: [
+      activeLayerInstanceWhere,
+      { map: { name: mapName, deletedAt: null } },
+    ],
   };
 }
 
@@ -124,7 +127,10 @@ export function activeLayerInstancesForMapsWhere(
   mapNames: string[]
 ): Prisma.LayerInstanceWhereInput {
   return {
-    AND: [activeLayerInstanceWhere, { map: { name: { in: mapNames } } }],
+    AND: [
+      activeLayerInstanceWhere,
+      { map: { name: { in: mapNames }, deletedAt: null } },
+    ],
   };
 }
 

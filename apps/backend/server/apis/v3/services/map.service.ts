@@ -381,7 +381,11 @@ class MapService {
 
   async getToolsForMap(mapName: string) {
     return await prisma.toolsOnMaps.findMany({
-      where: { mapName, ...ACTIVE_TOOLS_ON_MAP_WHERE },
+      where: {
+        mapName,
+        map: { deletedAt: null },
+        ...ACTIVE_TOOLS_ON_MAP_WHERE,
+      },
       include: { tool: true },
       orderBy: { index: "asc" },
     });
@@ -660,21 +664,10 @@ class MapService {
       );
     }
 
-    // Remove the map together with what belongs to it: its layer instances,
-    // its tree with its exceptions, settings and draw order, and its tool
-    // placements. Shared catalog entities (layers, tools, groups,
-    // projections) are kept. RoleOnMap / DocumentFolder / Document cascade.
+    // Soft delete — the map's rows are kept so it can be restored as it was.
     const deletedAt = new Date();
 
     await prisma.$transaction([
-      prisma.layerInstance.deleteMany({ where: { mapId: map.id } }),
-      prisma.mapTreeItem.deleteMany({ where: { mapName } }),
-      prisma.mapGroupException.deleteMany({ where: { mapName } }),
-      prisma.mapDrawOrderItem.deleteMany({ where: { mapName } }),
-      prisma.mapGroupSetting.deleteMany({ where: { mapName } }),
-      prisma.mapLayerSetting.deleteMany({ where: { mapName } }),
-      prisma.toolsOnMaps.deleteMany({ where: { mapName } }),
-      prisma.roleOnMap.deleteMany({ where: { mapId: map.id } }),
       prisma.theme.updateMany({
         where: { mapName, deletedAt: null },
         data: { deletedAt, lastSavedDate: deletedAt },

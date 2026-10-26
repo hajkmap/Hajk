@@ -21,7 +21,7 @@ class ToolService {
         maps: {
           // Count maps where the tool is enabled. Inactive rows are kept to
           // preserve placement but should not count as "used".
-          where: { active: true },
+          where: { active: true, map: { deletedAt: null } },
           select: { mapName: true },
         },
       },

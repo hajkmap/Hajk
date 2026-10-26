@@ -269,7 +269,7 @@ async function buildClientBaselayersForMap(
   const instances = await prisma.layerInstance.findMany({
     where: {
       AND: [
-        { map: { name: mapName } },
+        { map: { name: mapName, deletedAt: null } },
         { usage: UseType.BACKGROUND },
         activeLayerInstanceWhere,
       ],
@@ -299,7 +299,7 @@ export async function buildClientToolsForMap(
   const groups = layerTree.groups;
   const [toolsOnMap, baselayers, themes] = await Promise.all([
     prisma.toolsOnMaps.findMany({
-      where: { mapName, active: true },
+      where: { mapName, active: true, map: { deletedAt: null } },
       include: { tool: true },
       orderBy: { index: "asc" },
     }),

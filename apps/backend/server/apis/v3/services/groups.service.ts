@@ -272,8 +272,8 @@ class GroupsService {
   async deleteGroup(id: string) {
     await this.requireGroup(id);
 
-    // The group's places in trees stay as they are; the trees leave deleted
-    // groups out.
+    // Soft delete — the group keeps its own tree, but its placements in maps
+    // and other groups are removed.
     await prisma.$transaction(async (transaction) => {
       const [mapTreePlacements, mapExceptions, parentItems, nestedRefs] =
         await Promise.all([
