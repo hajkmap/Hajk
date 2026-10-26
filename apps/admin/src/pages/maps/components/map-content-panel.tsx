@@ -1,4 +1,10 @@
-import { useEffect, useMemo, useState, type RefObject } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+  type RefObject,
+} from "react";
 import { Box } from "@mui/material";
 
 import LayerTreeEditor, {
@@ -25,6 +31,8 @@ interface MapContentPanelProps {
   /** Unsaved edits of the map's layer tree. */
   layerTreeDraft?: LayerTreeDraft | null;
   onLayerTreeDraftChange?: (draft: LayerTreeDraft | null) => void;
+  /** A warning about the tree, under the text of its heading. */
+  notice?: ReactNode;
 }
 
 export default function MapContentPanel({
@@ -36,6 +44,7 @@ export default function MapContentPanel({
   moveZoneHostRef,
   layerTreeDraft = null,
   onLayerTreeDraftChange,
+  notice,
 }: MapContentPanelProps) {
   const preview = useMemo(
     () => previewOptionsFor(mapTools, activeToolIds, catalogTools),
@@ -72,6 +81,7 @@ export default function MapContentPanel({
         onDraftChange={onLayerTreeDraftChange}
         preview={preview}
         moveZoneHost={moveZoneHost?.isConnected ? moveZoneHost : null}
+        notice={notice}
       />
     </Box>
   );

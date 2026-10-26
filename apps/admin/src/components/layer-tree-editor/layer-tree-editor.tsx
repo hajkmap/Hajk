@@ -73,6 +73,11 @@ interface LayerTreeEditorProps {
   preview?: LayerTreePreviewOptions;
   /** Map mode: where the page shows the move zone, beside its save button. */
   moveZoneHost?: HTMLElement | null;
+  /**
+   * A warning about the tree, e.g. that someone else is editing it: under the
+   * help text, or in map mode under the text of the frame's heading.
+   */
+  notice?: ReactNode;
 }
 
 /**
@@ -88,6 +93,7 @@ export default function LayerTreeEditor({
   onDraftChange,
   preview = NO_LAYERSWITCHER,
   moveZoneHost = null,
+  notice,
 }: LayerTreeEditorProps) {
   const { t } = useTranslation();
   const groupTree = useGroupTree(mode === "group" ? ownerId : "");
@@ -247,11 +253,6 @@ export default function LayerTreeEditor({
     return <Alert severity="error">{t("layerTree.loadFailed")}</Alert>;
   }
 
-  const mapExceptions =
-    mode === "group" ? (groupTree.data?.mapExceptions ?? []) : [];
-  const groupAdditions =
-    mode === "group" ? (groupTree.data?.groupAdditions ?? []) : [];
-
   // In a map: framed as the map's layerswitcher, whose tabs switch between
   // the tree, the background and the draw order.
   const framed = (content: ReactNode, toolbar?: ReactNode) => (
@@ -261,6 +262,7 @@ export default function LayerTreeEditor({
       tab={tab}
       onTabChange={setTab}
       toolbar={toolbar}
+      headerExtra={notice}
     >
       {content}
     </LayerTreePreviewFrame>
@@ -271,40 +273,7 @@ export default function LayerTreeEditor({
       <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
         {t(mode === "group" ? "layerTree.groupHelp" : MAP_HELP[tab])}
       </Typography>
-      {/* Where the group shows with someone else's changes to it. */}
-      {mapExceptions.length > 0 || groupAdditions.length > 0 ? (
-        <Alert severity="info" sx={{ mb: 1.5 }}>
-          {mapExceptions.length > 0 ? (
-            <div>
-              {t("layerTree.mapExceptionsInfo", {
-                maps: mapExceptions
-                  .map((entry) =>
-                    t("layerTree.mapExceptionsEntry", {
-                      map: entry.mapName,
-                      added: entry.added,
-                      hidden: entry.hidden,
-                    }),
-                  )
-                  .join(", "),
-              })}
-            </div>
-          ) : null}
-          {groupAdditions.length > 0 ? (
-            <div>
-              {t("layerTree.groupAdditionsInfo", {
-                groups: groupAdditions
-                  .map((entry) =>
-                    t("layerTree.groupAdditionsEntry", {
-                      group: entry.name,
-                      count: entry.added,
-                    }),
-                  )
-                  .join(", "),
-              })}
-            </div>
-          ) : null}
-        </Alert>
-      ) : null}
+      {mode === "group" ? notice : null}
 
       {mode === "group" || tab === "layers" ? (
         <LayerTreePanel

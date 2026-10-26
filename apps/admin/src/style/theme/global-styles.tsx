@@ -7,7 +7,7 @@ export function GlobalStylesComponent({ mode }: { mode: PaletteMode }) {
   return (
     <GlobalStyles
       styles={{
-        ".form-container .MuiPaper-root": {
+        ".form-container .MuiPaper-root:not(.MuiAlert-root)": {
           "&:before": {
             display: "none", // Hide the fake top border on Accordion
           },

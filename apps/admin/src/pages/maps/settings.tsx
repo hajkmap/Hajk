@@ -18,6 +18,8 @@ import {
   Typography,
   CircularProgress,
   IconButton,
+  type SxProps,
+  type Theme,
 } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
 import LayersIcon from "@mui/icons-material/Layers";
@@ -47,6 +49,7 @@ import {
 } from "./map-settings-form-values";
 import { SquareSpinnerComponent } from "../../components/progress/square-progress";
 import FormActionPanel from "../../components/form-action-panel";
+import PresenceNotice from "../../components/presence-notice";
 import { toast } from "react-toastify";
 import { HttpError } from "../../lib/http-error";
 import FormContainer from "../../components/form-components/form-container";
@@ -86,6 +89,7 @@ import {
 import { type ToolColumnOrder } from "./map-tools-layout";
 import { useProjections } from "../../api/services";
 import { isLayerTreeConflict } from "../../api/layer-tree";
+import { usePresence } from "../../api/presence";
 import useAppStateStore from "../../store/use-app-state-store";
 import { SettingsPageTabs } from "../../components/settings-page-tabs";
 import UnsavedChangesGuard from "../../components/unsaved-changes-guard";
@@ -145,7 +149,7 @@ interface ToolsDraft {
 }
 
 export default function MapSettings() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { mapId } = useParams();
   const { data: maps } = useMaps();
@@ -717,6 +721,43 @@ export default function MapSettings() {
     [isDirty, toolsDirty, hasPendingWindowSizeInput, layerTreeDirty],
   );
 
+  // Spara saves every tab's changes: the tabs that have some are marked, and
+  // named under the button.
+  const unsavedTabs: Record<(typeof MAP_PAGE_TABS)[number]["key"], boolean> = {
+    settings: isDirty,
+    menu: layerTreeDirty,
+    tools: toolsDirty || hasPendingWindowSizeInput,
+  };
+  const unsavedTabNames = MAP_PAGE_TABS.filter(
+    (tab) => unsavedTabs[tab.key],
+  ).map((tab) => t(tab.labelKey));
+
+  // Told to the other tabs on this map from every tab of the page; their tree
+  // changes are shown in the tree, the rest by the save button on the tabs
+  // without the tree.
+  const presenceResource = mapName
+    ? { type: "map" as const, id: mapName }
+    : null;
+  const { data: presence } = usePresence(presenceResource, [
+    ...(layerTreeDirty ? (["tree"] as const) : []),
+    ...(isDirty ? (["settings"] as const) : []),
+    ...(toolsDirty || hasPendingWindowSizeInput ? (["tools"] as const) : []),
+  ]);
+  const presenceNotice = (
+    placement: "tree" | "sidebar",
+    sx?: SxProps<Theme>,
+  ) =>
+    presenceResource ? (
+      <PresenceNotice
+        resource={presenceResource}
+        presence={presence}
+        placement={placement}
+        draft={layerTreeDraft}
+        onReload={() => setLayerTreeDraft(null)}
+        sx={sx}
+      />
+    ) : null;
+
   const savePending = isSaving || updateStatus === "pending";
 
   const handleUpdateMap = async (formData: FieldValues) => {
@@ -759,11 +800,19 @@ export default function MapSettings() {
       }
 
       // Before the map's own fields, like the tools: saved after a rename it
-      // would go to the old name, and the draft would be lost with the error.
+      // would go to the old name. A tree someone else has saved meanwhile is
+      // refused, but the rest is still saved.
+      let treeRefused = false;
       if (layerTreeDirty && layerTreeDraft) {
-        await saveLayerTree(layerTreeDraft);
-        setLayerTreeDraft(null);
-        didSave = true;
+        try {
+          await saveLayerTree(layerTreeDraft);
+          setLayerTreeDraft(null);
+          didSave = true;
+        } catch (error) {
+          if (!isLayerTreeConflict(error)) throw error;
+          treeRefused = true;
+          setLayerTreeConflict(true);
+        }
       }
 
       if (isDirty) {
@@ -774,26 +823,38 @@ export default function MapSettings() {
         });
         setCommittedFormBaseline(formData);
         didSave = true;
+        // A refused draft follows the map's new name, so it still counts as
+        // unsaved.
+        const newName = payload.name;
+        if (treeRefused && newName && newName !== map.name) {
+          setLayerTreeDraft((draft) =>
+            draft ? { ...draft, ownerId: newName } : draft,
+          );
+        }
       }
 
       if (didSave) {
-        toast.success(t("maps.updateMapSuccess", { name: map.name }), {
-          position: "bottom-left",
-          theme: palette.mode,
-          hideProgressBar: true,
-        });
+        toast.success(
+          t(
+            treeRefused
+              ? "maps.updateMapSuccessExceptTree"
+              : "maps.updateMapSuccess",
+            { name: map.name },
+          ),
+          {
+            position: "bottom-left",
+            theme: palette.mode,
+            hideProgressBar: true,
+          },
+        );
       }
     } catch (error) {
-      if (isLayerTreeConflict(error)) {
-        setLayerTreeConflict(true);
-      } else {
-        console.error("Failed to update map:", error);
-        toast.error(t("maps.updateMapFailed", { name: map.name }), {
-          position: "bottom-left",
-          theme: palette.mode,
-          hideProgressBar: true,
-        });
-      }
+      console.error("Failed to update map:", error);
+      toast.error(t("maps.updateMapFailed", { name: map.name }), {
+        position: "bottom-left",
+        theme: palette.mode,
+        hideProgressBar: true,
+      });
     } finally {
       saveInFlightRef.current = false;
       setIsSaving(false);
@@ -861,7 +922,10 @@ export default function MapSettings() {
       <SettingsPageTabs
         value={activeTab}
         onChange={setActiveTab}
-        tabs={[...MAP_PAGE_TABS]}
+        tabs={MAP_PAGE_TABS.map((tab) => ({
+          ...tab,
+          unsaved: unsavedTabs[tab.key],
+        }))}
       />
       <FormActionPanel
         updateStatus={savePending ? "pending" : updateStatus}
@@ -872,6 +936,16 @@ export default function MapSettings() {
         lastSavedBy={map?.lastSavedBy}
         lastSavedDate={map?.lastSavedDate}
         isDirty={mapSettingsDirty && !savePending}
+        saveNote={
+          unsavedTabNames.length > 0
+            ? t("maps.unsavedTabs", {
+                tabs: new Intl.ListFormat(i18n.language, {
+                  type: "conjunction",
+                }).format(unsavedTabNames),
+              })
+            : undefined
+        }
+        notice={mapLayersMoveZoneVisible ? null : presenceNotice("sidebar")}
         sidebarExtra={
           mapLayersMoveZoneVisible || activeTab === "tools" ? (
             <Box
@@ -1028,6 +1102,7 @@ export default function MapSettings() {
             moveZoneHostRef={mapLayersMoveZoneHostRef}
             layerTreeDraft={layerTreeDraft}
             onLayerTreeDraftChange={setLayerTreeDraft}
+            notice={presenceNotice("tree", { mt: 1 })}
           />
         )}
 

@@ -589,6 +589,101 @@ paths:
           description: Requested group was not found
         409:
           description: The tree has been saved since the version sent; load it again
+  /presence:
+    get:
+      tags:
+        - Admin only
+      summary: The other admin tabs on a map's or group's page, and the version of its layer tree now
+      parameters:
+        - $ref: "#/components/parameters/PresenceClientId"
+        - $ref: "#/components/parameters/PresenceType"
+        - $ref: "#/components/parameters/PresenceId"
+      responses:
+        200:
+          description: The other tabs, with the parts of the page they have unsaved changes in, and the tree's version (null if the map or group is gone)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  others:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        dirty:
+                          type: array
+                          items:
+                            type: string
+                        userName:
+                          type: string
+                          nullable: true
+                        dirtySince:
+                          type: string
+                          format: date-time
+                          nullable: true
+                          description: When the tab began to have unsaved changes on the page (the server's clock)
+                  version:
+                    type: integer
+                    nullable: true
+        400:
+          description: Invalid request
+    post:
+      tags:
+        - Admin only
+      summary: A tab tells which map or group page it is on and which parts of it have unsaved changes
+      description: Sent when that changes and as a heartbeat; a tab not heard from for 2.5 minutes is dropped
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - clientId
+                - type
+                - id
+                - dirty
+              properties:
+                clientId:
+                  type: string
+                type:
+                  type: string
+                  enum:
+                    - map
+                    - group
+                id:
+                  type: string
+                  description: The map's name or the group's id
+                dirty:
+                  type: array
+                  items:
+                    type: string
+                    enum:
+                      - tree
+                      - settings
+                      - tools
+                      - details
+      responses:
+        204:
+          description: Noted
+        400:
+          description: Invalid request
+  /presence/leave:
+    post:
+      tags:
+        - Admin only
+      summary: A tab leaves a map's or group's page
+      description: Also sent as a beacon when the tab closes, hence the query; ignored if the tab has moved on to another page
+      parameters:
+        - $ref: "#/components/parameters/PresenceClientId"
+        - $ref: "#/components/parameters/PresenceType"
+        - $ref: "#/components/parameters/PresenceId"
+      responses:
+        204:
+          description: Noted
+        400:
+          description: Invalid request
   /services:
     get:
       tags:
@@ -1227,6 +1322,30 @@ paths:
               schema:
                 $ref: "#/components/schemas/WebSocketHealthError"
 components:
+  parameters:
+    PresenceClientId:
+      name: clientId
+      in: query
+      description: The tab, left out of the answer
+      required: true
+      schema:
+        type: string
+    PresenceType:
+      name: type
+      in: query
+      required: true
+      schema:
+        type: string
+        enum:
+          - map
+          - group
+    PresenceId:
+      name: id
+      in: query
+      description: The map's name or the group's id
+      required: true
+      schema:
+        type: string
   schemas:
     SearchAutocompleteBody:
       type: object

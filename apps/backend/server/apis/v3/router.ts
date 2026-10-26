@@ -8,6 +8,7 @@ import filesRouter from "./controllers/files/router.ts";
 import groupsRouter from "./controllers/groups/router.ts";
 import layersRouter from "./controllers/layers/router.ts";
 import mapsRouter from "./controllers/maps/router.ts";
+import presenceRouter from "./controllers/presence/router.ts";
 import publicRouter from "./controllers/public/router.ts";
 import servicesRouter from "./controllers/services/router.ts";
 import themesGlobalRouter from "./controllers/themes/global.router.ts";
@@ -32,6 +33,7 @@ export default Router()
   .use("/groups", isAdmin, groupsRouter)
   .use("/layers", isAdmin, layersRouter)
   .use("/maps", isAdmin, mapsRouter)
+  .use("/presence", isAdmin, presenceRouter)
   .use("/services", isAdmin, servicesRouter)
   .use("/themes", isAdmin, themesGlobalRouter)
   .use("/tools", isAdmin, toolsRouter)

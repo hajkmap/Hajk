@@ -21,6 +21,10 @@ interface FormActionProps {
   warning?: React.ReactNode;
   /** Optional content rendered below the action buttons in the sticky sidebar. */
   sidebarExtra?: React.ReactNode;
+  /** Optional content rendered above the save button, such as a presence warning. */
+  notice?: React.ReactNode;
+  /** Optional line under the save button, such as what it will save. */
+  saveNote?: React.ReactNode;
 }
 
 const FormActionPanel: React.FC<FormActionProps> = ({
@@ -37,6 +41,8 @@ const FormActionPanel: React.FC<FormActionProps> = ({
   isDirty,
   warning,
   sidebarExtra,
+  notice,
+  saveNote,
 }) => {
   const { t } = useTranslation();
   const { data: createdUser } = useUser(createdBy ?? "");
@@ -86,26 +92,34 @@ const FormActionPanel: React.FC<FormActionProps> = ({
           position: "sticky",
         }}
       >
+        {notice}
         {updateStatus === "error" && (
           <Alert severity="error" sx={{ textAlign: "left" }}>
             {t("common.saveFailed")}
           </Alert>
         )}
-        <Button
-          onClick={(e) => {
-            e.preventDefault();
-            void onUpdate();
-          }}
-          variant="contained"
-          disabled={updateStatus === "pending" || !isDirty}
-          sx={{ height: 30 }}
-        >
-          {updateStatus === "pending" ? (
-            <CircularProgress color="primary" size={20} />
-          ) : (
-            saveButtonText || t("common.dialog.saveBtn")
-          )}
-        </Button>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+          <Button
+            onClick={(e) => {
+              e.preventDefault();
+              void onUpdate();
+            }}
+            variant="contained"
+            disabled={updateStatus === "pending" || !isDirty}
+            sx={{ height: 30 }}
+          >
+            {updateStatus === "pending" ? (
+              <CircularProgress color="primary" size={20} />
+            ) : (
+              saveButtonText || t("common.dialog.saveBtn")
+            )}
+          </Button>
+          {saveNote ? (
+            <Typography variant="caption" color="text.secondary">
+              {saveNote}
+            </Typography>
+          ) : null}
+        </Box>
         <Button
           onClick={(e) => {
             e.preventDefault();

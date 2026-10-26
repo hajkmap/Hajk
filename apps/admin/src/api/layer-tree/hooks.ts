@@ -83,6 +83,15 @@ export const useUpdateMapLayerTree = () => {
   });
 };
 
+/** The tree as an editor last loaded it, without loading it if none has. */
+export const useLoadedLayerTree = (mode: "group" | "map", ownerId: string) =>
+  useQuery<{ version: number }>({
+    queryKey: ["layerTree", mode, ownerId],
+    queryFn: () =>
+      mode === "map" ? getMapLayerTree(ownerId) : getGroupTree(ownerId),
+    enabled: false,
+  });
+
 /** Loads a tree again, as when a save was refused because it had changed. */
 export const useReloadLayerTree = () => {
   const queryClient = useQueryClient();

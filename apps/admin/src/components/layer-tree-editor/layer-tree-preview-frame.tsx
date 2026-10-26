@@ -28,6 +28,8 @@ interface LayerTreePreviewFrameProps {
   onTabChange: (tab: LayerTreeMapTab) => void;
   /** Above the content, e.g. the tree's search and expand-all. */
   toolbar?: ReactNode;
+  /** Below the heading's text, e.g. that someone else is editing the map. */
+  headerExtra?: ReactNode;
   children: ReactNode;
 }
 
@@ -42,6 +44,7 @@ export default function LayerTreePreviewFrame({
   tab,
   onTabChange,
   toolbar,
+  headerExtra,
   children,
 }: LayerTreePreviewFrameProps) {
   const { t } = useTranslation();
@@ -72,6 +75,7 @@ export default function LayerTreePreviewFrame({
           borderColor: "divider",
           flexShrink: 0,
         }}
+        data-layer-tree-heading
       >
         <Typography
           variant="subtitle2"
@@ -90,6 +94,7 @@ export default function LayerTreePreviewFrame({
               })
             : t("layerTree.preview.noLayerswitcher")}
         </Typography>
+        {headerExtra}
       </Box>
 
       <AppBar
