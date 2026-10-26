@@ -114,10 +114,11 @@ paths:
     delete:
       tags:
         - Admin only
+      description: Soft delete — the map is hidden but kept in the database with its layer tree, settings, tool placements and roles, so it can be restored
       parameters:
         - name: mapName
           in: path
-          description: Name of the map to be fetched
+          description: Name of the map to delete
           required: true
           schema:
             type: string

@@ -1,4 +1,5 @@
 import {
+  QueryClient,
   useQuery,
   UseQueryResult,
   useMutation,
@@ -208,6 +209,19 @@ export const useUpdateMap = () => {
   });
 };
 
+// A deleted map is left out of what is counted per map until it is restored,
+// so deleting and restoring both change the usage of tools, layers, groups
+// and services.
+const invalidateMapUsage = (queryClient: QueryClient) => {
+  void queryClient.invalidateQueries({ queryKey: ["tools"] });
+  void queryClient.invalidateQueries({ queryKey: ["mapsByTool"] });
+  void queryClient.invalidateQueries({ queryKey: ["layersUsageSummary"] });
+  void queryClient.invalidateQueries({ queryKey: ["layerUsage"] });
+  void queryClient.invalidateQueries({ queryKey: ["mapsByGroupId"] });
+  void queryClient.invalidateQueries({ queryKey: ["mapsByServiceId"] });
+  void queryClient.invalidateQueries({ queryKey: ["layerTree"] });
+};
+
 // React mutation to delete a map
 // This hook uses the `deleteMap` function from the `requests` module
 export const useDeleteMap = () => {
@@ -218,6 +232,7 @@ export const useDeleteMap = () => {
       void queryClient.invalidateQueries({ queryKey: ["maps"] });
       void queryClient.invalidateQueries({ queryKey: ["deletedMaps"] });
       void queryClient.invalidateQueries({ queryKey: ["deletedThemes"] });
+      invalidateMapUsage(queryClient);
     },
     onError: (error) => {
       console.error(error);
@@ -235,6 +250,7 @@ export const useRestoreMap = () => {
       void queryClient.invalidateQueries({ queryKey: ["maps"] });
       void queryClient.invalidateQueries({ queryKey: ["maps", mapName] });
       void queryClient.invalidateQueries({ queryKey: ["themes", mapName] });
+      invalidateMapUsage(queryClient);
     },
     onError: (error) => {
       console.error(error);
