@@ -481,10 +481,7 @@ export function toolsPayloadSignature(payload: MapToolPayloadEntry[]): string {
   );
 }
 
-/**
- * What the map would show for a tools state. Tools in a column are compared by
- * their order there, not by raw index, because reordering renumbers a column.
- */
+
 function effectiveToolsSignature(
   state: MapToolsDraftState & { zones: ToolZones },
   mapTools: ToolOnMap[],
@@ -516,8 +513,8 @@ function effectiveToolsSignature(
     state.activeToolIds,
     state.indexes,
   );
-  // Server zones also hold tools placed by a legacy options.target that the
-  // board never shows in a column, and saving drops them from the zones.
+  // The saved map's columns can include tools placed only by a legacy
+  // options.target, which the board never shows and saving drops.  
   const columns = Object.fromEntries(
     TOOL_PLACEMENT_ZONES.map((zone) => [
       zone,
