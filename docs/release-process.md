@@ -236,7 +236,7 @@ Security fixes follow the [disclosure policy](../SECURITY.md#disclosure-policy).
 Pushing a tag that starts with `v` runs the [release workflow](../.github/workflows/release.yml):
 
 1. **Checks the tag.** A release (`v4.4.0`) must point to a commit on `master`. A release candidate must look like `vX.Y.0-rc.N` and point to a commit on `release/X.Y`. The version in all three `package.json` files must match the tag. If anything is wrong, nothing is published.
-2. **Publishes the Docker image** to `ghcr.io/hajkmap/hajk` for `linux/amd64` and `linux/arm64`, with the tags described in [Docker images](releases.md#docker-images).
+2. **Publishes the Docker images** `ghcr.io/hajkmap/hajk` and `ghcr.io/hajkmap/hajk-simple` for `linux/amd64` and `linux/arm64`, with the tags described in [Docker images](releases.md#docker-images).
 3. **Creates a draft release** on the [releases page](https://github.com/hajkmap/Hajk/releases). It takes the release notes from the version's section in the CHANGELOG, and attaches the `nodejs` and `simple` zip packages built by [`scripts/create-release.mjs`](../scripts/create-release.mjs) after a clean install of the dependencies. Release candidates are marked as pre-releases.
 
 The release is not public until you publish the draft. With immutable releases, files cannot be added to a release once it is published, which is why the workflow attaches the packages while it is a draft.

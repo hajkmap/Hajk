@@ -1,0 +1,45 @@
+# Hajk simple: the Client only, as static files served by nginx, without the
+# Backend. Same contents as the hajk-vX.Y.Z-simple.zip release package.
+#
+# Build from the repository root:
+#   docker build --file Docker/Dockerfile.simple --tag hajk-simple .
+# Run on http://localhost:8080:
+#   docker run --rm -p 8080:8080 hajk-simple
+
+# --- CLIENT --- #
+FROM node:24-alpine AS buildimage
+WORKDIR /tmp/build/client
+
+COPY /apps/client/package*.json ./
+RUN npm ci
+
+COPY /apps/client ./
+
+# The Client shows the commit and build date it was built from. prebuild.js
+# reads them from .git, which is not copied into the image, so write them here.
+ARG GIT_HASH=unknown
+RUN printf 'VITE_APP_GIT_HASH=%s\nVITE_APP_BUILD_DATE=%s\n' \
+      "$GIT_HASH" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > .env.local
+
+# Without a mapserviceBase, the Client reads its map configuration from
+# simpleMapAndLayersConfig.json instead of asking the Backend.
+RUN node -e ' \
+      const fs = require("node:fs"); \
+      const file = "public/appConfig.json"; \
+      const config = JSON.parse(fs.readFileSync(file, "utf8")); \
+      config.mapserviceBase = ""; \
+      fs.writeFileSync(file, JSON.stringify(config, null, 2) + "\n");'
+
+# --ignore-scripts skips prebuild.js, see above.
+RUN npm run build --ignore-scripts
+# --- CLIENT END --- #
+
+# --- FINAL ASSEMBLY --- #
+# Runs nginx as a non-root user, listening on port 8080.
+FROM nginxinc/nginx-unprivileged:stable-alpine
+
+COPY Docker/nginx-simple.conf /etc/nginx/conf.d/default.conf
+COPY --from=buildimage /tmp/build/client/build /usr/share/nginx/html
+
+EXPOSE 8080
+# --- FINAL ASSEMBLY END --- #

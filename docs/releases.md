@@ -65,7 +65,14 @@ The [installation guide](https://github.com/hajkmap/Hajk/wiki/Installation-guide
 
 ## Docker images
 
-Official Docker images are published as `ghcr.io/hajkmap/hajk` on the GitHub Container Registry. Each image contains Backend, Client and Admin, and runs on both `linux/amd64` and `linux/arm64`.
+Two official Docker images are published on the GitHub Container Registry, matching the two downloads:
+
+| Image                         | Contains                                                |
+| ----------------------------- | ------------------------------------------------------- |
+| `ghcr.io/hajkmap/hajk`        | Backend, Client and Admin, like the `nodejs` package    |
+| `ghcr.io/hajkmap/hajk-simple` | Client only, served by nginx, like the `simple` package |
+
+Both run on `linux/amd64` and `linux/arm64`, and get the same tags. How to run them is described in the [Docker README](../Docker/README.md).
 
 | Tag               | Contains                                  | Updated                                 |
 | ----------------- | ----------------------------------------- | --------------------------------------- |

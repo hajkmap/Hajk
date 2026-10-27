@@ -4,6 +4,14 @@ name: Build and publish image
 on:
   workflow_call:
     inputs:
+      image:
+        description: Package name under ghcr.io/hajkmap, for example hajk or hajk-simple
+        required: true
+        type: string
+      dockerfile:
+        description: Path to the Dockerfile, relative to the repository root
+        required: true
+        type: string
       ref:
         description: Branch or tag to check out and build
         required: true
@@ -18,7 +26,7 @@ on:
         type: string
 
 env:
-  IMAGE: ghcr.io/hajkmap/hajk
+  IMAGE: ghcr.io/hajkmap/${{ inputs.image }}
 
 jobs:
   # Each platform builds natively on its own runner and is pushed untagged, by digest only. The merge job then tags them together.
@@ -66,6 +74,8 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: .
+          file: ${{ inputs.dockerfile }}
+          build-args: GIT_HASH=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
           platforms: linux/${{ matrix.arch }}
           pull: true
           no-cache: true
@@ -83,7 +93,7 @@ jobs:
       - name: Upload digest
         uses: actions/upload-artifact@v7
         with:
-          name: digests-${{ matrix.arch }}
+          name: digests-${{ inputs.image }}-${{ matrix.arch }}
           path: ${{ runner.temp }}/digests/*
           if-no-files-found: error
           retention-days: 1
@@ -116,7 +126,7 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           path: ${{ runner.temp }}/digests
-          pattern: digests-*
+          pattern: digests-${{ inputs.image }}-*
           merge-multiple: true
 
       - name: Set up Docker Buildx

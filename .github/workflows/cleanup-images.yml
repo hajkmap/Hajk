@@ -27,7 +27,7 @@ jobs:
       - name: Delete untagged images
         uses: dataaxiom/ghcr-cleanup-action@v1
         with:
-          package: hajk
+          package: hajk,hajk-simple
           delete-untagged: true
           older-than: 1 day
           validate: true

@@ -14,10 +14,22 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  hajk:
     if: github.repository == 'hajkmap/Hajk'
     uses: ./.github/workflows/build-image.yml
     with:
+      image: hajk
+      dockerfile: Dockerfile
       ref: develop
       tags: type=raw,value=nightly-develop
       description: Nightly build of Hajk's develop branch, containing the latest additions. Changes constantly and may be unstable.
+
+  hajk-simple:
+    if: github.repository == 'hajkmap/Hajk'
+    uses: ./.github/workflows/build-image.yml
+    with:
+      image: hajk-simple
+      dockerfile: Docker/Dockerfile.simple
+      ref: develop
+      tags: type=raw,value=nightly-develop
+      description: Nightly build of Hajk simple (the Client only, served by nginx) from the develop branch, containing the latest additions. Changes constantly and may be unstable.

@@ -62,6 +62,8 @@ jobs:
       packages: write
     uses: ./.github/workflows/build-image.yml
     with:
+      image: hajk
+      dockerfile: Dockerfile
       ref: ${{ github.ref }}
       # A release (v4.3.0) gets 4.3.0, 4.3, 4 and latest. A release candidate (v4.3.0-rc.1) only gets 4.3.0-rc.1.
       tags: |
@@ -69,6 +71,23 @@ jobs:
         type=semver,pattern={{major}}.{{minor}},value=${{ github.ref_name }}
         type=semver,pattern={{major}},value=${{ github.ref_name }}
       description: Hajk ${{ github.ref_name }}. Release notes at https://github.com/hajkmap/Hajk/releases/tag/${{ github.ref_name }}
+
+  image-simple:
+    needs: check
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/build-image.yml
+    with:
+      image: hajk-simple
+      dockerfile: Docker/Dockerfile.simple
+      ref: ${{ github.ref }}
+      # Same tags as the hajk image above.
+      tags: |
+        type=semver,pattern={{version}},value=${{ github.ref_name }}
+        type=semver,pattern={{major}}.{{minor}},value=${{ github.ref_name }}
+        type=semver,pattern={{major}},value=${{ github.ref_name }}
+      description: Hajk simple ${{ github.ref_name }}, the Client only, served by nginx. Release notes at https://github.com/hajkmap/Hajk/releases/tag/${{ github.ref_name }}
 
   packages:
     name: Build release packages
