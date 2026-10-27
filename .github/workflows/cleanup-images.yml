@@ -1,0 +1,34 @@
+name: Clean up untagged images
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: Only log what would be deleted
+        type: boolean
+        default: true
+
+permissions:
+  packages: write
+
+concurrency:
+  group: cleanup-images
+
+jobs:
+  cleanup:
+    if: github.repository == 'hajkmap/Hajk'
+    runs-on: ubuntu-latest
+
+    steps:
+      # Platform images referenced by a tagged multi-platform image are kept; only orphaned ones are deleted.
+      # older-than keeps digests from a nightly build that is still running, before its merge job has tagged them.
+      - name: Delete untagged images
+        uses: dataaxiom/ghcr-cleanup-action@v1
+        with:
+          package: hajk
+          delete-untagged: true
+          older-than: 1 day
+          validate: true
+          dry-run: ${{ inputs.dry-run || false }}

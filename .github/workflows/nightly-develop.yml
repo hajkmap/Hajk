@@ -1,0 +1,23 @@
+name: Nightly image (develop)
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: nightly-develop
+  cancel-in-progress: true
+
+jobs:
+  build:
+    if: github.repository == 'hajkmap/Hajk'
+    uses: ./.github/workflows/build-image.yml
+    with:
+      ref: develop
+      tags: type=raw,value=nightly-develop
+      description: Nightly build of Hajk's develop branch, containing the latest additions. Changes constantly and may be unstable.

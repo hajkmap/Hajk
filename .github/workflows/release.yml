@@ -1,0 +1,44 @@
+name: Release image
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: release-${{ github.ref }}
+
+jobs:
+  # Only publish tags that point to a commit on master.
+  check:
+    if: github.repository == 'hajkmap/Hajk'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Verify tag is on master
+        run: |
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/master; then
+            echo "::error::Tag $GITHUB_REF_NAME does not point to a commit on master"
+            exit 1
+          fi
+
+  build:
+    needs: check
+    uses: ./.github/workflows/build-image.yml
+    with:
+      ref: ${{ github.ref }}
+      # A release (v4.3.0) gets 4.3.0, 4.3, 4 and latest. A pre-release (v4.3.0-rc.1) only gets 4.3.0-rc.1.
+      tags: |
+        type=semver,pattern={{version}},value=${{ github.ref_name }}
+        type=semver,pattern={{major}}.{{minor}},value=${{ github.ref_name }}
+        type=semver,pattern={{major}},value=${{ github.ref_name }}
+      description: Hajk ${{ github.ref_name }}, built from the release tag on master.
