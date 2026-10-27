@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import {
   Box,
   Button,
+  Chip,
   Collapse,
   Dialog,
   DialogActions,
@@ -13,6 +14,7 @@ import {
   Typography,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import CheckIcon from "@mui/icons-material/Check";
 import SearchIcon from "@mui/icons-material/Search";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { useTranslation } from "react-i18next";
@@ -31,7 +33,7 @@ interface MapToolsAddDialogProps {
   /** Tools already in a placement column, keyed by tool type. */
   placedByType: Map<string, PlacedToolOfType>;
   onClose: () => void;
-  onSelect: (toolId: number) => void;
+  onSelect: (toolIds: number[]) => void;
 }
 
 function MapToolsAddDialog({
@@ -44,8 +46,23 @@ function MapToolsAddDialog({
 }: MapToolsAddDialogProps) {
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [openWarnings, setOpenWarnings] = useState<Set<number>>(
     () => new Set(),
+  );
+
+  const toolsById = useMemo(
+    () => new Map(tools.map((tool) => [tool.toolId, tool])),
+    [tools],
+  );
+
+  const selectedTools = useMemo(
+    () =>
+      selectedIds.flatMap((toolId) => {
+        const tool = toolsById.get(toolId);
+        return tool ? [tool] : [];
+      }),
+    [selectedIds, toolsById],
   );
 
   const toggleWarning = (toolId: number) => {
@@ -55,6 +72,14 @@ function MapToolsAddDialog({
       else next.add(toolId);
       return next;
     });
+  };
+
+  const toggleSelected = (toolId: number) => {
+    setSelectedIds((current) =>
+      current.includes(toolId)
+        ? current.filter((id) => id !== toolId)
+        : [...current, toolId],
+    );
   };
 
   const filtered = useMemo(() => {
@@ -67,6 +92,11 @@ function MapToolsAddDialog({
     );
   }, [search, tools]);
 
+  const confirmSelection = () => {
+    if (selectedIds.length === 0) return;
+    onSelect(selectedIds);
+  };
+
   return (
     <Dialog
       open={open}
@@ -77,6 +107,7 @@ function MapToolsAddDialog({
         transition: {
           onEnter: () => {
             setSearch("");
+            setSelectedIds([]);
             setOpenWarnings(new Set());
           },
         },
@@ -104,10 +135,13 @@ function MapToolsAddDialog({
           placeholder={t("tools.searchTitle")}
           onChange={(event) => setSearch(event.target.value)}
           onKeyDown={(event) => {
-            if (event.key === "Enter" && filtered.length === 1) {
-              event.preventDefault();
-              onSelect(filtered[0].toolId);
+            if (event.key !== "Enter") return;
+            event.preventDefault();
+            if (filtered.length === 1) {
+              toggleSelected(filtered[0].toolId);
+              return;
             }
+            if (selectedIds.length > 0) confirmSelection();
           }}
           slotProps={{
             input: {
@@ -121,6 +155,30 @@ function MapToolsAddDialog({
           }}
           sx={{ mt: 0.5, mb: 1.5 }}
         />
+        {selectedTools.length > 0 ? (
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 1,
+              mb: 1.5,
+            }}
+          >
+            {selectedTools.map((tool) => {
+              const hasTitle =
+                tool.title.trim() !== "" && tool.title !== tool.type;
+              return (
+                <Chip
+                  key={tool.toolId}
+                  label={hasTitle ? tool.title : tool.type}
+                  color="primary"
+                  variant="outlined"
+                  onDelete={() => toggleSelected(tool.toolId)}
+                />
+              );
+            })}
+          </Box>
+        ) : null}
         {filtered.length === 0 ? (
           <Typography color="text.secondary" sx={{ py: 4, textAlign: "center" }}>
             {tools.length === 0
@@ -131,20 +189,40 @@ function MapToolsAddDialog({
           <List disablePadding>
             {filtered.map((tool) => {
               const placed = placedByType.get(tool.type);
-              const hasTitle = tool.title.trim() !== "" && tool.title !== tool.type;
+              const hasTitle =
+                tool.title.trim() !== "" && tool.title !== tool.type;
+              const selected = selectedIds.includes(tool.toolId);
               return (
                 <Box
                   key={tool.toolId}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => toggleSelected(tool.toolId)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      toggleSelected(tool.toolId);
+                    }
+                  }}
                   sx={{
                     mb: 0.75,
                     px: 1.5,
                     py: 1,
                     border: "1px solid",
-                    borderColor: placed ? "warning.main" : "divider",
+                    borderColor: selected
+                      ? "primary.main"
+                      : placed
+                        ? "warning.main"
+                        : "divider",
                     borderRadius: 1.5,
                     display: "flex",
                     alignItems: "center",
                     gap: 1,
+                    cursor: "pointer",
+                    bgcolor: selected ? "action.selected" : "transparent",
+                    "&:hover": {
+                      bgcolor: selected ? "action.selected" : "action.hover",
+                    },
                   }}
                 >
                   <Box sx={{ minWidth: 0, flex: 1 }}>
@@ -166,7 +244,11 @@ function MapToolsAddDialog({
                         <Typography
                           variant="caption"
                           component="div"
-                          sx={{ mt: 0.5, lineHeight: 1.4, color: "warning.main" }}
+                          sx={{
+                            mt: 0.5,
+                            lineHeight: 1.4,
+                            color: "warning.main",
+                          }}
                         >
                           {t("maps.toolsTypeAlreadyPlaced", {
                             title: placed.title,
@@ -195,11 +277,28 @@ function MapToolsAddDialog({
                   <IconButton
                     size="small"
                     color="primary"
-                    aria-label={t("common.add")}
-                    onClick={() => onSelect(tool.toolId)}
-                    sx={{ flexShrink: 0 }}
+                    aria-label={
+                      selected ? t("maps.toolsDeselect") : t("common.add")
+                    }
+                    aria-pressed={selected}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      toggleSelected(tool.toolId);
+                    }}
+                    sx={{
+                      flexShrink: 0,
+                      bgcolor: selected ? "primary.main" : "transparent",
+                      color: selected ? "primary.contrastText" : "primary.main",
+                      "&:hover": {
+                        bgcolor: selected ? "primary.dark" : "action.hover",
+                      },
+                    }}
                   >
-                    <AddIcon fontSize="small" />
+                    {selected ? (
+                      <CheckIcon fontSize="small" />
+                    ) : (
+                      <AddIcon fontSize="small" />
+                    )}
                   </IconButton>
                 </Box>
               );
@@ -210,6 +309,14 @@ function MapToolsAddDialog({
       <DialogActions>
         <Button type="button" onClick={onClose}>
           {t("common.dialog.closeBtn")}
+        </Button>
+        <Button
+          type="button"
+          variant="contained"
+          disabled={selectedIds.length === 0}
+          onClick={confirmSelection}
+        >
+          {t("common.dialog.okBtn")}
         </Button>
       </DialogActions>
     </Dialog>

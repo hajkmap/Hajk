@@ -368,6 +368,7 @@
     "maps.toolsDropHere": "Lägg här",
     "maps.toolsRemoveFromMap": "Ta bort från kartan",
     "maps.toolsNoToolsToAdd": "Inga verktyg att lägga till.",
+    "maps.toolsDeselect": "Ta bort från urvalet",
     "maps.toolsTypeAlreadyPlacedShort": "Verktygstypen finns redan på kartan",
     "maps.toolsTypeAlreadyPlaced": "Den här verktygstypen finns redan på kartan som \"{{title}}\" i {{placement}}. Befintligt verktyg ersätts.",
     "maps.toolsDragHandle": "Dra för att ändra ordning",

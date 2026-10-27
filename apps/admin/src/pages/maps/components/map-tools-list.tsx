@@ -599,11 +599,13 @@ function MapToolsList({
   );
 
   const handleAdd = useCallback(
-    (toolId: number) => {
-      if (addTarget == null) return;
-      warnIfDuplicateType(toolId);
-      if (addTarget === "unplaced") onToggleActive(toolId, true);
-      else onAddTool(toolId, addTarget);
+    (toolIds: number[]) => {
+      if (addTarget == null || toolIds.length === 0) return;
+      for (const toolId of toolIds) {
+        warnIfDuplicateType(toolId);
+        if (addTarget === "unplaced") onToggleActive(toolId, true);
+        else onAddTool(toolId, addTarget);
+      }
       setAddTarget(null);
     },
     [addTarget, onAddTool, onToggleActive, warnIfDuplicateType],
