@@ -44,7 +44,7 @@ model Role {
   RoleOnSearchLayer   RoleOnSearchLayer[]
   RoleOnEditingLayer  RoleOnEditingLayer[]
   RoleOnLayerInstance RoleOnLayerInstance[]
-  RoleOnTool          RoleOnTool[]
+  RoleOnToolInstance  RoleOnToolInstance[]
   RoleOnGroup         RoleOnGroup[]
 }
 
@@ -102,13 +102,14 @@ model RoleOnLayerInstance {
   @@id([layerInstanceId, roleId])
 }
 
-model RoleOnTool {
-  toolId Int
-  roleId String
-  tool   Tool   @relation(fields: [toolId], references: [id], onDelete: Cascade)
-  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+model RoleOnToolInstance {
+  toolInstanceId Int          @map("toolId")
+  roleId         String
+  toolInstance   ToolInstance @relation(fields: [toolInstanceId], references: [id], onDelete: Cascade)
+  role           Role         @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
-  @@id([toolId, roleId])
+  @@id([toolInstanceId, roleId])
+  @@map("RoleOnTool")
 }
 
 model RoleOnGroup {
@@ -171,89 +172,93 @@ model Theme {
   @@index([mapName])
 }
 
-/// A folder owned by a DocumentHandler Tool instance that groups documents.
+/// A folder owned by a DocumentHandler ToolInstance that groups documents.
 model DocumentFolder {
-  id            Int        @id @default(autoincrement())
+  id             Int          @id @default(autoincrement())
   /// URL-safe slug derived from title at creation time. Immutable.
-  name          String
+  name           String
   /// Human-readable display name.
-  title         String
-  toolId        Int
-  createdBy     String?
-  createdDate   DateTime?  @db.Timestamptz(3)
-  lastSavedBy   String?
-  lastSavedDate DateTime?  @db.Timestamptz(3)
-  tool          Tool       @relation(fields: [toolId], references: [id], onDelete: Cascade)
-  documents     Document[]
+  title          String
+  toolInstanceId Int          @map("toolId")
+  createdBy      String?
+  createdDate    DateTime?    @db.Timestamptz(3)
+  lastSavedBy    String?
+  lastSavedDate  DateTime?    @db.Timestamptz(3)
+  toolInstance   ToolInstance @relation(fields: [toolInstanceId], references: [id], onDelete: Cascade)
+  documents      Document[]
 
-  @@unique([toolId, name])
+  @@unique([toolInstanceId, name])
 }
 
-/// A document belonging to a DocumentHandler Tool instance and folder. Content is stored as JSON.
+/// A document belonging to a DocumentHandler ToolInstance and folder. Content is stored as JSON.
 model Document {
-  id            Int            @id @default(autoincrement())
+  id             Int            @id @default(autoincrement())
   /// URL-safe slug derived from title at creation time. Immutable.
-  name          String
+  name           String
   /// Human-readable display name.
-  title         String
+  title          String
   /// Chapter tree content: { chapters: [...] }
-  content       Json           @default("{\"chapters\":[]}")
-  toolId        Int
-  folderId      Int
-  createdBy     String?
-  createdDate   DateTime?      @db.Timestamptz(3)
-  lastSavedBy   String?
-  lastSavedDate DateTime?      @db.Timestamptz(3)
-  tool          Tool           @relation(fields: [toolId], references: [id], onDelete: Cascade)
-  folder        DocumentFolder @relation(fields: [folderId], references: [id], onDelete: Restrict)
+  content        Json           @default("{\"chapters\":[]}")
+  toolInstanceId Int            @map("toolId")
+  folderId       Int
+  createdBy      String?
+  createdDate    DateTime?      @db.Timestamptz(3)
+  lastSavedBy    String?
+  lastSavedDate  DateTime?      @db.Timestamptz(3)
+  toolInstance   ToolInstance   @relation(fields: [toolInstanceId], references: [id], onDelete: Cascade)
+  folder         DocumentFolder @relation(fields: [folderId], references: [id], onDelete: Restrict)
 
-  @@unique([toolId, folderId, name])
+  @@unique([toolInstanceId, folderId, name])
 }
 
-/// Available plugin types. Each Tool instance references one of these.
+/// A plugin the client knows how to render (search, draw, documenthandler, ...).
+/// Describes what a tool is; configuration lives on ToolInstance.
 model ToolType {
-  type        String  @id
+  type        String         @id
   title       String
   description String?
-  tools       Tool[]
+  instances   ToolInstance[]
 }
 
-/// A configured instance of a plugin (ToolType). Several instances of the
-/// same type can exist, e.g. "Dokument Bygglov" and "Dokument Detaljplaner".
-model Tool {
-  id                Int              @id @default(autoincrement())
-  locked            Boolean          @default(false)
+/// A configured instance of a ToolType. Several instances of the same type can
+/// exist, e.g. "Dokument Bygglov" and "Dokument Detaljplaner", and one instance
+/// can be used on many maps through ToolsOnMaps.
+model ToolInstance {
+  id                Int                  @id @default(autoincrement())
+  locked            Boolean              @default(false)
   type              String
   /// Instance name, distinguishes instances of the same type
   title             String?
-  options           Json             @default("{}")
+  /// Default options for this instance. ToolsOnMaps.options overrides them per map.
+  options           Json                 @default("{}")
   createdBy         String?
-  createdDate       DateTime?        @db.Timestamptz(3) // Timestamp when created
+  createdDate       DateTime?            @db.Timestamptz(3) // Timestamp when created
   lastSavedBy       String?
-  lastSavedDate     DateTime?        @db.Timestamptz(3) // Timestamp when last saved
+  lastSavedDate     DateTime?            @db.Timestamptz(3) // Timestamp when last saved
   /// Soft delete - set instead of removing the row
-  deletedAt         DateTime?        @db.Timestamptz(3)
-  toolType          ToolType         @relation(fields: [type], references: [type])
+  deletedAt         DateTime?            @db.Timestamptz(3)
+  toolType          ToolType             @relation(fields: [type], references: [type])
   maps              ToolsOnMaps[]
-  restrictedToRoles RoleOnTool[]
+  restrictedToRoles RoleOnToolInstance[]
   documentFolders   DocumentFolder[]
   documents         Document[]
 }
 
+/// A ToolInstance placed on a map. `toolId` and `tool` refer to the ToolInstance.
 model ToolsOnMaps {
   mapName String
   toolId  Int
   /// Whether the tool is enabled on the map. Inactive tools keep their row (and
   /// placement) so they can be re-enabled without losing configuration.
-  active  Boolean @default(true)
+  active  Boolean      @default(true)
   /// Determines the sort between tools within a zone
-  index   Int     @default(0)
+  index   Int          @default(0)
   /// Placement zone in the map UI: drawer | widgetLeft | widgetRight | controlButton. Null means unplaced (managed via admin UI).
   target  String?
-  /// Allows overriding default tool options (set in Tool) on a per-map basis
-  options Json    @default("{}")
-  map     Map     @relation(fields: [mapName], references: [name])
-  tool    Tool    @relation(fields: [toolId], references: [id])
+  /// Overrides ToolInstance.options for this map only
+  options Json         @default("{}")
+  map     Map          @relation(fields: [mapName], references: [name])
+  tool    ToolInstance @relation(fields: [toolId], references: [id])
 
   @@id([mapName, toolId])
 }

@@ -15,6 +15,7 @@ import {
   type ToolColumnOrder,
 } from "./map-tools-layout";
 
+/** A tool instance as shown in a placement column on the map tools board. */
 export interface BoardTool {
   toolId: number;
   title: string;
@@ -31,6 +32,7 @@ export interface BoardTool {
   defaultHeight?: number;
 }
 
+/** A tool instance that can be added to the map from the add dialog. */
 export interface AddableTool {
   toolId: number;
   title: string;
@@ -39,6 +41,7 @@ export interface AddableTool {
   placement: ToolZone | null;
 }
 
+/** The tool instances on a map, grouped and ordered by placement column. */
 export interface ToolBoard {
   columns: Record<ToolZone, BoardTool[]>;
   order: ToolColumnOrder;

@@ -14,8 +14,12 @@ import { getApiClient, InternalApiError } from "../../lib/internal-api-client";
  * This module provides API request functions to interact with the backend
  * services for fetching data related to tools and maps.
  *
- * - The `getTools` function retrieves a list of all tools.
- * - The `getMapsByToolName` function fetches all maps linked to a given tool name.
+ * "Tool" here means a tool instance: a configured instance of a ToolType
+ * (backend model ToolInstance). One instance can be used on many maps, and
+ * several instances of the same type can exist.
+ *
+ * - The `getTools` function retrieves all tool instances.
+ * - The `getMapsByToolName` function fetches all maps using a tool of the given type.
  *
  * These functions utilize a custom Axios instance and throw appropriate error messages for failures.
  *
@@ -67,6 +71,7 @@ export const getMapsByToolName = async (toolName: string): Promise<Map[]> => {
   }
 };
 
+/** Fetches the plugin types that tool instances can be created from. */
 export const getToolTypes = async (): Promise<ToolType[]> => {
   const internalApiClient = getApiClient();
   try {
@@ -88,6 +93,7 @@ export const getToolTypes = async (): Promise<ToolType[]> => {
   }
 };
 
+/** Creates a tool instance of the given type. */
 export const createTool = async (data: ToolCreateInput): Promise<Tool> => {
   const internalApiClient = getApiClient();
   try {
@@ -108,6 +114,7 @@ export const createTool = async (data: ToolCreateInput): Promise<Tool> => {
   }
 };
 
+/** Soft-deletes a tool instance. It disappears from every map using it. */
 export const deleteTool = async (id: string): Promise<void> => {
   const internalApiClient = getApiClient();
   try {
@@ -124,6 +131,7 @@ export const deleteTool = async (id: string): Promise<void> => {
   }
 };
 
+/** Updates a tool instance. Changes apply to every map using it. */
 export const updateTool = async (
   id: string,
   data: ToolUpdateInput

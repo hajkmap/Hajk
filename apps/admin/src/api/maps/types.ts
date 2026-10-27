@@ -76,6 +76,7 @@ export interface MapMutation {
   options?: Record<string, string>;
 }
 
+/** Where a tool instance is placed in the map setting tools' placement containers. */
 export type ToolZone =
   | "drawer"
   | "widgetLeft"

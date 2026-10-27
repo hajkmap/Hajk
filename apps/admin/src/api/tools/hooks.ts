@@ -15,7 +15,7 @@ import {
 import { Tool, ToolType, ToolCreateInput, ToolUpdateInput } from "./types";
 import { Map } from "../maps";
 
-// React Query hook to fetch tools
+// React Query hook to fetch all tool instances
 // This hook uses the `getTools` function from the tools `requests` module
 export const useTools = (): UseQueryResult<Tool[]> => {
   return useQuery({
@@ -24,7 +24,7 @@ export const useTools = (): UseQueryResult<Tool[]> => {
   });
 };
 
-// React Query hook to fetch maps by tool name
+// React Query hook to fetch maps using a tool of the given type
 // This hook uses the `getMapsByToolName` function from the tools `requests` module
 export const useMapsByToolName = (toolName: string): UseQueryResult<Map[]> => {
   return useQuery({
@@ -33,7 +33,7 @@ export const useMapsByToolName = (toolName: string): UseQueryResult<Map[]> => {
   });
 };
 
-// React Query hook to fetch available tool types
+// React Query hook to fetch the tool types that instances can be created from
 export const useToolTypes = (): UseQueryResult<ToolType[]> => {
   return useQuery({
     queryKey: ["toolTypes"],
@@ -52,7 +52,7 @@ export const useCreateTool = () => {
   });
 };
 
-// React Query mutation hook to update a tool
+// React Query mutation hook to update a tool instance (affects every map using it)
 export const useUpdateTool = () => {
   const queryClient = useQueryClient();
   return useMutation({

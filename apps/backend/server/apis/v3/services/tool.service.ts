@@ -14,7 +14,7 @@ class ToolService {
   }
 
   async getTools() {
-    return await prisma.tool.findMany({
+    return await prisma.toolInstance.findMany({
       where: { deletedAt: null },
       orderBy: { type: "asc" },
       include: {
@@ -58,7 +58,10 @@ class ToolService {
     return maps;
   }
 
-  async createTool(data: Prisma.ToolUncheckedCreateInput, userId?: string) {
+  async createTool(
+    data: Prisma.ToolInstanceUncheckedCreateInput,
+    userId?: string
+  ) {
     const toolType = await prisma.toolType.findUnique({
       where: { type: data.type },
     });
@@ -71,7 +74,7 @@ class ToolService {
       );
     }
 
-    return await prisma.tool.create({
+    return await prisma.toolInstance.create({
       data: {
         ...data,
         createdBy: userId,
@@ -82,8 +85,12 @@ class ToolService {
     });
   }
 
-  async updateTool(id: number, data: Prisma.ToolUpdateInput, userId?: string) {
-    return await prisma.tool.update({
+  async updateTool(
+    id: number,
+    data: Prisma.ToolInstanceUpdateInput,
+    userId?: string
+  ) {
+    return await prisma.toolInstance.update({
       where: { id },
       data: {
         ...data,
@@ -96,7 +103,7 @@ class ToolService {
   // Soft delete — the row is kept (with its ToolsOnMaps placements) so the
   // tool can be restored with its full configuration.
   async deleteTool(id: number, userId?: string) {
-    return await prisma.tool.update({
+    return await prisma.toolInstance.update({
       where: { id },
       data: {
         deletedAt: new Date(),

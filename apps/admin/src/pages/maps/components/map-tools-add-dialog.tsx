@@ -21,6 +21,7 @@ import { useTranslation } from "react-i18next";
 import type { ToolZone } from "../../../api/maps";
 import type { AddableTool } from "../map-tools-board-model";
 
+/** The tool instance of a given type already on the map, and where it sits. */
 export interface PlacedToolOfType {
   title: string;
   zone: ToolZone | "unplaced";

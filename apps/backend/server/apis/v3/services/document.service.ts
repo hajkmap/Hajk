@@ -23,19 +23,19 @@ class DocumentService {
 
   // ─── Folders ─────────────────────────────────────────────────────────────
 
-  async getFolders(toolId: number) {
+  async getFolders(toolInstanceId: number) {
     return await prisma.documentFolder.findMany({
-      where: { toolId },
+      where: { toolInstanceId },
       orderBy: { title: "asc" },
       include: { _count: { select: { documents: true } } },
     });
   }
 
-  async createFolder(toolId: number, title: string, userId?: string) {
+  async createFolder(toolInstanceId: number, title: string, userId?: string) {
     const base = slugify(title);
     for (let attempt = 1; attempt <= SLUG_MAX_RETRIES; attempt++) {
       const existing = await prisma.documentFolder.findMany({
-        where: { toolId },
+        where: { toolInstanceId },
         select: { name: true },
       });
       const existingNames = new Set(existing.map((f) => f.name));
@@ -46,7 +46,7 @@ class DocumentService {
           data: {
             name,
             title,
-            toolId,
+            toolInstanceId,
             createdBy: userId,
             createdDate: new Date(),
             lastSavedBy: userId,
@@ -63,18 +63,18 @@ class DocumentService {
     // Unreachable — the loop always returns or throws.
     throw new HajkError(
       HttpStatusCodes.CONFLICT,
-      `Could not generate a unique slug for folder '${title}' in tool '${toolId}'.`,
+      `Could not generate a unique slug for folder '${title}' in tool '${toolInstanceId}'.`,
       HajkStatusCodes.DOCUMENT_ALREADY_EXISTS
     );
   }
 
   async renameFolder(
-    toolId: number,
+    toolInstanceId: number,
     folderName: string,
     title: string,
     userId?: string
   ) {
-    const folder = await this.#requireFolder(toolId, folderName);
+    const folder = await this.#requireFolder(toolInstanceId, folderName);
 
     return await prisma.documentFolder.update({
       where: { id: folder.id },
@@ -86,15 +86,15 @@ class DocumentService {
     });
   }
 
-  async deleteFolder(toolId: number, folderName: string) {
+  async deleteFolder(toolInstanceId: number, folderName: string) {
     const folder = await prisma.documentFolder.findFirst({
-      where: { toolId, name: folderName },
+      where: { toolInstanceId, name: folderName },
       include: { _count: { select: { documents: true } } },
     });
     if (!folder) {
       throw new HajkError(
         HttpStatusCodes.NOT_FOUND,
-        `No folder '${folderName}' in tool '${toolId}'.`,
+        `No folder '${folderName}' in tool '${toolInstanceId}'.`,
         HajkStatusCodes.UNKNOWN_FOLDER
       );
     }
@@ -111,10 +111,10 @@ class DocumentService {
 
   // ─── Documents ────────────────────────────────────────────────────────────
 
-  async getDocuments(toolId: number, folderName: string) {
-    const folder = await this.#requireFolder(toolId, folderName);
+  async getDocuments(toolInstanceId: number, folderName: string) {
+    const folder = await this.#requireFolder(toolInstanceId, folderName);
     return await prisma.document.findMany({
-      where: { toolId, folderId: folder.id },
+      where: { toolInstanceId, folderId: folder.id },
       select: {
         id: true,
         name: true,
@@ -126,15 +126,15 @@ class DocumentService {
     });
   }
 
-  async getDocument(toolId: number, folderName: string, docName: string) {
-    const folder = await this.#requireFolder(toolId, folderName);
+  async getDocument(toolInstanceId: number, folderName: string, docName: string) {
+    const folder = await this.#requireFolder(toolInstanceId, folderName);
     const doc = await prisma.document.findFirst({
-      where: { toolId, folderId: folder.id, name: docName },
+      where: { toolInstanceId, folderId: folder.id, name: docName },
     });
     if (!doc) {
       throw new HajkError(
         HttpStatusCodes.NOT_FOUND,
-        `No document '${docName}' in folder '${folderName}' of tool '${toolId}'.`,
+        `No document '${docName}' in folder '${folderName}' of tool '${toolInstanceId}'.`,
         HajkStatusCodes.UNKNOWN_DOCUMENT
       );
     }
@@ -142,17 +142,17 @@ class DocumentService {
   }
 
   async createDocument(
-    toolId: number,
+    toolInstanceId: number,
     folderName: string,
     title: string,
     userId?: string
   ) {
-    const folder = await this.#requireFolder(toolId, folderName);
+    const folder = await this.#requireFolder(toolInstanceId, folderName);
     const base = slugify(title);
 
     for (let attempt = 1; attempt <= SLUG_MAX_RETRIES; attempt++) {
       const existing = await prisma.document.findMany({
-        where: { toolId, folderId: folder.id },
+        where: { toolInstanceId, folderId: folder.id },
         select: { name: true },
       });
       const existingNames = new Set(existing.map((d) => d.name));
@@ -164,7 +164,7 @@ class DocumentService {
             name,
             title,
             content: { chapters: [] },
-            toolId,
+            toolInstanceId,
             folderId: folder.id,
             createdBy: userId,
             createdDate: new Date(),
@@ -187,20 +187,20 @@ class DocumentService {
   }
 
   async saveDocument(
-    toolId: number,
+    toolInstanceId: number,
     folderName: string,
     docName: string,
     data: { title?: string; content: Record<string, unknown> },
     userId?: string
   ) {
-    const folder = await this.#requireFolder(toolId, folderName);
+    const folder = await this.#requireFolder(toolInstanceId, folderName);
     const doc = await prisma.document.findFirst({
-      where: { toolId, folderId: folder.id, name: docName },
+      where: { toolInstanceId, folderId: folder.id, name: docName },
     });
     if (!doc) {
       throw new HajkError(
         HttpStatusCodes.NOT_FOUND,
-        `No document '${docName}' in folder '${folderName}' of tool '${toolId}'.`,
+        `No document '${docName}' in folder '${folderName}' of tool '${toolInstanceId}'.`,
         HajkStatusCodes.UNKNOWN_DOCUMENT
       );
     }
@@ -217,28 +217,28 @@ class DocumentService {
   }
 
   async moveDocument(
-    toolId: number,
+    toolInstanceId: number,
     folderName: string,
     docName: string,
     targetFolderName: string,
     userId?: string
   ) {
-    const folder = await this.#requireFolder(toolId, folderName);
-    const targetFolder = await this.#requireFolder(toolId, targetFolderName);
+    const folder = await this.#requireFolder(toolInstanceId, folderName);
+    const targetFolder = await this.#requireFolder(toolInstanceId, targetFolderName);
 
     const doc = await prisma.document.findFirst({
-      where: { toolId, folderId: folder.id, name: docName },
+      where: { toolInstanceId, folderId: folder.id, name: docName },
     });
     if (!doc) {
       throw new HajkError(
         HttpStatusCodes.NOT_FOUND,
-        `No document '${docName}' in folder '${folderName}' of tool '${toolId}'.`,
+        `No document '${docName}' in folder '${folderName}' of tool '${toolInstanceId}'.`,
         HajkStatusCodes.UNKNOWN_DOCUMENT
       );
     }
 
     const conflict = await prisma.document.findFirst({
-      where: { toolId, folderId: targetFolder.id, name: docName },
+      where: { toolInstanceId, folderId: targetFolder.id, name: docName },
       select: { id: true },
     });
     if (conflict) {
@@ -273,15 +273,15 @@ class DocumentService {
     }
   }
 
-  async deleteDocument(toolId: number, folderName: string, docName: string) {
-    const folder = await this.#requireFolder(toolId, folderName);
+  async deleteDocument(toolInstanceId: number, folderName: string, docName: string) {
+    const folder = await this.#requireFolder(toolInstanceId, folderName);
     const doc = await prisma.document.findFirst({
-      where: { toolId, folderId: folder.id, name: docName },
+      where: { toolInstanceId, folderId: folder.id, name: docName },
     });
     if (!doc) {
       throw new HajkError(
         HttpStatusCodes.NOT_FOUND,
-        `No document '${docName}' in folder '${folderName}' of tool '${toolId}'.`,
+        `No document '${docName}' in folder '${folderName}' of tool '${toolInstanceId}'.`,
         HajkStatusCodes.UNKNOWN_DOCUMENT
       );
     }
@@ -305,10 +305,10 @@ class DocumentService {
     return { ...rest, folderName: folder.name };
   }
 
-  async loadDocumentForClient(toolId: number, folderName: string | null, docName: string) {
+  async loadDocumentForClient(toolInstanceId: number, folderName: string | null, docName: string) {
     let folder;
     if (folderName) {
-      folder = await this.#requireFolder(toolId, folderName);
+      folder = await this.#requireFolder(toolInstanceId, folderName);
     } else {
       // Root-level load — no folder required. All documents now live in a folder,
       // so search by name across all folders for this tool; pick the lowest folderId
@@ -318,15 +318,15 @@ class DocumentService {
 
     const doc = await prisma.document.findFirst({
       where: folder
-        ? { toolId, folderId: folder.id, name: docName }
-        : { toolId, name: docName },
+        ? { toolInstanceId, folderId: folder.id, name: docName }
+        : { toolInstanceId, name: docName },
       ...(folder === null && { orderBy: { folderId: "asc" } }),
     });
 
     if (!doc) {
       throw new HajkError(
         HttpStatusCodes.NOT_FOUND,
-        `No document '${docName}' in tool '${toolId}'.`,
+        `No document '${docName}' in tool '${toolInstanceId}'.`,
         HajkStatusCodes.UNKNOWN_DOCUMENT
       );
     }
@@ -356,14 +356,14 @@ class DocumentService {
 
   // ─── Private ──────────────────────────────────────────────────────────────
 
-  async #requireFolder(toolId: number, folderName: string) {
+  async #requireFolder(toolInstanceId: number, folderName: string) {
     const folder = await prisma.documentFolder.findFirst({
-      where: { toolId, name: folderName },
+      where: { toolInstanceId, name: folderName },
     });
     if (!folder) {
       throw new HajkError(
         HttpStatusCodes.NOT_FOUND,
-        `No folder '${folderName}' in tool '${toolId}'.`,
+        `No folder '${folderName}' in tool '${toolInstanceId}'.`,
         HajkStatusCodes.UNKNOWN_FOLDER
       );
     }

@@ -62,7 +62,6 @@ const KNOWN_TOOL_TYPES = [
 // layerswitcher options hold map-specific groups/baselayers used when seeding
 // the maps' layer trees — keep one Tool instance per map for that type.
 const PER_MAP_TOOL_TYPES = new Set(["layerswitcher"]);
-
 const jsonToDisplayLayerId = new Map();
 const jsonToSearchLayerId = new Map();
 const jsonToEditingLayerId = new Map();
@@ -216,7 +215,7 @@ async function readMapConfigAndPopulateMap(file) {
     let toolId = !perMap ? seededToolsByType.get(toolType) : undefined;
 
     if (toolId == null) {
-      const tool = await prisma.tool.create({
+      const tool = await prisma.toolInstance.create({
         data: {
           type: toolType,
           title: toolOptions.title ?? null,
@@ -968,7 +967,7 @@ async function populateLayerTrees() {
     const options = { ...tool.options };
     delete options.groups;
     delete options.baselayers;
-    await prisma.tool.update({ where: { id: tool.id }, data: { options } });
+    await prisma.toolInstance.update({ where: { id: tool.id }, data: { options } });
   }
 
   // Background layers, with their roles.
@@ -1045,9 +1044,9 @@ async function updateRolesFromVisibleForGroups(
         });
         break;
       case "tool":
-        await prisma.roleOnTool.create({
+        await prisma.roleOnToolInstance.create({
           data: {
-            tool: { connect: { id: entityId } },
+            toolInstance: { connect: { id: entityId } },
             role: { connect: { id: role.id } },
           },
         });
@@ -1142,7 +1141,7 @@ async function seedDocuments() {
   // Collect all documenthandler tools from the DB, keyed by their map(s).
   // We resolve a tool for each document by the doc's optional "map" field,
   // then fall back to the first documenthandler tool found.
-  const dhTools = await prisma.tool.findMany({
+  const dhTools = await prisma.toolInstance.findMany({
     where: { type: "documenthandler", deletedAt: null },
     include: { maps: { select: { mapName: true } } },
   });
@@ -1184,12 +1183,14 @@ async function seedDocuments() {
     existingSlugs.add(folderSlug);
 
     const folder = await prisma.documentFolder.upsert({
-      where: { toolId_name: { toolId, name: folderSlug } },
+      where: {
+        toolInstanceId_name: { toolInstanceId: toolId, name: folderSlug },
+      },
       update: {},
       create: {
         name: folderSlug,
         title: folderTitle,
-        toolId,
+        toolInstanceId: toolId,
         createdDate: new Date(),
         lastSavedDate: new Date(),
       },
@@ -1213,7 +1214,7 @@ async function seedDocuments() {
         name: docSlug,
         title: docTitle,
         content,
-        toolId,
+        toolInstanceId: toolId,
         folderId,
         createdDate: new Date(),
         lastSavedDate: new Date(),
@@ -1313,7 +1314,6 @@ async function createToolTypes() {
   });
   console.log(`Created ${created.count} tool types`);
 }
-
 function remapLayerIdInLayerswitcherOptions(options, idMap) {
   if (!options || typeof options !== "object") {
     return options;
@@ -1381,7 +1381,7 @@ async function assignLayerswitcherDrawOrderIndexes() {
   });
   const nameById = new Map(displayLayers.map((layer) => [layer.id, layer.name]));
 
-  const tools = await prisma.tool.findMany({
+  const tools = await prisma.toolInstance.findMany({
     where: { type: "layerswitcher" },
     select: { id: true, options: true },
   });
@@ -1451,7 +1451,7 @@ async function assignLayerswitcherDrawOrderIndexes() {
         groups: applyDrawOrders(group.groups),
       }));
 
-    await prisma.tool.update({
+    await prisma.toolInstance.update({
       where: { id: tool.id },
       data: {
         options: {
@@ -1475,7 +1475,7 @@ async function assignLayerswitcherDrawOrderIndexes() {
  * ids match Prisma DisplayLayer ids (catalog / Kartlager lookups).
  */
 async function remapLayerswitcherToolOptionsLayerIds() {
-  const tools = await prisma.tool.findMany({
+  const tools = await prisma.toolInstance.findMany({
     where: { type: "layerswitcher" },
     select: { id: true, options: true },
   });
@@ -1486,7 +1486,7 @@ async function remapLayerswitcherToolOptionsLayerIds() {
       tool.options,
       jsonToDisplayLayerId
     );
-    await prisma.tool.update({
+    await prisma.toolInstance.update({
       where: { id: tool.id },
       data: { options: remapped },
     });

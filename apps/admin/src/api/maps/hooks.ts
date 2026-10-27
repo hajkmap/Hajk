@@ -77,7 +77,7 @@ export const useProjectionByMapName = (
   });
 };
 
-// React Query hook to fetch tools by map name
+// React Query hook to fetch the tool instances placed on a map
 // This hook uses the `getToolsByMapName` function from the maps `requests` module
 export const useToolsByMapName = (
   mapName: string
@@ -89,7 +89,7 @@ export const useToolsByMapName = (
   });
 };
 
-// React mutation to update tools for a map
+// React mutation to update which tool instances a map uses and where they are placed
 export const useUpdateMapTools = () => {
   const queryClient = useQueryClient();
   return useMutation({

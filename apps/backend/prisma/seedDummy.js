@@ -567,7 +567,7 @@ async function main() {
   }
 
   for (const u of toolData) {
-    const tool = await prisma.tool.create({
+    const tool = await prisma.toolInstance.create({
       data: u,
     });
     console.log(`Created tool with id: ${tool.id}`);

@@ -481,35 +481,70 @@ export function toolsPayloadSignature(payload: MapToolPayloadEntry[]): string {
   );
 }
 
-/** True when the draft would persist a different tools payload than the server. */
+/**
+ * What the map would show for a tools state. Tools in a column are compared by
+ * their order there, not by raw index, because reordering renumbers a column.
+ */
+function effectiveToolsSignature(
+  state: MapToolsDraftState & { zones: ToolZones },
+  mapTools: ToolOnMap[],
+  toolTypesById: Map<number, string>,
+): string {
+  const payload = zonesToToolsPayload(
+    state.zones,
+    state.activeToolIds,
+    state.windowPositions,
+    state.windowSizes,
+    state.inactiveTargets,
+    mapTools,
+    toolTypesById,
+    state.indexes,
+  );
+  const entries = payload
+    .slice()
+    .sort((a, b) => a.toolId - b.toolId)
+    .map(({ toolId, active, index, target, options }) => ({
+      toolId,
+      active,
+      target,
+      options: options ?? {},
+      ...(active && target != null ? {} : { index }),
+    }));
+  const mapToolsById = new Map(mapTools.map((tool) => [tool.toolId, tool]));
+  const order = activeColumnOrder(
+    state.zones,
+    state.activeToolIds,
+    state.indexes,
+  );
+  // Server zones also hold tools placed by a legacy options.target that the
+  // board never shows in a column, and saving drops them from the zones.
+  const columns = Object.fromEntries(
+    TOOL_PLACEMENT_ZONES.map((zone) => [
+      zone,
+      order[zone].filter(
+        (toolId) =>
+          getMapToolFieldConfig(
+            resolveToolType(toolId, mapToolsById, toolTypesById),
+          ).target,
+      ),
+    ]),
+  );
+  return JSON.stringify({ entries, columns });
+}
+
+/** True when saving the draft would change what the map shows. */
 export function isToolsDraftDirty(
   mapTools: ToolOnMap[],
   draft: MapToolsDraftState & { zones: ToolZones },
   toolTypesById: Map<number, string> = new Map<number, string>(),
 ): boolean {
-  const serverState = buildToolsDraftState(mapTools);
-  const serverPayload = zonesToToolsPayload(
-    mapToolsToZones(mapTools),
-    serverState.activeToolIds,
-    serverState.windowPositions,
-    serverState.windowSizes,
-    serverState.inactiveTargets,
-    mapTools,
-    toolTypesById,
-    serverState.indexes,
-  );
-  const draftPayload = zonesToToolsPayload(
-    draft.zones,
-    draft.activeToolIds,
-    draft.windowPositions,
-    draft.windowSizes,
-    draft.inactiveTargets,
-    mapTools,
-    toolTypesById,
-    draft.indexes,
-  );
+  const server = {
+    ...buildToolsDraftState(mapTools),
+    zones: mapToolsToZones(mapTools),
+  };
   return (
-    toolsPayloadSignature(serverPayload) !== toolsPayloadSignature(draftPayload)
+    effectiveToolsSignature(server, mapTools, toolTypesById) !==
+    effectiveToolsSignature(draft, mapTools, toolTypesById)
   );
 }
 
