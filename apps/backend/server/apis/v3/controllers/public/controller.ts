@@ -7,7 +7,8 @@ class PublicController {
   async getClientConfigForMap(req: Request, res: Response) {
     const mapConfig = await PublicService.getClientConfigForMap(
       req.params.mapName,
-      req.user
+      req.user,
+      typeof res.locals.authUser === "string" ? res.locals.authUser : undefined
     );
 
     res.status(HttpStatusCodes.OK).json(mapConfig);

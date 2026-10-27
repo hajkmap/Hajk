@@ -15,6 +15,7 @@ import {
   buildClientProjectionsForMap,
   buildClientToolsForMap,
 } from "../utils/build-client-map-config.ts";
+import { washClientTools } from "../utils/group-visibility.ts";
 
 const logger = log4js.getLogger("service.v3.public");
 
@@ -48,7 +49,12 @@ class PublicService {
     return formattedMaps;
   }
 
-  async getClientConfigForMap(mapName: string, user?: Express.User) {
+  /** `adUser` is the AD account extractUserContext found; visibleForGroups is checked against it. */
+  async getClientConfigForMap(
+    mapName: string,
+    user?: Express.User,
+    adUser?: string
+  ) {
     logger.debug(
       `Fetching public client config for map "${mapName}", user: ${user?.id || "anonymous"}`
     );
@@ -74,7 +80,9 @@ class PublicService {
         ),
         buildClientMapForMap(mapName),
         buildClientProjectionsForMap(mapName),
-        buildClientToolsForMap(mapName, layerTree),
+        buildClientToolsForMap(mapName, layerTree).then((tools) =>
+          washClientTools(tools, adUser)
+        ),
         this.#getAllMaps(),
       ]);
 

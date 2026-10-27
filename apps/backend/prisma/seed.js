@@ -31,6 +31,7 @@ const DEFAULT_PROJECTION_CODE = "EPSG:3006";
 // with the type name as title.
 const KNOWN_TOOL_TYPES = [
   { type: "anchor", title: "Dela" },
+  { type: "attributeeditor", title: "Attributredigerare" },
   { type: "bookmarks", title: "Bokmärken" },
   { type: "buffer", title: "Buffra" },
   { type: "collector", title: "Tyck till" },
@@ -473,13 +474,13 @@ async function readAndPopulateLayers() {
               geometryField: layer.geometryField || layer.searchGeometryField,
               service: { connect: { id: service.id } },
               options: {
-                editPoint: layer.editPoint,
-                editMultiPoint: layer.editMultiPoint,
-                editLine: layer.editLine,
-                editMultiLine: layer.editMultiLine,
-                editPolygon: layer.editPolygon,
-                editMultiPolygon: layer.editMultiPolygon,
-                allowMultiGeometries: layer.allowMultipleGeometries,
+                uri: layer.uri,
+                idField: layer.idField,
+                forceZ: layer.forceZ,
+                editPoint: layer.editPoint || layer.editMultiPoint,
+                editLine: layer.editLine || layer.editMultiLine,
+                editPolygon: layer.editPolygon || layer.editMultiPolygon,
+                allowMultiGeometries: layer.allowMultiGeom,
                 editableFields: layer.editableFields,
                 nonEditableFields: layer.nonEditableFields,
               },

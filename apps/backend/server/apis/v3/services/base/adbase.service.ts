@@ -8,7 +8,11 @@ class AdBaseService {
   logger: log4js.Logger;
   overrideUser: string | null = null;
   overrideUserGroups: string | null | string[] = null;
-  postRequestHandler?: (request: Request, user: string | undefined) => void;
+  // Declared only, so no field hides a strategy's own method.
+  declare postRequestHandler?: (
+    request: Request,
+    user: string | undefined
+  ) => void;
 
   constructor() {
     this.logger = log4js.getLogger("service.auth.v3");

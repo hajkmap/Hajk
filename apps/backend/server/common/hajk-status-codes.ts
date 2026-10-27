@@ -76,6 +76,11 @@ enum HajkStatusCodes {
   LAYER_ALREADY_PUBLISHED = "CF005",
 
   /**
+   * The editing layer's url is empty, not http(s), or on a host that WFS_ALLOWED_HOSTS leaves out.
+   */
+  LAYER_URL_NOT_ALLOWED = "CF006",
+
+  /**
    * The requested document name does not exist in the given map + folder.
    */
   UNKNOWN_DOCUMENT = "DB012",

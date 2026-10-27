@@ -1,7 +1,7 @@
 import type { FieldValues } from "react-hook-form";
 import type { Layer } from "../../api/layers";
 import type { EditableFieldConfig } from "./types/editing-layer";
-import { geometryTypesFromOptions } from "./types/editing-layer";
+import { editingOptionsFrom } from "./types/editing-layer";
 
 /** Geometry field from searchSettings (search) or top-level scalar (editing). */
 export function getLayerGeometryField(layer: Layer): string {
@@ -32,7 +32,6 @@ export function buildLayerSettingsFormValues(
     !Array.isArray(layer.options)
       ? layer.options
       : {};
-  const savedGeometry = geometryTypesFromOptions(layerOptions);
   const savedEditableFields = Array.isArray(layerOptions.editableFields)
     ? (layerOptions.editableFields as EditableFieldConfig[])
     : [];
@@ -105,13 +104,7 @@ export function buildLayerSettingsFormValues(
       geoWebCache: layer.options?.geoWebCache ?? false,
       showAttributeTableButton:
         layer.options?.showAttributeTableButton ?? false,
-      editPoint: savedGeometry.editPoint,
-      editMultiPoint: savedGeometry.editMultiPoint,
-      editLine: savedGeometry.editLine,
-      editMultiLine: savedGeometry.editMultiLine,
-      editPolygon: savedGeometry.editPolygon,
-      editMultiPolygon: savedGeometry.editMultiPolygon,
-      allowMultiGeometries: savedGeometry.allowMultiGeometries,
+      ...editingOptionsFrom(layerOptions),
       editableFields: savedEditableFields,
       nonEditableFields: savedNonEditableFields,
     },

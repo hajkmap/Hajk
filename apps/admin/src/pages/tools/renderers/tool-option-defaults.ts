@@ -6,6 +6,16 @@ export const anchorDefaults: Record<string, unknown> = {
   visibleForGroups: [],
 };
 
+// The client's own fallbacks. Window placement and size are set per map.
+export const attributeeditorDefaults: Record<string, unknown> = {
+  visibleAtStart: false,
+  visibleForGroups: [],
+  title: "Attributredigerare",
+  description: "Redigera attribut för WFS-lager",
+  zoomLevel: 6,
+  activeServices: [],
+};
+
 // Used as the isDirty baseline in settings.tsx.
 export const bookmarksDefaults: Record<string, unknown> = {
   visibleAtStart: false,
@@ -324,6 +334,7 @@ const toolOptionDefaults: Record<string, Record<string, unknown>> = {
   commandpalette: commandpaletteDefaults,
   feedback: feedbackDefaults,
   floodsimulator: floodsimulatorDefaults,
+  attributeeditor: attributeeditorDefaults,
 };
 
 export const getToolOptionDefaults = (

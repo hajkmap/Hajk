@@ -11,6 +11,7 @@ import {
   FormGroup,
   InputLabel,
   MenuItem,
+  Radio,
   Select,
   Stack,
   Table,
@@ -34,45 +35,40 @@ import FormFieldGrid, {
 import { TextFieldWithHelp } from "../../../components/form-components/field-label-with-help";
 import {
   EditingFieldRow,
-  EditingGeometryTypes,
+  EditingOptions,
   mergeDescribeWithSavedFields,
 } from "../types/editing-layer";
 import type { EditableFieldConfig } from "../types/editing-layer";
 import { useLayerFieldLabels } from "../use-layer-field-labels";
 
-const GEOMETRY_TYPE_ROW_CONFIG: {
-  field: keyof EditingGeometryTypes;
-  labelKey:
-    | "layers.editing.geometry.point"
-    | "layers.editing.geometry.multipoint"
-    | "layers.editing.geometry.line"
-    | "layers.editing.geometry.multiline"
-    | "layers.editing.geometry.polygon"
-    | "layers.editing.geometry.multipolygon"
-    | "layers.editing.allowMultiGeometries";
-}[] = [
-  { field: "editPoint", labelKey: "layers.editing.geometry.point" },
-  { field: "editMultiPoint", labelKey: "layers.editing.geometry.multipoint" },
-  { field: "editLine", labelKey: "layers.editing.geometry.line" },
-  { field: "editMultiLine", labelKey: "layers.editing.geometry.multiline" },
-  { field: "editPolygon", labelKey: "layers.editing.geometry.polygon" },
+type EditingCheckboxOption =
+  "editPoint" | "editLine" | "editPolygon" | "allowMultiGeometries" | "forceZ";
+
+const GEOMETRY_TYPES = [
   {
-    field: "editMultiPolygon",
-    labelKey: "layers.editing.geometry.multipolygon",
+    field: "editPoint",
+    labelKey: "layers.editing.geometry.point",
+    helpKey: "layers.help.editingGeometryPoint",
   },
   {
-    field: "allowMultiGeometries",
-    labelKey: "layers.editing.allowMultiGeometries",
+    field: "editLine",
+    labelKey: "layers.editing.geometry.line",
+    helpKey: "layers.help.editingGeometryLine",
   },
-];
+  {
+    field: "editPolygon",
+    labelKey: "layers.editing.geometry.polygon",
+    helpKey: "layers.help.editingGeometryPolygon",
+  },
+] as const;
 
 interface EditingLayerSettingsProps {
   serviceUrl: string;
   typeName: string;
   geometryField: string;
   onGeometryFieldChange: (value: string) => void;
-  geometryTypes: EditingGeometryTypes;
-  onGeometryTypesChange: (value: EditingGeometryTypes) => void;
+  options: EditingOptions;
+  onOptionsChange: (value: EditingOptions) => void;
   savedEditableFields: EditableFieldConfig[];
   savedNonEditableFields: EditableFieldConfig[];
   onFieldsChange: (
@@ -189,9 +185,10 @@ function ListValuesCell({
         />
         {list.length > 0 ? (
           <Stack
-            sx={{ direction: "row", flexWrap: "wrap" }}
+            direction="row"
             useFlexGap
             spacing={0.5}
+            sx={{ flexWrap: "wrap" }}
           >
             {list.map((v, valueIdx) => (
               <Chip
@@ -228,8 +225,8 @@ export default function EditingLayerSettings({
   typeName,
   geometryField,
   onGeometryFieldChange,
-  geometryTypes,
-  onGeometryTypesChange,
+  options,
+  onOptionsChange,
   savedEditableFields,
   savedNonEditableFields,
   onFieldsChange,
@@ -238,6 +235,7 @@ export default function EditingLayerSettings({
   const { fieldLabel } = useLayerFieldLabels();
   const [fieldsDialogOpen, setFieldsDialogOpen] = useState(false);
   const [draftFieldRows, setDraftFieldRows] = useState<EditingFieldRow[]>([]);
+  const [draftIdField, setDraftIdField] = useState("");
 
   const {
     data: describeProperties,
@@ -270,6 +268,7 @@ export default function EditingLayerSettings({
 
   const handleOpenFieldsDialog = () => {
     setDraftFieldRows(fieldRows);
+    setDraftIdField(options.idField);
     setFieldsDialogOpen(true);
   };
 
@@ -280,25 +279,49 @@ export default function EditingLayerSettings({
   const handleApplyFieldsDialog = () => {
     const { editableFields, nonEditableFields } = splitRows(draftFieldRows);
     onFieldsChange(editableFields, nonEditableFields);
+    onOptionsChange({ ...options, idField: draftIdField });
     setFieldsDialogOpen(false);
   };
 
   const editableCount = fieldRows.filter((r) => r.editable).length;
 
-  const setGeometryType = (
-    key: keyof EditingGeometryTypes,
-    checked: boolean,
-    exclusiveKey?: keyof EditingGeometryTypes,
-  ) => {
-    const next = { ...geometryTypes, [key]: checked };
-    if (checked && exclusiveKey) {
-      next[exclusiveKey] = false;
-    }
-    onGeometryTypesChange(next);
-  };
+  const optionCheckbox = (
+    field: EditingCheckboxOption,
+    labelKey: string,
+    helpKey: string,
+  ) => (
+    <FormControlLabel
+      key={field}
+      control={
+        <Checkbox
+          checked={options[field]}
+          onChange={(e) =>
+            onOptionsChange({ ...options, [field]: e.target.checked })
+          }
+        />
+      }
+      label={fieldLabel(labelKey, helpKey)}
+    />
+  );
 
   return (
     <>
+      <FormPanel title={t("layers.editing.wfstSection")}>
+        <FormFieldGrid>
+          <FormFieldRow>
+            <TextFieldWithHelp
+              labelKey="layers.editing.uri"
+              helpKey="layers.help.editingUri"
+              fullWidth
+              value={options.uri}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                onOptionsChange({ ...options, uri: e.target.value })
+              }
+            />
+          </FormFieldRow>
+        </FormFieldGrid>
+      </FormPanel>
+
       <FormPanel title={t("layers.editing.geometrySection")}>
         <FormFieldGrid>
           <FormFieldRow>
@@ -316,159 +339,24 @@ export default function EditingLayerSettings({
             <Typography variant="subtitle2" gutterBottom>
               {t("layers.editing.geometryTypes")}
             </Typography>
-            <Box sx={{ mb: 2 }}>
-              {GEOMETRY_TYPE_ROW_CONFIG.filter(
-                ({ field }) => geometryTypes[field],
-              ).length === 0 ? (
-                <Typography variant="body2" color="text.secondary">
-                  {t("layers.editing.geometryTypesNone")}
-                </Typography>
-              ) : (
-                <Stack
-                  sx={{ direction: "row", flexWrap: "wrap" }}
-                  useFlexGap
-                  spacing={1}
-                >
-                  {GEOMETRY_TYPE_ROW_CONFIG.filter(
-                    ({ field }) => geometryTypes[field],
-                  ).map(({ field, labelKey }) => (
-                    <Chip
-                      key={field}
-                      size="small"
-                      label={String(t(labelKey as never))}
-                      variant="outlined"
-                      color="primary"
-                    />
-                  ))}
-                </Stack>
-              )}
-            </Box>
             <FormGroup>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={geometryTypes.editPoint}
-                    onChange={(e) =>
-                      setGeometryType(
-                        "editPoint",
-                        e.target.checked,
-                        "editMultiPoint",
-                      )
-                    }
-                  />
-                }
-                label={fieldLabel(
-                  "layers.editing.geometry.point",
-                  "layers.help.editingGeometryPoint",
-                )}
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={geometryTypes.editMultiPoint}
-                    onChange={(e) =>
-                      setGeometryType(
-                        "editMultiPoint",
-                        e.target.checked,
-                        "editPoint",
-                      )
-                    }
-                  />
-                }
-                label={fieldLabel(
-                  "layers.editing.geometry.multipoint",
-                  "layers.help.editingGeometryMultipoint",
-                )}
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={geometryTypes.editLine}
-                    onChange={(e) =>
-                      setGeometryType(
-                        "editLine",
-                        e.target.checked,
-                        "editMultiLine",
-                      )
-                    }
-                  />
-                }
-                label={fieldLabel(
-                  "layers.editing.geometry.line",
-                  "layers.help.editingGeometryLine",
-                )}
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={geometryTypes.editMultiLine}
-                    onChange={(e) =>
-                      setGeometryType(
-                        "editMultiLine",
-                        e.target.checked,
-                        "editLine",
-                      )
-                    }
-                  />
-                }
-                label={fieldLabel(
-                  "layers.editing.geometry.multiline",
-                  "layers.help.editingGeometryMultiline",
-                )}
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={geometryTypes.editPolygon}
-                    onChange={(e) =>
-                      setGeometryType(
-                        "editPolygon",
-                        e.target.checked,
-                        "editMultiPolygon",
-                      )
-                    }
-                  />
-                }
-                label={fieldLabel(
-                  "layers.editing.geometry.polygon",
-                  "layers.help.editingGeometryPolygon",
-                )}
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={geometryTypes.editMultiPolygon}
-                    onChange={(e) =>
-                      setGeometryType(
-                        "editMultiPolygon",
-                        e.target.checked,
-                        "editPolygon",
-                      )
-                    }
-                  />
-                }
-                label={fieldLabel(
-                  "layers.editing.geometry.multipolygon",
-                  "layers.help.editingGeometryMultipolygon",
-                )}
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={geometryTypes.allowMultiGeometries}
-                    onChange={(e) =>
-                      onGeometryTypesChange({
-                        ...geometryTypes,
-                        allowMultiGeometries: e.target.checked,
-                      })
-                    }
-                  />
-                }
-                label={fieldLabel(
-                  "layers.editing.allowMultiGeometries",
-                  "layers.help.editingAllowMultiGeometries",
-                )}
-              />
+              {GEOMETRY_TYPES.map(({ field, labelKey, helpKey }) =>
+                optionCheckbox(field, labelKey, helpKey),
+              )}
+            </FormGroup>
+          </FormFieldRow>
+          <FormFieldRow>
+            <FormGroup>
+              {optionCheckbox(
+                "allowMultiGeometries",
+                "layers.editing.allowMultiGeometries",
+                "layers.help.editingAllowMultiGeometries",
+              )}
+              {optionCheckbox(
+                "forceZ",
+                "layers.editing.forceZ",
+                "layers.help.editingForceZ",
+              )}
             </FormGroup>
           </FormFieldRow>
         </FormFieldGrid>
@@ -502,12 +390,20 @@ export default function EditingLayerSettings({
           </Alert>
         ) : (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Typography variant="body2" color="text.secondary">
-              {t("layers.editing.fieldsSummary", {
-                editable: editableCount,
-                total: fieldRows.length,
-              })}
-            </Typography>
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                {t("layers.editing.fieldsSummary", {
+                  editable: editableCount,
+                  total: fieldRows.length,
+                })}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {t("layers.editing.idFieldSummary", {
+                  field:
+                    options.idField || t("layers.editing.idFieldAutomatic"),
+                })}
+              </Typography>
+            </Box>
             <Box>
               <Button variant="outlined" onClick={handleOpenFieldsDialog}>
                 {t("layers.editing.manageFields")}
@@ -574,6 +470,12 @@ export default function EditingLayerSettings({
                     )}
                   </TableCell>
                   <TableCell>
+                    {fieldLabel(
+                      "layers.editing.col.idField",
+                      "layers.help.editingColIdField",
+                    )}
+                  </TableCell>
+                  <TableCell>
                     {fieldLabel("common.name", "layers.help.fieldName")}
                   </TableCell>
                   <TableCell>
@@ -615,6 +517,26 @@ export default function EditingLayerSettings({
                 </TableRow>
               </TableHead>
               <TableBody>
+                <TableRow>
+                  <TableCell padding="checkbox" />
+                  <TableCell padding="checkbox" />
+                  <TableCell padding="checkbox">
+                    <Radio
+                      name="idField"
+                      checked={draftIdField === ""}
+                      onChange={() => setDraftIdField("")}
+                    />
+                  </TableCell>
+                  <TableCell sx={{ fontStyle: "italic" }}>
+                    {t("layers.editing.idFieldAuto")}
+                  </TableCell>
+                  <TableCell
+                    colSpan={6}
+                    sx={{ fontStyle: "italic", color: "text.secondary" }}
+                  >
+                    {t("layers.editing.idFieldAutoDescription")}
+                  </TableCell>
+                </TableRow>
                 {draftFieldRows.map((row, rowIndex) => (
                   <TableRow key={row.name}>
                     <TableCell padding="checkbox">
@@ -635,6 +557,13 @@ export default function EditingLayerSettings({
                             hidden: e.target.checked,
                           })
                         }
+                      />
+                    </TableCell>
+                    <TableCell padding="checkbox">
+                      <Radio
+                        name="idField"
+                        checked={draftIdField === row.name}
+                        onChange={() => setDraftIdField(row.name)}
                       />
                     </TableCell>
                     <TableCell>{row.name}</TableCell>

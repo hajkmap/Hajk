@@ -50,13 +50,13 @@ function getWfstEditingFields(
   optionsRec: Record<string, unknown>
 ): Record<string, unknown> {
   return {
+    uri: typeof optionsRec.uri === "string" ? optionsRec.uri : "",
+    idField: typeof optionsRec.idField === "string" ? optionsRec.idField : "",
+    forceZ: optionsRec.forceZ === true,
     editPoint: optionsRec.editPoint === true,
-    editMultiPoint: optionsRec.editMultiPoint === true,
     editLine: optionsRec.editLine === true,
-    editMultiLine: optionsRec.editMultiLine === true,
     editPolygon: optionsRec.editPolygon === true,
-    editMultiPolygon: optionsRec.editMultiPolygon === true,
-    allowMultipleGeometries: optionsRec.allowMultiGeometries === true,
+    allowMultiGeom: optionsRec.allowMultiGeometries === true,
     editableFields: Array.isArray(optionsRec.editableFields)
       ? optionsRec.editableFields
       : [],
@@ -230,6 +230,17 @@ function appendEditingLayerToWfst(
   editingLayer: EditingLayerWithRelations,
   instance?: { id: string; zIndex: number }
 ) {
+  out.wfstlayers.push(toClientWfstLayer(editingLayer, instance));
+}
+
+/**
+ * An editing layer as the client's `wfstlayers` have it. On a map, `instance`
+ * is its placement there, whose id the client then uses.
+ */
+export function toClientWfstLayer(
+  editingLayer: EditingLayerWithRelations,
+  instance?: { id: string; zIndex: number }
+): Record<string, unknown> {
   const service = editingLayer.service;
   const svc = toClientServiceFields({
     url: service.url,
@@ -246,7 +257,7 @@ function appendEditingLayerToWfst(
   const selected = editingLayer.selectedLayers ?? [];
   const optionsRec = getOptionsRecord(editingLayer.options);
 
-  out.wfstlayers.push({
+  return {
     id: instance?.id ?? editingLayer.id,
     caption: editingLayer.name,
     url: svc.url,
@@ -258,7 +269,7 @@ function appendEditingLayerToWfst(
     geometryField: editingLayer.geometryField ?? "geom",
     zIndex: instance && instance.zIndex !== 0 ? instance.zIndex : null,
     ...getWfstEditingFields(optionsRec),
-  });
+  };
 }
 
 type DisplayLayerWithRelations = Prisma.DisplayLayerGetPayload<{

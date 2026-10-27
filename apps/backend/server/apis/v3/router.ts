@@ -8,6 +8,7 @@ import filesRouter from "./controllers/files/router.ts";
 import groupsRouter from "./controllers/groups/router.ts";
 import layersRouter from "./controllers/layers/router.ts";
 import mapsRouter from "./controllers/maps/router.ts";
+import ogcRouter from "./controllers/ogc/router.ts";
 import presenceRouter from "./controllers/presence/router.ts";
 import publicRouter from "./controllers/public/router.ts";
 import servicesRouter from "./controllers/services/router.ts";
@@ -25,6 +26,7 @@ export default Router()
   .use("/healthz", healthRouter)
   // All other endpoints require authentication
   .use("/public", isAuthenticated, publicRouter)
+  .use("/ogc", isAuthenticated, ogcRouter)
   // The admin endpoints require that the user is authenticated and has the admin role
   .use("/websockets", isAdmin, websocketsRouter) // Note that UPGRADE endpoint at /api/v3/websockets is not behind this router, but rather directly in the websockets.ts file
   .use("/database", isAdmin, databaseRouter)

@@ -17,37 +17,38 @@ export interface EditingFieldRow extends EditableFieldConfig {
   type: string;
 }
 
-export interface EditingGeometryTypes {
+/** Editing settings persisted in layer.options; an empty idField means automatic. */
+export interface EditingOptions {
+  uri: string;
+  idField: string;
+  forceZ: boolean;
   editPoint: boolean;
-  editMultiPoint: boolean;
   editLine: boolean;
-  editMultiLine: boolean;
   editPolygon: boolean;
-  editMultiPolygon: boolean;
   allowMultiGeometries: boolean;
 }
 
-export const defaultEditingGeometryTypes = (): EditingGeometryTypes => ({
+export const defaultEditingOptions = (): EditingOptions => ({
+  uri: "",
+  idField: "",
+  forceZ: false,
   editPoint: false,
-  editMultiPoint: false,
   editLine: false,
-  editMultiLine: false,
   editPolygon: false,
-  editMultiPolygon: false,
   allowMultiGeometries: false,
 });
 
-export function geometryTypesFromOptions(
+export function editingOptionsFrom(
   options: Record<string, unknown> | undefined,
-): EditingGeometryTypes {
-  if (!options) return defaultEditingGeometryTypes();
+): EditingOptions {
+  if (!options) return defaultEditingOptions();
   return {
+    uri: typeof options.uri === "string" ? options.uri : "",
+    idField: typeof options.idField === "string" ? options.idField : "",
+    forceZ: options.forceZ === true,
     editPoint: options.editPoint === true,
-    editMultiPoint: options.editMultiPoint === true,
     editLine: options.editLine === true,
-    editMultiLine: options.editMultiLine === true,
     editPolygon: options.editPolygon === true,
-    editMultiPolygon: options.editMultiPolygon === true,
     allowMultiGeometries: options.allowMultiGeometries === true,
   };
 }

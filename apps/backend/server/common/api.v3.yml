@@ -589,6 +589,62 @@ paths:
           description: Requested group was not found
         409:
           description: The tree has been saved since the version sent; load it again
+  /ogc/wfst:
+    get:
+      tags:
+        - Client-accessible
+      summary: The WFS-T layers the attribute editor can edit
+      parameters:
+        - name: fields
+          in: query
+          description: Comma-separated fields to return, e.g. id,caption; all of them when left out
+          required: false
+          schema:
+            type: string
+      responses:
+        200:
+          description: The editing layers as the client config's wfstlayers have them, leaving out those whose url is empty, not http(s), or on a host WFS_ALLOWED_HOSTS leaves out
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  layers:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/WfstLayer"
+  /ogc/wfst/{id}:
+    get:
+      tags:
+        - Client-accessible
+      summary: One WFS-T layer the attribute editor can edit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: fields
+          in: query
+          description: Comma-separated fields to return, e.g. id,caption; all of them when left out
+          required: false
+          schema:
+            type: string
+      responses:
+        200:
+          description: The editing layer as the client config's wfstlayers have it
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WfstLayer"
+        400:
+          description: Invalid layer id
+        404:
+          description: No such editing layer
+        500:
+          description: The layer's url is empty, not http(s), or on a host WFS_ALLOWED_HOSTS leaves out
   /presence:
     get:
       tags:
@@ -1347,6 +1403,64 @@ components:
       schema:
         type: string
   schemas:
+    WfstLayer:
+      type: object
+      description: An editing layer as the client config's wfstlayers have it. With the fields query parameter only the fields asked for are present.
+      properties:
+        id:
+          type: string
+        caption:
+          type: string
+        url:
+          type: string
+          description: The WFS-T service's url, absolute or this backend's proxy
+        serverType:
+          type: string
+        projection:
+          type: string
+        version:
+          type: string
+          description: The WFS version
+        layers:
+          type: array
+          items:
+            type: string
+        layer:
+          type: string
+          description: The first of layers
+        geometryField:
+          type: string
+        zIndex:
+          type: integer
+          nullable: true
+        uri:
+          type: string
+          description: The feature type's namespace; empty when not set
+        idField:
+          type: string
+          description: The attribute that identifies the features; empty means automatic
+        forceZ:
+          type: boolean
+          description: The layer has 3D geometry
+        editPoint:
+          type: boolean
+        editLine:
+          type: boolean
+        editPolygon:
+          type: boolean
+        allowMultiGeom:
+          type: boolean
+          description: Several parts may be drawn as one feature
+        editableFields:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        nonEditableFields:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
     SearchAutocompleteBody:
       type: object
       properties:

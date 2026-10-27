@@ -68,12 +68,12 @@ import FormPanel from "../../components/form-components/form-panel";
 import LayerInfoClickModal from "./components/layer-infoclick-modal";
 import EditingLayerSettings from "./components/editing-layer-settings";
 import {
-  defaultEditingGeometryTypes,
-  geometryTypesFromOptions,
+  defaultEditingOptions,
+  editingOptionsFrom,
 } from "./types/editing-layer";
 import DialogWrapper from "../../components/flexible-dialog";
 import type { EditableFieldConfig } from "./types/editing-layer";
-import type { EditingGeometryTypes } from "./types/editing-layer";
+import type { EditingOptions } from "./types/editing-layer";
 import { buildLayerUpdatePayload } from "../../api/layers/build-layer-payload";
 import {
   getLayerCategoryFromPathname,
@@ -265,8 +265,9 @@ export default function LayerSettings() {
     { pxRatio: 0, dpi: 90 },
     { pxRatio: 2, dpi: 180 },
   ]);
-  const [editingGeometryTypes, setEditingGeometryTypes] =
-    useState<EditingGeometryTypes>(defaultEditingGeometryTypes());
+  const [editingOptions, setEditingOptions] = useState<EditingOptions>(
+    defaultEditingOptions(),
+  );
   const [editingEditableFields, setEditingEditableFields] = useState<
     EditableFieldConfig[]
   >([]);
@@ -319,7 +320,7 @@ export default function LayerSettings() {
         ? layer.options
         : {};
     return {
-      geometryTypes: geometryTypesFromOptions(opts),
+      options: editingOptionsFrom(opts),
       editableFields: Array.isArray(opts.editableFields)
         ? (opts.editableFields as EditableFieldConfig[])
         : [],
@@ -343,7 +344,7 @@ export default function LayerSettings() {
     setSyncedLayerFormKey(layerFormSyncKey);
     setCommittedFormBaseline(null);
     if (layerEditingDefaults) {
-      setEditingGeometryTypes(layerEditingDefaults.geometryTypes);
+      setEditingOptions(layerEditingDefaults.options);
       setEditingEditableFields(layerEditingDefaults.editableFields);
       setEditingNonEditableFields(layerEditingDefaults.nonEditableFields);
     }
@@ -746,13 +747,7 @@ export default function LayerSettings() {
           newOptions.layerDisplayDescription ??
           existingOptions.layerDisplayDescription,
         ...(settingsVisibility.showEditingSettingsPanel && {
-          editPoint: editingGeometryTypes.editPoint,
-          editMultiPoint: editingGeometryTypes.editMultiPoint,
-          editLine: editingGeometryTypes.editLine,
-          editMultiLine: editingGeometryTypes.editMultiLine,
-          editPolygon: editingGeometryTypes.editPolygon,
-          editMultiPolygon: editingGeometryTypes.editMultiPolygon,
-          allowMultiGeometries: editingGeometryTypes.allowMultiGeometries,
+          ...editingOptions,
           editableFields: editingEditableFields,
           nonEditableFields: editingNonEditableFields,
         }),
@@ -908,13 +903,7 @@ export default function LayerSettings() {
             geoWebCache: layerData.options?.geoWebCache,
             showAttributeTableButton:
               layerData.options?.showAttributeTableButton,
-            editPoint: editingGeometryTypes.editPoint,
-            editMultiPoint: editingGeometryTypes.editMultiPoint,
-            editLine: editingGeometryTypes.editLine,
-            editMultiLine: editingGeometryTypes.editMultiLine,
-            editPolygon: editingGeometryTypes.editPolygon,
-            editMultiPolygon: editingGeometryTypes.editMultiPolygon,
-            allowMultiGeometries: editingGeometryTypes.allowMultiGeometries,
+            ...editingOptions,
             editableFields: editingEditableFields,
             nonEditableFields: editingNonEditableFields,
           },
@@ -1091,14 +1080,7 @@ export default function LayerSettings() {
                     data.options as { showAttributeTableButton?: boolean }
                   )?.showAttributeTableButton,
                   ...(settingsVisibility.showEditingSettingsPanel && {
-                    editPoint: editingGeometryTypes.editPoint,
-                    editMultiPoint: editingGeometryTypes.editMultiPoint,
-                    editLine: editingGeometryTypes.editLine,
-                    editMultiLine: editingGeometryTypes.editMultiLine,
-                    editPolygon: editingGeometryTypes.editPolygon,
-                    editMultiPolygon: editingGeometryTypes.editMultiPolygon,
-                    allowMultiGeometries:
-                      editingGeometryTypes.allowMultiGeometries,
+                    ...editingOptions,
                     editableFields: editingEditableFields,
                     nonEditableFields: editingNonEditableFields,
                   }),
@@ -2642,17 +2624,17 @@ export default function LayerSettings() {
               keywords={[
                 ...settingsSearchLabels(
                   "layers.editing.tab",
+                  "layers.editing.wfstSection",
+                  "layers.editing.uri",
                   "layers.editing.geometrySection",
                   "layers.editing.geometryTypes",
                   "layers.editing.editableFields",
                   "layers.searchSettings.geometryField",
                   "layers.editing.geometry.point",
-                  "layers.editing.geometry.multipoint",
                   "layers.editing.geometry.line",
-                  "layers.editing.geometry.multiline",
                   "layers.editing.geometry.polygon",
-                  "layers.editing.geometry.multipolygon",
                   "layers.editing.allowMultiGeometries",
+                  "layers.editing.forceZ",
                 ),
                 "redigering",
                 "editing",
@@ -2666,13 +2648,13 @@ export default function LayerSettings() {
               ]}
               fields={[
                 "searchSettings.geometryField",
+                "options.uri",
+                "options.idField",
                 "options.editPoint",
-                "options.editMultiPoint",
                 "options.editLine",
-                "options.editMultiLine",
                 "options.editPolygon",
-                "options.editMultiPolygon",
                 "options.allowMultiGeometries",
+                "options.forceZ",
               ]}
               allValues={showSettingsSearchUi ? getValues() : undefined}
               searchTerm={settingsSearchTerm}
@@ -2683,27 +2665,27 @@ export default function LayerSettings() {
                   <SettingsSearchField
                     labelKeys={[
                       "layers.editing.tab",
+                      "layers.editing.wfstSection",
+                      "layers.editing.uri",
                       "layers.editing.geometrySection",
                       "layers.editing.geometryTypes",
                       "layers.searchSettings.geometryField",
                       "layers.editing.editableFields",
                       "layers.editing.geometry.point",
-                      "layers.editing.geometry.multipoint",
                       "layers.editing.geometry.line",
-                      "layers.editing.geometry.multiline",
                       "layers.editing.geometry.polygon",
-                      "layers.editing.geometry.multipolygon",
                       "layers.editing.allowMultiGeometries",
+                      "layers.editing.forceZ",
                     ]}
                     fields={[
                       "searchSettings.geometryField",
+                      "options.uri",
+                      "options.idField",
                       "options.editPoint",
-                      "options.editMultiPoint",
                       "options.editLine",
-                      "options.editMultiLine",
                       "options.editPolygon",
-                      "options.editMultiPolygon",
                       "options.allowMultiGeometries",
+                      "options.forceZ",
                     ]}
                     synonyms={[
                       "redigering",
@@ -2728,21 +2710,11 @@ export default function LayerSettings() {
                           shouldDirty: true,
                         })
                       }
-                      geometryTypes={editingGeometryTypes}
-                      onGeometryTypesChange={(types) => {
-                        setEditingGeometryTypes(types);
-                        (
-                          [
-                            "editPoint",
-                            "editMultiPoint",
-                            "editLine",
-                            "editMultiLine",
-                            "editPolygon",
-                            "editMultiPolygon",
-                            "allowMultiGeometries",
-                          ] as const satisfies readonly (keyof EditingGeometryTypes)[]
-                        ).forEach((key) => {
-                          setValue(`options.${key}`, types[key], {
+                      options={editingOptions}
+                      onOptionsChange={(options) => {
+                        setEditingOptions(options);
+                        Object.entries(options).forEach(([key, value]) => {
+                          setValue(`options.${key}`, value, {
                             shouldDirty: true,
                           });
                         });
