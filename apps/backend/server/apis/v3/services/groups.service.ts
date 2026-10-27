@@ -275,34 +275,50 @@ class GroupsService {
     // Soft delete — the group keeps its own tree, but its placements in maps
     // and other groups are removed.
     await prisma.$transaction(async (transaction) => {
-      const [mapTreePlacements, mapExceptions, parentItems, nestedRefs] =
-        await Promise.all([
-          transaction.mapTreeItem.findMany({
-            where: { groupId: id },
-            select: { mapName: true },
-          }),
-          transaction.mapGroupException.findMany({
-            where: {
-              OR: [{ groupId: id }, { childGroupId: id }],
-            },
-            select: { mapName: true },
-          }),
-          transaction.groupItem.findMany({
-            where: { childGroupId: id },
-            select: { groupId: true },
-          }),
-          transaction.groupNestedItem.findMany({
-            where: {
-              OR: [{ groupId: id }, { childGroupId: id }],
-            },
-            select: { ownerGroupId: true },
-          }),
-        ]);
+      const [
+        mapTreePlacements,
+        mapExceptions,
+        mapGroupSettings,
+        mapLayerSettings,
+        parentItems,
+        nestedRefs,
+      ] = await Promise.all([
+        transaction.mapTreeItem.findMany({
+          where: { groupId: id },
+          select: { mapName: true },
+        }),
+        transaction.mapGroupException.findMany({
+          where: {
+            OR: [{ groupId: id }, { childGroupId: id }],
+          },
+          select: { mapName: true },
+        }),
+        transaction.mapGroupSetting.findMany({
+          where: { groupId: id },
+          select: { mapName: true },
+        }),
+        transaction.mapLayerSetting.findMany({
+          where: { groupId: id },
+          select: { mapName: true },
+        }),
+        transaction.groupItem.findMany({
+          where: { childGroupId: id },
+          select: { groupId: true },
+        }),
+        transaction.groupNestedItem.findMany({
+          where: {
+            OR: [{ groupId: id }, { childGroupId: id }],
+          },
+          select: { ownerGroupId: true },
+        }),
+      ]);
 
       const mapNames = [
         ...new Set([
           ...mapTreePlacements.map((row) => row.mapName),
           ...mapExceptions.map((row) => row.mapName),
+          ...mapGroupSettings.map((row) => row.mapName),
+          ...mapLayerSettings.map((row) => row.mapName),
         ]),
       ];
       const parentGroupIds = [
