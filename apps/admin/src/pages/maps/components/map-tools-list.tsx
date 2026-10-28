@@ -369,6 +369,7 @@ function MapToolsList({
         label: tool.title,
         toolId: tool.toolId,
         active: tool.active,
+        toolSettings: true,
       });
     }
     if (mapControls.showThemeToggler) {

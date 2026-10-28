@@ -366,7 +366,7 @@
     "maps.toolsFixedTheme": "Tema",
     "maps.toolsFixedRecent": "Senaste verktyg",
     "maps.toolsShowMapSetting": "Visa den här inställningen",
-    "maps.toolsUnplacedTitle": "Övriga verktyg",
+    "maps.toolsUnplacedTitle": "Verktyg utan placering",
     "maps.toolsUnplacedHelp": "De här verktygen kan slås på, men de har ingen verktygsplacering. Var de visas på kartan är fast.",
     "maps.toolsUnplacedWhere.search": "Sökfält i sidhuvudet",
     "maps.toolsUnplacedWhere.infoclick": "Körs när kartan klickas",

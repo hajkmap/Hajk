@@ -367,7 +367,7 @@
     "maps.toolsFixedTheme": "Theme",
     "maps.toolsFixedRecent": "Recent tools",
     "maps.toolsShowMapSetting": "Show this setting",
-    "maps.toolsUnplacedTitle": "Other tools",
+    "maps.toolsUnplacedTitle": "Tools without placement",
     "maps.toolsUnplacedHelp": "These tools can be turned on, but they have no tool placement. Where they show on the map is fixed.",
     "maps.toolsUnplacedWhere.search": "Search field in the header",
     "maps.toolsUnplacedWhere.infoclick": "Runs when the map is clicked",

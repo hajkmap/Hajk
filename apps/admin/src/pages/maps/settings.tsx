@@ -672,14 +672,11 @@ export default function MapSettings() {
     useWatch({ control, name: "options.showCookieNoticeButton" }) === true;
   const userAvatarOn =
     useWatch({ control, name: "options.showUserAvatar" }) === true;
-  const introductionEnabledOn =
-    useWatch({ control, name: "options.introductionEnabled" }) === true;
   const introductionButtonOn =
     useWatch({
       control,
       name: "options.introductionShowControlButton",
     }) === true;
-  const introductionOn = introductionEnabledOn && introductionButtonOn;
   const mapResetterOn =
     useWatch({ control, name: "options.mapresetter" }) === true;
   const mapSelectorOn =
@@ -696,7 +693,7 @@ export default function MapSettings() {
     () => ({
       showCookieNoticeButton: cookieButtonOn,
       showUserAvatar: userAvatarOn,
-      showIntroductionButton: introductionOn,
+      showIntroductionButton: introductionButtonOn,
       mapresetter: mapResetterOn,
       showMapSelectorButton: mapSelectorOn && mapSelectorIsButton,
       mapcleaner: mapCleanerOn,
@@ -705,7 +702,7 @@ export default function MapSettings() {
     }),
     [
       cookieButtonOn,
-      introductionOn,
+      introductionButtonOn,
       mapCleanerOn,
       mapSelectorIsButton,
       mapResetterOn,
