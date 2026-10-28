@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Accordion,
   AccordionSummary,
@@ -8,6 +8,11 @@ import {
   alpha,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import {
+  SETTINGS_SEARCH_CLOSE,
+  SETTINGS_SEARCH_OPEN,
+  useSettingsSearchTerm,
+} from "./settings-search";
 
 interface FormAccordionProps {
   title: string;
@@ -21,6 +26,31 @@ export default function FormAccordion({
   defaultExpanded = false,
 }: FormAccordionProps) {
   const [expanded, setExpanded] = useState(defaultExpanded);
+  const searching = useSettingsSearchTerm() !== null;
+  const rootRef = useRef<HTMLDivElement>(null);
+  const expandedRef = useRef(expanded);
+  const openedBySearch = useRef(false);
+  expandedRef.current = expanded;
+
+  useEffect(() => {
+    const node = rootRef.current;
+    if (!node) return;
+    const open = () => {
+      if (!expandedRef.current) openedBySearch.current = true;
+      setExpanded(true);
+    };
+    const close = () => {
+      if (!openedBySearch.current) return;
+      openedBySearch.current = false;
+      setExpanded(false);
+    };
+    node.addEventListener(SETTINGS_SEARCH_OPEN, open);
+    node.addEventListener(SETTINGS_SEARCH_CLOSE, close);
+    return () => {
+      node.removeEventListener(SETTINGS_SEARCH_OPEN, open);
+      node.removeEventListener(SETTINGS_SEARCH_CLOSE, close);
+    };
+  }, []);
 
   const handleAccordionChange = (
     _event: React.SyntheticEvent,
@@ -31,9 +61,13 @@ export default function FormAccordion({
 
   return (
     <Accordion
+      ref={rootRef}
       disableGutters
       expanded={expanded}
       onChange={handleAccordionChange}
+      {...(searching
+        ? { "data-settings-section": "", "data-settings-title": title }
+        : {})}
       sx={{
         width: "100%",
         marginBottom: "24px !important",

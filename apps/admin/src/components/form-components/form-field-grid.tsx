@@ -1,5 +1,6 @@
-import type { ReactNode } from "react";
+import { Children, type ReactNode } from "react";
 import { Box, Stack, type SxProps, type Theme } from "@mui/material";
+import { useSettingsSearchTerm } from "./settings-search";
 
 /** Vertical gap between stacked fields in settings panels (12px). */
 export const FORM_FIELD_ROW_SPACING = 1.5;
@@ -23,11 +24,30 @@ export function FormFieldRow({ children }: { children: ReactNode }) {
   return <Box sx={{ width: "100%", minWidth: 0 }}>{children}</Box>;
 }
 
+/** Marks one grid row so the settings search can show or hide it without re-rendering. */
+function SettingsSearchItem({ children }: { children: ReactNode }) {
+  return (
+    <Box data-settings-field="" sx={{ width: "100%", minWidth: 0 }}>
+      {children}
+    </Box>
+  );
+}
+
 /** Standard single-column field layout for FormPanel / FormAccordion content. */
 export default function FormFieldGrid({ children, sx }: FormFieldGridProps) {
+  const term = useSettingsSearchTerm();
+
   return (
     <Stack spacing={FORM_FIELD_ROW_SPACING} sx={{ width: "100%", ...sx }}>
-      {children}
+      {term === null
+        ? children
+        : Children.map(children, (child) =>
+            child == null || typeof child === "boolean" ? (
+              child
+            ) : (
+              <SettingsSearchItem>{child}</SettingsSearchItem>
+            ),
+          )}
     </Stack>
   );
 }

@@ -1,11 +1,14 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router";
 import {
   Box,
   Button,
   Chip,
+  FormControl,
   IconButton,
+  InputLabel,
   MenuItem,
+  Select,
   TextField,
   Tooltip,
   Typography,
@@ -29,6 +32,11 @@ import {
 import StyledDataGrid from "../../../components/data-grid";
 import DialogWrapper from "../../../components/flexible-dialog";
 import CreateButton from "../../../components/create-button";
+import {
+  ListFilterField,
+  ListFilterRow,
+  ListFilterSearch,
+} from "../../../components/form-components/list-filter-row";
 
 function ToolUsedInMapsCell({
   count,
@@ -117,7 +125,7 @@ export default function ToolsList({
   pageTitleKey,
   baseRoute,
 }: ToolsListProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { data: tools, isLoading } = useTools();
   const { data: toolTypes } = useToolTypes();
   const { mutateAsync: createTool } = useCreateTool();
@@ -125,6 +133,7 @@ export default function ToolsList({
   const navigate = useNavigate();
   const { palette } = useTheme();
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [typeFilter, setTypeFilter] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
   const [toolToDelete, setToolToDelete] = useState<Tool | null>(null);
 
@@ -143,21 +152,43 @@ export default function ToolsList({
     setSearchTerm(event.target.value);
   };
 
+  const typeLabel = useCallback(
+    (type: string) =>
+      t(`tools.typeNames.${type}`, { defaultValue: type }),
+    [t],
+  );
+
+  const pageTools = useMemo(
+    () => (tools ? filterTools(tools) : []),
+    [tools, filterTools],
+  );
+
+  const typeOptions = useMemo(() => {
+    const types = [...new Set(pageTools.map((tool) => tool.type))];
+    return types.sort((a, b) =>
+      typeLabel(a).localeCompare(typeLabel(b), i18n.language),
+    );
+  }, [pageTools, typeLabel, i18n.language]);
+
+  const optionLabel = useCallback(
+    (type: string) => {
+      const label = typeLabel(type);
+      const shared = typeOptions.filter((option) => typeLabel(option) === label);
+      return shared.length > 1 ? `${label} (${type})` : label;
+    },
+    [typeLabel, typeOptions],
+  );
+
   const filteredTools = useMemo(() => {
-    if (!tools) return [];
-
-    // First apply the specific filter for this page type
-    const typeFilteredTools = filterTools(tools);
-
-    // Then apply search filter
-    const searchFilter = (tool: Tool) => {
+    const needle = searchTerm.toLowerCase();
+    return pageTools.filter((tool) => {
+      if (typeFilter && tool.type !== typeFilter) return false;
       const titleText = tool.title ?? "";
-      const combinedText = `${tool.type} ${titleText}`.toLowerCase();
-      return combinedText.includes(searchTerm.toLowerCase());
-    };
-
-    return typeFilteredTools.filter(searchFilter);
-  }, [tools, searchTerm, filterTools]);
+      const combinedText =
+        `${tool.type} ${typeLabel(tool.type)} ${titleText}`.toLowerCase();
+      return combinedText.includes(needle);
+    });
+  }, [pageTools, searchTerm, typeFilter, typeLabel]);
 
   const handleCreateSubmit = async (data: ToolCreateInput) => {
     try {
@@ -258,7 +289,7 @@ export default function ToolsList({
                 >
                   {(toolTypes ?? []).map((toolType) => (
                     <MenuItem key={toolType.type} value={toolType.type}>
-                      {`${toolType.title} (${toolType.type})`}
+                      {typeLabel(toolType.type)}
                     </MenuItem>
                   ))}
                 </TextField>
@@ -329,15 +360,37 @@ export default function ToolsList({
         <Typography variant="h6">{t("common.loading")}</Typography>
       ) : (
         <>
-          <Box sx={{ mb: 2, width: { xs: "100%", sm: "50%", md: "33%" } }}>
-            <TextField
-              fullWidth
-              label={t("tools.searchTitle")}
-              variant="outlined"
-              value={searchTerm}
-              onChange={handleSearchChange}
-            />
-          </Box>
+          <ListFilterRow>
+            <ListFilterSearch>
+              <TextField
+                fullWidth
+                label={t("tools.searchTitle")}
+                variant="outlined"
+                value={searchTerm}
+                onChange={handleSearchChange}
+              />
+            </ListFilterSearch>
+            <ListFilterField>
+              <FormControl fullWidth>
+                <InputLabel id="tool-type-filter-label">
+                  {t("tools.toolType")}
+                </InputLabel>
+                <Select
+                  labelId="tool-type-filter-label"
+                  label={t("tools.toolType")}
+                  value={typeFilter}
+                  onChange={(event) => setTypeFilter(event.target.value)}
+                >
+                  <MenuItem value="">{t("common.all")}</MenuItem>
+                  {typeOptions.map((type) => (
+                    <MenuItem key={type} value={type}>
+                      {optionLabel(type)}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </ListFilterField>
+          </ListFilterRow>
 
           <Box sx={{ width: "100%", minWidth: 0 }}>
             <StyledDataGrid
@@ -354,6 +407,8 @@ export default function ToolsList({
                   field: "type",
                   headerName: t("tools.type"),
                   flex: 0.4,
+                  valueGetter: (_value: unknown, row: Tool) =>
+                    typeLabel(row.type),
                 },
                 {
                   field: "mapsCount",

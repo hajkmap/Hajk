@@ -126,10 +126,15 @@ function MapToolCard({
   const auto = t("maps.toolsSizeAuto");
   const width = tool.windowWidth ?? tool.defaultWidth;
   const height = tool.windowHeight ?? tool.defaultHeight;
-  const hasTitle = tool.title.trim() !== "" && tool.title !== tool.type;
-  const primaryLabel = hasTitle ? tool.title : tool.type || tool.title;
+  const typeName = t(`tools.typeNames.${tool.type}`, {
+    defaultValue: tool.type,
+  });
+  const title = tool.title.trim();
+  const hasTitle =
+    title !== "" && title !== tool.type && title !== typeName;
+  const primaryLabel = hasTitle ? tool.title : typeName || tool.title;
   const summary = [
-    hasTitle ? tool.type : null,
+    hasTitle ? typeName : null,
     tool.showWindowPosition
       ? t(`maps.windowPlacement.${tool.windowPosition}`)
       : null,
