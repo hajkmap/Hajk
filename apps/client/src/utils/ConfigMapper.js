@@ -1,5 +1,6 @@
 import { Projection } from "ol/proj";
 import i18n from "src/i18n";
+import { layerHasLabelStyle } from "./labelStyle";
 
 export default class ConfigMapper {
   constructor(proxy) {
@@ -154,7 +155,7 @@ export default class ConfigMapper {
         layerType: args.layerType,
         caption: args.caption,
         visible: args.visibleAtStart,
-        hasLabelStyle: args.hasLabelStyle || false,
+        hasLabelStyle: layerHasLabelStyle(args),
         opacity: args.opacity || 1,
         zIndex: args.drawOrder || 0,
         maxZoom: args.maxZoom,

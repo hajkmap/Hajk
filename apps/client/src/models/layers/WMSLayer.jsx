@@ -8,6 +8,7 @@ import LayerInfo from "./LayerInfo";
 import { equals } from "ol/extent";
 import { delay } from "../../utils/Delay";
 import { hfetch, overrideLayerSourceParams } from "../../utils/FetchWrapper";
+import { applyLabelStyle } from "../../utils/labelStyle";
 
 class WMSLayer {
   constructor(config, proxyUrl, globalObserver) {
@@ -123,6 +124,17 @@ class WMSLayer {
     );
     this.layer.set("hasLabelStyle", config.hasLabelStyle);
     this.layer.set("useLabelStyle", false);
+    if (config.hasLabelStyle) {
+      // Remember the layer name and default style so that the label style
+      // can be toggled back and forth, and apply STYLES whenever the flag
+      // changes, no matter who changed it (URL, LayerSwitcher, LayerControlModel…)
+      this.layer.set("wmsLayerName", this.subLayers[0]);
+      this.layer.set(
+        "initialStyles",
+        this.layer.getSource().getParams().STYLES || ""
+      );
+      this.layer.on("change:useLabelStyle", () => applyLabelStyle(this.layer));
+    }
     this.layer.set(
       "minMaxZoomAlertOnToggleOnly",
       !!config.minMaxZoomAlertOnToggleOnly
