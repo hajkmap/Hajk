@@ -241,6 +241,38 @@ export function CheckboxOption({
   );
 }
 
+/** Instruction is stored base64-encoded, the same way the client reads it. */
+export function InstructionOption({
+  control,
+}: {
+  control: Control<FieldValues>;
+}) {
+  const { t } = useTranslation();
+  return (
+    <FormFieldRow>
+      <Controller
+        name="options.instruction"
+        control={control}
+        render={({ field }) => (
+          <TextField
+            label={t("tools.instruction")}
+            fullWidth
+            multiline
+            minRows={3}
+            value={
+              typeof field.value === "string" && field.value
+                ? atob(field.value)
+                : ""
+            }
+            onChange={(event) => field.onChange(btoa(event.target.value))}
+            onBlur={field.onBlur}
+          />
+        )}
+      />
+    </FormFieldRow>
+  );
+}
+
 export function GroupsOption({ control }: { control: Control<FieldValues> }) {
   const { t } = useTranslation();
   return (

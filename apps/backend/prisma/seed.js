@@ -38,6 +38,7 @@ const KNOWN_TOOL_TYPES = [
   { type: "commandpalette", title: "Kommandopanel" },
   { type: "coordinates", title: "Visa koordinat" },
   { type: "documenthandler", title: "Dokumenthanterare" },
+  { type: "dummy", title: "Dummy (testplugin)" },
   { type: "edit", title: "Redigera" },
   { type: "externalLinks", title: "Externa länkar" },
   { type: "feedback", title: "Tyck till (feedback)" },

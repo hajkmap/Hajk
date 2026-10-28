@@ -20,6 +20,11 @@ import CommandPaletteRenderer from "./render-commandpalette";
 import FeedbackRenderer from "./render-feedback";
 import FloodSimulatorRenderer from "./render-floodsimulator";
 import AttributeEditorRenderer from "./render-attributeeditor";
+import DummyRenderer from "./render-dummy";
+import LayerComparerRenderer from "./render-layercomparer";
+import EditRenderer from "./render-edit";
+import TimeSliderRenderer from "./render-timeslider";
+import CollectorRenderer from "./render-collector";
 import React from "react";
 import { Control, FieldValues, UseFormSetValue } from "react-hook-form";
 import { Tool } from "../../../api/tools";
@@ -59,6 +64,12 @@ const toolRenderers: Record<string, React.ComponentType<ToolRendererProps>> = {
     FloodSimulatorRenderer as React.ComponentType<ToolRendererProps>,
   attributeeditor:
     AttributeEditorRenderer as React.ComponentType<ToolRendererProps>,
+  dummy: DummyRenderer as React.ComponentType<ToolRendererProps>,
+  layercomparer:
+    LayerComparerRenderer as React.ComponentType<ToolRendererProps>,
+  edit: EditRenderer as React.ComponentType<ToolRendererProps>,
+  timeslider: TimeSliderRenderer as React.ComponentType<ToolRendererProps>,
+  collector: CollectorRenderer as React.ComponentType<ToolRendererProps>,
 };
 
 interface RenderToolProps {

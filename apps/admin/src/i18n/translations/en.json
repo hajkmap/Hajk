@@ -1242,6 +1242,77 @@
         "serviceGone": "The layer no longer exists ({{id}})",
         "layersLoadFailed": "Could not load the editing layers."
       },
+      "dummy": {
+        "hint": "Test plugin. It has no settings of its own. Placement is set per map."
+      },
+      "layerPicker": {
+        "search": "Search by name or internal name…",
+        "sort": "Change sort order",
+        "ascending": "A–Z",
+        "descending": "Z–A",
+        "selectedHeading": "Selected layers ({{count}})",
+        "noMatches": "No layers match the search.",
+        "truncated": "Showing {{shown}} of {{total}} layers. Refine the search to find more."
+      },
+      "layercomparer": {
+        "layers": "Layers in the comparer",
+        "showNonBaseLayers": "Also offer ordinary map layers in the comparer, in addition to background layers.",
+        "selectChosenLayers": "Enable \"Choose layers\"",
+        "startCompareMode": "Starting compare mode",
+        "sideBySide": "Side by side",
+        "spyGlass": "Spy glass",
+        "chosenLayersHint": "These are the only layers offered in the comparer.",
+        "noLayers": "There are no display layers.",
+        "layerGone": "The layer no longer exists ({{id}})",
+        "layersLoadFailed": "Could not load the layers."
+      },
+      "edit": {
+        "services": "Editing services",
+        "servicesHint": "Pick the editing layers that can be edited in the tool.",
+        "noServices": "There are no editing layers. Add them under Services and layers.",
+        "serviceGone": "The layer no longer exists ({{id}})",
+        "layersLoadFailed": "Could not load the editing layers."
+      },
+      "timeslider": {
+        "resolution": "Resolution",
+        "resolutionHelp": "How large a step the timeline takes each time it updates.",
+        "days": "One day",
+        "months": "One month",
+        "years": "One year",
+        "layers": "Timeline layers",
+        "layersHint": "Pick the layers used by the timeline. Only layers with an eight-character start and end date are listed.",
+        "noLayers": "No layers have timeline dates.",
+        "layerGone": "The layer no longer exists ({{id}})",
+        "layersLoadFailed": "Could not load the layers."
+      },
+      "collector": {
+        "url": "URL",
+        "abstract": "Description",
+        "abstractHelp": "Shown inside the widget button when the tool is placed on the left or right.",
+        "headerText": "Heading",
+        "showThankYou": "Show thank-you page",
+        "thankYou": "Thank-you text",
+        "collectAgain": "Show \"Submit again\"",
+        "collectAgainHelp": "The thank-you page then has Close and Submit again. Close closes the window. Submit again starts a new entry.",
+        "wkt": "Enable WKT",
+        "wktHelp": "Lets users draw several geometries for each entry, and for several entries.",
+        "service": "Editing service",
+        "serviceHint": "The editing layer the entries are saved to.",
+        "noServices": "There are no editing layers. Add them under Services and layers.",
+        "serviceGone": "The layer no longer exists ({{id}})",
+        "layersLoadFailed": "Could not load the editing layers.",
+        "form": "Form",
+        "addPage": "Add page",
+        "pageHeader": "Heading",
+        "pageText": "Page content (HTML)",
+        "pageTextHelp": "A field is an element with a field attribute, for example <div field=\"name\" label=\"Name\"></div>. field must match an editable field on the chosen editing service.",
+        "removePage": "Remove page",
+        "afterSubmit": "After submission",
+        "noPages": "The form has no pages yet.",
+        "pageNumber": "Page {{number}}",
+        "movePageUp": "Move up",
+        "movePageDown": "Move down"
+      },
       "commandpalette": {
         "hint": "Opens with Ctrl+K, or Cmd+K on Mac. It searches for tools and starts them."
       },

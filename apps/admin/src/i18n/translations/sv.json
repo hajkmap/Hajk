@@ -1175,6 +1175,77 @@
         "serviceGone": "Lagret finns inte längre ({{id}})",
         "layersLoadFailed": "Kunde inte hämta redigeringslagren."
       },
+      "dummy": {
+        "hint": "Testplugin utan egna inställningar. Placeringen ställs in per karta."
+      },
+      "layerPicker": {
+        "search": "Sök på namn eller internt namn…",
+        "sort": "Ändra sorteringsordning",
+        "ascending": "A–Ö",
+        "descending": "Ö–A",
+        "selectedHeading": "Valda lager ({{count}})",
+        "noMatches": "Inga lager matchar sökningen.",
+        "truncated": "Visar {{shown}} av {{total}} lager. Förfina sökningen för att hitta fler."
+      },
+      "layercomparer": {
+        "layers": "Lager i jämföraren",
+        "showNonBaseLayers": "Visa även vanliga kartlager som valbara i jämföraren, utöver bakgrundslager.",
+        "selectChosenLayers": "Aktivera \"Välj lager\"",
+        "startCompareMode": "Startläge för jämförare",
+        "sideBySide": "Sida vid sida",
+        "spyGlass": "Titthål",
+        "chosenLayersHint": "Det här är de enda lager som går att välja i jämföraren.",
+        "noLayers": "Det finns inga visningslager.",
+        "layerGone": "Lagret finns inte längre ({{id}})",
+        "layersLoadFailed": "Kunde inte hämta lagren."
+      },
+      "edit": {
+        "services": "Redigeringstjänster",
+        "servicesHint": "Välj de redigeringslager som går att redigera i verktyget.",
+        "noServices": "Det finns inga redigeringslager. Lägg till dem under Tjänster och lager.",
+        "serviceGone": "Lagret finns inte längre ({{id}})",
+        "layersLoadFailed": "Kunde inte hämta redigeringslagren."
+      },
+      "timeslider": {
+        "resolution": "Upplösning",
+        "resolutionHelp": "Hur stort steg tidslinjen tar varje gång den uppdateras.",
+        "days": "En dag",
+        "months": "En månad",
+        "years": "Ett år",
+        "layers": "Tidslinjens lager",
+        "layersHint": "Markera vilka lager som ska användas i tidslinjen. Bara lager med start- och slutdatum på åtta tecken visas.",
+        "noLayers": "Inga lager har tidslinjedatum.",
+        "layerGone": "Lagret finns inte längre ({{id}})",
+        "layersLoadFailed": "Kunde inte hämta lagren."
+      },
+      "collector": {
+        "url": "URL",
+        "abstract": "Beskrivning",
+        "abstractHelp": "Om verktyget visas som widget till vänster eller höger visas den här beskrivningen i widgetknappen.",
+        "headerText": "Rubrik",
+        "showThankYou": "Visa tacksida",
+        "thankYou": "Text för tacksida",
+        "collectAgain": "Visa \"Tyck till igen\"",
+        "collectAgainHelp": "Tacksidan får då Stäng och Tyck till igen. Stäng stänger fönstret. Tyck till igen börjar en ny inskickning.",
+        "wkt": "Aktivera WKT",
+        "wktHelp": "Användarna kan rita flera geometrier för varje inskickning, och för flera inskickningar.",
+        "service": "Redigeringstjänst",
+        "serviceHint": "Redigeringslagret som inskickningarna sparas till.",
+        "noServices": "Det finns inga redigeringslager. Lägg till dem under Tjänster och lager.",
+        "serviceGone": "Lagret finns inte längre ({{id}})",
+        "layersLoadFailed": "Kunde inte hämta redigeringslagren.",
+        "form": "Formulär",
+        "addPage": "Lägg till ny sida",
+        "pageHeader": "Rubrik",
+        "pageText": "Sidans innehåll (HTML)",
+        "pageTextHelp": "Ett fält är ett element med attributet field, till exempel <div field=\"namn\" label=\"Namn\"></div>. field ska matcha ett redigerbart fält på den valda redigeringstjänsten.",
+        "removePage": "Ta bort sida",
+        "afterSubmit": "Efter inskickning",
+        "noPages": "Formuläret har inga sidor ännu.",
+        "pageNumber": "Sida {{number}}",
+        "movePageUp": "Flytta upp",
+        "movePageDown": "Flytta ned"
+      },
       "commandpalette": {
         "hint": "Öppnas med Ctrl+K, eller Cmd+K på Mac. Den söker efter verktyg och startar dem."
       },

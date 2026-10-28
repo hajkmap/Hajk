@@ -311,6 +311,53 @@ export const streetviewDefaults: Record<string, unknown> = {
   apiKey: "",
 };
 
+export const dummyDefaults: Record<string, unknown> = {
+  visibleAtStart: false,
+  visibleForGroups: [],
+};
+
+export const layercomparerDefaults: Record<string, unknown> = {
+  visibleAtStart: false,
+  instruction: "",
+  visibleForGroups: [],
+  showNonBaseLayersInSelect: false,
+  selectChosenLayers: false,
+  chosenLayers: [],
+  startCompareMode: "sideBySide",
+};
+
+export const editDefaults: Record<string, unknown> = {
+  visibleAtStart: false,
+  instruction: "",
+  visibleForGroups: [],
+  activeServices: [],
+};
+
+export const timesliderDefaults: Record<string, unknown> = {
+  visibleAtStart: false,
+  instruction: "",
+  title: "Tidslinje",
+  layers: [],
+  defaultResolution: "years",
+};
+
+export const collectorDefaults: Record<string, unknown> = {
+  visibleAtStart: false,
+  visibleForGroups: [],
+  url: "",
+  title: "Tyck till",
+  abstract: "Vi vill veta vad du tycker!",
+  headerText: "",
+  showThankYou: true,
+  thankYou: "",
+  collectAgain: false,
+  wkt: false,
+  serviceId: "",
+  featureType: "",
+  featureNS: "",
+  form: [],
+};
+
 // Per-type option defaults, used by settings.tsx as the isDirty baseline.
 // documenthandler isn't here yet — its fields don't use the `options.*` naming.
 const toolOptionDefaults: Record<string, Record<string, unknown>> = {
@@ -335,6 +382,11 @@ const toolOptionDefaults: Record<string, Record<string, unknown>> = {
   feedback: feedbackDefaults,
   floodsimulator: floodsimulatorDefaults,
   attributeeditor: attributeeditorDefaults,
+  dummy: dummyDefaults,
+  layercomparer: layercomparerDefaults,
+  edit: editDefaults,
+  timeslider: timesliderDefaults,
+  collector: collectorDefaults,
 };
 
 export const getToolOptionDefaults = (
