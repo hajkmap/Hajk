@@ -151,8 +151,12 @@ export default function MapToolsUnplaced({
           >
             {tools.map((tool) => {
               const where = t(whereKey(tool.type));
+              const typeName = t(`tools.typeNames.${tool.type}`, {
+                defaultValue: tool.type,
+              });
+              const title = tool.title.trim();
               const hasTitle =
-                tool.title.trim() !== "" && tool.title !== tool.type;
+                title !== "" && title !== tool.type && title !== typeName;
               return (
                 <Box
                   key={tool.toolId}
@@ -171,7 +175,7 @@ export default function MapToolsUnplaced({
                 >
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography variant="body2" noWrap sx={{ fontWeight: 600 }}>
-                      {hasTitle ? tool.title : tool.type}
+                      {hasTitle ? tool.title : typeName || tool.title}
                     </Typography>
                     {hasTitle ? (
                       <Typography
@@ -180,7 +184,7 @@ export default function MapToolsUnplaced({
                         noWrap
                         component="div"
                       >
-                        {tool.type}
+                        {typeName}
                       </Typography>
                     ) : null}
                     <Typography variant="caption" color="text.secondary" noWrap>
