@@ -39,9 +39,9 @@ If the vulnerability is in a third-party package (for example OpenLayers, Expres
 
 ## Supported versions
 
-Only the **latest release** receives security fixes. Releases are listed on the [releases page](https://github.com/hajkmap/Hajk/releases).
+Only the **latest release** receives security fixes. Releases are listed on the [releases page](https://github.com/hajkmap/Hajk/releases), and versions, downloads and Docker images are described in [Releases](docs/releases.md).
 
-Fixes land on the `develop` branch and ship with the next release. For severe vulnerabilities we also publish a patch release of the latest release (for example 4.3.0 → 4.3.1). That way you can stay on a tested release and get the fix, instead of waiting for the next release or running an unreleased build from `develop`.
+Fixes ship with the next release. For severe vulnerabilities we also publish a patch release of the latest release (for example 4.3.0 → 4.3.1). That way you can stay on a tested release and get the fix, instead of waiting for the next release or running an unreleased build from `develop`.
 
 We do not backport fixes to older releases, such as 4.2.x. If you run an older release, the fix is to upgrade.
 

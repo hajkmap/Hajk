@@ -44,27 +44,15 @@ function runCommand(command, args, cwd) {
   });
 }
 
-async function refreshDependencies() {
-  const reinstallScriptPath = path.join(
-    rootDir,
-    "scripts",
-    "reinstall_modules.sh",
-  );
-
-  if (process.platform === "win32") {
+// npm ci removes node_modules and installs exactly what package-lock.json
+// says, so the packages contain the dependencies of the checked-out commit.
+async function cleanInstallDependencies() {
+  for (const appDir of [BACKEND_DIR, ADMIN_DIR, CLIENT_DIR]) {
     console.log(
-      "\nWindows detected: reinstall_modules.sh is bash-only, using npm install per app instead...",
+      `\nClean installing dependencies in ${path.relative(rootDir, appDir)}...`,
     );
-    await runCommand("npm", ["install"], BACKEND_DIR);
-    await runCommand("npm", ["install"], ADMIN_DIR);
-    await runCommand("npm", ["install"], CLIENT_DIR);
-    return;
+    await runCommand("npm", ["ci"], appDir);
   }
-
-  console.log(
-    "\nRefreshing dependencies using scripts/reinstall_modules.sh...",
-  );
-  await runCommand("bash", [reinstallScriptPath], rootDir);
 }
 
 async function ensureDirectoryExists(dirPath) {
@@ -87,17 +75,18 @@ async function ensureDirectory(dirPath) {
 
 function normalizeVersion(inputVersion) {
   const trimmed = inputVersion.trim();
-  const match = /^(\d+)\.(\d+)(?:\.(\d+))?$/.exec(trimmed);
+  const match = /^(\d+)\.(\d+)(?:\.(\d+))?(-[0-9A-Za-z.-]+)?$/.exec(trimmed);
   if (!match) {
     throw new Error(
-      `Invalid version "${inputVersion}". Use "major.minor.patch" or "major.minor.patch".`,
+      `Invalid version "${inputVersion}". Use "major.minor.patch" or "major.minor.patch-rc.N".`,
     );
   }
 
   const major = Number.parseInt(match[1], 10);
   const minor = Number.parseInt(match[2], 10);
   const patch = match[3] ? Number.parseInt(match[3], 10) : 0;
-  return `${major}.${minor}.${patch}`;
+  const preRelease = match[4] ?? "";
+  return `${major}.${minor}.${patch}${preRelease}`;
 }
 
 async function getClientPackageVersion() {
@@ -111,9 +100,8 @@ async function getClientPackageVersion() {
   return normalizeVersion(packageJson.version);
 }
 
-function buildReleaseName(version, isRc, rcNumber, type) {
-  const rcPart = isRc ? `-rc.${rcNumber}` : "";
-  return `hajk-v${version}${rcPart}-${type}`;
+function buildReleaseName(version, type) {
+  return `hajk-v${version}-${type}`;
 }
 
 async function zipDirectory(sourceDir) {
@@ -226,13 +214,19 @@ async function assembleNodeRelease(
 }
 
 async function main() {
-  const rl = createInterface({ input, output });
+  // With --ci, every question gets its default answer and archives are always
+  // created. Used by the release workflow in .github/workflows/release.yml.
+  const isCi = process.argv.includes("--ci");
+  const rl = isCi ? null : createInterface({ input, output });
+  const ask = (question, ciAnswer) =>
+    isCi ? Promise.resolve(ciAnswer) : rl.question(question);
 
   try {
     await ensureDirectory(DEFAULT_RELEASES_DIR);
 
-    const targetParentDirInput = await rl.question(
+    const targetParentDirInput = await ask(
       `Where should the release folders be created? (default: ${DEFAULT_RELEASES_DIR}): `,
+      "",
     );
     const targetParentDir =
       targetParentDirInput.trim() === ""
@@ -242,55 +236,36 @@ async function main() {
 
     const defaultVersion = await getClientPackageVersion();
 
-    const versionInput = await rl.question(
+    // The version comes from apps/client/package.json and includes any
+    // pre-release part, e.g. 4.4.0-rc.1 for a release candidate.
+    const versionInput = await ask(
       `Release version override (default ${defaultVersion}, press Enter to keep): `,
+      "",
     );
     const version =
       versionInput.trim() === ""
         ? defaultVersion
         : normalizeVersion(versionInput);
 
-    const rcInput = await rl.question("Is this a release candidate? (y/N): ");
-    const isRc = /^(y|yes)$/i.test(rcInput.trim());
-
-    const refreshDepsInput = await rl.question(
-      "Reinstall dependencies before build? (y/N): ",
+    const cleanInstallInput = await ask(
+      "Clean install dependencies (npm ci) before build? (Y/n): ",
+      "y",
     );
-    const shouldRefreshDependencies = /^(y|yes)$/i.test(
-      refreshDepsInput.trim(),
-    );
+    const shouldCleanInstall = !/^(n|no)$/i.test(cleanInstallInput.trim());
 
-    const zipReleasesInput = await rl.question(
+    const zipReleasesInput = await ask(
       "Create .zip archives for release folders automatically? (y/N): ",
+      "y",
     );
     const shouldZipReleases = /^(y|yes)$/i.test(zipReleasesInput.trim());
 
-    let rcNumber = 1;
-    if (isRc) {
-      const rcNumberInput = await rl.question(
-        "Release candidate number (default 1): ",
-      );
-      if (rcNumberInput.trim() !== "") {
-        const parsedRc = Number.parseInt(rcNumberInput.trim(), 10);
-        if (!Number.isInteger(parsedRc) || parsedRc <= 0) {
-          throw new Error("RC number must be a positive integer.");
-        }
-        rcNumber = parsedRc;
-      }
-    }
-
-    const simpleReleaseName = buildReleaseName(
-      version,
-      isRc,
-      rcNumber,
-      "simple",
-    );
-    const nodeReleaseName = buildReleaseName(version, isRc, rcNumber, "nodejs");
+    const simpleReleaseName = buildReleaseName(version, "simple");
+    const nodeReleaseName = buildReleaseName(version, "nodejs");
     const simpleReleaseDir = path.join(targetParentDir, simpleReleaseName);
     const nodeReleaseDir = path.join(targetParentDir, nodeReleaseName);
 
-    if (shouldRefreshDependencies) {
-      await refreshDependencies();
+    if (shouldCleanInstall) {
+      await cleanInstallDependencies();
     }
 
     console.log("\nBuilding backend...");
@@ -329,7 +304,7 @@ async function main() {
       console.log(`Nodejs release archive: ${nodeArchivePath}`);
     }
   } finally {
-    rl.close();
+    rl?.close();
   }
 }
 

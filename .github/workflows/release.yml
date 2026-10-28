@@ -1,0 +1,138 @@
+name: Release
+
+# Runs when a version tag is pushed. Publishes the Docker image and creates a draft GitHub release
+# with the zip packages and the CHANGELOG section as notes. A maintainer reviews and publishes the draft.
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+
+jobs:
+  # Releases (v4.4.0) must be on master. Release candidates exist only for minor and major releases
+  # (v4.4.0-rc.1) and must be on their release branch (release/4.4). See docs/release-process.md.
+  # The tag must also match the version in all three package.json files.
+  check:
+    if: github.repository == 'hajkmap/Hajk'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Verify tag and branch
+        run: |
+          if [[ "$GITHUB_REF_NAME" =~ ^v([0-9]+)\.([0-9]+)\.0-rc\.[0-9]+$ ]]; then
+            branch="release/${BASH_REMATCH[1]}.${BASH_REMATCH[2]}"
+          elif [[ "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            branch="master"
+          else
+            echo "::error::Tag $GITHUB_REF_NAME must be vX.Y.Z, or vX.Y.0-rc.N for a release candidate"
+            exit 1
+          fi
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" "origin/$branch"; then
+            echo "::error::Tag $GITHUB_REF_NAME does not point to a commit on $branch"
+            exit 1
+          fi
+
+      - name: Verify package versions
+        run: |
+          expected="${GITHUB_REF_NAME#v}"
+          failed=0
+          for app in client admin backend; do
+            actual=$(jq -r .version "apps/$app/package.json")
+            if [ "$actual" != "$expected" ]; then
+              echo "::error file=apps/$app/package.json::Version is $actual, expected $expected"
+              failed=1
+            fi
+          done
+          exit $failed
+
+  image:
+    needs: check
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/build-image.yml
+    with:
+      image: hajk
+      dockerfile: Dockerfile
+      ref: ${{ github.ref }}
+      # A release (v4.3.0) gets 4.3.0, 4.3, 4 and latest. A release candidate (v4.3.0-rc.1) only gets 4.3.0-rc.1.
+      tags: |
+        type=semver,pattern={{version}},value=${{ github.ref_name }}
+        type=semver,pattern={{major}}.{{minor}},value=${{ github.ref_name }}
+        type=semver,pattern={{major}},value=${{ github.ref_name }}
+      description: Hajk ${{ github.ref_name }}. Release notes at https://github.com/hajkmap/Hajk/releases/tag/${{ github.ref_name }}
+
+  image-simple:
+    needs: check
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/build-image.yml
+    with:
+      image: hajk-simple
+      dockerfile: Docker/Dockerfile.simple
+      ref: ${{ github.ref }}
+      # Same tags as the hajk image above.
+      tags: |
+        type=semver,pattern={{version}},value=${{ github.ref_name }}
+        type=semver,pattern={{major}}.{{minor}},value=${{ github.ref_name }}
+        type=semver,pattern={{major}},value=${{ github.ref_name }}
+      description: Hajk simple ${{ github.ref_name }}, the Client only, served by nginx. Release notes at https://github.com/hajkmap/Hajk/releases/tag/${{ github.ref_name }}
+
+  packages:
+    name: Build release packages
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      # Clean installs the dependencies of all three apps (npm ci) and builds them.
+      - name: Build packages
+        run: node scripts/create-release.mjs --ci
+
+      - name: Extract release notes from CHANGELOG
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          awk -v heading="## [$version]" '
+            index($0, heading) == 1 { found = 1; next }
+            found && /^## \[/ { exit }
+            found { print }
+          ' CHANGELOG.md > "$RUNNER_TEMP/notes.md"
+          if [ ! -s "$RUNNER_TEMP/notes.md" ]; then
+            echo "::warning::No section for $version in CHANGELOG.md"
+            echo "See [CHANGELOG.md](https://github.com/hajkmap/Hajk/blob/$GITHUB_REF_NAME/CHANGELOG.md)." > "$RUNNER_TEMP/notes.md"
+          fi
+
+      # A draft can still get assets when immutable releases are enabled; a published release cannot.
+      - name: Create draft release with packages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" releases/*.zip --clobber
+          else
+            flags=(--draft --verify-tag --title "$GITHUB_REF_NAME" --notes-file "$RUNNER_TEMP/notes.md")
+            if [[ "$GITHUB_REF_NAME" == *-* ]]; then
+              flags+=(--prerelease)
+            fi
+            gh release create "$GITHUB_REF_NAME" "${flags[@]}" releases/*.zip
+          fi

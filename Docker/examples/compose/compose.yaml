@@ -1,0 +1,65 @@
+# EXAMPLE ONLY, NOT FOR PRODUCTION. See Docker/README.md.
+#
+# Hajk with a PostGIS database and a GeoServer, behind an nginx reverse proxy.
+#
+#   cd Docker/examples/compose
+#   cp example.env .env   # then set the passwords in .env
+#   docker compose up
+#
+# Hajk:      http://localhost:1337 (Admin at http://localhost:1337/admin)
+# GeoServer: http://localhost:8080/geoserver
+# PostGIS:   localhost:5432
+
+services:
+  hajk:
+    image: ghcr.io/hajkmap/hajk:${HAJK_TAG:-nightly-master}
+    volumes:
+      - hajk-appdata:/usr/app/App_Data
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:stable-alpine
+    ports:
+      - "1337:1337"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - hajk
+    restart: unless-stopped
+
+  db:
+    image: kartoza/postgis:18-3.6
+    volumes:
+      - geo-db-data:/var/lib/postgresql
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      POSTGRES_DB: hajkGeoData
+      POSTGRES_USER: postgres
+      POSTGRES_PASS: ${POSTGRES_PASS:?Set POSTGRES_PASS in .env}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h localhost -U postgres"]
+      interval: 10s
+      retries: 10
+    restart: unless-stopped
+
+  geoserver:
+    image: kartoza/geoserver:2.28.5
+    volumes:
+      - geoserver-data:/opt/geoserver/data_dir
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      GEOSERVER_ADMIN_USER: admin
+      GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD:?Set GEOSERVER_ADMIN_PASSWORD in .env}
+      INITIAL_MEMORY: 1G
+      MAXIMUM_MEMORY: 2G
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  hajk-appdata:
+  geo-db-data:
+  geoserver-data:

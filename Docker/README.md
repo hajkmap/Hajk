@@ -1,108 +1,108 @@
-# HAJK - Docker
+# Hajk and Docker
 
-## Standard image
+## Official images
 
-The HAJK [standard Dockerfile](../Dockerfile) combines all of HAJK's parts (front-end, back-end using NodeJS and admin) into a single image that is very handy for testing or small scale deployments.
+The easiest way to run Hajk in Docker is to use the official images, published on the GitHub Container Registry:
 
-Image settings:
-  * Exposed back-end port: tcp/1337
-  * Exposed volume path for mounting of persistent back-end data: /usr/app/App_Data
+| Image                         | Contains                                                      | Port   | Built from                               |
+| ----------------------------- | ------------------------------------------------------------- | ------ | ---------------------------------------- |
+| `ghcr.io/hajkmap/hajk`        | Backend, Client and Admin, run with Node.js                   | `3002` | [`Dockerfile`](../Dockerfile)            |
+| `ghcr.io/hajkmap/hajk-simple` | Client only, as static files served by nginx, with no Backend | `8080` | [`Dockerfile.simple`](Dockerfile.simple) |
 
-### Sample Usage
+Both are built for `linux/amd64` and `linux/arm64`. Which tag to use, how the images are updated and the nightly builds are described in [Releases](../docs/releases.md#docker-images).
 
-Example build for back-end (NodeJS), admin and client image creation, running a container named `local-hajk-backend-with-client-and-admin` with local volume `hajk-backend-appdata` mounted for persistent data and exposing NodeJS on host port [tcp/1337](http://localhost:1337/).
+### Hajk
 
-```
-# First time set-up of a local volume, this will make back-end data persistent
-docker volume create hajk-backend-appdata
-
-# Docker image build
-docker build -t hajk-backend-with-client-and-admin:1.0.0 .
-
-# For removing any previous container before re-configuration run:
-# docker rm local-hajk-backend-with-client-and-admin
-
-# Run container from local image
-docker run -p 1337:3002 -v hajk-backend-appdata:/usr/app/App_Data --name local-hajk-backend-with-client-and-admin hajk-backend-with-client-and-admin:1.0.0
+```bash
+docker volume create hajk-appdata
+docker run -d --name hajk -p 3002:3002 -v hajk-appdata:/usr/app/App_Data ghcr.io/hajkmap/hajk:4.3
 ```
 
-Note regarding ports for HAJK in a Docker setting: the port printed on e.g. HAJK's back-end console output is not neccesarily the host-exposed port. HAJK will locally in the container know of the right-hand side of the port expose command-line switch (`-p` for a Docker run), the host/your web-browser till need to use the left-hand side which is a port-forward rule into the container. In the example above, HAJK back-end will output:
-```
-[INFO] hajk - Server startup completed. Launched on port 3002. (http://localhost:3002)
-```
-Still, you would use [port 1337](http://localhost:1337/) for host access.
+Hajk is now available on <http://localhost:3002>, and Admin on <http://localhost:3002/admin>.
 
-### Hosted Images
+- **Configuration** is read from `/usr/app/.env` in the container, which contains the defaults from [`apps/backend/.env.example`](../apps/backend/.env.example). Mount your own `.env` there, or set the settings as environment variables.
+- **Maps, layers and other data** are stored in `/usr/app/App_Data`. Mount a volume there, as above, so they survive when the container is replaced.
 
-Courtesy of [Hallbergs](https://github.com/Hallbergs) there is also a [Docker Hub feed](https://hub.docker.com/r/hallbergs/hajk/tags) of the latest HAJK images. Use in a compose or local docker run command using the corresponding tag, e.g. `hallbergs/hajk:3.7.0` or `hallbergs/hajk:latest`.
+> [!WARNING]
+> With the default settings, anyone who can reach the container can use Admin and change the maps. Read [How do we harden our installation?](../docs/security-faq.md#how-do-we-harden-our-installation) before you expose Hajk to anyone else.
 
-## Compose
+### Hajk simple
 
-HAJK also contains a Docker Compose for a production-like set-up combining the following components into a hand "HAJK WebGIS in a box":
-
-* [PostgreSQL](https://www.postgresql.org/) relational database with [PostGIS](https://postgis.net/) spatial extensions (based on the latest [Kartoza](https://www.kartoza.com/en/) image)
-  * Exposes host port tcp/5432
-* GeoSever map server (based on Kartoza v2.18.0 image) running as WAR in Tomcat Java application server
-  * Exposes host port [tcp/8080](http://localhost:8080/)
-* HAJK (based on the standard HAJK triple-combination, see above)
-* nginx web server used as a unified proxy HTTP front (base on the latest nginx image)
-  * Reverse-proxy of all `/proxy/*` URLs to HAJK proxy component
-  * Reverse-proxy of all other URLs to the compose's local HAJK container
-  * Exposes host port [tcp/1337](http://localhost:1337/)
-
-### Development and Demo Usage
-
-```
-# cd hajk/Docker
-docker-compose -p hajk up
+```bash
+docker run -d --name hajk-simple -p 8080:8080 ghcr.io/hajkmap/hajk-simple:4.3
 ```
 
-Now use [GeoServer admin](http://localhost:8080/geoserver/) to set up a default workspace, a PostGIS datasource to host `db`, database `hajkGeoData` and you are good to go. Use exposed port 5432 to load data into PostgreSQL.
+Hajk is now available on <http://localhost:8080>. Without a Backend, the Client reads its maps and layers from `simpleMapAndLayersConfig.json`. To use your own configuration, mount your files over the defaults in `/usr/share/nginx/html`:
 
-### Production Usage
-
-For a production set-up you are free to re-use the compose file, but read up on [Docker Compose](https://docs.docker.com/compose/) syntax and make sure to do some adjustments like:
-
-* change the composition's default passwords (use Docker secrets)
-* set container memory limits
-* adjust container re-start conditions to your needs
-* pin all image versions to explicit releases for stability
-
-Also consider running an orchestration component like Docker Stack/Swarm, Kubernetes, RedHat OpenShift or similar for greater scalibility flexibility in a high load production scenario.
-
-## Alternative Dockerfiles
-
-### Back-end + Admin
-This directory contains alternative Dockerfile combinations for local development, testing etc.
-
-* backend-and-admin.dockerfile - Alpine-based NodeJS builders combining HAJK back-end (NodeJS) and admin to finally combine the build into an Alpine NodeJS v14 image where the containern will start back-end's index.js
-  * Image settings:
-    * Exposed back-end port: tcp/3002
-    * Exposed volume path for mounting of persistent back-end data: /usr/app/App_Data
-
-#### Sample Usage
-
-Example build for back-end (NodeJS) + admin image creation, running a container named `local-hajk-backend-and-admin` with local volume `hajk-backend-appdata` mounted for persistent data and exposing NodeJS on port [tcp/2000](http://localhost:2000/) on the host.
-
-Corresponding appConfig setting for using this containerized back-end from host front-end development:
-* `"mapserviceBase": "http://localhost:2000/api/v1",`
-
-```
-# cd hajk/Docker
-
-# First time set-up of a local volume, this will make back-end data persistent
-docker volume create hajk-backend-appdata
-
-# Docker image build
-docker build --file Docker/backend-and-admin.dockerfile -t hajk-backend-and-admin:0.1.0 .
-
-# For removing any previous container before re-configuration run:
-# docker rm local-hajk-backend-and-admin
-
-# Run container from local image
-docker run -p 2000:3002 -v hajk-backend-appdata:/usr/app/App_Data --name local-hajk-backend-and-admin hajk-backend-and-admin:0.1.0
+```bash
+docker run -d --name hajk-simple -p 8080:8080 \
+  -v "$PWD/appConfig.json:/usr/share/nginx/html/appConfig.json:ro" \
+  -v "$PWD/simpleMapAndLayersConfig.json:/usr/share/nginx/html/simpleMapAndLayersConfig.json:ro" \
+  ghcr.io/hajkmap/hajk-simple:4.3
 ```
 
-## Room for future improvement
+nginx runs as a non-root user. Its configuration is in [`nginx-simple.conf`](nginx-simple.conf).
 
-The current duplicated Dockerfile constructs into alternative Dockerfiles could be refined into e.g. a multi-stage build or other types of more clever parametrized build. Consider the current state of Docker "altfiles" a friendly stepping stone for developers using Docker for HAJK. And remember: this is open source, so please consider opening a pull request with your own improvements! Thanks.
+## Building the images yourself
+
+Build from the root of the repository:
+
+```bash
+# Hajk
+docker build --tag hajk .
+
+# Hajk simple
+docker build --file Docker/Dockerfile.simple --tag hajk-simple .
+```
+
+### Red Hat UBI
+
+[`Dockerfile.ubi9-nodejs`](Dockerfile.ubi9-nodejs) builds Hajk (Backend, Client and Admin) on Red Hat's [Universal Base Image](https://catalog.redhat.com/software/base-images) 9 with Node.js, for organisations that need to run Red Hat based images. It is not published as an image. It copies your `apps/backend/.env` into the image, so create that file from `.env.example` first:
+
+```bash
+cp apps/backend/.env.example apps/backend/.env
+docker build --file Docker/Dockerfile.ubi9-nodejs --tag hajk-ubi9 .
+```
+
+## Examples
+
+> [!CAUTION]
+> **The files in [`examples/`](examples) are examples, not for production.** They show ways to build and run Hajk, but are not maintained or tested like the official images, may be out of date, and leave out things a production setup needs, such as TLS, secrets management, resource limits and backups. Use them as a starting point, and review them before using anything from them.
+
+| Example                                                                 | What it shows                                                      |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| [`compose/`](examples/compose)                                          | Hajk with PostGIS and GeoServer behind nginx, using Docker Compose |
+| [`backend-and-admin.dockerfile`](examples/backend-and-admin.dockerfile) | Backend and Admin only, for developing the Client outside Docker   |
+
+### Docker Compose
+
+The [compose example](examples/compose/compose.yaml) runs Hajk together with a [PostGIS](https://postgis.net/) database and a [GeoServer](https://geoserver.org/), behind an nginx reverse proxy:
+
+```bash
+cd Docker/examples/compose
+cp example.env .env   # then set the passwords in .env
+docker compose up
+```
+
+| Service   | Address                                                                        |
+| --------- | ------------------------------------------------------------------------------ |
+| Hajk      | <http://localhost:1337>, and Admin on <http://localhost:1337/admin>            |
+| GeoServer | <http://localhost:8080/geoserver>, log in as `admin` with the password you set |
+| PostGIS   | `localhost:5432`, database `hajkGeoData`, user `postgres`                      |
+
+In GeoServer, create a workspace and a PostGIS store with host `db` and database `hajkGeoData`. Load data into PostGIS through port 5432. GeoServer and PostGIS are only reachable from your own computer.
+
+### Backend and Admin only
+
+Runs the Backend and Admin in Docker while you develop the Client on your computer:
+
+```bash
+docker build --file Docker/examples/backend-and-admin.dockerfile --tag hajk-backend-and-admin .
+docker run -d -p 3002:3002 -v hajk-appdata:/usr/app/App_Data hajk-backend-and-admin
+```
+
+Set `mapserviceBase` to `http://localhost:3002/api/v2` in `apps/client/public/appConfig.json`.
+
+## Ports
+
+The port a container listens on is not always the port you open in the browser. In `-p 1337:3002`, Hajk listens on `3002` inside the container, and you open <http://localhost:1337>. Hajk logs the port inside the container, so it prints `3002` either way.
