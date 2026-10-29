@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 const ChipsWrapper = styled("div")(({ _theme }) => ({
   display: "flex",
@@ -57,11 +58,15 @@ class SearchSettings extends React.PureComponent {
       <Grid container spacing={2} direction="column">
         <Grid size="grow">
           <FormControl component="fieldset">
-            <FormLabel component="legend">Generella sökinställningar</FormLabel>
+            <FormLabel component="legend">
+              {i18n.t("search.settings.general")}
+            </FormLabel>
             <FormGroup>
-              <HajkToolTip title="Slå på för att välja vilka datakällor som sökningen kommer göras i. Om reglaget är i off-läget kommer sökningen att ske i alla tillgänliga sökkällor.">
+              <HajkToolTip
+                title={i18n.t("search.settings.limitSourcesTooltip")}
+              >
                 <FormControlLabel
-                  label="Begränsa sökkällor"
+                  label={i18n.t("search.settings.limitSources")}
                   control={
                     <Switch
                       checked={this.state.showSearchSourcesFilter}
@@ -133,9 +138,11 @@ class SearchSettings extends React.PureComponent {
             </FormGroup>
             {showSearchInVisibleLayers && (
               <FormGroup>
-                <HajkToolTip title="Om aktivt kommer sökningen att ske i lager som är inställda för sökning av systemadministratören och som är synliga.">
+                <HajkToolTip
+                  title={i18n.t("search.settings.visibleLayersOnlyTooltip")}
+                >
                   <FormControlLabel
-                    label="Sök endast i synliga lager"
+                    label={i18n.t("search.settings.visibleLayersOnly")}
                     control={
                       <Switch
                         checked={searchOptions.searchInVisibleLayers}
@@ -157,16 +164,16 @@ class SearchSettings extends React.PureComponent {
         <Grid size="grow">
           <FormControl component="fieldset">
             <FormLabel component="legend">
-              Inställningar för textsökning
+              {i18n.t("search.settings.text")}
             </FormLabel>
             <FormGroup>
               {showWildcardAtStart && (
                 <HajkToolTip
                   disableInteractive
-                  title="Om aktivt kommer en sökning på 'väg' även ge träffar på exempelvis 'storväg'."
+                  title={i18n.t("search.settings.wildcardBeforeTooltip")}
                 >
                   <FormControlLabel
-                    label="Wildcard före"
+                    label={i18n.t("search.settings.wildcardBefore")}
                     control={
                       <Switch
                         checked={searchOptions.wildcardAtStart}
@@ -185,10 +192,10 @@ class SearchSettings extends React.PureComponent {
               {showWildcardAtEnd && (
                 <HajkToolTip
                   disableInteractive
-                  title="Om aktivt kommer en sökning på 'väg' även ge träffar på exempelvis 'vägen'."
+                  title={i18n.t("search.settings.wildcardAfterTooltip")}
                 >
                   <FormControlLabel
-                    label="Wildcard efter"
+                    label={i18n.t("search.settings.wildcardAfter")}
                     control={
                       <Switch
                         checked={searchOptions.wildcardAtEnd}
@@ -207,10 +214,10 @@ class SearchSettings extends React.PureComponent {
               {showMatchCase && (
                 <HajkToolTip
                   disableInteractive
-                  title="Om aktivt kommer en sökning på 'a' inte ge träffar på 'A'. Inaktivera för att söka oberoende av gemener/versaler."
+                  title={i18n.t("search.settings.caseSensitiveTooltip")}
                 >
                   <FormControlLabel
-                    label="Skiftlägeskänslighet"
+                    label={i18n.t("search.settings.caseSensitive")}
                     control={
                       <Switch
                         checked={searchOptions.matchCase}
@@ -230,15 +237,17 @@ class SearchSettings extends React.PureComponent {
                 <Grid size="grow">
                   <FormControl component="fieldset">
                     <FormLabel component="legend">
-                      Spatiala sökinställningar
+                      {i18n.t("search.settings.spatial")}
                     </FormLabel>
                     <FormGroup>
                       <HajkToolTip
                         disableInteractive
-                        title="Om aktivt kommer hela objektet (exempelvis en fastigheten) behöva rymmas inom sökområdet för att komma med i resultatet. Om inaktivt räcker det att endast en liten del av objektet ryms inom, eller nuddar vid, sökområdet."
+                        title={i18n.t(
+                          "search.settings.activeSpatialFilterTooltip"
+                        )}
                       >
                         <FormControlLabel
-                          label="Kräv att hela objektet ryms inom sökområde"
+                          label={i18n.t("search.settings.activeSpatialFilter")}
                           control={
                             <Switch
                               checked={
@@ -266,15 +275,17 @@ class SearchSettings extends React.PureComponent {
                 <Grid size="grow">
                   <FormControl component="fieldset">
                     <FormLabel component="legend">
-                      Visning av resultat
+                      {i18n.t("search.settings.display")}
                     </FormLabel>
                     <FormGroup>
                       <HajkToolTip
                         disableInteractive
-                        title="Om aktivt kommer en etikett att visas i kartan intill det markerade sökresultatet"
+                        title={i18n.t(
+                          "search.settings.labelOnHighlightTooltip"
+                        )}
                       >
                         <FormControlLabel
-                          label="Visa textetikett i kartan"
+                          label={i18n.t("search.settings.labelOnHighlight")}
                           control={
                             <Switch
                               checked={searchOptions.enableLabelOnHighlight}

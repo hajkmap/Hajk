@@ -4,6 +4,7 @@ import { Menu, MenuItem } from "@mui/material";
 import LaunchIcon from "@mui/icons-material/Launch";
 import HajkTransformer from "../utils/HajkTransformer";
 import ControlButton from "components/ControlButton";
+import { configText } from "src/i18n";
 
 class ExternalLinks extends React.PureComponent {
   static propTypes = {
@@ -31,7 +32,7 @@ class ExternalLinks extends React.PureComponent {
 
     this.options = this.config.options;
     this.map = props.appModel.getMap();
-    this.title = this.options.title || "Öppna koordinat i extern applikation";
+    this.title = configText("controls.externalLinksTitle", this.options.title);
   }
 
   // Show dropdown menu, anchored to the element clicked

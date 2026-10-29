@@ -1,4 +1,5 @@
 import { hfetch } from "../../../utils/FetchWrapper";
+import i18n from "src/i18n";
 import { WFS, GeoJSON } from "ol/format";
 import GML2 from "ol/format/GML2";
 import Feature from "ol/Feature";
@@ -160,7 +161,9 @@ export function createOgcApi(baseUrl) {
     const m = text.match(
       /<(?:\w+:)?(?:ExceptionText|ServiceException)[^>]*>([\s\S]*?)<\//i
     );
-    return (m?.[1] || "").trim() || "Okänt WFS-fel (ExceptionReport)";
+    return (
+      (m?.[1] || "").trim() || i18n.t("attributeEditor.errors.unknownWfsError")
+    );
   };
 
   const fetchWfstFeatures = async (id, params = {}, { signal } = {}) => {
@@ -218,7 +221,9 @@ export function createOgcApi(baseUrl) {
 
     const wfsError = detectWfsException(responseText);
     if (wfsError) {
-      throw new Error(`WFS-fel från servern: ${wfsError}`);
+      throw new Error(
+        i18n.t("attributeEditor.errors.wfsError", { message: wfsError })
+      );
     }
 
     // JSON response — parse as GeoJSON

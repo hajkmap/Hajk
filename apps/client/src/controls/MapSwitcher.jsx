@@ -3,6 +3,7 @@ import { Menu, MenuItem, Select, FormControl, InputLabel } from "@mui/material";
 import SwitchCameraIcon from "@mui/icons-material/SwitchCamera";
 import { hfetch } from "../utils/FetchWrapper";
 import ControlButton from "components/ControlButton";
+import i18n from "src/i18n";
 
 class MapSwitcher extends React.PureComponent {
   // Will hold map configs
@@ -134,11 +135,13 @@ class MapSwitcher extends React.PureComponent {
 
     return (
       <FormControl sx={{ minWidth: 180 }}>
-        <InputLabel id="selected-map-label">Aktiv karta</InputLabel>
+        <InputLabel id="selected-map-label">
+          {i18n.t("controls.activeMap")}
+        </InputLabel>
         <Select
           variant="outlined"
           size="small"
-          label="Aktiv karta"
+          label={i18n.t("controls.activeMap")}
           labelId="selected-map-label"
           value={
             selectedIndex !== null && this.maps[selectedIndex]
@@ -178,7 +181,8 @@ class MapSwitcher extends React.PureComponent {
     const { variant = "button" } = this.props;
 
     const title =
-      this.props.appModel.config.mapConfig.map.title || "Karta utan titel";
+      this.props.appModel.config.mapConfig.map.title ||
+      i18n.t("controls.untitledMap");
 
     if (!this.props.appModel.config.mapConfig.map.mapselector) return null;
     if (this.maps.length <= 1) return null;
@@ -190,8 +194,8 @@ class MapSwitcher extends React.PureComponent {
     return (
       <>
         <ControlButton
-          tooltip={`Nuvarande karta: ${title}`}
-          ariaLabel="Byt karta"
+          tooltip={i18n.t("controls.currentMap", { title })}
+          ariaLabel={i18n.t("controls.switchMap")}
           aria-owns={open ? "render-props-menu" : undefined}
           aria-haspopup="true"
           onClick={this.handleClick}

@@ -1,0 +1,26 @@
+{
+  "location": {
+    "autoRotate": "Rotate automatically",
+    "controlTooltip": "My location: Show my position in the map",
+    "description": "Show my position in the map",
+    "details": {
+      "accuracy": "Accuracy (m)",
+      "altitude": "Altitude (m above sea level)",
+      "altitudeAccuracy": "Altitude accuracy (m)",
+      "heading": "Heading (rad)",
+      "speed": "Speed (m/s)"
+    },
+    "error": "Couldn't determine your location. Error code: {{code}}. Details: \"{{message}}\".",
+    "follow": "Follow position",
+    "property": "Property",
+    "showMyPosition": "Show my position",
+    "title": "My location",
+    "tooltip": {
+      "accuracy": "Accuracy: {{accuracy}} m",
+      "altitude": "Altitude: {{altitude}} (+/- {{altitudeAccuracy}}) m",
+      "heading": "Heading: {{heading}} rad",
+      "speed": "Speed: {{speed}} km/h"
+    },
+    "unavailable": "My location: position not available"
+  }
+}

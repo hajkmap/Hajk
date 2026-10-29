@@ -15,6 +15,7 @@ import {
 
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import { Box } from "@mui/system";
+import i18n from "src/i18n";
 
 import type {
   LayerCheckerReportDialogProps,
@@ -32,9 +33,9 @@ export default function ReportDialog({
   // Helper: Prepare plain text version of the report, used for clipboard.
   const getPlainTextForClipboard = () => {
     return (
-      `GRANSKNINGSRAPPORT ${currentPropertyName}\n` +
+      `${i18n.t("propertyChecker.report.titleUpper", { property: currentPropertyName })}\n` +
       "\n" +
-      "Granskning har gjorts mot följande kartlager:\n\n" +
+      `${i18n.t("propertyChecker.report.layersIntro")}\n\n` +
       controlledLayers
         .map(
           (l: ControlledLayer) =>
@@ -46,22 +47,24 @@ export default function ReportDialog({
             ` - ${l.caption}` +
               (l.subcaption !== null ? ` (${l.subcaption})` : "") +
               (getLayerNotesAsArray(l.id).length > 0
-                ? `\n   Notering: ${getLayerNotesAsArray(l.id)?.join(" ")}`
+                ? `\n   ${i18n.t("propertyChecker.report.note")} ${getLayerNotesAsArray(l.id)?.join(" ")}`
                 : "")
         )
         .join("\n") + // Finally, join the array into a string using new line as join character.
       "\n\n" +
       getUserDetailsText() +
       "\n\n" +
-      `Rapporten utgår från data som var känd per ${new Date().toLocaleDateString()}.`
+      i18n.t("propertyChecker.report.dataDate", {
+        date: new Date().toLocaleDateString(),
+      })
     );
   };
 
   // Helper: Prepare plain text version of the report, used for clipboard.
   const getHtmlFormattedTextForClipboard = () => {
     return (
-      `<h1>Granskningsrapport ${currentPropertyName}</h1>` +
-      "<p>Granskning har gjorts mot följande kartlager:</p>" +
+      `<h1>${i18n.t("propertyChecker.report.title", { property: currentPropertyName })}</h1>` +
+      `<p>${i18n.t("propertyChecker.report.layersIntro")}</p>` +
       "<ul>" +
       controlledLayers
         .map((l: ControlledLayer) =>
@@ -73,7 +76,9 @@ export default function ReportDialog({
               "<li>" +
               l.caption +
               (l.subcaption !== null ? ` (${l.subcaption})` : "") +
-              (getLayerNotesAsArray(l.id).length > 0 ? "<br>Notering: " : "") +
+              (getLayerNotesAsArray(l.id).length > 0
+                ? `<br>${i18n.t("propertyChecker.report.note")} `
+                : "") +
               getLayerNotesAsArray(l.id)
                 .map((s: string) => s)
                 .join("<br>") +
@@ -83,7 +88,7 @@ export default function ReportDialog({
         .join("") + // Finally, join the array into a string using new line as join character.
       "</ul>" +
       `<p>${getUserDetailsText()}</p>` +
-      `<p>Rapporten utgår från data som var känd per ${new Date().toLocaleDateString()}.</p>`
+      `<p>${i18n.t("propertyChecker.report.dataDate", { date: new Date().toLocaleDateString() })}</p>`
     );
   };
 
@@ -103,7 +108,7 @@ export default function ReportDialog({
 
     navigator.clipboard.write(data).then(
       () => {
-        alert("Rapporten har kopierats till urklipp");
+        alert(i18n.t("propertyChecker.reportCopied"));
       },
       () => {}
     );
@@ -115,7 +120,10 @@ export default function ReportDialog({
       Object.hasOwn(userDetails, "displayName") &&
       Object.hasOwn(userDetails, "description")
     ) {
-      return `Granskningen genomfördes av ${userDetails.description} genom ${userDetails.displayName}.`;
+      return i18n.t("propertyChecker.report.reviewedBy", {
+        description: userDetails.description,
+        displayName: userDetails.displayName,
+      });
     } else {
       return "";
     }
@@ -144,10 +152,14 @@ export default function ReportDialog({
           e.stopPropagation();
         }}
       >
-        <DialogTitle>Granskningsrapport {currentPropertyName}</DialogTitle>
+        <DialogTitle>
+          {i18n.t("propertyChecker.report.title", {
+            property: currentPropertyName,
+          })}
+        </DialogTitle>
         <DialogContent>
           <Typography gutterBottom>
-            Granskning har gjorts mot följande kartlager:
+            {i18n.t("propertyChecker.report.layersIntro")}
           </Typography>
           <List>
             {controlledLayers.map((l: ControlledLayer, key: number) => {
@@ -178,7 +190,9 @@ export default function ReportDialog({
                                 variant="caption"
                                 sx={{ display: "block" }}
                               >
-                                {i === 0 && "Notering: "} {s}
+                                {i === 0 &&
+                                  `${i18n.t("propertyChecker.report.note")} `}{" "}
+                                {s}
                               </Typography>
                             )
                           )}
@@ -192,20 +206,21 @@ export default function ReportDialog({
           </List>
           <Typography gutterBottom>{getUserDetailsText()}</Typography>
           <Typography gutterBottom>
-            Rapporten utgår från data som var känd per{" "}
-            {new Date().toLocaleDateString()}.
+            {i18n.t("propertyChecker.report.dataDate", {
+              date: new Date().toLocaleDateString(),
+            })}
           </Typography>
         </DialogContent>
         <DialogActions>
           <Button color="success" variant="contained" onClick={copyToClipboard}>
-            Kopiera till urklipp
+            {i18n.t("propertyChecker.copyToClipboard")}
           </Button>
           <Button
             onClick={() => {
               setReportDialogVisible(false);
             }}
           >
-            Stäng
+            {i18n.t("common.close")}
           </Button>
         </DialogActions>
       </BaseDialog>

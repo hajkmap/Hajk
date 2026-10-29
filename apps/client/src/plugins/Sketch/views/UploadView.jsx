@@ -14,6 +14,7 @@ import TextIncreaseIcon from "@mui/icons-material/TextIncrease";
 import Information from "../components/Information";
 import UploadDialog from "../components/UploadDialog";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   width: "100%",
@@ -39,19 +40,19 @@ const ButtonPanel = ({
   return (
     <Grid container spacing={1}>
       <Grid size={12}>
-        <HajkToolTip title="Klicka för att öppna en dialog där du kan välja en .kml-, .gpx- eller .geojson-fil från din dator.">
+        <HajkToolTip title={i18n.t("sketch.upload.importHint")}>
           <Button
             fullWidth
             variant="contained"
             onClick={() => setDialogOpen(true)}
             startIcon={<FolderOpenIcon />}
           >
-            Importera ritobjekt
+            {i18n.t("sketch.upload.import")}
           </Button>
         </HajkToolTip>
       </Grid>
       <Grid size={12}>
-        <HajkToolTip title="Klicka för att exportera alla ritobjekt till en .kml-fil. KML stödjer alla typer av geometrier inklusive polygoner, linjer, punkter och text.">
+        <HajkToolTip title={i18n.t("sketch.upload.exportKmlHint")}>
           <span>
             <Button
               fullWidth
@@ -60,13 +61,13 @@ const ButtonPanel = ({
               startIcon={<SaveAltIcon />}
               disabled={uiDisabled}
             >
-              Exportera till KML
+              {i18n.t("sketch.upload.exportKml")}
             </Button>
           </span>
         </HajkToolTip>
       </Grid>
       <Grid size={12}>
-        <HajkToolTip title="Klicka för att exportera alla ritobjekt till en .gpx-fil. GPX stödjer endast punkter (waypoints) och linjer (tracks/routes). Polygoner och andra komplexa geometrier kommer att exkluderas.">
+        <HajkToolTip title={i18n.t("sketch.upload.exportGpxHint")}>
           <span>
             <Button
               fullWidth
@@ -75,13 +76,13 @@ const ButtonPanel = ({
               startIcon={<SaveAltIcon />}
               disabled={uiDisabled}
             >
-              Exportera till GPX
+              {i18n.t("sketch.upload.exportGpx")}
             </Button>
           </span>
         </HajkToolTip>
       </Grid>
       <Grid size={12}>
-        <HajkToolTip title="Klicka för att exportera alla ritobjekt till en .geojson-fil. GeoJSON stödjer alla typer av geometrier och bevarar stilar. Cirklar exporteras som polygoner.">
+        <HajkToolTip title={i18n.t("sketch.upload.exportGeoJsonHint")}>
           <span>
             <Button
               fullWidth
@@ -90,7 +91,7 @@ const ButtonPanel = ({
               startIcon={<SaveAltIcon />}
               disabled={uiDisabled}
             >
-              Exportera till GeoJSON
+              {i18n.t("sketch.upload.exportGeoJson")}
             </Button>
           </span>
         </HajkToolTip>
@@ -124,7 +125,7 @@ const UploadedFile = (props) => {
             }}
           >
             <Grid>
-              <HajkToolTip title="Klicka för att ta bort de importerade objekten.">
+              <HajkToolTip title={i18n.t("sketch.upload.removeImported")}>
                 <IconButton size="small" onClick={props.onRemoveClick}>
                   <DeleteIcon />
                 </IconButton>
@@ -132,9 +133,11 @@ const UploadedFile = (props) => {
             </Grid>
             <Grid>
               <HajkToolTip
-                title={`Klicka för att ${
-                  props.hidden ? "visa" : "dölja"
-                } objekten ${props.hidden ? "i" : "från"} kartan.`}
+                title={
+                  props.hidden
+                    ? i18n.t("sketch.upload.showObjects")
+                    : i18n.t("sketch.upload.hideObjects")
+                }
               >
                 <IconButton
                   size="small"
@@ -146,9 +149,11 @@ const UploadedFile = (props) => {
             </Grid>
             <Grid>
               <HajkToolTip
-                title={`Klicka här för att ${
-                  props.textShown ? "dölja" : "visa"
-                } objektens etiketter.`}
+                title={
+                  props.textShown
+                    ? i18n.t("sketch.upload.hideLabels")
+                    : i18n.t("sketch.upload.showLabels")
+                }
               >
                 <IconButton size="small" onClick={props.onToggleShowTextClick}>
                   {props.textShown ? (
@@ -170,7 +175,9 @@ const UploadedFileList = (props) => {
   return (
     <Grid container style={{ maxHeight: 240, overflowY: "auto" }}>
       <Grid size={12}>
-        <Typography variant="caption">Uppladdade filer</Typography>
+        <Typography variant="caption">
+          {i18n.t("sketch.upload.uploadedFiles")}
+        </Typography>
       </Grid>
       <Grid size={12}>
         {props.uploadedFiles.map((file) => {

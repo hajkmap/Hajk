@@ -1,6 +1,7 @@
 import { PLUGINS_TO_IGNORE_IN_HASH_APP_STATE } from "../constants";
 import { isValidLayerId } from "../utils/Validator";
 import { debounce } from "../utils/debounce";
+import i18n, { getDefaultLanguage } from "src/i18n";
 
 class AnchorModel {
   #app;
@@ -252,6 +253,10 @@ class AnchorModel {
 
     // Only add 'q_pc' if PropertyChecker has an active property
     this.#currentQPc && url.searchParams.append("q_pc", this.#currentQPc);
+
+    // Only add 'lang' if it differs from the default language
+    i18n.language !== getDefaultLanguage() &&
+      url.searchParams.append("lang", i18n.language);
 
     // Occasionally we may want to prevent hash update, but it's off by default
     if (

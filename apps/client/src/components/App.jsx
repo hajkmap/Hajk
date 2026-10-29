@@ -29,6 +29,7 @@ import SnackbarProvider from "./SnackbarProvider";
 import Search from "./Search/Search";
 
 import CookieNoticeButton from "../controls/CookieNoticeButton";
+import LanguageSwitcher from "../controls/LanguageSwitcher";
 import Zoom from "../controls/Zoom";
 import User from "../controls/User";
 import Rotate from "../controls/Rotate";
@@ -62,6 +63,7 @@ import MapIcon from "@mui/icons-material/Map";
 import MenuIcon from "@mui/icons-material/Menu";
 import ThemeToggler from "../controls/ThemeToggler";
 import HajkToolTip from "components/HajkToolTip";
+import i18n, { setLanguage, setAppStateInHash, configText } from "src/i18n";
 
 // A global that holds our windows, for use see components/Window.js
 document.windows = [];
@@ -528,11 +530,14 @@ class App extends React.PureComponent {
             this.globalObserver.publish("core.addDrawerToggleButton", {
               value: "plugins",
               ButtonIcon: ButtonIcon,
-              caption:
-                this.props.config.mapConfig.map?.drawerButtonTitle ??
-                "Kartverktyg",
-              drawerTitle:
-                this.props.config.mapConfig.map?.drawerTitle ?? "Kartverktyg",
+              caption: configText(
+                "app.mapTools",
+                this.props.config.mapConfig.map?.drawerButtonTitle
+              ),
+              drawerTitle: configText(
+                "app.mapTools",
+                this.props.config.mapConfig.map?.drawerTitle
+              ),
               order: 0,
               // If no plugins render **directly** in Drawer, but some **might**
               // render there occasionally, let's ensure to hide the Tools button on
@@ -566,6 +571,15 @@ class App extends React.PureComponent {
       layerControl: this.appModel.layerControl,
       dirtyLayers: {},
     };
+
+    // Lets setLanguage() write lang to the hash rather than the query.
+    setAppStateInHash(this.props.config.mapConfig.map.enableAppStateInHash);
+
+    // Defined after the spread above, so the getter isn't flattened into a value.
+    Object.defineProperties(window.hajkPublicApi, {
+      language: { get: () => i18n.language, enumerable: true },
+      setLanguage: { value: setLanguage, enumerable: true },
+    });
 
     // Register a handle to prevent pinch zoom on mobile devices.
     document.body.addEventListener(
@@ -1022,7 +1036,10 @@ class App extends React.PureComponent {
       config.mapConfig.map.logo || // If neither was set, try to see if we have the legacy admin parameter.
       "logo.png"; // If we didn't have this either, fallback to hard-coded value.
 
-    const logoAltText = config.mapConfig.map.logoAltText || "Logotype";
+    const logoAltText = configText(
+      "app.logoAltText",
+      config.mapConfig.map.logoAltText
+    );
 
     return (
       <>
@@ -1047,8 +1064,9 @@ class App extends React.PureComponent {
               <Box sx={{ display: { xs: "none", md: "block" } }}>
                 <HajkToolTip
                   title={
-                    (this.state.drawerPermanent ? "Lås upp" : "Lås fast") +
-                    " verktygspanelen"
+                    this.state.drawerPermanent
+                      ? i18n.t("app.unlockDrawer")
+                      : i18n.t("app.lockDrawer")
                   }
                 >
                   <IconButton
@@ -1262,7 +1280,7 @@ class App extends React.PureComponent {
             open={this.state.alert}
             message={this.state.alertMessage}
             parent={this}
-            title="Meddelande"
+            title={i18n.t("alert.title")}
           />
           <SrShortcuts globalObserver={this.globalObserver}></SrShortcuts>
           {this.renderDrawer()}
@@ -1364,6 +1382,7 @@ class App extends React.PureComponent {
                     mapConfig={this.appModel.config.mapConfig.map}
                   />
                 )}
+                {clean === false && <LanguageSwitcher />}
                 {clean === false && (
                   <CookieNoticeButton appModel={this.appModel} />
                 )}

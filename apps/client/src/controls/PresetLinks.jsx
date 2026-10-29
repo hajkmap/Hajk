@@ -8,6 +8,7 @@ import FolderSpecial from "@mui/icons-material/FolderSpecial";
 
 import Dialog from "../components/Dialog/Dialog";
 import ControlButton from "components/ControlButton";
+import i18n, { configText } from "src/i18n";
 
 class Preset extends React.PureComponent {
   static propTypes = {
@@ -35,7 +36,7 @@ class Preset extends React.PureComponent {
     // Else, if we're still here, go on.
     this.options = this.config.options;
     this.map = props.appModel.getMap();
-    this.title = this.options.title || "Snabbval";
+    this.title = configText("controls.presetTitle", this.options.title);
 
     this.location = null;
     this.zoom = null;
@@ -105,18 +106,11 @@ class Preset extends React.PureComponent {
       }
     } // If the provided url is not a valid map-link, warn the user.
     else {
-      this.props.enqueueSnackbar(
-        "Länken till platsen är tyvärr felaktig. Kontakta administratören av karttjänsten för att åtgärda felet.",
-        {
-          variant: "warning",
-        }
-      );
+      this.props.enqueueSnackbar(i18n.t("controls.presetInvalidLink"), {
+        variant: "warning",
+      });
       console.error(
-        "Fel i verktyget Snabbval. Länken til : \n" +
-          item.name +
-          "\n" +
-          item.presetUrl +
-          "\när tyvärr felaktig. Någon av följande parametrar saknas: &x=, &y=, &z= eller innehåller fel."
+        `Preset tool: the link "${item.name}" (${item.presetUrl}) is invalid. One of the parameters &x=, &y=, &z= is missing or incorrect.`
       );
     }
   };
@@ -197,10 +191,10 @@ class Preset extends React.PureComponent {
       return createPortal(
         <Dialog
           options={{
-            text: "Alla tända lager i kartan kommer nu att släckas. Snabbvalets fördefinierade lager tänds istället.",
-            headerText: "Visa snabbval",
-            buttonText: "OK",
-            abortText: "Avbryt",
+            text: i18n.t("controls.presetDialogText"),
+            headerText: i18n.t("controls.presetDialogTitle"),
+            buttonText: i18n.t("common.ok"),
+            abortText: i18n.t("common.cancel"),
             useLegacyNonMarkdownRenderer: true,
           }}
           open={this.state.dialogOpen}

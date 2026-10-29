@@ -13,6 +13,7 @@ import XLSXExport from "./utils/XLSXExport";
 import { encodeCommas, decodeCommas } from "../../utils/StringCommaCoder";
 import LocalStorageHelper from "../../utils/LocalStorageHelper";
 import { functionalOk as functionalCookieOk } from "../../models/Cookie";
+import i18n from "src/i18n";
 
 class Search extends React.PureComponent {
   defaultSearchOptions = {
@@ -66,44 +67,42 @@ class Search extends React.PureComponent {
 
   defaultSearchTools = [
     {
-      name: "Sök med polygon",
+      name: i18n.t("search.tools.polygon"),
       icon: <EditIcon />,
       type: "Polygon",
       enabled: this.props.options.enablePolygonSearch ?? true,
-      toolTipTitle:
-        "Genomför en sökning i ett område genom att rita en polygon.",
+      toolTipTitle: i18n.t("search.tools.polygonTooltip"),
       onClickEventName: "search.spatialSearchActivated",
     },
     {
-      name: "Sök med radie",
+      name: i18n.t("search.tools.radius"),
       icon: <RadioButtonUncheckedIcon />,
       type: "Circle",
       enabled: this.props.options.enableRadiusSearch ?? true,
-      toolTipTitle: "Genomför en sökning i ett område genom att rita en cirkel",
+      toolTipTitle: i18n.t("search.tools.radiusTooltip"),
       onClickEventName: "search.spatialSearchActivated",
     },
     {
-      name: "Sök med objekt",
+      name: i18n.t("search.tools.select"),
       icon: <TouchAppIcon />,
       type: "Select",
       enabled: this.props.options.enableSelectSearch ?? true,
-      toolTipTitle:
-        "Genomför en sökning genom att välja en eller flera områden i kartan.",
+      toolTipTitle: i18n.t("search.tools.selectTooltip"),
       onClickEventName: "search.spatialSearchActivated",
     },
     {
-      name: "Sök inom vyn",
+      name: i18n.t("search.tools.extent"),
       icon: <Crop54Icon />,
       type: "Extent",
       enabled: this.props.options.enableExtentSearch ?? true,
-      toolTipTitle: "Genomför en sökning i hela det område som kartan visar.",
+      toolTipTitle: i18n.t("search.tools.extentTooltip"),
       onClickEventName: "search.spatialSearchActivated",
     },
     {
-      name: "Sökinställningar",
+      name: i18n.t("search.settings.title"),
       icon: <SettingsIcon />,
       type: "SETTINGS",
-      toolTipTitle: "Ändra sökinställningarna.",
+      toolTipTitle: i18n.t("search.tools.settingsTooltip"),
       onClickEventName: "",
     },
   ];
@@ -183,7 +182,7 @@ class Search extends React.PureComponent {
     this.localObserver.subscribe("on-draw-start", (type) => {
       if (type === "Circle") {
         this.snackbarKey = this.props.enqueueSnackbar(
-          "Tryck i kartan där du vill ha centrumpunkten, dra sedan utåt och släpp.",
+          i18n.t("search.drawCircleHint"),
           {
             variant: "information",
             anchorOrigin: { vertical: "bottom", horizontal: "center" },
@@ -191,7 +190,7 @@ class Search extends React.PureComponent {
         );
       } else if (type === "Polygon") {
         this.snackbarKey = this.props.enqueueSnackbar(
-          "Tryck en gång i kartan för varje nod i polygonen. Genomför sökningen genom att trycka på den sista noden en gång till.",
+          i18n.t("search.drawPolygonHint"),
           {
             variant: "information",
             anchorOrigin: { vertical: "bottom", horizontal: "center" },
@@ -205,7 +204,7 @@ class Search extends React.PureComponent {
     });
     this.localObserver.subscribe("on-select-search-start", () => {
       this.snackbarKey = this.props.enqueueSnackbar(
-        "Tryck på den yta i kartan där du vill genomföra en sökning. Håll in CTRL för att välja flera ytor.",
+        i18n.t("search.selectHint"),
         {
           variant: "information",
           anchorOrigin: { vertical: "bottom", horizontal: "center" },
@@ -226,7 +225,7 @@ class Search extends React.PureComponent {
     });
     this.localObserver.subscribe("extent-search-failed", () => {
       this.snackbarKey = this.props.enqueueSnackbar(
-        "Ett problem uppstod vid sökning i området. Kontakta systemadministratören.",
+        i18n.t("search.extentSearchFailed"),
         {
           variant: "warning",
           anchorOrigin: { vertical: "top", horizontal: "center" },
@@ -755,15 +754,11 @@ class Search extends React.PureComponent {
   getPotentialWFSErrorMessage = (searchResults) => {
     return searchResults.errors.length === 0
       ? ``
-      : `OBS: Kunde inte hämta data från: `.concat(
-          searchResults.errors
-            .map((error, index) => {
-              return index === searchResults.errors.length - 1
-                ? error.source.caption
-                : `${error.source.caption}, `;
-            })
-            .join("")
-        );
+      : i18n.t("search.fetchFailed", {
+          sources: searchResults.errors
+            .map((error) => error.source.caption)
+            .join(", "),
+        });
   };
 
   async doSearch() {
@@ -854,7 +849,8 @@ class Search extends React.PureComponent {
     // and supplying an empty string is not allowed here. See also the
     // comment on shortFeatureTitle below.
     const featureTitle =
-      source.displayFields?.reduce(reducerFn, "") || "Visningsfält saknas";
+      source.displayFields?.reduce(reducerFn, "") ||
+      i18n.t("search.missingDisplayFields");
 
     // Also, try to prepare the short title. It's possible that
     // this array is not defined though, and in that case, we want

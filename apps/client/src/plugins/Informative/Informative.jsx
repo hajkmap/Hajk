@@ -1,5 +1,6 @@
 import React from "react";
 import BaseWindowPlugin from "../BaseWindowPlugin";
+import i18n from "src/i18n";
 
 import SatelliteIcon from "@mui/icons-material/Satellite";
 
@@ -12,7 +13,7 @@ class Informative extends React.PureComponent {
     super(props);
 
     this.options = props.options;
-    this.caption = this.options.caption || "Titel";
+    this.caption = this.options.caption || i18n.t("common.titleLabel");
     this.html = this.options.html || "<div>Html</div>";
     this.app = props.app;
 
@@ -50,8 +51,6 @@ class Informative extends React.PureComponent {
         custom={{
           open: this.open, // Expose open() so it can be used from other plugins (LayerSwitcher/BreadCrumbs uses this)
           icon: <SatelliteIcon />,
-          title: "Översiktsplan",
-          description: "Läs mer om vad som planeras i kommunen",
           height: "auto",
           width: 640,
         }}

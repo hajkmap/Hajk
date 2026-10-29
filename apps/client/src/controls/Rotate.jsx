@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { easeOut } from "ol/easing";
 import NavigationIcon from "@mui/icons-material/Navigation";
 import ControlButton from "components/ControlButton";
+import { useTranslation } from "react-i18next";
 
 const RotateControl = (props) => {
+  const { t } = useTranslation();
   const view = useRef();
   const [rotation, setRotation] = useState(view.current?.getRotation() || 0);
 
@@ -47,8 +49,8 @@ const RotateControl = (props) => {
   return (
     (props.map && rotation !== 0 && (
       <ControlButton
-        tooltip="Återställ rotation"
-        ariaLabel="Återställ rotation"
+        tooltip={t("controls.resetRotation")}
+        ariaLabel={t("controls.resetRotation")}
         onClick={rotateNorth}
       >
         <NavigationIcon style={{ transform: `rotate(${rotation}rad)` }} />

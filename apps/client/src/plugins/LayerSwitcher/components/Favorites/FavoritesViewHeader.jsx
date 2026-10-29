@@ -7,6 +7,7 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 function FavoritesViewHeader({
   backButtonCallback,
@@ -74,13 +75,10 @@ function FavoritesViewHeader({
           }
         } catch (error) {
           console.error(`Favorite could not be parsed. Error: ${error}`);
-          enqueueSnackbar(
-            "Favoriten kunde inte laddas, kontrollera att .json filen ser korrekt ut.",
-            {
-              variant: "error",
-              anchorOrigin: { vertical: "bottom", horizontal: "center" },
-            }
-          );
+          enqueueSnackbar(i18n.t("layerSwitcher.favoriteImportFailed"), {
+            variant: "error",
+            anchorOrigin: { vertical: "bottom", horizontal: "center" },
+          });
         }
       };
     }
@@ -108,7 +106,7 @@ function FavoritesViewHeader({
           open={tooltipOpen}
           onClose={handleClose}
           onOpen={handleOpen}
-          title="Tillbaka"
+          title={i18n.t("common.back")}
           slotProps={{ transition: { timeout: 0 } }}
         >
           <IconButton
@@ -119,7 +117,9 @@ function FavoritesViewHeader({
           </IconButton>
         </HajkToolTip>
         <Box sx={{ flexGrow: 1, textAlign: "center" }}>
-          <Typography variant="subtitle1">Mina favoriter</Typography>
+          <Typography variant="subtitle1">
+            {i18n.t("layerSwitcher.myFavorites")}
+          </Typography>
         </Box>
         <input
           ref={fileInputRef}
@@ -133,12 +133,18 @@ function FavoritesViewHeader({
           disabled={!functionalCookiesOk}
           onClick={handleImportButtonClick}
         >
-          <HajkToolTip title={"Importera"}>
+          <HajkToolTip title={i18n.t("layerSwitcher.import")}>
             <FileUploadOutlinedIcon />
           </HajkToolTip>
         </IconButton>
         <IconButton onClick={handleInfoButtonClick}>
-          <HajkToolTip title={infoIsActive ? "Dölj info" : "Visa info"}>
+          <HajkToolTip
+            title={
+              infoIsActive
+                ? i18n.t("layerSwitcher.hideInfo")
+                : i18n.t("layerSwitcher.showInfo")
+            }
+          >
             <InfoOutlinedIcon />
           </HajkToolTip>
         </IconButton>

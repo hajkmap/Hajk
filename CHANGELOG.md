@@ -18,6 +18,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Client: i18n - LayerSwitcher info texts, the Print disclaimer, the logo alt text and the DocumentHandler window title have translated defaults (via `configText()`), and the remaining hard-coded fallback texts (e.g. "Unnamed plugin") are translated.
+- Client: i18n - InfoDialog texts can be translated per dialog, keyed by the dialog's `name` (`infoDialog.dialogs.<name>.*`).
+- Client: i18n - Language switcher button in the map controls, right above the cookie button. Hidden when only one language is available.
+- Client: i18n - Anchor, Buffer, Export, Feedback, InfoDialog, Location and StreetView are translated, and the Template and Dummy reference plugins show how new plugins use `t()` and their own `i18n/<lng>.json`.
+- Client: i18n - Collector, CommandPalette, Edit, Informative, LayerComparer, Routing and TimeSlider are translated, and Fir and Kir get translatable window titles. CommandPalette shows the same tool titles as the tools' own windows, and TimeSlider formats dates in the UI language.
+- Client: i18n - FloodSimulator, FmeServer and GeosuiteExport are translated. Their admin-configurable texts (e.g. FmeServer's group name, GeosuiteExport's step descriptions) follow `configText()`: shown as-is in Swedish, replaced by the translated default in other languages.
+- Client: i18n - PropertyChecker's UI is translated. Its review reports are formal documents under Swedish planning law, so their text is kept in Swedish in every language for now (it's behind keys, so it can be translated later).
+- Client: i18n - AttributeEditor is translated. Switching editable layer no longer compares against the Swedish "Ingen" label.
 - Admin + Client: Map setting `replaceAppStateInHash` (default off, and only used when `enableAppStateInHash` is on). When on, hash updates use `history.replaceState` so the browser Back button leaves the map instead of stepping through pans, layer toggles, and opened tools. Missing or any value other than `true` keeps assigning `location.hash`.
 - Backend: The delimiter used between groups in the AD group header is now configurable via `AD_TRUSTED_GROUP_HEADER_DELIMITER`, making it possible to use the same header for Hajk and GeoServer. [#1914](https://github.com/hajkmap/Hajk/issues/1914)
 - Client: Measurer/Sketch - Angle snapping can be repeated while Ctrl/Cmd is held. Clicking a green snap guide removes that guide and draws a new one from the clicked point. [#1923](https://github.com/hajkmap/Hajk/issues/1923)

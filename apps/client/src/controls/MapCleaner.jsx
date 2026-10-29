@@ -3,6 +3,7 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
 import ControlButton from "components/ControlButton";
 import useSnackbar from "../hooks/useSnackbar";
+import { useTranslation } from "react-i18next";
 
 /**
  * @summary Hides all visible layers
@@ -12,12 +13,13 @@ import useSnackbar from "../hooks/useSnackbar";
  */
 const MapCleaner = React.memo((props) => {
   const { clearSnackbar } = useSnackbar();
+  const { t } = useTranslation();
 
   return (
     props.appModel.config.mapConfig.map.mapcleaner && (
       <ControlButton
-        tooltip="Dölj alla aktiva lager"
-        ariaLabel="Rensa kartan"
+        tooltip={t("controls.hideAllLayers")}
+        ariaLabel={t("controls.clearMap")}
         onClick={() => {
           props.appModel.clear();
           clearSnackbar();

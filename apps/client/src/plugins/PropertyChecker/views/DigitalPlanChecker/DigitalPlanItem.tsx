@@ -12,6 +12,7 @@ import {
 
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 import type {
   DigitalPlanItemProps,
@@ -120,7 +121,11 @@ const DigitalPlanItem = ({
             }}
           >
             <HajkToolTip
-              title={showTooltips ? "Inkludera planbestämmelsen i rapport" : ""}
+              title={
+                showTooltips
+                  ? i18n.t("propertyChecker.includeRegulationInReport")
+                  : ""
+              }
             >
               <Checkbox
                 size="small"
@@ -138,12 +143,14 @@ const DigitalPlanItem = ({
                 checked={isSelected()}
               />
             </HajkToolTip>
-            <HajkToolTip title={showTooltips ? "Lägg till notering" : ""}>
+            <HajkToolTip
+              title={showTooltips ? i18n.t("propertyChecker.addNote") : ""}
+            >
               <IconButton
                 size="small"
                 onClick={handleExpandClick}
                 aria-expanded={expanded}
-                aria-label="Visa noteringar"
+                aria-label={i18n.t("propertyChecker.showNotes")}
               >
                 <ExpandMoreIcon
                   sx={{
@@ -162,7 +169,7 @@ const DigitalPlanItem = ({
       <Collapse in={expanded} timeout="auto">
         <Box sx={{ px: 2, pb: 1.5 }}>
           <TextField
-            label="Notering"
+            label={i18n.t("propertyChecker.noteLabel")}
             multiline
             fullWidth
             size="small"

@@ -1,0 +1,47 @@
+{
+  "edit": {
+    "clickFeatureToEdit": "Klicka på ett objekt i kartan för att redigera dess attribut",
+    "continueEditing": "Fortsätt redigera",
+    "dataSource": "Datakälla",
+    "description": "Redigera objekt i kartan (WFS)",
+    "editableFields": "Editerbara fält:",
+    "enterAttributes": "Ange objektets attribut:",
+    "invalidUrl": "Ange en giltig url. t.ex. https://www.example.com",
+    "loadFailed": "Fel vid laddning av data. Kontakta systemadministratören.",
+    "nonEditableFields": "Icke-editerbara fält:",
+    "readFailed": "Fel: data kan inte läsas in. Kontrollera koordinatsystem.",
+    "selectValue": "-Välj värde-",
+    "status": {
+      "deleted": "Antal borttagna objekt: {{number}}",
+      "failed": "Uppdateringen misslyckades: {{message}}",
+      "inserted": "Antal skapade objekt: {{number}}",
+      "noChanges": "Uppdateringen lyckades men det upptäcktes inte några ändringar.",
+      "succeeded": "Uppdateringen lyckades.",
+      "unknown": "Status för uppdateringen kunde inte avläsas ur svaret från servern.",
+      "updated": "Antal uppdaterade objekt: {{number}}"
+    },
+    "steps": {
+      "done": "Klart!",
+      "edit": "Redigera",
+      "editing": "Redigerar {{name}}",
+      "selectSource": "Välj datamängd att redigera"
+    },
+    "title": "Redigera",
+    "toolbar": {
+      "add": "Lägg till",
+      "addLine": "Lägg till linje",
+      "addPoint": "Lägg till punkt",
+      "addPolygon": "Lägg till yta",
+      "edit": "Editera",
+      "line": "Linje",
+      "modify": "Ändra",
+      "modifyGeometry": "Ändra geometri",
+      "move": "Flytta",
+      "moveGeometry": "Flytta geometri",
+      "point": "Punkt",
+      "polygon": "Yta",
+      "remove": "Radera",
+      "removeGeometry": "Ta bort geometri"
+    }
+  }
+}

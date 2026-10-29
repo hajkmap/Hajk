@@ -9,6 +9,7 @@ import ClearIcon from "@mui/icons-material/Clear";
 
 import HajkToolTip from "components/HajkToolTip";
 import LayersTabActionsMenu from "./LayersTabActionsMenu.jsx";
+import i18n from "src/i18n";
 
 const MIN_FILTER_TOOLTIP_DELAY = 1000;
 
@@ -34,7 +35,9 @@ const LayerListFilter = ({
   return (
     <>
       <HajkToolTip
-        title={`Skriv minst ${minFilterLength} tecken eller tryck enter`}
+        title={i18n.t("layerSwitcher.minFilterLength", {
+          count: minFilterLength,
+        })}
         placement="right"
         enterDelay={MIN_FILTER_TOOLTIP_DELAY}
         open={showToolTip}
@@ -63,7 +66,7 @@ const LayerListFilter = ({
             }
           }}
           fullWidth
-          placeholder="Sök lager"
+          placeholder={i18n.t("layerSwitcher.searchLayers")}
           inputRef={inputRef}
           variant="standard"
           sx={{ pt: 1.25, pb: 1, pl: 1.75, pr: 0.5 }}
@@ -73,7 +76,7 @@ const LayerListFilter = ({
               endAdornment: (
                 <InputAdornment position="end">
                   {inputRef.current?.value.length >= minFilterLength ? (
-                    <HajkToolTip title="Rensa sökning">
+                    <HajkToolTip title={i18n.t("search.clearSearch")}>
                       <IconButton
                         onClick={() => {
                           if (inputRef.current) {

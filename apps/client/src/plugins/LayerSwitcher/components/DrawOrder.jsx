@@ -32,6 +32,7 @@ import GroupLayer from "./GroupLayer";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import HajkToolTip from "components/HajkToolTip";
 import SortableList from "./SortableList";
+import i18n, { configText } from "src/i18n";
 
 const reorder = (list, startIndex, endIndex) => {
   const result = Array.from(list);
@@ -342,13 +343,19 @@ function DrawOrder({ display, app, map, _localObserver, options }) {
                     onChange={setSystemFilter}
                   />
                 }
-                label="Systemlager"
+                label={i18n.t("layerSwitcher.systemLayers")}
               />
             </FormGroup>
           )}
           <Box sx={{ flexGrow: 1 }} />
           <IconButton onClick={handleInfoButtonClick}>
-            <HajkToolTip title={infoIsActive ? "Dölj info" : "Visa info"}>
+            <HajkToolTip
+              title={
+                infoIsActive
+                  ? i18n.t("layerSwitcher.hideInfo")
+                  : i18n.t("layerSwitcher.showInfo")
+              }
+            >
               <InfoOutlinedIcon />
             </HajkToolTip>
           </IconButton>
@@ -362,7 +369,10 @@ function DrawOrder({ display, app, map, _localObserver, options }) {
           <Box sx={{ p: 1, pt: 0 }}>
             <hr></hr>
             <Typography variant="subtitle2">
-              {options.drawOrderViewInfoText}
+              {configText(
+                "layerSwitcher.drawOrderViewInfoText",
+                options.drawOrderViewInfoText
+              )}
             </Typography>
           </Box>
         </Collapse>

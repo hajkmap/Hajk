@@ -1,6 +1,7 @@
 import { Typography } from "@mui/material";
 
 import DigitalPlan from "./DigitalPlan";
+import i18n from "src/i18n";
 
 import type { DigitalPlanCheckerTabContentViewProps } from "../../types";
 
@@ -21,9 +22,7 @@ function DigitalPlanList({
     ))
   ) : (
     <Typography sx={{ p: 2 }}>
-      Inga digitala plan hittades på den klickade punkten. Observera att det
-      fortfarande kan finnas en detaljplan på ytan och du ska kontrollera det
-      genom att titta i lagret med detaljplaner.
+      {i18n.t("propertyChecker.noDigitalPlans")}
     </Typography>
   );
 }

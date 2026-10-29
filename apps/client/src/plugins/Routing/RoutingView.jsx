@@ -18,6 +18,7 @@ import SettingsBackupRestoreIcon from "@mui/icons-material/SettingsBackupRestore
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 
 import withSnackbar from "components/WithSnackbar";
+import i18n from "src/i18n";
 
 class RoutingView extends React.PureComponent {
   state = {
@@ -65,49 +66,34 @@ class RoutingView extends React.PureComponent {
     });
 
     props.localObserver.subscribe("startStopPointsMissing", () => {
-      this.props.enqueueSnackbar(
-        "Välj start- och stoppunkt för att kunna navigera.",
-        {
-          variant: "error",
-        }
-      );
+      this.props.enqueueSnackbar(i18n.t("routing.errors.pointsMissing"), {
+        variant: "error",
+      });
     });
 
     props.localObserver.subscribe("requestDenied", () => {
-      this.props.enqueueSnackbar(
-        "Kunde inte navigera. Kontakta systemadministratör och påtala att giltig licens för Google Maps API saknas.",
-        {
-          variant: "error",
-        }
-      );
+      this.props.enqueueSnackbar(i18n.t("routing.errors.requestDenied"), {
+        variant: "error",
+      });
     });
 
     props.localObserver.subscribe("routingGoogleMapsApiLoadFailed", () => {
-      this.props.enqueueSnackbar(
-        "Kunde inte ladda Google Maps API. Kontakta systemadministratör.",
-        {
-          variant: "error",
-        }
-      );
+      this.props.enqueueSnackbar(i18n.t("routing.errors.loadFailed"), {
+        variant: "error",
+      });
     });
 
     props.localObserver.subscribe("zeroResults", () => {
-      this.props.enqueueSnackbar(
-        "Kunde inte hitta vägbeskrivning mellan valda punkter och för det valda transportslaget. Prova att byta färdsätt och sök igen.",
-        {
-          variant: "warning",
-        }
-      );
+      this.props.enqueueSnackbar(i18n.t("routing.errors.zeroResults"), {
+        variant: "warning",
+      });
     });
 
     props.localObserver.subscribe("otherError", (status) => {
       console.error(status);
-      this.props.enqueueSnackbar(
-        "Ett fel har inträffat. Vänligen försök igen.",
-        {
-          variant: "warning",
-        }
-      );
+      this.props.enqueueSnackbar(i18n.t("routing.errors.other"), {
+        variant: "warning",
+      });
     });
   }
 
@@ -125,7 +111,7 @@ class RoutingView extends React.PureComponent {
 
       case "manual":
         this.selectStartSnackbar = this.props.enqueueSnackbar(
-          "Klicka i kartan för att välja startpunkt.",
+          i18n.t("routing.clickToSelectStart"),
           { variant: "info", persist: true }
         );
         this.props.model.activateStartMode();
@@ -140,7 +126,7 @@ class RoutingView extends React.PureComponent {
     if (this.state.endSelectionInProgress !== true) {
       this.setState({ endSelectionInProgress: true }, (_e) => {
         this.selectEndSnackbar = this.props.enqueueSnackbar(
-          "Klicka i kartan för att välja din destination.",
+          i18n.t("routing.clickToSelectEnd"),
           { variant: "info", persist: true }
         );
         this.props.model.activateEndMode();
@@ -157,7 +143,7 @@ class RoutingView extends React.PureComponent {
           sx={{ padding: 2 }}
         >
           <Step key="pickStart">
-            <StepLabel>Välj startpunkt</StepLabel>
+            <StepLabel>{i18n.t("routing.steps.start")}</StepLabel>
             <StepContent>
               <ToggleButtonGroup
                 value={this.state.startMode}
@@ -166,28 +152,28 @@ class RoutingView extends React.PureComponent {
                 size="small"
               >
                 <ToggleButton key={1} value="gps">
-                  Min position
+                  {i18n.t("routing.myPosition")}
                 </ToggleButton>
                 <ToggleButton key={2} value="manual">
-                  Välj i kartan
+                  {i18n.t("routing.selectInMap")}
                 </ToggleButton>
               </ToggleButtonGroup>
             </StepContent>
           </Step>
           <Step key="pickEnd">
-            <StepLabel>Välj destination</StepLabel>
+            <StepLabel>{i18n.t("routing.steps.end")}</StepLabel>
             <StepContent>
               <Button
                 variant="contained"
                 onClick={this.handleClickOnEndSelection}
                 disabled={this.state.endSelectionInProgress === true}
               >
-                Välj i kartan
+                {i18n.t("routing.selectInMap")}
               </Button>
             </StepContent>
           </Step>
           <Step key="pickTravelMode">
-            <StepLabel>Välj färdsätt</StepLabel>
+            <StepLabel>{i18n.t("routing.steps.travelMode")}</StepLabel>
             <StepContent>
               <ToggleButtonGroup
                 value={this.state.travelMode}
@@ -228,7 +214,7 @@ class RoutingView extends React.PureComponent {
             this.setState({ activeStep: this.state.activeStep - 1 });
           }}
         >
-          Föregående
+          {i18n.t("common.previous")}
         </Button>
         <Button
           variant="contained"
@@ -242,7 +228,7 @@ class RoutingView extends React.PureComponent {
             this.props.model.clearMap();
           }}
         >
-          Nollställ
+          {i18n.t("common.reset")}
         </Button>
       </ButtonGroup>
     );

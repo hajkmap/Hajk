@@ -9,6 +9,7 @@ import ZoomOutMapIcon from "@mui/icons-material/ZoomOutMap";
 import FormatShapesIcon from "@mui/icons-material/FormatShapes";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
+import i18n from "src/i18n";
 
 const StyledButton = styled(Button)(({ theme }) => ({
   borderTop: `${theme.spacing(0.5)} solid transparent`,
@@ -123,7 +124,7 @@ class Toolbar extends Component {
     return (
       <Grid container spacing={1}>
         <Grid size={12}>
-          <Typography>Lägg till</Typography>
+          <Typography>{i18n.t("edit.toolbar.add")}</Typography>
         </Grid>
         <Grid size={4}>
           <StyledButton
@@ -135,9 +136,9 @@ class Toolbar extends Component {
             }}
             selected={this.props.activeTool === "point"}
             type="button"
-            title="Lägg till punkt"
+            title={i18n.t("edit.toolbar.addPoint")}
           >
-            Punkt
+            {i18n.t("edit.toolbar.point")}
             <ScatterPlotIcon sx={{ marginLeft: 1 }} />
           </StyledButton>
         </Grid>
@@ -150,10 +151,10 @@ class Toolbar extends Component {
               this.onAddLineClicked();
             }}
             type="button"
-            title="Lägg till linje"
+            title={i18n.t("edit.toolbar.addLine")}
             selected={this.props.activeTool === "linestring"}
           >
-            Linje
+            {i18n.t("edit.toolbar.line")}
             <LinearScaleIcon sx={{ marginLeft: 1 }} />
           </StyledButton>
         </Grid>
@@ -166,15 +167,15 @@ class Toolbar extends Component {
               this.onAddPolygonClicked();
             }}
             type="button"
-            title="Lägg till yta"
+            title={i18n.t("edit.toolbar.addPolygon")}
             selected={this.props.activeTool === "polygon"}
           >
-            Yta
+            {i18n.t("edit.toolbar.polygon")}
             <BorderStyleIcon sx={{ marginLeft: 1 }} />
           </StyledButton>
         </Grid>
         <Grid size={12}>
-          <Typography>Editera</Typography>
+          <Typography>{i18n.t("edit.toolbar.edit")}</Typography>
         </Grid>
         <Grid size={4}>
           <StyledButton
@@ -184,10 +185,10 @@ class Toolbar extends Component {
               this.onMoveClicked();
             }}
             type="button"
-            title="Flytta geometri"
+            title={i18n.t("edit.toolbar.moveGeometry")}
             selected={this.props.activeTool === "move"}
           >
-            Flytta
+            {i18n.t("edit.toolbar.move")}
             <ZoomOutMapIcon sx={{ marginLeft: 1 }} />
           </StyledButton>
         </Grid>
@@ -199,10 +200,10 @@ class Toolbar extends Component {
               this.onRemoveClicked();
             }}
             type="button"
-            title="Ta bort geometri"
+            title={i18n.t("edit.toolbar.removeGeometry")}
             selected={this.props.activeTool === "remove"}
           >
-            Radera
+            {i18n.t("edit.toolbar.remove")}
             <DeleteIcon sx={{ marginLeft: 1 }} />
           </StyledButton>
         </Grid>
@@ -214,10 +215,10 @@ class Toolbar extends Component {
               this.onModifyClicked();
             }}
             type="button"
-            title="Ändra geometri"
+            title={i18n.t("edit.toolbar.modifyGeometry")}
             selected={this.props.activeTool === "modify"}
           >
-            Ändra
+            {i18n.t("edit.toolbar.modify")}
             <FormatShapesIcon sx={{ marginLeft: 1 }} />
           </StyledButton>
         </Grid>

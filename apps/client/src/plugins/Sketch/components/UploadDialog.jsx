@@ -9,6 +9,7 @@ import {
   Box,
 } from "@mui/material";
 import { useSnackbar } from "notistack";
+import i18n from "src/i18n";
 
 const StyledDialog = styled(BaseDialog)(({ _theme }) => ({
   "& .MuiDialog-paper": {
@@ -61,7 +62,7 @@ const UploadDialog = (props) => {
             } catch (error) {
               console.error("Failed to import file:", error);
               enqueueSnackbar(
-                `Kunde inte importera "${fileName}". Filen är skadad eller har fel format.`,
+                i18n.t("sketch.upload.importFailed", { fileName }),
                 { variant: "error" }
               );
             }
@@ -69,15 +70,14 @@ const UploadDialog = (props) => {
           reader.readAsText(file);
         }
         if (skippedFiles.length > 0) {
-          enqueueSnackbar(
-            "Hajk stödjer endast .kml-, .gpx- och .geojson-filer. En eller flera filer ignorerades.",
-            { variant: "warning" }
-          );
+          enqueueSnackbar(i18n.t("sketch.upload.unsupportedFiles"), {
+            variant: "warning",
+          });
         }
         props.setOpen(false);
       } catch (error) {
         console.error("Error processing files:", error);
-        enqueueSnackbar("Ett fel uppstod vid inläsning av filerna.", {
+        enqueueSnackbar(i18n.t("sketch.upload.readError"), {
           variant: "error",
         });
       }
@@ -86,7 +86,7 @@ const UploadDialog = (props) => {
 
   return (
     <StyledDialog open={props.open} onClose={() => props.setOpen(false)}>
-      <DialogTitle>Importera ritobjekt</DialogTitle>
+      <DialogTitle>{i18n.t("sketch.upload.import")}</DialogTitle>
       <DialogContent>
         <StyledFileInput>
           <input
@@ -99,16 +99,18 @@ const UploadDialog = (props) => {
           />
           <label htmlFor="file-upload">
             <Button variant="contained" component="span">
-              Välj filer
+              {i18n.t("sketch.upload.chooseFiles")}
             </Button>
           </label>
           <Typography variant="body1" sx={{ mt: 2 }}>
-            Välj en eller flera .kml-, .gpx- eller .geojson-filer
+            {i18n.t("sketch.upload.chooseFilesHint")}
           </Typography>
         </StyledFileInput>
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => props.setOpen(false)}>Avbryt</Button>
+        <Button onClick={() => props.setOpen(false)}>
+          {i18n.t("common.cancel")}
+        </Button>
       </DialogActions>
     </StyledDialog>
   );

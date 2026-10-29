@@ -31,6 +31,7 @@ import SearchResultsList from "./SearchResultsList";
 import SearchResultsDownloadMenu from "./SearchResultsDownloadMenu";
 import ArrowBack from "@mui/icons-material/ArrowBack";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   maxHeight: "80vh",
@@ -86,25 +87,25 @@ class SearchResultsContainer extends React.PureComponent {
 
   searchResultTools = [
     {
-      name: "Filtrera",
+      name: i18n.t("search.results.filter"),
       type: "filter",
       render: () => this.renderFilterTool(),
       enabled: this.props.options.enableResultsFiltering ?? true,
     },
     {
-      name: "Sortera",
+      name: i18n.t("search.results.sort"),
       type: "sort",
       render: () => this.renderSortTool(),
       enabled: this.props.options.enableResultsSorting ?? true,
     },
     {
-      name: "Rensa",
+      name: i18n.t("search.results.clear"),
       type: "clear",
       render: () => this.renderClearTool(),
       enabled: this.props.options.enableResultsSelectionClearing ?? true,
     },
     {
-      name: "Ladda ner",
+      name: i18n.t("search.results.download"),
       type: "download",
       render: () => this.renderDownloadTool(),
       enabled: this.props.options.enableResultsDownloading ?? true,
@@ -114,17 +115,17 @@ class SearchResultsContainer extends React.PureComponent {
   sortingStrategies = [
     {
       type: "AtoZ",
-      name: "alfabetisk stigande",
+      name: i18n.t("search.results.sortAtoZ"),
       appliesTo: ["featureCollections", "features"],
     },
     {
       type: "ZtoA",
-      name: "alfabetisk fallande",
+      name: i18n.t("search.results.sortZtoA"),
       appliesTo: ["featureCollections", "features"],
     },
     {
       type: "numHits",
-      name: "antal träffar",
+      name: i18n.t("search.results.sortNumHits"),
       appliesTo: ["featureCollections"],
     },
   ];
@@ -291,7 +292,10 @@ class SearchResultsContainer extends React.PureComponent {
     );
     return {
       origin: "USERSELECT",
-      source: { id: "userSelected", caption: "Markerade objekt" },
+      source: {
+        id: "userSelected",
+        caption: i18n.t("search.results.userSelected"),
+      },
       value: {
         type: "featureCollection",
         features: features,
@@ -352,7 +356,9 @@ class SearchResultsContainer extends React.PureComponent {
         }}
         size={12}
       >
-        <span style={visuallyHidden}>Textfält för att filtrera resultatet</span>
+        <span style={visuallyHidden}>
+          {i18n.t("search.results.filterFieldLabel")}
+        </span>
         <TextField
           autoFocus
           onChange={this.handleFilterTextFieldInputChange}
@@ -362,13 +368,15 @@ class SearchResultsContainer extends React.PureComponent {
           fullWidth
           size="small"
           variant="outlined"
-          label="Filtrera sökresultaten"
+          label={i18n.t("search.results.filterResults")}
           slotProps={{
             input: {
               endAdornment: showClearFilterButton && (
-                <HajkToolTip title="Rensa filtret">
+                <HajkToolTip title={i18n.t("search.results.clearFilter")}>
                   <IconButton onClick={this.clearViewFilters} size="small">
-                    <span style={visuallyHidden}>Rensa filtret</span>
+                    <span style={visuallyHidden}>
+                      {i18n.t("search.results.clearFilter")}
+                    </span>
                     <ClearIcon />
                   </IconButton>
                 </HajkToolTip>
@@ -504,8 +512,8 @@ class SearchResultsContainer extends React.PureComponent {
   renderFilterTool = () => {
     const filterActive = this.isFilterActive();
     const filterHelpText = filterActive
-      ? "Filtret är aktivt"
-      : "Filtrera resultatet";
+      ? i18n.t("search.results.filterActive")
+      : i18n.t("search.results.filterResult");
     return (
       <HajkToolTip title={filterHelpText}>
         <IconButton
@@ -536,9 +544,9 @@ class SearchResultsContainer extends React.PureComponent {
       featureSortingStrategy,
     } = this.state;
 
-    const sortHelpText = `Sortera resultatet, sorterar nu enligt ${
+    const sortHelpText = i18n.t("search.results.sortTooltip", {
       // Get current sorting strategy from the array of strategies
-      this.sortingStrategies.find(
+      strategy: this.sortingStrategies.find(
         // by finding...
         (strategy) =>
           // the strategy with the "type"-value...
@@ -548,8 +556,8 @@ class SearchResultsContainer extends React.PureComponent {
           (activeFeatureCollection
             ? featureSortingStrategy
             : featureCollectionSortingStrategy)
-      ).name // And it is the name value of the strategy we want to show
-    }`;
+      ).name, // And it is the name value of the strategy we want to show
+    });
 
     return (
       <HajkToolTip title={sortHelpText}>
@@ -567,7 +575,7 @@ class SearchResultsContainer extends React.PureComponent {
 
   renderClearTool = () => {
     return (
-      <HajkToolTip title="Rensa alla selekterade objekt">
+      <HajkToolTip title={i18n.t("search.results.clearSelected")}>
         <IconButton
           sx={{ minWidth: 30 }}
           onClick={this.clearAllSelectedFeaturesInView}
@@ -648,7 +656,11 @@ class SearchResultsContainer extends React.PureComponent {
           </Grow>
           <Grid>
             <HajkToolTip
-              title={`${this.state.showTools ? "Dölj" : "Visa"} verktyg`}
+              title={
+                this.state.showTools
+                  ? i18n.t("search.results.hideTools")
+                  : i18n.t("search.results.showTools")
+              }
             >
               <IconButton
                 sx={{ minWidth: 30 }}
@@ -890,11 +902,11 @@ class SearchResultsContainer extends React.PureComponent {
               );
             }}
           >
-            Gå till föregående vy
+            {i18n.t("common.backToPreviousView")}
           </Button>
           <Divider />
-          <Breadcrumbs aria-label="breadcrumb" separator="/">
-            <HajkToolTip title="Tillbaka till alla sökresultat">
+          <Breadcrumbs aria-label={i18n.t("common.breadcrumb")} separator="/">
+            <HajkToolTip title={i18n.t("search.results.backToAll")}>
               <Link
                 tabIndex={0}
                 underline="hover"
@@ -913,7 +925,7 @@ class SearchResultsContainer extends React.PureComponent {
                 }}
                 onChange={this.handleActiveFeatureChange}
               >
-                Sökresultat
+                {i18n.t("search.results.title")}
               </Link>
             </HajkToolTip>
             <HajkToolTip title={featureCollectionTitle}>
@@ -981,7 +993,9 @@ class SearchResultsContainer extends React.PureComponent {
         >
           <HajkToolTip
             title={
-              activeFeatureCollection ? featureCollectionTitle : "Sökresultat"
+              activeFeatureCollection
+                ? featureCollectionTitle
+                : i18n.t("search.results.title")
             }
           >
             <Typography
@@ -991,7 +1005,9 @@ class SearchResultsContainer extends React.PureComponent {
               sx={{ maxWidth: "100%", fontSize: 18 }}
             >
               {`${
-                activeFeatureCollection ? featureCollectionTitle : "Sökresultat"
+                activeFeatureCollection
+                  ? featureCollectionTitle
+                  : i18n.t("search.results.title")
               }`}
             </Typography>
           </HajkToolTip>
@@ -1088,7 +1104,9 @@ class SearchResultsContainer extends React.PureComponent {
       <Collapse in={!panelCollapsed}>
         {sumOfResults === null ? null : sumOfResults === 0 ? (
           <StyledPaper onMouseDown={handleFocus}>
-            <Alert severity="warning">Sökningen gav inget resultat.</Alert>
+            <Alert severity="warning">
+              {i18n.t("search.results.noResults")}
+            </Alert>
           </StyledPaper>
         ) : (
           <StyledPaper onMouseDown={handleFocus}>

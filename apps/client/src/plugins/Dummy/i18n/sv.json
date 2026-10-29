@@ -1,0 +1,20 @@
+{
+  "dummy": {
+    "activateDraw": "Aktivera ritverktyg",
+    "alert": "Larm",
+    "clicked_one": "Klickad {{count}} gång",
+    "clicked_other": "Klickad {{count}} gånger",
+    "defaultSnackbarMessage": "Ett trevligt meddelande med standardutseende.",
+    "description": "En kort beskrivning som visas i widgeten",
+    "disableDraw": "Inaktivera ritverktyg",
+    "drawerText": "Dummy har anropat globalObserver och bett om att få lägga till en knapp uppe i headern. När du trycker på knappen visas det här innehållet i sidopanelen.",
+    "drawerTitle": "Dummyverktyg",
+    "errorSnackbarMessage": "Hoppsan, ett meddelande med felutseende!",
+    "randomBorderColor": "Slumpa kantfärg",
+    "randomTitleAndColor": "Slumpa titel och färg",
+    "showDefaultSnackbar": "Visa standardmeddelande",
+    "showErrorSnackbar": "Visa felmeddelande",
+    "snackbarKey": "Jag tillhör meddelandet med nyckeln {{key}}",
+    "title": "Dummy"
+  }
+}

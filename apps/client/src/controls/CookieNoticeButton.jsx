@@ -1,6 +1,7 @@
 import CookieIcon from "@mui/icons-material/Cookie";
 
 import ControlButton from "components/ControlButton";
+import { useTranslation } from "react-i18next";
 
 /**
  * @summary Displays the cookie notice dialog
@@ -9,11 +10,12 @@ import ControlButton from "components/ControlButton";
  * @returns {object} React
  */
 const CookieNoticeButton = (props) => {
+  const { t } = useTranslation();
   return (
     props.appModel.config.mapConfig.map.showCookieNoticeButton && (
       <ControlButton
-        tooltip="Visa cookie meddelande"
-        ariaLabel="CookieNoticeButton"
+        tooltip={t("controls.showCookieNotice")}
+        ariaLabel={t("controls.showCookieNotice")}
         onClick={() => {
           props.appModel.globalObserver.publish("core.showCookieBanner");
         }}

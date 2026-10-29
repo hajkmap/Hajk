@@ -2,6 +2,7 @@ import React from "react";
 import { styled } from "@mui/material/styles";
 import { Attribution } from "ol/control";
 import { getIsMobile } from "../utils/IsMobile";
+import i18n from "src/i18n";
 
 const Root = styled("div")(({ theme }) => ({
   background: theme.palette.background.paper,
@@ -92,7 +93,7 @@ class AttributionControl extends React.PureComponent {
       // mobile we start collapsed (© only) to save footer space.
       const attributionControl = new Attribution({
         target: this.ref.current,
-        tipLabel: "Visa/dölj copyrightinformation för kartdata",
+        tipLabel: i18n.t("controls.toggleAttribution"),
         label: "©",
         collapsible: true,
         collapsed: getIsMobile(),

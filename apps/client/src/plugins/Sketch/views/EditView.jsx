@@ -23,6 +23,7 @@ import HajkToolTip from "components/HajkToolTip";
 import Information from "../components/Information";
 import FeatureTitleEditor from "../components/FeatureTitleEditor";
 import FeatureStyleEditor from "../components/featureStyle/FeatureStyleEditor";
+import i18n from "src/i18n";
 
 const ModifyNodeToggler = ({ modifyEnabled, setModifyEnabled }) => {
   return (
@@ -34,12 +35,14 @@ const ModifyNodeToggler = ({ modifyEnabled, setModifyEnabled }) => {
           alignItems: "center",
         }}
       >
-        <Typography variant="body2">Tillåt redigering av noder</Typography>
+        <Typography variant="body2">
+          {i18n.t("sketch.edit.allowNodeEditing")}
+        </Typography>
         <HajkToolTip
           title={
             modifyEnabled
-              ? "Avaktivera redigering av noder för att enklare kunna selektera objekt i kartan för redigering av färg etc."
-              : "Aktivera för att kunna redigera objektens utbredning i kartan."
+              ? i18n.t("sketch.edit.disableNodeEditingHint")
+              : i18n.t("sketch.edit.enableNodeEditingHint")
           }
         >
           <Switch
@@ -93,14 +96,13 @@ const EditView = (props) => {
         <Grid size={12}>
           {props.editFeature === null ? (
             <Typography align="center" style={{ marginTop: 24 }}>
-              Klicka på ett objekt i kartan för att ändra dess utseende eller
-              för att byta dess ritordning.
+              {i18n.t("sketch.edit.clickObjectHint")}
             </Typography>
           ) : (
             <Grid size={12}>
               {props.editFeature?.get?.("__ae_style_delegate") === true ? (
                 <Typography align="center" style={{ marginTop: 24 }}>
-                  Detta objekt hanteras av redigerbart lager.
+                  {i18n.t("sketch.edit.managedByService")}
                 </Typography>
               ) : (
                 <div
@@ -132,7 +134,7 @@ const EditView = (props) => {
       {props.editFeature && (
         <Grid container style={{ marginTop: 8 }} spacing={2}>
           <Grid size={7}>
-            <HajkToolTip title="Klicka för att duplicera det markerade objektet.">
+            <HajkToolTip title={i18n.t("sketch.edit.duplicateHint")}>
               <span style={{ display: "inline-block", width: "100%" }}>
                 <Button
                   variant="contained"
@@ -145,7 +147,7 @@ const EditView = (props) => {
                     props.drawModel.reBindFeaturePropertyListener();
                   }}
                 >
-                  Duplicera
+                  {i18n.t("sketch.edit.duplicate")}
                 </Button>
               </span>
             </HajkToolTip>
@@ -160,7 +162,7 @@ const EditView = (props) => {
               size="small"
               disabled={uiDisabled}
             >
-              Ordna
+              {i18n.t("sketch.edit.arrange")}
             </Button>
 
             <Menu
@@ -183,7 +185,9 @@ const EditView = (props) => {
                 <ListItemIcon>
                   <FlipToFront fontSize="small" />
                 </ListItemIcon>
-                <ListItemText>Placera längst fram</ListItemText>
+                <ListItemText>
+                  {i18n.t("sketch.edit.bringToFront")}
+                </ListItemText>
               </MenuItem>
 
               <MenuItem
@@ -194,7 +198,9 @@ const EditView = (props) => {
                 <ListItemIcon>
                   <ArrowDropUp fontSize="small" />
                 </ListItemIcon>
-                <ListItemText>Flytta framåt</ListItemText>
+                <ListItemText>
+                  {i18n.t("sketch.edit.bringForward")}
+                </ListItemText>
               </MenuItem>
 
               <MenuItem
@@ -205,7 +211,9 @@ const EditView = (props) => {
                 <ListItemIcon>
                   <ArrowDropDown fontSize="small" />
                 </ListItemIcon>
-                <ListItemText>Flytta bakåt</ListItemText>
+                <ListItemText>
+                  {i18n.t("sketch.edit.sendBackward")}
+                </ListItemText>
               </MenuItem>
 
               <MenuItem
@@ -216,7 +224,7 @@ const EditView = (props) => {
                 <ListItemIcon>
                   <FlipToBack fontSize="small" />
                 </ListItemIcon>
-                <ListItemText>Placera längst bak</ListItemText>
+                <ListItemText>{i18n.t("sketch.edit.sendToBack")}</ListItemText>
               </MenuItem>
             </Menu>
           </Grid>

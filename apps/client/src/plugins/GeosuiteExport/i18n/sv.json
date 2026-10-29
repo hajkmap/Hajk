@@ -1,0 +1,43 @@
+{
+  "geosuiteExport": {
+    "boreholes": {
+      "deliveryInformation": "Leveransinformation",
+      "referenceSystem": "Referenssystem",
+      "title": "Borrhålsdata i GeoSuite-format"
+    },
+    "creatingZip": "Skapar ZIP-fil...",
+    "deliveryInfo": "Projekt: {{project}}\nDokument: {{document}}",
+    "deliveryInfoFileName": "Leveransinformation.txt",
+    "description": "Hämta data med urvalsområde",
+    "documents": {
+      "title": "Geotekniska utredningar"
+    },
+    "done": "Klar",
+    "email": "E-postadress",
+    "entireProject": " Hela projekt",
+    "entireProjectCount": "Hela projekt ({{number}})",
+    "fetchingResults": "Hämtar resultat...",
+    "finish": "Avsluta",
+    "nextStep": "Fortsätt till nästa steg",
+    "noResultsSelectNewArea": "Inget resultat. Gå tillbaka och markera ett nytt område.",
+    "order": "Beställ",
+    "previousStep": "Gå tillbaka till föregående steg",
+    "projectExportOptions": "Visa projekt export val.",
+    "projectId": "Id: {{id}}",
+    "selectAll": "Välj Alla",
+    "selectMore": "Välj mer",
+    "selectMoreProducts": "Välj mer produkter",
+    "startOver": "Börja Om",
+    "steps": {
+      "confirmation": "Bekräftelse",
+      "delivery": "Leveransalternativ",
+      "selectArea": "Markera område",
+      "selectProduct": "Välj produkt"
+    },
+    "termsOfUse": "Villkor för nyttjande",
+    "title": "Hämta data",
+    "withinArea": "Inom markering",
+    "withinAreaCount": "Inom markering ({{number}})",
+    "yourEmail": "Din e-postadress"
+  }
+}

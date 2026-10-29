@@ -56,8 +56,6 @@ class Print extends React.PureComponent {
         custom={{
           disablePadding: true,
           icon: <PrintIcon />,
-          title: "Skriv ut",
-          description: "Skapa en PDF av kartan",
           height: "dynamic",
           width: 350,
           onWindowShow: this.onWindowShow,

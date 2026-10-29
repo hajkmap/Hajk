@@ -3,6 +3,7 @@ import { useSnackbar as useNotistackSnackbar } from "notistack";
 import { IconButton } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
 import { SnackbarContext } from "../components/SnackbarProvider";
+import i18n from "src/i18n";
 
 // Constants for operation types.
 const ADD = "ADD";
@@ -39,8 +40,11 @@ const useSnackbar = () => {
     const otherLayersCount = keys.length - 1;
 
     return otherLayersCount > 0
-      ? `Lagret '${mostRecentLayer}' och ${otherLayersCount} andra lager är inte synliga vid aktuell zoomnivå.`
-      : `Lagret '${mostRecentLayer}' är inte synligt vid aktuell zoomnivå.`;
+      ? i18n.t("snackbar.layersNotVisibleAtZoom", {
+          layer: mostRecentLayer,
+          count: otherLayersCount,
+        })
+      : i18n.t("snackbar.layerNotVisibleAtZoom", { layer: mostRecentLayer });
   };
 
   // Function to display the snackbar.

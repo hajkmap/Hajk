@@ -1,10 +1,11 @@
 import { Badge, Button } from "@mui/material";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 export default function SettingsButton({ layerStatus, open, setOpen }) {
   return (
-    <HajkToolTip title="Inställningar">
+    <HajkToolTip title={i18n.t("common.settings")}>
       <Badge
         color="error"
         invisible={!layerStatus.error}

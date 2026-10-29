@@ -60,6 +60,7 @@ import { buildLayout } from "./PrintLayout";
 import { renderToPdf } from "./PdfRenderer";
 import { renderToPng } from "./PngRenderer";
 import { buildLegendPdfPages, getLegendInfoForLayer } from "./LegendUtil";
+import i18n, { configText } from "src/i18n";
 
 export default class PrintModel {
   constructor(settings) {
@@ -78,7 +79,10 @@ export default class PrintModel {
     this.textFontSize = settings.options.textFontSize || 8;
     this.textFontWeight = settings.options.textFontWeight || "normal";
     this.date = settings.options.date || "";
-    this.disclaimer = settings.options.disclaimer || "";
+    // An empty disclaimer from Admin means no disclaimer, so only a set one is translated.
+    this.disclaimer = settings.options.disclaimer
+      ? configText("print.disclaimer", settings.options.disclaimer)
+      : "";
     this.localObserver = settings.localObserver;
     this.mapConfig = settings.mapConfig;
     this.mmPerPoint = 2.83465;
@@ -959,7 +963,7 @@ export default class PrintModel {
             windowUrl
           );
 
-          const fileName = `Kartexport - ${new Date().toLocaleString()}`;
+          const fileName = `${i18n.t("print.fileName")} - ${new Date().toLocaleString()}`;
           const blob = await this.saveOutput({
             elements,
             options,

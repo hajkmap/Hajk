@@ -9,11 +9,13 @@ import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
 
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import { useTranslation } from "react-i18next";
 SimpleDialog.propTypes = {
   globalObserver: PropTypes.object.isRequired,
 };
 
 export default function SimpleDialog({ globalObserver }) {
+  const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
   const [content, setContent] = React.useState({ columns: [], rows: [] });
   const [title, setTitle] = React.useState("");
@@ -43,7 +45,7 @@ export default function SimpleDialog({ globalObserver }) {
             edge="start"
             color="inherit"
             onClick={handleClose}
-            aria-label="close"
+            aria-label={t("common.close")}
           >
             <CloseIcon />
           </IconButton>

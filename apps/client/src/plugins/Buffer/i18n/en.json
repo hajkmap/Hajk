@@ -1,0 +1,17 @@
+{
+  "buffer": {
+    "buffer": "Buffer",
+    "description": "Create a buffer around selected features in the map",
+    "distanceLabel": "Buffer distance (in meters)",
+    "selectAtLeastOne": "You must select at least one feature in the map to create a buffer",
+    "selectFeatures": "Select features",
+    "selectMultiple": "Select multiple features",
+    "startOver": "Start over",
+    "steps": {
+      "distance": "Enter buffer distance",
+      "done": "Done",
+      "select": "Select features to buffer"
+    },
+    "title": "Buffer"
+  }
+}

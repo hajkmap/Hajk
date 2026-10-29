@@ -6,6 +6,7 @@ import BorderStyleIcon from "@mui/icons-material/BorderStyle";
 import LinearScaleIcon from "@mui/icons-material/LinearScale";
 import Typography from "@mui/material/Typography";
 import WKT from "ol/format/WKT";
+import i18n from "src/i18n";
 
 const StyledButton = styled(Button)(({ theme }) => ({
   margin: theme.spacing(1),
@@ -100,17 +101,14 @@ class Toolbar extends Component {
 
   getStatusMessage(data) {
     if (!data) {
-      return (
-        <Typography>
-          Uppdateringen lyckades men det upptäcktes inte några ändringar.
-        </Typography>
-      );
+      return <Typography>{i18n.t("collector.status.noChanges")}</Typography>;
     }
     if (data.ExceptionReport) {
       return (
         <Typography>
-          Uppdateringen misslyckades:{" "}
-          {data.ExceptionReport.Exception.ExceptionText.toString()}
+          {i18n.t("collector.status.failed", {
+            message: data.ExceptionReport.Exception.ExceptionText.toString(),
+          })}
         </Typography>
       );
     }
@@ -120,27 +118,26 @@ class Toolbar extends Component {
     ) {
       return (
         <div>
-          <Typography>Uppdateringen lyckades.</Typography>
+          <Typography>{i18n.t("collector.status.succeeded")}</Typography>
           <Typography>
-            Antal skapade objekt:{" "}
-            {data.TransactionResponse.TransactionSummary.totalInserted.toString()}
+            {i18n.t("collector.status.inserted", {
+              number: data.TransactionResponse.TransactionSummary.totalInserted,
+            })}
           </Typography>
           <Typography>
-            Antal borttagna objekt:{" "}
-            {data.TransactionResponse.TransactionSummary.totalDeleted.toString()}
+            {i18n.t("collector.status.deleted", {
+              number: data.TransactionResponse.TransactionSummary.totalDeleted,
+            })}
           </Typography>
           <Typography>
-            Antal uppdaterade objekt:{" "}
-            {data.TransactionResponse.TransactionSummary.totalUpdated.toString()}
+            {i18n.t("collector.status.updated", {
+              number: data.TransactionResponse.TransactionSummary.totalUpdated,
+            })}
           </Typography>
         </div>
       );
     } else {
-      return (
-        <Typography>
-          Status för uppdateringen kunde inte avläsas ur svaret från servern.
-        </Typography>
-      );
+      return <Typography>{i18n.t("collector.status.unknown")}</Typography>;
     }
   }
 
@@ -231,10 +228,10 @@ class Toolbar extends Component {
                 this.onAddPointClicked();
               }}
               type="button"
-              title="Lägg till plats"
+              title={i18n.t("collector.addPoint")}
               style={this.getSelectedStyle("point")}
             >
-              Plats
+              {i18n.t("collector.point")}
               <ScatterPlotIcon sx={{ marginLeft: 1 }} />
             </StyledButton>
             <StyledButton
@@ -244,10 +241,10 @@ class Toolbar extends Component {
                 this.onAddLineClicked();
               }}
               type="button"
-              title="Lägg till sträcka"
+              title={i18n.t("collector.addLine")}
               style={this.getSelectedStyle("linestring")}
             >
-              Sträcka
+              {i18n.t("collector.line")}
               <LinearScaleIcon sx={{ marginLeft: 1 }} />
             </StyledButton>
             <StyledButton
@@ -257,10 +254,10 @@ class Toolbar extends Component {
                 this.onAddPolygonClicked();
               }}
               type="button"
-              title="Lägg till område"
+              title={i18n.t("collector.addPolygon")}
               style={this.getSelectedStyle("polygon")}
             >
-              Område
+              {i18n.t("collector.polygon")}
               <BorderStyleIcon sx={{ marginLeft: 1 }} />
             </StyledButton>
           </div>

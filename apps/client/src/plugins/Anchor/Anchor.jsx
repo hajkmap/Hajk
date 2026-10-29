@@ -5,24 +5,25 @@ import DialogWindowPlugin from "../DialogWindowPlugin";
 import ShareIcon from "@mui/icons-material/Share";
 
 import AnchorView from "./AnchorView";
+import i18n, { configText } from "src/i18n";
 
 const Anchor = (props) => {
   const { app, map, options } = props;
-  const title = options.title || "Dela";
+  // Admin texts are assumed to be Swedish, see configText(). They're
+  // passed in options too, as options override defaults.
+  const title = configText("anchor.title", options.title);
+  const description = configText("anchor.description", options.description);
 
   return (
     <DialogWindowPlugin
-      options={options}
+      options={{ ...options, title, description }}
       map={map}
       app={app}
       type="Anchor"
       defaults={{
         icon: <ShareIcon />,
-        title: title,
-        description:
-          "Skapa en länk med kartans synliga lager, aktuella zoomnivå och utbredning",
-        headerText: "Dela",
-        abortText: "Stäng",
+        headerText: i18n.t("anchor.title"),
+        abortText: i18n.t("common.close"),
       }}
     >
       <AnchorView

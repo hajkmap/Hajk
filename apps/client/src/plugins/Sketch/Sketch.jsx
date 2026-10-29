@@ -28,6 +28,7 @@ import { STORAGE_KEY, DEFAULT_MEASUREMENT_SETTINGS } from "./constants";
 import useCookieStatus from "../../hooks/useCookieStatus";
 import useAttributeEditorIntegration from "./hooks/useAttributeEditorIntegration";
 import useGeometryValidation from "./hooks/useGeometryValidation";
+import { configText } from "src/i18n";
 
 // Returns the measurement-settings-object from LS if it exists, otherwise it returns
 // the default measurement-settings. The LS might be empty since the user might have chosen
@@ -193,9 +194,14 @@ const Sketch = (props) => {
       })
   );
 
+  // Window title when no editable layer is selected (admin text, see configText())
+  const [defaultTitle] = React.useState(() =>
+    configText("sketch.title", props.options.title)
+  );
+
   // TODO: Refine!!!
   const [pluginSettings, setPluginSettings] = React.useState({
-    title: "Rita",
+    title: defaultTitle,
     color: "4a90e2",
   });
 
@@ -294,7 +300,7 @@ const Sketch = (props) => {
       if (source === "sketch") return;
       setPluginSettings((ps) => ({
         ...ps,
-        title: "Rita",
+        title: defaultTitle,
         color: theme.palette.primary.main,
       }));
     });
@@ -303,7 +309,7 @@ const Sketch = (props) => {
       offSel();
       offClr();
     };
-  }, [theme.palette.primary.main]);
+  }, [theme.palette.primary.main, defaultTitle]);
 
   // Use custom hooks for AttributeEditor integration and geometry validation
   useAttributeEditorIntegration({
@@ -618,7 +624,6 @@ const Sketch = (props) => {
         icon: <EditIcon />,
         title: pluginSettings.title,
         color: pluginSettings.color,
-        description: "Skapa dina helt egna geometrier!",
         height: "dynamic",
         width: 350,
         onWindowHide: onWindowHide,

@@ -12,6 +12,7 @@ import FeaturePointSizeAccordion from "./FeatureSizeAccordion";
 import StrokeTypeSelector from "./StrokeTypeSelector";
 import FeatureBufferAccordion from "./FeatureBufferAccordion";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 export default function FeatureStyleSelector(props) {
   const { activeDrawType, drawStyle, setDrawStyle } = props;
@@ -125,7 +126,9 @@ export default function FeatureStyleSelector(props) {
     return (
       <Grid style={{ marginTop: 16 }} size={12}>
         <Grid style={{ marginBottom: 4 }} size={12}>
-          <Typography align="center">Variant</Typography>
+          <Typography align="center">
+            {i18n.t("sketch.style.variant")}
+          </Typography>
         </Grid>
         <Grid size={12}>
           <StrokeTypeSelector
@@ -142,7 +145,9 @@ export default function FeatureStyleSelector(props) {
     return (
       <Grid style={{ marginTop: 16 }} size={12}>
         <Grid style={{ marginBottom: 4 }} size={12}>
-          <Typography align="center">Textstorlek</Typography>
+          <Typography align="center">
+            {i18n.t("sketch.style.textSize")}
+          </Typography>
         </Grid>
         <Grid size={12}>
           <TextField
@@ -164,7 +169,7 @@ export default function FeatureStyleSelector(props) {
       <Grid container>
         <Grid size={12}>
           <FeatureStyleAccordion
-            title="Fyllnad"
+            title={i18n.t("sketch.style.fill")}
             showOpacitySlider
             color={props.drawStyle.fillColor}
             handleColorChange={handleFillColorChange}
@@ -174,7 +179,7 @@ export default function FeatureStyleSelector(props) {
         </Grid>
         <Grid size={12}>
           <FeatureStyleAccordion
-            title="Linje"
+            title={i18n.t("sketch.style.line")}
             showStrokeWidthSlider
             color={props.drawStyle.strokeColor}
             strokeWidth={props.drawStyle.strokeWidth}
@@ -202,7 +207,7 @@ export default function FeatureStyleSelector(props) {
       <Grid container>
         <Grid size={12}>
           <FeaturePointSizeAccordion
-            title="Storlek"
+            title={i18n.t("sketch.style.size")}
             showPointSizeSlider
             drawModel={props.drawModel}
             radius={props.drawStyle.radius}
@@ -218,7 +223,7 @@ export default function FeatureStyleSelector(props) {
       <Grid container>
         <Grid size={12}>
           <FeatureStyleAccordion
-            title="Färg - förgrund"
+            title={i18n.t("sketch.style.foreground")}
             color={props.textStyle.foregroundColor}
             handleColorChange={handleForegroundColorChange}
             drawModel={props.drawModel}
@@ -226,7 +231,7 @@ export default function FeatureStyleSelector(props) {
         </Grid>
         <Grid size={12}>
           <FeatureStyleAccordion
-            title="Färg - bakgrund"
+            title={i18n.t("sketch.style.background")}
             color={props.textStyle.backgroundColor}
             handleColorChange={handleBackgroundColorChange}
             drawModel={props.drawModel}
@@ -241,7 +246,7 @@ export default function FeatureStyleSelector(props) {
   const renderArrowStyleSettings = () => {
     return (
       <FeatureStyleAccordion
-        title="Färg"
+        title={i18n.t("sketch.style.color")}
         color={props.drawStyle.strokeColor}
         handleColorChange={handleStrokeColorChange}
         drawModel={props.drawModel}
@@ -254,7 +259,7 @@ export default function FeatureStyleSelector(props) {
   const renderLineStyleSettings = () => {
     return (
       <FeatureStyleAccordion
-        title="Bredd och färg"
+        title={i18n.t("sketch.style.widthAndColor")}
         showStrokeWidthSlider
         color={props.drawStyle.strokeColor}
         strokeWidth={props.drawStyle.strokeWidth}
@@ -268,7 +273,7 @@ export default function FeatureStyleSelector(props) {
   const renderBufferStyleSettings = () => {
     return (
       <FeatureBufferAccordion
-        title="Buffra"
+        title={i18n.t("sketch.buffer.buffer")}
         showBufferSlider
         drawStyle={props.drawStyle}
         drawModel={props.drawModel}
@@ -306,7 +311,9 @@ export default function FeatureStyleSelector(props) {
     return (
       <Grid style={{ marginTop: 16 }} size={12}>
         <Grid style={{ marginBottom: 4 }} size={12}>
-          <Typography align="center">Radie (m)</Typography>
+          <Typography align="center">
+            {i18n.t("sketch.style.radius")}
+          </Typography>
         </Grid>
         <Grid size={12}>
           <TextField
@@ -336,10 +343,10 @@ export default function FeatureStyleSelector(props) {
           }}
         >
           <Typography sx={{ flex: 1, textAlign: "center", ml: 5 }}>
-            Utseende
+            {i18n.t("sketch.style.appearance")}
           </Typography>
 
-          <HajkToolTip title="Återställ utseendet till standardinställningar">
+          <HajkToolTip title={i18n.t("sketch.style.reset")}>
             <IconButton
               sx={{ mr: 1 }}
               size="small"

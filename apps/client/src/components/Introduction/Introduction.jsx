@@ -20,8 +20,23 @@ import { getFullIntroductionSteps } from "./steps/fullTourSteps";
 import { getLayerSwitcherSteps } from "./steps/layerSwitcherSteps";
 import { functionalOk as functionalCookieOk } from "../../models/Cookie";
 import LocalStorageHelper from "utils/LocalStorageHelper";
+import { useTranslation } from "react-i18next";
+import i18n, { configText } from "src/i18n";
+
+// Built-in steps are recognized by their id (see steps/step.js). Steps from the
+// map config (introductionSteps) have no id, so they're still matched by the
+// Swedish titles that this logic used before the client was translated.
+const LEGACY_STEP_TITLES = {
+  welcome: "Välkommen",
+  mapTools: "Kartverktyg",
+  documentHandler: "Dokumenthanteraren",
+};
+const isStep = (step, id) =>
+  step?.id === id ||
+  (step?.id === undefined && step?.title === LEGACY_STEP_TITLES[id]);
 
 const IntroSelectionScreen = ({ onSelect, onClose, layerSwitcherPlugin }) => {
+  const { t } = useTranslation();
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
 
@@ -62,7 +77,7 @@ const IntroSelectionScreen = ({ onSelect, onClose, layerSwitcherPlugin }) => {
       }}
     >
       <DialogTitle sx={{ textAlign: "center", textDecoration: "underline" }}>
-        Välj introduktion
+        {t("introduction.chooseIntroduction")}
       </DialogTitle>
       <DialogContent>
         <Button
@@ -75,7 +90,7 @@ const IntroSelectionScreen = ({ onSelect, onClose, layerSwitcherPlugin }) => {
             height: "40px",
           }}
         >
-          Hela introduktionen
+          {t("introduction.fullIntroduction")}
         </Button>
 
         <Box component="span" sx={{ display: "inline-block", width: "100%" }}>
@@ -88,14 +103,17 @@ const IntroSelectionScreen = ({ onSelect, onClose, layerSwitcherPlugin }) => {
               height: "40px",
             }}
           >
-            {layerSwitcherPlugin.options.title
-              ? "Nytt i " + layerSwitcherPlugin.options.title
-              : " Nytt i Visa"}
+            {t("introduction.newIn", {
+              title: configText(
+                "layerSwitcher.title",
+                layerSwitcherPlugin.options.title
+              ),
+            })}
           </Button>
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Avbryt</Button>
+        <Button onClick={handleClose}>{t("common.cancel")}</Button>
       </DialogActions>
     </BaseDialog>
   );
@@ -268,7 +286,7 @@ class Introduction extends React.PureComponent {
         : getLayerSwitcherSteps(this.layerSwitcherPlugin);
 
     if (type === "full") {
-      steps = steps.filter((step) => step.title !== "Hajk 4");
+      steps = steps.filter((step) => step.id !== "hajk4");
     }
 
     // Apply all filters
@@ -445,8 +463,8 @@ class Introduction extends React.PureComponent {
         onClick={() => {
           this.showIntroduction();
         }}
-        title="Introduktionsguide"
-        abstract="Öppna guidad tour"
+        title={i18n.t("introduction.buttonTitle")}
+        abstract={i18n.t("introduction.buttonAbstract")}
       />,
       document.getElementById("plugin-control-buttons")
     );
@@ -467,7 +485,7 @@ class Introduction extends React.PureComponent {
 
     // Close drawer transitions (only if drawer is not permanent)
     if (
-      (previousStep?.title === "Välkommen" &&
+      (isStep(previousStep, "welcome") &&
         currentStep?.element === "#drawer-toggle-button-group") ||
       (previousStep?.element === "#toggle-drawer-permanent" &&
         currentStep?.element === "#search-bar") ||
@@ -593,12 +611,9 @@ class Introduction extends React.PureComponent {
 
         // Function to type one character
         const typeChar = () => {
-          const texts = [
-            "Badplatser",
-            "Lekplatser",
-            "Gymnasieskolor",
-            "Sevärdheter",
-          ];
+          const texts = i18n.t("introduction.layerSearchExamples", {
+            returnObjects: true,
+          });
           let textIndex = 0;
           let charIndex = 0;
 
@@ -658,8 +673,8 @@ class Introduction extends React.PureComponent {
       );
       if (tabs) {
         const activeTab = tabs.querySelector(".Mui-selected");
-        if (activeTab && activeTab.textContent !== "Kartlager") {
-          const firstTab = tabs.querySelector(".MuiTab-root");
+        const firstTab = tabs.querySelector(".MuiTab-root");
+        if (activeTab && activeTab !== firstTab) {
           if (firstTab) {
             firstTab.click();
             return true;
@@ -677,10 +692,7 @@ class Introduction extends React.PureComponent {
         "#layer-switcher-tab-panel .MuiTabs-root"
       );
       if (tabs) {
-        const tabElements = tabs.querySelectorAll(".MuiTab-root");
-        const ritordningTab = Array.from(tabElements).find(
-          (tab) => tab.textContent === "Ritordning"
-        );
+        const ritordningTab = tabs.querySelector("#draw-order-tab");
         if (ritordningTab) {
           ritordningTab.click();
           return true;
@@ -803,7 +815,7 @@ class Introduction extends React.PureComponent {
 
       if (
         step?.element === "#drawer-content" &&
-        step?.title === "Kartverktyg" &&
+        isStep(step, "mapTools") &&
         previousStep?.element === "#drawer-toggle-button-group"
       ) {
         this.props.globalObserver.publish(
@@ -819,7 +831,7 @@ class Introduction extends React.PureComponent {
 
       if (
         step?.element === "#drawer-content" &&
-        step?.title === "Dokumenthanteraren" &&
+        isStep(step, "documentHandler") &&
         previousStep?.element === "#toggle-drawer-permanent"
       ) {
         this.props.globalObserver.publish(
@@ -835,7 +847,7 @@ class Introduction extends React.PureComponent {
 
       if (
         step?.element === "#search-bar" &&
-        previousStep?.title === "Dokumenthanteraren"
+        isStep(previousStep, "documentHandler")
       ) {
         const isDrawerPermanent =
           window.localStorage.getItem("drawerPermanent") === "true";
@@ -1078,7 +1090,7 @@ class Introduction extends React.PureComponent {
     const goingForward = stepIndex > this.state.currentStepIndex;
     const goingBackward = stepIndex < this.state.currentStepIndex;
 
-    if (step?.title === "Kartverktyg") {
+    if (isStep(step, "mapTools")) {
       window.localStorage.setItem("activeDrawerContent", "plugins");
     }
 
@@ -1210,9 +1222,9 @@ class Introduction extends React.PureComponent {
   getIntroOptions = () => ({
     highlightClass: "introjs-click-through",
     exitOnOverlayClick: false,
-    nextLabel: "Nästa",
-    prevLabel: "Föregående",
-    doneLabel: "Avsluta",
+    nextLabel: i18n.t("common.next"),
+    prevLabel: i18n.t("common.previous"),
+    doneLabel: i18n.t("introduction.done"),
     showBullets: false,
     showProgress: true,
   });

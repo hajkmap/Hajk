@@ -1,0 +1,15 @@
+{
+  "bookmarks": {
+    "add": "Add",
+    "cookiesRequired": "You haven't allowed functional cookies. To save bookmarks, you need to allow functional cookies.",
+    "deleteButton": "Delete",
+    "deleteConfirm": "Are you sure you want to delete the bookmark \"{{name}}\"?",
+    "deleteTitle": "Delete bookmark",
+    "description": "Your bookmarks",
+    "intro": "Create a bookmark with the map's visible layers, current zoom level and extent.",
+    "name": "Name",
+    "namePlaceholder": "Enter the bookmark's name",
+    "nameTaken": "The name is taken. Replace bookmark \"{{name}}\"?",
+    "title": "Bookmarks"
+  }
+}

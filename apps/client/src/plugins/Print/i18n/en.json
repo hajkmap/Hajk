@@ -1,0 +1,52 @@
+{
+  "print": {
+    "advancedSettings": "Advanced settings",
+    "canBeEmpty": "Can be left empty",
+    "cancelled": "You cancelled the print – no data has been saved",
+    "cannotPrint": "The image won't print correctly. Try a lower resolution or a smaller scale.",
+    "customScale": "Enter another scale",
+    "description": "Create a PDF of the map",
+    "dialog": {
+      "text": "This may take a while, especially if you've chosen a large format (A2-A3) and a high resolution (>72 dpi). When it's done, the {{type}} file will be downloaded to your computer.<br/><br/>If you don't want to wait any longer, you can cancel the print by pressing the button below.",
+      "title": "Your {{type}} is being created"
+    },
+    "disclaimer": "Please note that the boundaries in the map do not always match reality and are not legally binding.",
+    "done": "Your print is ready!",
+    "fileName": "Map export",
+    "format": "Format",
+    "imageLoadFailed": "{{image}} couldn't be loaded.",
+    "includeLegend": "Include legend in PDF",
+    "includeLogo": "Include logo",
+    "includeNorthArrow": "Include north arrow",
+    "includeQrCode": "Include QR code",
+    "includeScaleBar": "Include scale bar",
+    "inProgress": "Printing – please wait…",
+    "landscape": "Landscape",
+    "landscapeLower": "landscape",
+    "logoImage": "The logo image",
+    "northArrowImage": "The north arrow",
+    "optionalComment": "Optional comment",
+    "optionalTitle": "Optional title",
+    "orientation": "Orientation",
+    "placement": {
+      "bottomLeft": "Bottom left",
+      "bottomRight": "Bottom right",
+      "label": "Placement",
+      "topLeft": "Top left",
+      "topRight": "Top right"
+    },
+    "placementsOverlap": "The image won't print correctly. The placements overlap.",
+    "portrait": "Portrait",
+    "portraitLower": "portrait",
+    "resolution": "Resolution (DPI)",
+    "saveAs": "Save as",
+    "saveFailed": "The print couldn't be saved, please contact the system administrator.",
+    "scale": "Scale",
+    "scaleText": "Scale: {{scale}} (at {{format}} {{orientation}})",
+    "showPredefinedScales": "Show predefined options",
+    "textColorHint": "The title color doesn't affect the map's labels, only the color of surrounding texts such as the title, copyright text, etc.",
+    "textInMargins": "Title text etc. in the margins",
+    "title": "Print",
+    "useMargin": "Margins around the map image"
+  }
+}

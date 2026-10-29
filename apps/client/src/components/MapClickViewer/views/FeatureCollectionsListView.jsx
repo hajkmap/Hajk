@@ -5,8 +5,10 @@ import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
 import { useMapClickViewerContext } from "../MapClickViewerContext";
 import FeatureIcon from "./FeatureIcon";
+import { useTranslation } from "react-i18next";
 
 const FeatureCollectionsListView = (props) => {
+  const { t } = useTranslation();
   const {
     featureCollections,
     selectedFeatureCollection,
@@ -70,7 +72,7 @@ const FeatureCollectionsListView = (props) => {
             </ListItemAvatar>
             <ListItemText
               primary={fc.displayName}
-              secondary={`${fc.numHits} träffar`}
+              secondary={t("common.hits", { count: fc.numHits })}
             />
           </ListItemButton>
         );

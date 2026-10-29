@@ -1,0 +1,52 @@
+{
+  "print": {
+    "advancedSettings": "Avancerade inställningar",
+    "canBeEmpty": "Kan lämnas tomt",
+    "cancelled": "Du avbröt utskriften – ingen data har sparats",
+    "cannotPrint": "Bilden kommer inte kunna skrivas ut korrekt. Testa med en lägre upplösning eller mindre skala.",
+    "customScale": "Ange annan skala",
+    "description": "Skapa en PDF av kartan",
+    "dialog": {
+      "text": "Det här kan ta en stund, speciellt om du har valt ett stort format (A2-A3) och hög upplösning (>72 dpi). Men när allt är klart kommer {{type}}-filen att laddas ner till din dator.<br/><br/>Om du inte vill vänta längre kan du avbryta utskriften genom att trycka på knappen nedan.",
+      "title": "Din {{type}} skapas"
+    },
+    "disclaimer": "Tänk på att gränserna i kartan inte alltid stämmer överens med verkligheten och de är inte juridiskt gällande.",
+    "done": "Din utskrift är klar!",
+    "fileName": "Kartexport",
+    "format": "Format",
+    "imageLoadFailed": "{{image}} kunde inte laddas in.",
+    "includeLegend": "Inkludera teckenförklaring i PDF",
+    "includeLogo": "Inkludera logotyp",
+    "includeNorthArrow": "Inkludera norrpil",
+    "includeQrCode": "Inkludera qr-kod",
+    "includeScaleBar": "Inkludera skalstock",
+    "inProgress": "Utskrift pågår – var god vänta…",
+    "landscape": "Liggande",
+    "landscapeLower": "liggande",
+    "logoImage": "Logotypbilden",
+    "northArrowImage": "Norrpilen",
+    "optionalComment": "Valfri kommentar",
+    "optionalTitle": "Valfri titel",
+    "orientation": "Orientering",
+    "placement": {
+      "bottomLeft": "Nere till vänster",
+      "bottomRight": "Nere till höger",
+      "label": "Placering",
+      "topLeft": "Uppe till vänster",
+      "topRight": "Uppe till höger"
+    },
+    "placementsOverlap": "Bilden kommer inte kunna skrivas ut korrekt. Placeringsvalen överlappar.",
+    "portrait": "Stående",
+    "portraitLower": "stående",
+    "resolution": "Upplösning (DPI)",
+    "saveAs": "Spara som",
+    "saveFailed": "Utskriften gick inte att spara, kontakta systemadministratören.",
+    "scale": "Skala",
+    "scaleText": "Skala: {{scale}} (vid {{format}} {{orientation}})",
+    "showPredefinedScales": "Visa fördefinierade val",
+    "textColorHint": "Titelfärg påverkar inte kartans etiketter utan styr endast färgen för kringliggande texter, så som titel, copyrighttext, etc.",
+    "textInMargins": "Rubriktext m.m. i marginalerna",
+    "title": "Skriv ut",
+    "useMargin": "Marginaler runt kartbilden"
+  }
+}

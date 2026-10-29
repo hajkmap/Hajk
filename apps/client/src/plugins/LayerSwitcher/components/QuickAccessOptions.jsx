@@ -9,6 +9,7 @@ import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import HajkToolTip from "components/HajkToolTip";
 import LsIconButton from "./LsIconButton";
 import { functionalOk } from "../../../models/Cookie";
+import i18n from "src/i18n";
 
 export default function QuickAccessOptions({
   handleAddLayersToQuickAccess,
@@ -57,7 +58,7 @@ export default function QuickAccessOptions({
         aria-expanded={optionsMenuIsOpen ? "true" : undefined}
         onClick={handleShowMoreOptionsClick}
       >
-        <HajkToolTip title="Fler val för snabbåtkomst">
+        <HajkToolTip title={i18n.t("layerSwitcher.moreQuickAccessOptions")}>
           <MoreVertOutlinedIcon />
         </HajkToolTip>
       </LsIconButton>
@@ -78,7 +79,7 @@ export default function QuickAccessOptions({
             setAnchorEl(null);
             if (!functionalOk()) {
               enqueueSnackbar(
-                "Du har inte tillåtit funktionella kakor. För att använda snabbåtkomst så måste du tillåta funktionella kakor.",
+                i18n.t("layerSwitcher.quickAccessCookiesRequired"),
                 {
                   variant: "warning",
                   anchorOrigin: { vertical: "bottom", horizontal: "center" },
@@ -92,7 +93,9 @@ export default function QuickAccessOptions({
           <ListItemIcon>
             <AddOutlinedIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Lägg till tända lager</ListItemText>
+          <ListItemText>
+            {i18n.t("layerSwitcher.addVisibleLayers")}
+          </ListItemText>
         </MenuItem>
         <MenuItem
           onClick={(e) => {
@@ -104,7 +107,7 @@ export default function QuickAccessOptions({
           <ListItemIcon>
             <DeleteOutlinedIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Rensa allt</ListItemText>
+          <ListItemText>{i18n.t("layerSwitcher.clearAll")}</ListItemText>
         </MenuItem>
       </Menu>
     </>

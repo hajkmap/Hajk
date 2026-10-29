@@ -17,6 +17,7 @@ import BtnShowDetails from "./BtnShowDetails";
 import BtnLayerWarning from "./BtnLayerWarning";
 import { getIsMobile } from "../LayerSwitcherUtils";
 import HajkToolTip from "../../../components/HajkToolTip";
+import i18n from "src/i18n";
 
 // TODO Remove all isfakemaplayer
 function BackgroundLayerItem({
@@ -97,7 +98,10 @@ function BackgroundLayerItem({
           }}
           className="dragInidcatorIcon"
         >
-          <HajkToolTip placement="left" title="Dra för att ändra ritordning">
+          <HajkToolTip
+            placement="left"
+            title={i18n.t("layerSwitcher.dragToReorder")}
+          >
             <DragIndicatorOutlinedIcon sx={{ pt: "1px" }} fontSize={"small"} />
           </HajkToolTip>
         </LsIconButton>

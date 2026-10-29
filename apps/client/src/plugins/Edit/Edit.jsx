@@ -31,8 +31,6 @@ class Edit extends React.PureComponent {
         type="Edit"
         custom={{
           icon: <FormatShapesIcon />,
-          title: "Redigera",
-          description: "Redigera objekt i kartan (WFS)",
           height: 500,
           width: 500,
           top: undefined,

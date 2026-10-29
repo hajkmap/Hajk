@@ -11,6 +11,7 @@ import { MAX_SKETCHES } from "../constants";
 import Information from "../components/Information";
 import ConfirmationDialog from "../../../components/ConfirmationDialog";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   width: "100%",
@@ -39,10 +40,7 @@ const NotSupportedView = ({ globalObserver }) => {
   return (
     <Grid container spacing={2}>
       <Grid size={12}>
-        <Information
-          text="Det ser ut som att du har valt att inte tillåta funktionella kakor. På grund av
-        detta så kan du inte spara dina rit-objekt. Klicka nedan för att ändra inställningarna."
-        />
+        <Information text={i18n.t("sketch.save.cookiesRequired")} />
       </Grid>
       <Grid size={12}>
         <Button
@@ -50,7 +48,7 @@ const NotSupportedView = ({ globalObserver }) => {
           variant="contained"
           onClick={handleChangeCookieSettingsClick}
         >
-          Cookie-inställningar
+          {i18n.t("common.cookieSettings")}
         </Button>
       </Grid>
     </Grid>
@@ -70,7 +68,7 @@ const SketchSaver = (props) => {
 
   const [saveButtonStateTest, setSaveButtonStateTest] = React.useState({
     disabled: true,
-    message: "Klicka för att spara de ritobjekt som finns i kartan.",
+    message: i18n.t("sketch.save.saveHint"),
   });
 
   // We're gonna want to prompt the user with a snackbar when a sketch is saved.
@@ -123,7 +121,9 @@ const SketchSaver = (props) => {
           ? trimmedSketchName.substring(0, 15) + "..."
           : trimmedSketchName,
       text: exists
-        ? `Namnet upptaget. Ersätt arbetsyta "${replaceWarning.truncatedSketchName}" ?`
+        ? i18n.t("sketch.save.nameTaken", {
+            name: replaceWarning.truncatedSketchName,
+          })
         : " ",
       show: exists ? true : false,
     });
@@ -156,8 +156,7 @@ const SketchSaver = (props) => {
       return setSaveButtonStateTest({
         ...saveButtonStateTest,
         disabled: true,
-        message:
-          "Minst fyra tecken måste anges för att en arbetsyta ska kunna skapas.",
+        message: i18n.t("sketch.save.minLength"),
       });
     }
     // If the name does not already exist, and we've already saved the maximum number of sketches,
@@ -168,15 +167,14 @@ const SketchSaver = (props) => {
       return setSaveButtonStateTest({
         ...saveButtonStateTest,
         disabled: true,
-        message:
-          "Maximalt antal arbetsytor har sparats. Ta bort eller skriv över en genom att ange ett av namnen i listan nedan.",
+        message: i18n.t("sketch.save.maxReached"),
       });
     }
     // If we've made it this far, it is OK to save!
     setSaveButtonStateTest({
       ...saveButtonStateTest,
       disabled: false,
-      message: "Klicka för att spara de ritobjekt som finns i kartan.",
+      message: i18n.t("sketch.save.saveHint"),
     });
   };
 
@@ -190,7 +188,7 @@ const SketchSaver = (props) => {
         }}
       >
         <Grid size={8}>
-          <HajkToolTip title="Ange att namn så att arbetsytan kan identifieras senare.">
+          <HajkToolTip title={i18n.t("sketch.save.nameHint")}>
             <TextField
               size="small"
               variant="outlined"
@@ -217,7 +215,9 @@ const SketchSaver = (props) => {
                 disabled={saveButtonStateTest.disabled}
                 onClick={handleSaveSketchClick}
               >
-                {replaceWarning.show ? "Ersätt" : "Spara"}
+                {replaceWarning.show
+                  ? i18n.t("common.replace")
+                  : i18n.t("common.save")}
               </Button>
             </span>
           </HajkToolTip>
@@ -259,7 +259,9 @@ const SavedSketch = ({
             </HajkToolTip>
             <Grid size={12}>
               <HajkToolTip
-                title={`Arbetsytan uppdaterades senast ${sketchInfo.date}`}
+                title={i18n.t("sketch.save.lastUpdated", {
+                  date: sketchInfo.date,
+                })}
               >
                 <Typography variant="caption">
                   {`Uppdaterad: ${sketchInfo.date?.split(" ")[0]}`}
@@ -275,12 +277,12 @@ const SavedSketch = ({
               justifyContent: "flex-end",
             }}
           >
-            <HajkToolTip title="Klicka för att radera arbetsytan.">
+            <HajkToolTip title={i18n.t("sketch.save.deleteHint")}>
               <IconButton size="small" onClick={handleRemoveClick}>
                 <DeleteIcon />
               </IconButton>
             </HajkToolTip>
-            <HajkToolTip title="Klicka för att läsa in objekten.">
+            <HajkToolTip title={i18n.t("sketch.save.loadHint")}>
               <IconButton size="small" onClick={handleAddToMapClick}>
                 <AddIcon />
               </IconButton>
@@ -326,8 +328,8 @@ const SavedSketchList = ({ model, savedSketches, setSavedSketches }) => {
       <Grid size={12}>
         <Typography variant="caption">
           {savedSketches.length === 0
-            ? "Inga sparade arbetsytor hittades."
-            : "Sparade arbetsytor:"}
+            ? i18n.t("sketch.save.noneFound")
+            : i18n.t("sketch.save.saved")}
         </Typography>
       </Grid>
       <Grid size={12}>
@@ -344,12 +346,10 @@ const SavedSketchList = ({ model, savedSketches, setSavedSketches }) => {
       </Grid>
       <ConfirmationDialog
         open={sketchToRemove !== null}
-        titleName={"Radera arbetsyta"}
-        contentDescription={
-          "Är du säker på att du vill radera arbetsytan? Detta går inte att ångra."
-        }
-        cancel={"Avbryt"}
-        confirm={"Radera"}
+        titleName={i18n.t("sketch.save.deleteTitle")}
+        contentDescription={i18n.t("sketch.save.deleteConfirm")}
+        cancel={i18n.t("common.cancel")}
+        confirm={i18n.t("sketch.deleteButton")}
         handleConfirm={handleRemoveConfirmation}
         handleAbort={handleRemoveConfirmationAbort}
       />

@@ -5,6 +5,7 @@ import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import { styled } from "@mui/material/styles";
 import { StyledControlButton } from "components/ControlButton";
+import { useTranslation } from "react-i18next";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),
@@ -13,6 +14,8 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
 }));
 
 const ZoomControl = React.memo((props) => {
+  const { t } = useTranslation();
+
   function zoomByDelta(delta) {
     if (!props.map) return;
     const view = props.map.getView();
@@ -43,7 +46,7 @@ const ZoomControl = React.memo((props) => {
     props.map !== undefined && (
       <StyledPaper>
         <StyledControlButton
-          aria-label="Zooma in"
+          aria-label={t("controls.zoomIn")}
           onClick={() => {
             zoomByDelta(1);
           }}
@@ -51,7 +54,7 @@ const ZoomControl = React.memo((props) => {
           <AddIcon />
         </StyledControlButton>
         <StyledControlButton
-          aria-label="Zooma ut"
+          aria-label={t("controls.zoomOut")}
           onClick={() => {
             zoomByDelta(-1);
           }}

@@ -19,6 +19,7 @@ import LegendImage from "./LegendImage";
 import HajkToolTip from "components/HajkToolTip";
 import LsIconButton from "./LsIconButton";
 import { functionalOk } from "../../../models/Cookie";
+import i18n from "src/i18n";
 
 function LayerItemDetails({
   display,
@@ -163,21 +164,22 @@ function LayerItemDetails({
   // Handle quickacces action
   const handleQuickAccess = () => {
     if (!functionalOk()) {
-      enqueueSnackbar(
-        "Du har inte tillåtit funktionella kakor. För att använda snabbåtkomst så måste du tillåta funktionella kakor.",
-        {
-          variant: "warning",
-          anchorOrigin: { vertical: "bottom", horizontal: "center" },
-        }
-      );
+      enqueueSnackbar(i18n.t("layerSwitcher.quickAccessCookiesRequired"), {
+        variant: "warning",
+        anchorOrigin: { vertical: "bottom", horizontal: "center" },
+      });
       return;
     }
 
     let snackbarMessage = "";
     if (!quickAccess) {
-      snackbarMessage = `${renderDetailTitle()} har nu lagts till i snabbåtkomst.`;
+      snackbarMessage = i18n.t("layerSwitcher.addedToQuickAccess", {
+        title: renderDetailTitle(),
+      });
     } else {
-      snackbarMessage = `${renderDetailTitle()} har nu tagits bort från snabbåtkomst.`;
+      snackbarMessage = i18n.t("layerSwitcher.removedFromQuickAccess", {
+        title: renderDetailTitle(),
+      });
     }
     enqueueSnackbar(snackbarMessage, {
       variant: "success",
@@ -241,7 +243,7 @@ function LayerItemDetails({
                 open={tooltipOpen}
                 onClose={handleClose}
                 onOpen={handleOpen}
-                title="Tillbaka"
+                title={i18n.t("common.back")}
                 slotProps={{ transition: { timeout: 0 } }}
               >
                 <LsIconButton
@@ -274,15 +276,15 @@ function LayerItemDetails({
             <Stack direction="row" alignItems="center">
               <Box sx={{ flexGrow: 1, ml: 1 }}>
                 <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-                  Info
+                  {i18n.t("common.info")}
                 </Typography>
               </Box>
               {showLegend && (
                 <HajkToolTip
                   title={
                     legendIsActive
-                      ? "Dölj teckenförklaring"
-                      : "Visa teckenförklaring"
+                      ? i18n.t("layerSwitcher.hideLegend")
+                      : i18n.t("layerSwitcher.showLegend")
                   }
                 >
                   <LsIconButton
@@ -332,7 +334,9 @@ function LayerItemDetails({
                   <SettingsOutlinedIcon />
                 </LsIconButton>
                 <Box sx={{ flexGrow: 1 }}>
-                  <Typography variant="subtitle1">Inställningar</Typography>
+                  <Typography variant="subtitle1">
+                    {i18n.t("common.settings")}
+                  </Typography>
                 </Box>
               </Stack>
             )}
@@ -356,10 +360,10 @@ function LayerItemDetails({
                     variant="subtitle2"
                     sx={{ flexGrow: 1, flexBasis: "25%" }}
                   >
-                    Opacitet
+                    {i18n.t("layerSwitcher.opacity")}
                   </Typography>
                   <Slider
-                    aria-label="Layer opacity"
+                    aria-label={i18n.t("layerSwitcher.opacityLabel")}
                     value={opacity}
                     onChange={handleOpacitySliderChange}
                     getAriaValueText={valueLabelFormat}
@@ -400,7 +404,9 @@ function LayerItemDetails({
                     <FilterAltOutlinedIcon />
                   </LsIconButton>
                   <Box sx={{ flexGrow: 1 }}>
-                    <Typography variant="subtitle1">Filter</Typography>
+                    <Typography variant="subtitle1">
+                      {i18n.t("layerSwitcher.filter")}
+                    </Typography>
                   </Box>
                 </Stack>
                 <Box
@@ -430,12 +436,12 @@ function LayerItemDetails({
                   {!quickAccess ? (
                     <>
                       <StarOutlineOutlinedIcon sx={{ marginRight: 1 }} />
-                      Lägg till i snabbåtkomst
+                      {i18n.t("layerSwitcher.addToQuickAccess")}
                     </>
                   ) : (
                     <>
                       <DeleteOutlinedIcon sx={{ marginRight: 1 }} />
-                      Ta bort från snabbåtkomst
+                      {i18n.t("layerSwitcher.removeFromQuickAccess")}
                     </>
                   )}
                 </Button>

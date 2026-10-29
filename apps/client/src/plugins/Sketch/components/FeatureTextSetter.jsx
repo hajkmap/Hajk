@@ -1,6 +1,7 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import Dialog from "../../../components/Dialog/Dialog";
+import i18n from "src/i18n";
 
 // This component has a couple of responsibilities:
 // - 1) Subscribe to text-feature-creation
@@ -55,9 +56,9 @@ const FeatureTextSetter = ({ drawModel, localObserver }) => {
           options={{
             text: "",
             prompt: true,
-            headerText: "Ange text",
-            buttonText: "Ok",
-            abortText: "Avbryt",
+            headerText: i18n.t("sketch.enterText"),
+            buttonText: i18n.t("common.ok"),
+            abortText: i18n.t("common.cancel"),
           }}
           open={feature !== null}
           onClose={handleCloseClick}

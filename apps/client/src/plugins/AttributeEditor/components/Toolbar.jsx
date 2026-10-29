@@ -5,6 +5,7 @@ import { editBus } from "../../../buses/editBus";
 import { useTheme } from "@mui/material/styles";
 import ConfirmSaveDialog from "./ConfirmSaveDialog";
 import ConfirmServiceSwitchWithDrawings from "../../../components/ConfirmServiceSwitchWithDrawings";
+import i18n from "src/i18n";
 
 export default function Toolbar({
   s,
@@ -82,7 +83,9 @@ export default function Toolbar({
 
   // Build options: "None" + configured services
   const services = React.useMemo(() => {
-    const base = [{ id: "NONE_ID", label: "Ingen" }];
+    const base = [
+      { id: "NONE_ID", label: i18n.t("attributeEditor.toolbar.noLayer") },
+    ];
     const fromProps = (serviceList || []).map((s) => ({
       id: s.id,
       label: s.title || s.id, // caption in dropdown
@@ -102,23 +105,31 @@ export default function Toolbar({
 
   const applyServiceSwitch = React.useCallback(
     (def, label) => {
+      const isNone = !def || def.id === "NONE_ID";
       setPluginSettings(
-        label === "Ingen"
-          ? { title: "Attributredigerare", color: theme.palette.primary.main }
+        isNone
+          ? {
+              title: i18n.t("attributeEditor.title"),
+              color: theme.palette.primary.main,
+            }
           : {
-              title: `Attributredigerare - Redigerar ${label}`,
+              title: i18n.t("attributeEditor.titleEditing", {
+                title: i18n.t("attributeEditor.title"),
+                layer: label,
+              }),
               color: theme.palette.warning.main,
             }
       );
 
-      if (!def || def.id === "NONE_ID") {
+      if (isNone) {
         editBus.emit("edit:service-cleared", { source: "toolbar" });
         setServiceId("NONE_ID");
       } else {
         editBus.emit("edit:service-selected", {
           source: "toolbar",
           id: def.id,
-          title: `Redigerar ${label}`,
+          title: i18n.t("attributeEditor.editingLayer", { layer: label }),
+          serviceTitle: label,
           color: theme.palette.warning.main,
         });
         setServiceId(def.id);
@@ -171,9 +182,9 @@ export default function Toolbar({
     try {
       const nextId = e.target.value;
       const def = services.find((o) => o.id === nextId);
-      const label = def?.label ?? "Ingen";
+      const label = def?.label ?? i18n.t("attributeEditor.toolbar.noLayer");
 
-      const isSelectingService = label !== "Ingen";
+      const isSelectingService = !!def && def.id !== "NONE_ID";
       if (isSelectingService && serviceId === "NONE_ID") {
         try {
           const drawingCount = getDrawnFeaturesCount();
@@ -186,7 +197,7 @@ export default function Toolbar({
             return;
           }
         } catch (drawErr) {
-          console.warn("Kunde inte räkna ritade objekt:", drawErr);
+          console.warn("Couldn't count drawn features:", drawErr);
           // Continue anyway
         }
       }
@@ -209,13 +220,12 @@ export default function Toolbar({
       pendingTargetRef.current = { def, label };
       setSaveDialogOpen(true);
     } catch (error) {
-      console.error("Fel vid byte av redigeringsbargt lager:", error);
+      console.error("Error switching editable layer:", error);
 
       if (enqueueSnackbar) {
-        enqueueSnackbar(
-          "Ett fel uppstod vid byte av redigeringsbart lager. Försök igen.",
-          { variant: "error" }
-        );
+        enqueueSnackbar(i18n.t("attributeEditor.toolbar.switchFailed"), {
+          variant: "error",
+        });
       }
 
       // Reset to safe state
@@ -237,7 +247,9 @@ export default function Toolbar({
 
       // Show notification
       enqueueSnackbar(
-        `Redigeringsbart lager valt. ${drawingsWarningDialog.drawingCount} ritade objekt finns kvar i kartan.`,
+        i18n.t("attributeEditor.toolbar.layerSelectedDrawingsKept", {
+          count: drawingsWarningDialog.drawingCount,
+        }),
         { variant: "info" }
       );
     }
@@ -267,7 +279,7 @@ export default function Toolbar({
       applyServiceSwitch(def, label);
 
       // Show notification
-      enqueueSnackbar("Ritade objekt borttagna. Redigeringsbart lager valt.", {
+      enqueueSnackbar(i18n.t("attributeEditor.toolbar.drawingsRemoved"), {
         variant: "success",
       });
     }
@@ -300,7 +312,7 @@ export default function Toolbar({
 
       pendingTargetRef.current = {
         def: def || { id: "NONE_ID" },
-        label: targetLabel || "Ingen",
+        label: targetLabel || i18n.t("attributeEditor.toolbar.noLayer"),
       };
       setSaveDialogOpen(true);
     });
@@ -323,7 +335,7 @@ export default function Toolbar({
             onClick={() => setMode("table")}
             style={s.toggle(mode === "table")}
             aria-pressed={mode === "table"}
-            title="Tabelläge"
+            title={i18n.t("attributeEditor.toolbar.tableMode")}
           >
             <TableRowsIcon fontSize="small" />
           </button>
@@ -333,7 +345,7 @@ export default function Toolbar({
             onClick={() => setMode("form")}
             style={s.toggle(mode === "form")}
             aria-pressed={mode === "form"}
-            title="Formulärläge"
+            title={i18n.t("attributeEditor.toolbar.formMode")}
           >
             <DynamicFormIcon fontSize="small" />
           </button>
@@ -345,10 +357,16 @@ export default function Toolbar({
         onChange={handleServiceChange}
         style={s.inputComb}
         disabled={aeSaving}
-        aria-label="Välj redigerbart lager"
-        title={aeSaving ? "Sparar…" : "Välj redigerbart lager"}
+        aria-label={i18n.t("attributeEditor.toolbar.selectLayer")}
+        title={
+          aeSaving
+            ? i18n.t("attributeEditor.saving")
+            : i18n.t("attributeEditor.toolbar.selectLayer")
+        }
       >
-        <option value="NONE_ID">Ingen</option>
+        <option value="NONE_ID">
+          {i18n.t("attributeEditor.toolbar.noLayer")}
+        </option>
         {serviceList.map((o) => (
           <option key={o.id} value={o.id}>
             {o.title}
@@ -378,37 +396,46 @@ export default function Toolbar({
         disabled={!showOnlySelected && selectedCount === 0}
         title={
           showOnlySelected
-            ? `Visa alla`
+            ? i18n.t("attributeEditor.toolbar.showAll")
             : selectedCount === 0
-              ? "Markera objekt först"
-              : `Visa endast ${selectedCount} markerade`
+              ? i18n.t("attributeEditor.toolbar.selectFirst")
+              : i18n.t("attributeEditor.toolbar.showOnlySelectedTooltip", {
+                  count: selectedCount,
+                })
         }
       >
-        {showOnlySelected ? `Visa alla` : `Visa markerade (${selectedCount})`}
+        {showOnlySelected
+          ? i18n.t("attributeEditor.toolbar.showAll")
+          : i18n.t("attributeEditor.toolbar.showSelected", {
+              count: selectedCount,
+            })}
       </button>
 
       <div style={s.toolbarInfo}>
         <input
           style={s.inputComb}
-          placeholder="Filtrera listan…"
+          placeholder={i18n.t("attributeEditor.toolbar.filterPlaceholder")}
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
         />
         {!isMobile && (
           <>
             <button style={s.btn} onClick={selectAllVisible}>
-              Markera alla
+              {i18n.t("attributeEditor.selectAll")}
             </button>
             <button
               style={selectedCount === 0 ? s.btnDisabled : s.btn}
               onClick={clearSelection}
               disabled={selectedCount === 0}
             >
-              Avmarkera alla
+              {i18n.t("attributeEditor.deselectAll")}
             </button>
             <span style={s.toolbarStats}>
-              Totalt: {features.length} • Visas: {filteredAndSorted.length} •
-              Valda: {selectedCount}
+              {i18n.t("attributeEditor.toolbar.stats", {
+                total: features.length,
+                shown: filteredAndSorted.length,
+                selected: selectedCount,
+              })}
             </span>
           </>
         )}
