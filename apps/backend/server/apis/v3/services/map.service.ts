@@ -593,8 +593,6 @@ class MapService {
     const { projection, projections, options, ...mapScalars } = data;
     const updateData: Prisma.MapUpdateInput = {
       ...mapScalars,
-      // Raised only by saves of the layer tree, whatever the body holds.
-      treeVersion: undefined,
       lastSavedBy: userId,
       lastSavedDate: new Date(),
     };

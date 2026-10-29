@@ -6,6 +6,7 @@ import HttpStatusCodes from "../../../../common/http-status-codes.ts";
 import { HajkError } from "../../../../common/classes.ts";
 import HajkStatusCodes from "../../../../common/hajk-status-codes.ts";
 import { asyncHandler } from "../../utils/async-handler.ts";
+import { userNameOf } from "../../utils/user-name.ts";
 
 class GroupsController {
   getGroups = asyncHandler(async (_: Request, res: Response) => {
@@ -47,7 +48,8 @@ class GroupsController {
     const tree = await LayerTreeService.updateGroupTree(
       req.params.id,
       req.body,
-      req.user?.id
+      req.user?.id,
+      await userNameOf(req, res)
     );
     res.status(HttpStatusCodes.OK).json(tree);
   });

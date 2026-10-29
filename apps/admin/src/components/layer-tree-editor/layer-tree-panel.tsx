@@ -45,6 +45,10 @@ import {
 import LayerTreeNewGroupDialog from "./layer-tree-new-group-dialog";
 import LayerTreeRow from "./layer-tree-row";
 import type { LayerTreeSettings } from "./layer-tree-settings";
+import type { LayerTreeShadowRow } from "./layer-tree-shadow";
+import LayerTreeShadowTree, {
+  type LayerTreeShadowState,
+} from "./layer-tree-shadow-tree";
 import LayerTreeToolbar from "./layer-tree-toolbar";
 import { useItemDetails, type LayerTreeItemDetails } from "./use-item-details";
 import type { LayerTreeHistoryControls } from "./use-draft-history";
@@ -84,6 +88,11 @@ interface LayerTreePanelProps {
   clickPlace?: PanelClickPlace;
   /** Undo and redo, shown in the toolbar. */
   history?: LayerTreeHistoryControls;
+  /**
+   * Someone else's tree, unsaved or saved after the draft began, shown in the
+   * tree's place; nothing can be changed meanwhile.
+   */
+  shadow?: { rows: LayerTreeShadowRow[]; state?: LayerTreeShadowState };
 }
 
 /** The catalog and the tree, for a group or a map. */
@@ -102,6 +111,7 @@ export default function LayerTreePanel({
   moveZone,
   clickPlace,
   history,
+  shadow,
 }: LayerTreePanelProps) {
   const { t } = useTranslation();
   const { palette } = useTheme();
@@ -156,7 +166,7 @@ export default function LayerTreePanel({
     () => (found ? [...new Set([...openIds, ...found.ancestors])] : openIds),
     [found, openIds],
   );
-  const canEdit = !isSaving && !found;
+  const canEdit = !isSaving && !found && !shadow;
 
   const layerCounts = useMemo(() => countLayers(nodes), [nodes]);
   const topLevelKeys = useMemo(
@@ -418,9 +428,9 @@ export default function LayerTreePanel({
       onSearchChange={setSearch}
       showSearch={showSearch}
       allExpanded={allExpanded}
-      canExpand={expandableIds.length > 0 && !found}
+      canExpand={expandableIds.length > 0 && !found && !shadow}
       onToggleAll={() => setOpen(allExpanded ? [] : expandableIds)}
-      disabled={isSaving}
+      disabled={isSaving || shadow !== undefined}
       history={history}
     />
   );
@@ -428,10 +438,19 @@ export default function LayerTreePanel({
   const tree = (
     <>
       {click.holding}
+      {shadow ? (
+        <LayerTreeShadowTree
+          rows={shadow.rows}
+          state={shadow.state}
+          search={search}
+        />
+      ) : null}
       <Paper
         variant="outlined"
         onMouseLeave={click.clearHover}
         sx={{
+          // Kept while the shadow shows, so the tree stays as it was left.
+          display: shadow ? "none" : "block",
           position: "relative",
           // Takes the window's height left, and scrolls inside it without
           // taking the page along at its ends.
@@ -580,7 +599,7 @@ export default function LayerTreePanel({
             placedKeys={topLevelKeys}
             // In a map a layer goes in a group, so it must be dragged there.
             canAdd={(item) => mode === "group" || item.kind === "group"}
-            disabled={isSaving}
+            disabled={isSaving || shadow !== undefined}
             onAdd={(item) => void insertItem(item, LAYER_TREE_ROOT_ID)}
             pick={click.catalogPick}
           />

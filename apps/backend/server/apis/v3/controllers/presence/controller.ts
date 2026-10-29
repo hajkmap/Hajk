@@ -1,16 +1,18 @@
 import type { Request, Response } from "express";
 
 import PresenceService from "../../services/presence.service.ts";
+import LayerTreeService from "../../services/layer-tree.service.ts";
 import HttpStatusCodes from "../../../../common/http-status-codes.ts";
 import { asyncHandler } from "../../utils/async-handler.ts";
+import { userNameOf } from "../../utils/user-name.ts";
 
 class PresenceController {
-  // The tab's page and the parts it has unsaved changes in, sent when that
-  // changes and as a heartbeat. The name comes from the login, if there is one.
+  // Whether the tab is editing the page's tree, sent when that changes and as
+  // a heartbeat.
   report = asyncHandler(async (req: Request, res: Response) => {
     PresenceService.report(
       PresenceService.parseReport(req.body),
-      req.user?.fullName ?? null
+      await userNameOf(req, res)
     );
     res.status(HttpStatusCodes.NO_CONTENT).end();
   });
@@ -21,11 +23,13 @@ class PresenceController {
     res.status(HttpStatusCodes.NO_CONTENT).end();
   });
 
+  // Who else is editing the tree, and when it was last saved.
   getPresence = asyncHandler(async (req: Request, res: Response) => {
-    const presence = await PresenceService.getPresence(
-      PresenceService.parseTab(req.query)
-    );
-    res.status(HttpStatusCodes.OK).json(presence);
+    const tab = PresenceService.parseTab(req.query);
+    res.status(HttpStatusCodes.OK).json({
+      ...PresenceService.getEditors(tab),
+      saved: await LayerTreeService.getTreeSaved(tab.type, tab.id),
+    });
   });
 }
 

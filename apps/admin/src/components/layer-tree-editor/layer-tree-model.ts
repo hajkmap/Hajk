@@ -71,14 +71,14 @@ export interface LayerTreeDraft {
   mode: LayerTreeEditorMode;
   /** The group's id in group mode, the map's name in map mode. */
   ownerId: string;
-  /** The version of the saved tree the draft was made from. */
-  version: number;
   nodes: LayerTreeFlatNode[];
   /** The map's settings for the groups and layers in its tree. */
   settings?: LayerTreeSettings;
   background?: MapBackgroundLayer[];
   /** Layer ids, top first. */
   drawOrder?: string[];
+  /** When the saved tree it began from was saved; null if never. */
+  savedAt: string | null;
 }
 
 export type LayerTreePlaceProblem =

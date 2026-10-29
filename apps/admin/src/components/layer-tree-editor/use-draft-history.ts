@@ -27,8 +27,8 @@ export interface LayerTreeEditorState {
 interface History {
   /** The tree the history belongs to; another one starts afresh. */
   owner: string;
-  /** The saved version the steps go with; null until the tree is loaded. */
-  version: number | null;
+  /** When the saved tree it was made on was saved. */
+  savedAt: string | null;
   past: LayerTreeEditorState[];
   future: LayerTreeEditorState[];
   /** The draft last set from here, to tell when the page changed it. */
@@ -38,10 +38,8 @@ interface History {
 interface UseDraftHistoryOptions {
   /** Which tree, e.g. "map:map_1". */
   owner: string;
-  /** The saved tree's version; null while it loads. */
-  savedVersion: number | null;
-  /** Whether this tab saved that version of the tree itself. */
-  savedHere: (version: number) => boolean;
+  /** When the saved tree shown was saved. */
+  savedAt: string | null;
   draft: LayerTreeDraft | null;
   onDraftChange: (draft: LayerTreeDraft | null) => void;
   /** What the editor shows now. */
@@ -71,9 +69,15 @@ const createsGroups = (draft: LayerTreeDraft | null) =>
 
 const fresh = (
   owner: string,
-  version: number | null,
+  savedAt: string | null,
   last: LayerTreeDraft | null,
-): History => ({ owner, version, past: [], future: [], last });
+): History => ({
+  owner,
+  savedAt,
+  past: [],
+  future: [],
+  last,
+});
 
 /**
  * Undo and redo for the editor's changes (Ctrl+Z, and Ctrl+Y or
@@ -81,14 +85,12 @@ const fresh = (
  * save is a draft again, saved like any other, and a step forward to what was
  * saved leaves nothing to save. A new change after stepping back drops the
  * steps forward. Starts afresh in another tree, when the editor closes, when
- * the page drops a draft it hasn't just saved (as on a reload after a refused
- * save), when a version this tab didn't save is loaded, and after a save that
- * created groups.
+ * the page sets a draft of its own, after a save that created groups, and
+ * when a save made elsewhere is loaded.
  */
 export function useDraftHistory({
   owner,
-  savedVersion,
-  savedHere,
+  savedAt,
   draft,
   onDraftChange,
   current,
@@ -98,36 +100,26 @@ export function useDraftHistory({
   change: (draft: LayerTreeDraft | null) => void;
 } {
   const [history, setHistory] = useState<History>(() =>
-    fresh(owner, savedVersion, draft),
+    fresh(owner, savedAt, draft),
   );
 
-  // Kept in step with the page and the saved tree while rendering.
+  // Kept in step with the page while rendering.
   let next = history;
-  if (next.owner !== owner) next = fresh(owner, savedVersion, draft);
-  // While the tree loads again it has no version yet; wait for it.
-  if (savedVersion !== null) {
-    if (next.version !== savedVersion) {
-      const keep =
-        next.version !== null &&
-        savedHere(savedVersion) &&
-        !createsGroups(next.last);
-      next = keep
-        ? { ...next, version: savedVersion }
-        : { ...next, version: savedVersion, past: [], future: [] };
-    }
-    if (draft !== next.last) {
-      // The page dropped the draft this tab just saved: the steps stay. A
-      // newer version saved by someone else (a reload after a refused save)
-      // starts afresh, or a step back would be saved over their change.
-      const saved =
-        draft === null &&
-        next.last !== null &&
-        savedHere(savedVersion) &&
-        next.last.version < savedVersion;
-      next = saved
+  if (next.owner !== owner) next = fresh(owner, savedAt, draft);
+  if (next.savedAt !== savedAt) {
+    // The saved tree changed. Saved from the draft here, the steps stay;
+    // loaded without a draft, from a save made elsewhere, a step back would
+    // undo that save.
+    next =
+      next.last !== null ? { ...next, savedAt } : fresh(owner, savedAt, draft);
+  }
+  if (draft !== next.last) {
+    // The page dropped the draft, as when it has saved it: the steps stay,
+    // unless the save created groups, which a step back would create again.
+    next =
+      draft === null && next.last !== null && !createsGroups(next.last)
         ? { ...next, last: null }
-        : fresh(owner, savedVersion, draft);
-    }
+        : fresh(owner, savedAt, draft);
   }
   if (next !== history) setHistory(next);
 

@@ -1,7 +1,8 @@
 export { default } from "./layer-tree-editor";
-export { default as LayerTreeConflictDialog } from "./layer-tree-conflict-dialog";
+export type { LayerTreePresence } from "./layer-tree-editor";
 export { default as LayerTreeItemTooltip } from "./layer-tree-item-tooltip";
 export { isLayerTreeDraftFor } from "./layer-tree-model";
+export { toLayerTreeShadow } from "./layer-tree-shadow";
 export type { LayerTreeDraft } from "./layer-tree-model";
 export { previewOptionsFor } from "./layer-tree-preview-options";
 export { useGroupContents } from "./use-group-contents";

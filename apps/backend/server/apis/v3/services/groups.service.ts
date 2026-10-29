@@ -249,8 +249,6 @@ class GroupsService {
         where: { id },
         data: {
           ...groupData,
-          // Raised only by saves of the group's tree, whatever the body holds.
-          treeVersion: undefined,
           lastSavedBy: userId,
           lastSavedDate: new Date(),
           ...(roleConnections !== undefined && {
@@ -275,59 +273,6 @@ class GroupsService {
     // Soft delete — the group keeps its own tree, but its placements in maps
     // and other groups are removed.
     await prisma.$transaction(async (transaction) => {
-      const [
-        mapTreePlacements,
-        mapExceptions,
-        mapGroupSettings,
-        mapLayerSettings,
-        parentItems,
-        nestedRefs,
-      ] = await Promise.all([
-        transaction.mapTreeItem.findMany({
-          where: { groupId: id },
-          select: { mapName: true },
-        }),
-        transaction.mapGroupException.findMany({
-          where: {
-            OR: [{ groupId: id }, { childGroupId: id }],
-          },
-          select: { mapName: true },
-        }),
-        transaction.mapGroupSetting.findMany({
-          where: { groupId: id },
-          select: { mapName: true },
-        }),
-        transaction.mapLayerSetting.findMany({
-          where: { groupId: id },
-          select: { mapName: true },
-        }),
-        transaction.groupItem.findMany({
-          where: { childGroupId: id },
-          select: { groupId: true },
-        }),
-        transaction.groupNestedItem.findMany({
-          where: {
-            OR: [{ groupId: id }, { childGroupId: id }],
-          },
-          select: { ownerGroupId: true },
-        }),
-      ]);
-
-      const mapNames = [
-        ...new Set([
-          ...mapTreePlacements.map((row) => row.mapName),
-          ...mapExceptions.map((row) => row.mapName),
-          ...mapGroupSettings.map((row) => row.mapName),
-          ...mapLayerSettings.map((row) => row.mapName),
-        ]),
-      ];
-      const parentGroupIds = [
-        ...new Set([
-          ...parentItems.map((row) => row.groupId),
-          ...nestedRefs.map((row) => row.ownerGroupId),
-        ]),
-      ].filter((groupId) => groupId !== id);
-
       await transaction.layerInstance.deleteMany({ where: { groupId: id } });
       await transaction.roleOnGroup.deleteMany({ where: { groupId: id } });
 
@@ -348,19 +293,6 @@ class GroupsService {
       await transaction.groupItem.deleteMany({
         where: { childGroupId: id },
       });
-
-      if (mapNames.length > 0) {
-        await transaction.map.updateMany({
-          where: { name: { in: mapNames } },
-          data: { treeVersion: { increment: 1 } },
-        });
-      }
-      if (parentGroupIds.length > 0) {
-        await transaction.group.updateMany({
-          where: { id: { in: parentGroupIds } },
-          data: { treeVersion: { increment: 1 } },
-        });
-      }
 
       const deletedAt = new Date();
 

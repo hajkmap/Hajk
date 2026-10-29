@@ -24,10 +24,6 @@ function toError(error: unknown, fallback: string): Error {
     : new Error(message);
 }
 
-/** A save refused because someone else saved the tree after it was loaded. */
-export const isLayerTreeConflict = (error: unknown) =>
-  error instanceof HttpError && error.status === 409;
-
 export const getGroupTree = async (
   groupId: string,
 ): Promise<LayerTreeGroupNode> => {

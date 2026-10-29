@@ -1,6 +1,7 @@
 import HttpStatusCodes from "../../../../common/http-status-codes.ts";
 import MapService from "../../services/map.service.ts";
 import LayerTreeService from "../../services/layer-tree.service.ts";
+import { userNameOf } from "../../utils/user-name.ts";
 
 import type { Request, Response } from "express";
 
@@ -71,6 +72,7 @@ class MapsController {
       req.params.mapName,
       req.body,
       req.user?.id,
+      await userNameOf(req, res)
     );
     res.status(HttpStatusCodes.OK).json(tree);
   }

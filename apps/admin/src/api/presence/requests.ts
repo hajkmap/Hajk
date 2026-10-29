@@ -1,6 +1,6 @@
 import { getApiClient } from "../../lib/internal-api-client";
 import useAppStateStore from "../../store/use-app-state-store";
-import { Presence, PresencePart, PresenceResource } from "./types";
+import { LayerTreeShadow, Presence, PresenceResource } from "./types";
 
 /**
  * Presence on map and group pages: GET/POST /presence and POST
@@ -25,16 +25,24 @@ export const getPresence = async (
   return response.data;
 };
 
+/** The backend takes 100 kB a request; a bigger draft is sent without it. */
+const MAX_SHADOW_BYTES = 90_000;
+
+const fits = (shadow: LayerTreeShadow) =>
+  new TextEncoder().encode(JSON.stringify(shadow)).length <= MAX_SHADOW_BYTES;
+
+/** `shadow` is the tab's draft of the tree, null when it has none. */
 export const reportPresence = async (
   resource: PresenceResource,
   clientId: string,
-  dirty: PresencePart[],
+  shadow: LayerTreeShadow | null,
 ) => {
   await getApiClient().post("/presence", {
     clientId,
     type: resource.type,
     id: resource.id,
-    dirty,
+    editing: shadow !== null,
+    shadow: shadow && fits(shadow) ? shadow : null,
   });
 };
 

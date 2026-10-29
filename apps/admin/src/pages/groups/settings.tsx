@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import {
   Alert,
@@ -13,8 +13,6 @@ import {
   TextField,
   Typography,
   useTheme,
-  type SxProps,
-  type Theme,
 } from "@mui/material";
 import { Controller, FieldValues, useForm, useWatch } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
@@ -22,7 +20,6 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
 import Page from "../../layouts/root/components/page";
 import { GroupType, GroupUpdateInput } from "../../api/groups";
 import FormActionPanel from "../../components/form-action-panel";
-import PresenceNotice from "../../components/presence-notice";
 import {
   useDeleteGroup,
   useGroupById,
@@ -34,7 +31,6 @@ import type { Map } from "../../api/maps";
 import { SquareSpinnerComponent } from "../../components/progress/square-progress";
 import { HttpError } from "../../lib/http-error";
 import { useUpdateGroup } from "../../api/groups";
-import { isLayerTreeConflict } from "../../api/layer-tree";
 import { usePresence } from "../../api/presence";
 import { toast } from "react-toastify";
 import DialogWrapper from "../../components/flexible-dialog";
@@ -57,7 +53,7 @@ import {
 import UnsavedChangesGuard from "../../components/unsaved-changes-guard";
 import LayerTreeEditor, {
   isLayerTreeDraftFor,
-  LayerTreeConflictDialog,
+  toLayerTreeShadow,
   useSaveLayerTree,
   type LayerTreeDraft,
 } from "../../components/layer-tree-editor";
@@ -89,8 +85,6 @@ function GroupSettings() {
   const { save: saveLayerTree, isSaving: isSavingLayerTree } =
     useSaveLayerTree();
   const layerTreeDirty = isLayerTreeDraftFor(layerTreeDraft, "group", groupId);
-  /** Someone else saved the tree meanwhile, so its save was refused. */
-  const [layerTreeConflict, setLayerTreeConflict] = useState(false);
 
   const {
     register,
@@ -105,29 +99,18 @@ function GroupSettings() {
     reValidateMode: "onChange",
   });
 
-  // Told to the other tabs on this group; their tree changes are shown in the
-  // tree, the rest by the save button.
+  // Told to the other tabs on this group, and shown in the tree.
   const presenceResource = groupId
     ? { type: "group" as const, id: groupId }
     : null;
-  const { data: presence } = usePresence(presenceResource, [
-    ...(layerTreeDirty ? (["tree"] as const) : []),
-    ...(isDirty ? (["details"] as const) : []),
-  ]);
-  const presenceNotice = (
-    placement: "tree" | "sidebar",
-    sx?: SxProps<Theme>,
-  ) =>
-    presenceResource ? (
-      <PresenceNotice
-        resource={presenceResource}
-        presence={presence}
-        placement={placement}
-        draft={layerTreeDraft}
-        onReload={() => setLayerTreeDraft(null)}
-        sx={sx}
-      />
-    ) : null;
+  const presenceShadow = useMemo(
+    () =>
+      layerTreeDirty && layerTreeDraft
+        ? toLayerTreeShadow(layerTreeDraft)
+        : null,
+    [layerTreeDirty, layerTreeDraft],
+  );
+  const { data: presence } = usePresence(presenceResource, presenceShadow);
 
   const watchedRoleIds = useWatch({ control, name: "roleIds" }) as
     | string[]
@@ -163,18 +146,14 @@ function GroupSettings() {
       setLayerTreeDraft(null);
       return true;
     } catch (error) {
-      if (isLayerTreeConflict(error)) {
-        setLayerTreeConflict(true);
-      } else {
-        toast.error(
-          `${t("layerTree.saveFailed")}: ${error instanceof Error ? error.message : ""}`,
-          {
-            position: "bottom-left",
-            theme: palette.mode,
-            hideProgressBar: true,
-          },
-        );
-      }
+      toast.error(
+        `${t("layerTree.saveFailed")}: ${error instanceof Error ? error.message : ""}`,
+        {
+          position: "bottom-left",
+          theme: palette.mode,
+          hideProgressBar: true,
+        },
+      );
       return false;
     }
   };
@@ -313,7 +292,6 @@ function GroupSettings() {
         lastSavedBy={group?.lastSavedBy}
         lastSavedDate={group?.lastSavedDate}
         isDirty={isDirty || layerTreeDirty}
-        notice={presenceNotice("sidebar")}
         warning={
           <Box sx={{ mt: 1 }}>
             <Alert severity="warning">{t("groups.deleteGroupWarning")}</Alert>
@@ -400,7 +378,11 @@ function GroupSettings() {
                 ownerId={group.id}
                 draft={layerTreeDraft}
                 onDraftChange={setLayerTreeDraft}
-                notice={presenceNotice("tree", { mb: 1.5 })}
+                presence={
+                  presenceResource
+                    ? { resource: presenceResource, data: presence }
+                    : undefined
+                }
               />
             </FormPanel>
           ) : null}
@@ -565,16 +547,6 @@ function GroupSettings() {
           disabled={isDeletingGroup}
         />
       </DialogWrapper>
-      <LayerTreeConflictDialog
-        mode="group"
-        ownerId={group.id}
-        open={layerTreeConflict}
-        onClose={() => setLayerTreeConflict(false)}
-        onReload={() => {
-          setLayerTreeConflict(false);
-          setLayerTreeDraft(null);
-        }}
-      />
       <UnsavedChangesGuard when={isDirty || layerTreeDirty} />
     </Page>
   );

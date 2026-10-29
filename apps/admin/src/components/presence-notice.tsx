@@ -1,150 +1,122 @@
-import { Alert, Box, Button, type SxProps, type Theme } from "@mui/material";
-import { useIsMutating } from "@tanstack/react-query";
+import { Alert, Button, Stack, type SxProps, type Theme } from "@mui/material";
 import { useTranslation } from "react-i18next";
 
-import {
-  isSavedHere,
-  LAYER_TREE_SAVE_KEY,
-  useLoadedLayerTree,
-  useReloadLayerTree,
-} from "../api/layer-tree";
-import type { Presence, PresencePart, PresenceResource } from "../api/presence";
-import {
-  isLayerTreeDraftFor,
-  type LayerTreeDraft,
-} from "./layer-tree-editor/layer-tree-model";
+import type { Presence, PresenceResource } from "../api/presence";
 
-const PART_ORDER: PresencePart[] = ["tree", "settings", "tools", "details"];
+/** Whose tree shows in the tree's place: the editing or the saved one. */
+export type PresenceShadowOf = "editing" | "saved";
 
 interface PresenceNoticeProps {
   resource: PresenceResource;
-  /** From the page's usePresence, which keeps running wherever this shows. */
+  /** From the page's usePresence. */
   presence: Presence | undefined;
-  /** In the tree: its warnings. By the save button: the other parts'. */
-  placement: "tree" | "sidebar";
-  /** The page's unsaved tree; a save is checked against its version. */
-  draft: LayerTreeDraft | null;
-  /** Drops the page's tree draft; the saved tree is then loaded again. */
+  /** What the tree shows instead of one's own, if anything. */
+  shadowOf: PresenceShadowOf | null;
+  /** Left out where the tree isn't shown: no buttons for it then. */
+  onShadowChange?: (shadowOf: PresenceShadowOf | null) => void;
+  /** The page's draft began before the tree's last save. */
+  overwrites: boolean;
+  /** Drops the draft for the saved tree. */
   onReload: () => void;
-  /** Spacing to what is around it; nothing is drawn when there is no news. */
+  /** Spacing to what is around it; nothing is drawn when there is no warning. */
   sx?: SxProps<Theme>;
 }
 
 /**
- * That another tab has unsaved changes on the same map or group, and that its
- * tree has changed since this page loaded it. Only a warning; a save of a
- * stale tree is still refused by its version check.
+ * That someone saved the map's or group's tree after the page's draft began,
+ * with buttons that show what they saved in the tree's place and that drop
+ * the draft for it, and that someone else is editing the tree, and since
+ * when, with a button that shows their unsaved tree. Only warnings: the last
+ * save wins.
  */
 export default function PresenceNotice({
   resource,
   presence,
-  placement,
-  draft,
+  shadowOf,
+  onShadowChange,
+  overwrites,
   onReload,
   sx,
 }: PresenceNoticeProps) {
   const { t, i18n } = useTranslation();
-  const mode = resource.type;
-  const ownerId = resource.id;
-  const { data: tree } = useLoadedLayerTree(mode, ownerId);
-  const reloadTree = useReloadLayerTree();
-  const treeSaving = useIsMutating({ mutationKey: LAYER_TREE_SAVE_KEY }) > 0;
+  const editors = presence?.editors ?? [];
+  const saved = overwrites ? presence?.saved : null;
+  if (editors.length === 0 && !saved) return null;
 
-  if (!presence) return null;
-
-  // The tree's changes where the tree is, the other parts' by the save button.
-  const shownParts: PresencePart[] =
-    placement === "tree"
-      ? PART_ORDER.filter((part) => part === "tree")
-      : PART_ORDER.filter((part) => part !== "tree");
-  const dirtyOthers = presence.others.filter((other) =>
-    other.dirty.some((part) => shownParts.includes(part)),
-  );
-  const parts = shownParts.filter((part) =>
-    dirtyOthers.some((other) => other.dirty.includes(part)),
-  );
+  // The time, with the date only if that isn't today.
+  const when = (iso: string, key: "since" | "at") => {
+    const date = new Date(iso);
+    const time = date.toLocaleTimeString(i18n.language, {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    return date.toDateString() === new Date().toDateString()
+      ? t(`presence.${key}.today`, { time })
+      : t(`presence.${key}.date`, {
+          date: date.toLocaleDateString(i18n.language),
+          time,
+        });
+  };
   const names = [
-    ...new Set(dirtyOthers.flatMap((other) => other.userName ?? [])),
+    ...new Set(editors.flatMap((editor) => editor.userName ?? [])),
   ];
-  // Since the first of them began; with the date only if that isn't today.
-  const sinceIso = dirtyOthers
-    .flatMap((other) => other.dirtySince ?? [])
-    .sort()[0];
-  const since = sinceIso ? new Date(sinceIso) : null;
+  // Since the first of them began.
+  const since = editors.map((editor) => editor.since).sort()[0];
+  const toggle = (of: PresenceShadowOf) =>
+    onShadowChange ? (
+      <Button
+        color="inherit"
+        size="small"
+        sx={{ whiteSpace: "nowrap" }}
+        onClick={() => onShadowChange(shadowOf === of ? null : of)}
+      >
+        {t(shadowOf === of ? "presence.hide" : "presence.show")}
+      </Button>
+    ) : null;
 
-  // Against the version this page's tree comes from: the draft's, or the
-  // loaded tree's. The page's own saves (running or done) don't count.
-  const ownDraft = isLayerTreeDraftFor(draft, mode, ownerId) ? draft : null;
-  const base = ownDraft?.version ?? tree?.version;
-  const treeChanged =
-    placement === "tree" &&
-    !treeSaving &&
-    presence.version !== null &&
-    base !== undefined &&
-    presence.version > base &&
-    !isSavedHere(mode, ownerId, presence.version);
-
-  if (parts.length === 0 && !treeChanged) return null;
-
-  const list = new Intl.ListFormat(i18n.language, { type: "conjunction" });
   return (
-    <Box
-      sx={[
-        { display: "flex", flexDirection: "column", gap: 1, textAlign: "left" },
-        ...(Array.isArray(sx) ? sx : [sx]),
-      ]}
-      data-presence-notice={placement}
-    >
-      {parts.length > 0 && (
-        <Alert severity="warning" data-presence-unsaved>
-          {t(`presence.unsaved.${mode}`, {
-            parts: list.format(
-              parts.map((part) => t(`presence.part.${mode}.${part}`)),
-            ),
-            since: since
-              ? ` ${t(
-                  since.toDateString() === new Date().toDateString()
-                    ? "presence.since.today"
-                    : "presence.since.date",
-                  {
-                    date: since.toLocaleDateString(i18n.language),
-                    time: since.toLocaleTimeString(i18n.language, {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    }),
-                  },
-                )}`
-              : "",
-            who: names.length > 0 ? ` (${list.format(names)})` : "",
-          })}
-        </Alert>
-      )}
-      {treeChanged && (
+    <Stack spacing={1} sx={sx}>
+      {saved ? (
         <Alert
           severity="warning"
+          data-presence-saved
           action={
-            <Button
-              variant="outlined"
-              color="inherit"
-              sx={{ whiteSpace: "nowrap" }}
-              onClick={() => {
-                onReload();
-                void reloadTree(mode, ownerId);
-              }}
-            >
-              {t("layerTree.conflict.reload")}
-            </Button>
+            <Stack direction="row" spacing={1}>
+              {toggle("saved")}
+              <Button
+                color="inherit"
+                size="small"
+                sx={{ whiteSpace: "nowrap" }}
+                onClick={onReload}
+              >
+                {t("presence.reload")}
+              </Button>
+            </Stack>
           }
-          data-presence-tree-changed
         >
-          {t(`presence.treeChanged.${mode}`)}
-          {ownDraft ? (
-            <Box component="span" sx={{ display: "block" }}>
-              {t("presence.treeChangedDraft")}
-            </Box>
-          ) : null}
+          {t(`presence.saved.${resource.type}`, {
+            who: saved.by ?? t("presence.someone"),
+            at: when(saved.at, "at"),
+          })}
         </Alert>
-      )}
-    </Box>
+      ) : null}
+      {editors.length > 0 ? (
+        <Alert
+          severity="warning"
+          data-presence-editing
+          action={toggle("editing")}
+        >
+          {t(`presence.editing.${resource.type}`, {
+            who:
+              names.length > 0
+                ? new Intl.ListFormat(i18n.language, {
+                    type: "conjunction",
+                  }).format(names)
+                : t("presence.someone"),
+            since: when(since, "since"),
+          })}
+        </Alert>
+      ) : null}
+    </Stack>
   );
 }

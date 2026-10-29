@@ -1,5 +1,5 @@
 import type { ReactElement, ReactNode } from "react";
-import { Badge, Tab, Tabs } from "@mui/material";
+import { Tab, Tabs } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 
@@ -63,8 +63,6 @@ export interface SettingsPageTab<T extends string> {
   labelKey?: string;
   label?: ReactNode;
   icon?: ReactElement;
-  /** Marked with a dot: the tab has changes that aren't saved. */
-  unsaved?: boolean;
 }
 
 interface SettingsPageTabsProps<T extends string> {
@@ -98,11 +96,7 @@ export function SettingsPageTabs<T extends string>({
           icon={tab.icon}
           iconPosition={tab.icon ? "start" : undefined}
           label={
-            <Badge color="primary" variant="dot" invisible={!tab.unsaved}>
-              {tab.labelKey
-                ? t(tab.labelKey as never)
-                : (tab.label ?? tab.key)}
-            </Badge>
+            tab.labelKey ? t(tab.labelKey as never) : (tab.label ?? tab.key)
           }
         />
       ))}

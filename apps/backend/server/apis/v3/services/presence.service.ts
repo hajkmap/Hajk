@@ -1,25 +1,21 @@
-import prisma from "../../../common/prisma.ts";
 import { HajkError } from "../../../common/classes.ts";
 import HttpStatusCodes from "../../../common/http-status-codes.ts";
 import HajkStatusCodes from "../../../common/hajk-status-codes.ts";
 
 /**
- * Which admin tabs are on which map or group page, and which parts of it they
- * have unsaved changes in, so that others can be warned before they start.
- * The tabs report it themselves, at once when it changes and otherwise as a
- * heartbeat. A tab not heard from within the TTL is gone; it is longer than a
- * minute since a hidden tab's timers may only run once a minute. Kept in
- * memory, so it assumes a single backend instance. Only a warning: the layer
- * trees' version check is what refuses a stale save.
+ * Which admin tabs are editing which map's or group's layer tree, so that
+ * others can be warned before they start. The tabs report it themselves, at
+ * once when it changes and otherwise as a heartbeat. A tab not heard from
+ * within the TTL is gone; it is longer than a minute since a hidden tab's
+ * timers may only run once a minute. Kept in memory, so it assumes a single
+ * backend instance. Only a warning: the last save wins.
  */
 
 const PRESENCE_TTL_MS = 150_000;
 
 const RESOURCE_TYPES = ["map", "group"] as const;
-const PARTS = ["tree", "settings", "tools", "details"] as const;
 
 export type PresenceResourceType = (typeof RESOURCE_TYPES)[number];
-export type PresencePart = (typeof PARTS)[number];
 
 /** A tab and the map or group page it is on. */
 export interface PresenceTab {
@@ -29,15 +25,21 @@ export interface PresenceTab {
   id: string;
 }
 
+/** A tab's draft of the tree, passed on as it came for the others to show. */
+type PresenceShadow = Record<string, unknown>;
+
 export interface PresenceReport extends PresenceTab {
-  /** The parts of the page with unsaved changes, none if it is only open. */
-  dirty: PresencePart[];
+  /** Whether the tab has unsaved changes in the page's tree. */
+  editing: boolean;
+  /** Null when the tab isn't editing or its draft was too big to send. */
+  shadow: PresenceShadow | null;
 }
 
-interface PresenceEntry extends PresenceReport {
+interface PresenceEntry extends PresenceTab {
   userName: string | null;
-  /** When the tab went from no unsaved changes on the page to some. */
-  dirtySince: number | null;
+  /** When the tab began to have unsaved changes in the tree; null if none. */
+  editingSince: number | null;
+  shadow: PresenceShadow | null;
   seenAt: number;
 }
 
@@ -78,31 +80,32 @@ class PresenceService {
 
   parseReport(body: unknown): PresenceReport {
     const tab = this.parseTab(body);
-    const { dirty } = (body ?? {}) as Record<string, unknown>;
-    if (!Array.isArray(dirty) || !dirty.every((part) => isOneOf(PARTS, part))) {
-      throw badRequest(`dirty must be a list of ${PARTS.join(", ")}.`);
+    const { editing, shadow = null } = (body ?? {}) as Record<string, unknown>;
+    if (typeof editing !== "boolean") {
+      throw badRequest("editing must be true or false.");
     }
-    // In one order, each once, so that the answers don't change with it.
-    return { ...tab, dirty: PARTS.filter((part) => dirty.includes(part)) };
+    if (
+      shadow !== null &&
+      (typeof shadow !== "object" || Array.isArray(shadow))
+    ) {
+      throw badRequest("shadow must be an object or null.");
+    }
+    return { ...tab, editing, shadow: shadow as PresenceShadow | null };
   }
 
-  report(report: PresenceReport, userName: string | null) {
+  report({ editing, shadow, ...tab }: PresenceReport, userName: string | null) {
     this.#prune();
     const now = Date.now();
-    const previous = this.#entries.get(report.clientId);
-    const stillDirty =
-      previous?.type === report.type &&
-      previous.id === report.id &&
-      previous.dirtySince !== null;
-    this.#entries.set(report.clientId, {
-      ...report,
+    const previous = this.#entries.get(tab.clientId);
+    const since =
+      previous?.type === tab.type && previous.id === tab.id
+        ? previous.editingSince
+        : null;
+    this.#entries.set(tab.clientId, {
+      ...tab,
       userName,
-      dirtySince:
-        report.dirty.length === 0
-          ? null
-          : stillDirty
-            ? previous.dirtySince
-            : now,
+      editingSince: editing ? (since ?? now) : null,
+      shadow: editing ? shadow : null,
       seenAt: now,
     });
   }
@@ -115,39 +118,29 @@ class PresenceService {
     }
   }
 
-  /** The other tabs on the map's or group's page, and its tree's version now. */
-  async getPresence({ clientId, type, id }: PresenceTab) {
+  /** The other tabs editing the map's or group's tree, with their drafts. */
+  getEditors({ clientId, type, id }: PresenceTab) {
     this.#prune();
-    const others = [...this.#entries.values()]
-      .filter(
-        (entry) =>
-          entry.type === type && entry.id === id && entry.clientId !== clientId
-      )
-      .map(({ dirty, userName, dirtySince }) => ({
-        dirty,
-        userName,
-        dirtySince:
-          dirtySince === null ? null : new Date(dirtySince).toISOString(),
-      }));
-    return { others, version: await this.#treeVersion(type, id) };
-  }
-
-  /** Null when the map or group doesn't exist or is deleted. */
-  async #treeVersion(
-    type: PresenceResourceType,
-    id: string
-  ): Promise<number | null> {
-    const owner =
-      type === "map"
-        ? await prisma.map.findFirst({
-            where: { name: id, deletedAt: null },
-            select: { treeVersion: true },
-          })
-        : await prisma.group.findFirst({
-            where: { id, deletedAt: null },
-            select: { treeVersion: true },
-          });
-    return owner?.treeVersion ?? null;
+    const editors: {
+      userName: string | null;
+      since: string;
+      shadow: PresenceShadow | null;
+    }[] = [];
+    for (const entry of this.#entries.values()) {
+      if (
+        entry.type === type &&
+        entry.id === id &&
+        entry.clientId !== clientId &&
+        entry.editingSince !== null
+      ) {
+        editors.push({
+          userName: entry.userName,
+          since: new Date(entry.editingSince).toISOString(),
+          shadow: entry.shadow,
+        });
+      }
+    }
+    return { editors };
   }
 
   #prune() {

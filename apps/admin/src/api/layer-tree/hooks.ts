@@ -6,7 +6,12 @@ import {
   updateGroupTree,
   updateMapLayerTree,
 } from "./requests";
-import { GroupTreeWrite, MapLayerTreeWrite } from "./types";
+import {
+  GroupTreeWrite,
+  LayerTreeGroupNode,
+  MapLayerTree,
+  MapLayerTreeWrite,
+} from "./types";
 
 // Groups are linked into other groups and maps, so a save can change any
 // layer tree that uses them. Of the ["groups"] queries only the list is
@@ -15,17 +20,6 @@ import { GroupTreeWrite, MapLayerTreeWrite } from "./types";
 
 /** Shared by both saves, so an editor can tell when a save is running. */
 export const LAYER_TREE_SAVE_KEY = ["layerTree", "save"];
-
-// The versions this tab saved itself, by tree, so an editor can keep its
-// undo steps across its own saves and start afresh on anyone else's.
-const savedHere = new Map<string, number>();
-
-/** Whether this tab saved that version of the tree itself. */
-export const isSavedHere = (
-  mode: "group" | "map",
-  ownerId: string,
-  version: number,
-) => savedHere.get(`${mode}:${ownerId}`) === version;
 
 export const useGroupTree = (groupId: string) =>
   useQuery({
@@ -46,8 +40,6 @@ export const useUpdateGroupTree = () => {
       payload: GroupTreeWrite;
     }) => updateGroupTree(groupId, payload),
     onSuccess: (tree, { groupId }) => {
-      // Before the tree shows, so the editor knows the version is its own.
-      savedHere.set(`group:${groupId}`, tree.version);
       queryClient.setQueryData(["layerTree", "group", groupId], tree);
       void queryClient.invalidateQueries({ queryKey: ["layerTree"] });
       void queryClient.invalidateQueries({ queryKey: ["groups"], exact: true });
@@ -74,8 +66,6 @@ export const useUpdateMapLayerTree = () => {
       payload: MapLayerTreeWrite;
     }) => updateMapLayerTree(mapName, payload),
     onSuccess: (tree, { mapName }) => {
-      // Before the tree shows, so the editor knows the version is its own.
-      savedHere.set(`map:${mapName}`, tree.version);
       queryClient.setQueryData(["layerTree", "map", mapName], tree);
       void queryClient.invalidateQueries({ queryKey: ["layerTree"] });
       void queryClient.invalidateQueries({ queryKey: ["groups"], exact: true });
@@ -83,21 +73,22 @@ export const useUpdateMapLayerTree = () => {
   });
 };
 
-/** The tree as an editor last loaded it, without loading it if none has. */
-export const useLoadedLayerTree = (mode: "group" | "map", ownerId: string) =>
-  useQuery<{ version: number }>({
-    queryKey: ["layerTree", mode, ownerId],
-    queryFn: () =>
-      mode === "map" ? getMapLayerTree(ownerId) : getGroupTree(ownerId),
-    enabled: false,
+/**
+ * The tree as saved at `savedAt`, beside the one an editor has loaded, to
+ * show what a save made elsewhere changed without taking it in.
+ */
+export const useLatestLayerTree = (
+  type: "group" | "map",
+  id: string,
+  savedAt: string | null,
+  enabled: boolean,
+) =>
+  useQuery({
+    queryKey: ["layerTree", type, id, "latest", savedAt],
+    queryFn: (): Promise<LayerTreeGroupNode | MapLayerTree> =>
+      type === "group" ? getGroupTree(id) : getMapLayerTree(id),
+    enabled,
   });
-
-/** Loads a tree again, as when a save was refused because it had changed. */
-export const useReloadLayerTree = () => {
-  const queryClient = useQueryClient();
-  return (mode: "group" | "map", ownerId: string) =>
-    queryClient.invalidateQueries({ queryKey: ["layerTree", mode, ownerId] });
-};
 
 /** Which groups and maps every group and layer is placed in. */
 export const useLayerTreePlacements = () =>

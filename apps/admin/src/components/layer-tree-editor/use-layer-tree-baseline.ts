@@ -22,14 +22,14 @@ import {
 
 /** The saved state, which tells what a draft changes. */
 export interface LayerTreeBaseline {
-  /** Sent back with a save, which is refused if the tree was saved since. */
-  version: number;
   nodes: LayerTreeFlatNode[];
   signature: string;
   settings: LayerTreeSettings;
   settingsSignature: string;
   background: MapBackgroundLayer[];
   drawOrder: string[];
+  /** When the tree was saved; null if never. */
+  savedAt: string | null;
 }
 
 const EMPTY_BACKGROUND: MapBackgroundLayer[] = [];
@@ -63,13 +63,13 @@ export function useLayerTreeBaseline(
     setLoaded({
       data,
       baseline: {
-        version: data.version,
         nodes: shown?.owner === owner ? keepNodeIds(nodes, shown.nodes) : nodes,
         signature: loadedSignature(data.items),
         settings,
         settingsSignature: settingsSignature(settings),
         background: "background" in data ? data.background : EMPTY_BACKGROUND,
         drawOrder: "drawOrder" in data ? data.drawOrder : EMPTY_ORDER,
+        savedAt: data.savedAt,
       },
     });
   }

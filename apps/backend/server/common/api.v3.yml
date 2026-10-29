@@ -266,7 +266,7 @@ paths:
             type: string
       responses:
         200:
-          description: Top-level linked groups, each expanded from its own content with the map's exceptions merged in (items added or hidden on this map), plus the map's settings for its groups and layers (only those that differ from the defaults), the background layers, the draw order and the tree's version, which a save sends back
+          description: Top-level linked groups, each expanded from its own content with the map's exceptions merged in (items added or hidden on this map), plus the map's settings for its groups and layers (only those that differ from the defaults), the background layers, the draw order and when the tree was last saved (savedAt, null if never)
         404:
           description: Map not found
     put:
@@ -280,17 +280,13 @@ paths:
           schema:
             type: string
       requestBody:
-        description: Ordered top-level groups (layers go in groups, since the client only shows layers inside groups). Groups are linked and sent without items; their content is edited on the group. A group sent with new set to true, a name and its items is created on save with that content (layers, linked groups and new groups); its id is then a temporary id, which the settings can use. Optional, each written only when sent - exceptions (add a layer or a group to a linked group on this map only, or hide one of its own items), settings, background and drawOrder. version is the tree's version as GET gave it; the save is refused if the tree has been saved since.
+        description: Ordered top-level groups (layers go in groups, since the client only shows layers inside groups). Groups are linked and sent without items; their content is edited on the group. A group sent with new set to true, a name and its items is created on save with that content (layers, linked groups and new groups); its id is then a temporary id, which the settings can use. Optional, each written only when sent - exceptions (add a layer or a group to a linked group on this map only, or hide one of its own items), settings, background and drawOrder. The last save wins.
         required: true
         content:
           application/json:
             schema:
               type: object
               properties:
-                version:
-                  type: integer
-                  minimum: 0
-                  description: The tree's version as GET gave it.
                 items:
                   type: array
                   items:
@@ -419,17 +415,14 @@ paths:
                   items:
                     type: string
               required:
-                - version
                 - items
       responses:
         200:
-          description: The saved tree, with its new version
+          description: The saved tree
         400:
           description: Invalid request
         404:
           description: Map not found
-        409:
-          description: The tree has been saved since the version sent; load it again
   /layers:
     get:
       tags:
@@ -501,7 +494,7 @@ paths:
             type: string
       responses:
         200:
-          description: The group with its layers and linked child groups, the tree's version (which a save sends back), the maps with their own exceptions to the group or a group in it (mapExceptions), and the groups outside its tree that put layers or groups in it in their own trees (groupAdditions)
+          description: The group with its layers and linked child groups, the maps with their own exceptions to the group or a group in it (mapExceptions), the groups outside its tree that put layers or groups in it in their own trees (groupAdditions), and when its tree was last saved (savedAt, null if never)
         404:
           description: Requested group was not found
     put:
@@ -515,17 +508,13 @@ paths:
           schema:
             type: string
       requestBody:
-        description: Ordered items. Groups are only linked and sent without items; their content is edited on the group itself. A group sent with new set to true, a name and its items is created on save; its id is then a temporary id. Optional nested lists what the group (ownerId - the group itself or a new group's temporary id) puts inside the groups linked in its tree (groupId), each after the item named by after (null puts it first), without changing those groups. A placement can be a group made in the editor - new set to true, a name and its items - which is created on save. version is the tree's version as GET gave it; the save is refused if the tree has been saved since.
+        description: Ordered items. Groups are only linked and sent without items; their content is edited on the group itself. A group sent with new set to true, a name and its items is created on save; its id is then a temporary id. Optional nested lists what the group (ownerId - the group itself or a new group's temporary id) puts inside the groups linked in its tree (groupId), each after the item named by after (null puts it first), without changing those groups. A placement can be a group made in the editor - new set to true, a name and its items - which is created on save. The last save wins.
         required: true
         content:
           application/json:
             schema:
               type: object
               properties:
-                version:
-                  type: integer
-                  minimum: 0
-                  description: The tree's version as GET gave it.
                 items:
                   type: array
                   items:
@@ -578,17 +567,14 @@ paths:
                       - type
                       - id
               required:
-                - version
                 - items
       responses:
         200:
-          description: The saved tree, with its new version
+          description: The saved tree
         400:
           description: Invalid request, for example a group placed inside itself, a linked group sent with items, or a nested item put in a group outside the owner's tree
         404:
           description: Requested group was not found
-        409:
-          description: The tree has been saved since the version sent; load it again
   /ogc/wfst:
     get:
       tags:
@@ -649,45 +635,55 @@ paths:
     get:
       tags:
         - Admin only
-      summary: The other admin tabs on a map's or group's page, and the version of its layer tree now
+      summary: The other admin tabs editing a map's or group's layer tree, and when it was last saved
       parameters:
         - $ref: "#/components/parameters/PresenceClientId"
         - $ref: "#/components/parameters/PresenceType"
         - $ref: "#/components/parameters/PresenceId"
       responses:
         200:
-          description: The other tabs, with the parts of the page they have unsaved changes in, and the tree's version (null if the map or group is gone)
+          description: The other tabs with unsaved changes in the tree, this tab's own left out, and the tree's last save
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  others:
+                  editors:
                     type: array
                     items:
                       type: object
                       properties:
-                        dirty:
-                          type: array
-                          items:
-                            type: string
                         userName:
                           type: string
                           nullable: true
-                        dirtySince:
+                          description: The login's name, else the AD account's display name, else the account; null without either
+                        since:
                           type: string
                           format: date-time
+                          description: When the tab began to have unsaved changes in the tree (the server's clock)
+                        shadow:
+                          type: object
                           nullable: true
-                          description: When the tab began to have unsaved changes on the page (the server's clock)
-                  version:
-                    type: integer
+                          additionalProperties: true
+                          description: The tab's draft of the tree as it sent it, for the admin's shadow view; null if it was too big to send
+                  saved:
+                    type: object
                     nullable: true
+                    description: When the tree was last saved and by whom, so that a tab whose draft began before can warn that saving overwrites it; null if never
+                    properties:
+                      at:
+                        type: string
+                        format: date-time
+                      by:
+                        type: string
+                        nullable: true
+                        description: As userName above
         400:
           description: Invalid request
     post:
       tags:
         - Admin only
-      summary: A tab tells which map or group page it is on and which parts of it have unsaved changes
+      summary: A tab tells which map or group page it is on and whether it is editing its layer tree
       description: Sent when that changes and as a heartbeat; a tab not heard from for 2.5 minutes is dropped
       requestBody:
         required: true
@@ -699,7 +695,7 @@ paths:
                 - clientId
                 - type
                 - id
-                - dirty
+                - editing
               properties:
                 clientId:
                   type: string
@@ -711,15 +707,14 @@ paths:
                 id:
                   type: string
                   description: The map's name or the group's id
-                dirty:
-                  type: array
-                  items:
-                    type: string
-                    enum:
-                      - tree
-                      - settings
-                      - tools
-                      - details
+                editing:
+                  type: boolean
+                  description: Whether the tab has unsaved changes in the tree
+                shadow:
+                  type: object
+                  nullable: true
+                  additionalProperties: true
+                  description: The tab's draft of the tree (nodes, changed settings, whether the background and draw order changed), passed on to the others as it is; null when it isn't editing or the draft is too big
       responses:
         204:
           description: Noted

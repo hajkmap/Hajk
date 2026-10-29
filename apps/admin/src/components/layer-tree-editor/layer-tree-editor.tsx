@@ -1,19 +1,21 @@
 import { getBackendOptions, MultiBackend } from "@minoru/react-dnd-treeview";
 import { Alert, Box, CircularProgress, Typography } from "@mui/material";
 import { useIsMutating } from "@tanstack/react-query";
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { DndProvider } from "react-dnd";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 
 import {
-  isSavedHere,
   LAYER_TREE_SAVE_KEY,
   useGroupTree,
+  useLatestLayerTree,
   useMapLayerTree,
   type MapBackgroundLayer,
 } from "../../api/layer-tree";
 import { useLayers } from "../../api/layers";
+import type { Presence, PresenceResource } from "../../api/presence";
+import PresenceNotice, { type PresenceShadowOf } from "../presence-notice";
 import { CATALOG_DRAG_TYPE } from "./lists/types";
 import LayerTreeBackground from "./layer-tree-background";
 import LayerTreeCatalog from "./layer-tree-catalog";
@@ -44,6 +46,8 @@ import {
   settingsSignature,
   type LayerTreeSettings,
 } from "./layer-tree-settings";
+import { layerTreeShadowRows, savedTreeShadow } from "./layer-tree-shadow";
+import type { LayerTreeShadowState } from "./layer-tree-shadow-tree";
 import { useClickPlace } from "./use-click-place";
 import {
   useDraftHistory,
@@ -56,11 +60,21 @@ const EMPTY_NODES: LayerTreeFlatNode[] = [];
 const EMPTY_BACKGROUND: MapBackgroundLayer[] = [];
 const EMPTY_ORDER: string[] = [];
 
+/** Whether a save at `at` came after the one at `than` (null: never saved). */
+const isLater = (at: string, than: string | null) =>
+  than === null || Date.parse(at) > Date.parse(than);
+
 const MAP_HELP: Record<LayerTreeMapTab, string> = {
   layers: "layerTree.mapHelp",
   background: "layerTree.backgroundHelp",
   drawOrder: "layerTree.drawOrderHelp",
 };
+
+/** Who else is editing the tree, and its last save, from usePresence. */
+export interface LayerTreePresence {
+  resource: PresenceResource;
+  data: Presence | undefined;
+}
 
 interface LayerTreeEditorProps {
   mode: LayerTreeEditorMode;
@@ -74,10 +88,11 @@ interface LayerTreeEditorProps {
   /** Map mode: where the page shows the move zone, beside its save button. */
   moveZoneHost?: HTMLElement | null;
   /**
-   * A warning about the tree, e.g. that someone else is editing it: under the
-   * help text, or in map mode under the text of the frame's heading.
+   * Others editing the tree, and saves made after the draft began: warned of
+   * under the help text, or in map mode under the text of the frame's
+   * heading. The others' unsaved tree is shown in the tree's place on request.
    */
-  notice?: ReactNode;
+  presence?: LayerTreePresence;
 }
 
 /**
@@ -93,7 +108,7 @@ export default function LayerTreeEditor({
   onDraftChange,
   preview = NO_LAYERSWITCHER,
   moveZoneHost = null,
-  notice,
+  presence,
 }: LayerTreeEditorProps) {
   const { t } = useTranslation();
   const groupTree = useGroupTree(mode === "group" ? ownerId : "");
@@ -110,6 +125,10 @@ export default function LayerTreeEditor({
     query.data,
     activeDraft?.nodes,
   );
+  // When the saved tree a draft began from was saved, kept while it lasts.
+  const savedAt = activeDraft
+    ? activeDraft.savedAt
+    : (baseline?.savedAt ?? null);
   const nodes = activeDraft?.nodes ?? baseline?.nodes ?? EMPTY_NODES;
   const settings: LayerTreeSettings =
     activeDraft?.settings ?? baseline?.settings ?? EMPTY_SETTINGS;
@@ -161,11 +180,11 @@ export default function LayerTreeEditor({
     return {
       mode,
       ownerId,
-      version: activeDraft?.version ?? baseline.version,
       nodes: state.nodes,
       settings: settingsChanged ? state.settings : undefined,
       background: backgroundChanged ? state.background : undefined,
       drawOrder: orderChanged ? state.drawOrder : undefined,
+      savedAt,
     };
   };
 
@@ -173,8 +192,7 @@ export default function LayerTreeEditor({
   // save made here.
   const history = useDraftHistory({
     owner: `${mode}:${ownerId}`,
-    savedVersion: baseline?.version ?? null,
-    savedHere: (version) => isSavedHere(mode, ownerId, version),
+    savedAt: baseline?.savedAt ?? null,
     draft: activeDraft,
     onDraftChange,
     current: { nodes, settings, background, drawOrder: fullDrawOrder },
@@ -216,13 +234,11 @@ export default function LayerTreeEditor({
         ? {
             mode,
             ownerId,
-            // A draft keeps the version it was begun on, even when the tree
-            // is loaded again meanwhile: the save is checked against it.
-            version: activeDraft?.version ?? baseline.version,
             nodes: next.nodes,
             settings: changedSettings,
             background: changedBackground,
             drawOrder: changedOrder,
+            savedAt,
           }
         : null,
     );
@@ -245,6 +261,79 @@ export default function LayerTreeEditor({
   // Click and place is switched on in the move zone, for the tree.
   const click = useClickPlace(moveZoneOn && tab === "layers");
   const held = click.pick;
+
+  // Saved elsewhere after the draft began: saving the draft overwrites that.
+  const saved = presence?.data?.saved ?? null;
+  const overwrites =
+    activeDraft !== null &&
+    saved !== null &&
+    !isSaving &&
+    isLater(saved.at, activeDraft.savedAt);
+  // Without a draft the tree follows the saves made elsewhere.
+  const behind =
+    activeDraft === null &&
+    saved !== null &&
+    baseline !== null &&
+    isLater(saved.at, baseline.savedAt);
+  const { refetch } = query;
+  useEffect(() => {
+    if (behind) void refetch();
+  }, [behind, refetch]);
+
+  // Someone else's tree in the tree's place on request: the unsaved one of
+  // the first who edits it, or the one saved after the draft began.
+  const editors = presence?.data?.editors ?? [];
+  const [shadowOf, setShadowOf] = useState<PresenceShadowOf | null>(null);
+  if (shadowOf === "editing" && editors.length === 0) setShadowOf(null);
+  if (shadowOf === "saved" && !overwrites) setShadowOf(null);
+  const editing = shadowOf === "editing" ? editors[0] : undefined;
+  const latest = useLatestLayerTree(
+    mode,
+    ownerId,
+    saved?.at ?? null,
+    shadowOf === "saved",
+  );
+  const latestShadow = useMemo(
+    () => (latest.data ? savedTreeShadow(latest.data, mode) : null),
+    [latest.data, mode],
+  );
+  const theirs =
+    shadowOf === "saved" ? latestShadow : (editing?.shadow ?? null);
+  const shadowRows = useMemo(
+    () =>
+      theirs && baseline
+        ? layerTreeShadowRows(
+            {
+              nodes: baseline.nodes,
+              settings: mode === "map" ? baseline.settings : undefined,
+            },
+            theirs,
+            false,
+          )
+        : [],
+    [theirs, baseline, mode],
+  );
+  let shadowState: LayerTreeShadowState | undefined;
+  if (shadowOf === "editing" && !editing?.shadow) shadowState = "tooBig";
+  if (shadowOf === "saved" && !latestShadow) {
+    shadowState = latest.isError ? "failed" : "loading";
+  }
+
+  const notice = presence ? (
+    <PresenceNotice
+      resource={presence.resource}
+      presence={presence.data}
+      shadowOf={shadowOf}
+      // Theirs takes the tree's place, so only where the tree is.
+      onShadowChange={
+        mode === "group" || tab === "layers" ? setShadowOf : undefined
+      }
+      overwrites={overwrites}
+      // Without the draft the tree catches up with the save (see above).
+      onReload={() => onDraftChange(null)}
+      sx={mode === "group" ? { mb: 1.5 } : { mt: 1 }}
+    />
+  ) : null;
 
   if (query.isLoading) {
     return <CircularProgress size={24} />;
@@ -289,6 +378,9 @@ export default function LayerTreeEditor({
           frame={mode === "map" ? framed : undefined}
           showSearch={mode === "group" || preview.showFilter}
           history={history}
+          shadow={
+            shadowOf ? { rows: shadowRows, state: shadowState } : undefined
+          }
           moveZone={
             moveZoneOn
               ? { flagged: zone.flaggedNodeIds, onPlaced: zone.placed }

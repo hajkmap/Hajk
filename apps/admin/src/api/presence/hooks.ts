@@ -6,12 +6,14 @@ import {
   leavePresenceOnClose,
   reportPresence,
 } from "./requests";
-import { PresencePart, PresenceResource } from "./types";
+import { LayerTreeShadow, PresenceResource } from "./types";
 
 /** Sent again this often when nothing changes; the backend waits 2.5 minutes. */
 const HEARTBEAT_MS = 30_000;
 /** How often a page asks who else is on it. */
 const POLL_MS = 5_000;
+/** A pause in the editing first, so typing a name doesn't send every key. */
+const REPORT_DELAY_MS = 500;
 
 const randomId = () =>
   typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
@@ -23,30 +25,37 @@ const randomId = () =>
 const CLIENT_ID = randomId();
 
 /**
- * Tells the backend that this tab is on the map's or group's page and which
- * parts of it have unsaved changes (at once when that changes, otherwise as a
- * heartbeat), and asks every few seconds who else is on the page and what
- * version its tree has now. The asking pauses while the tab is hidden; the
- * telling doesn't, so unsaved changes in a hidden tab still count.
+ * Tells the backend that this tab is on the map's or group's page and what
+ * its unsaved draft of the tree is, if any (soon after it changes, at once
+ * when it is gone, otherwise as a heartbeat), and asks every few seconds who
+ * else is editing the tree.
+ * The asking pauses while the tab is hidden; the telling doesn't, so unsaved
+ * changes in a hidden tab still count. `shadow` must keep its identity while
+ * the draft stays the same.
  */
 export function usePresence(
   resource: PresenceResource | null,
-  dirty: PresencePart[],
+  shadow: LayerTreeShadow | null,
 ) {
   const type = resource?.type;
   const id = resource?.id;
-  const dirtyKey = [...dirty].sort().join(",");
 
   useEffect(() => {
     if (!type || !id) return;
-    const parts = dirtyKey ? (dirtyKey.split(",") as PresencePart[]) : [];
     const report = () => {
-      reportPresence({ type, id }, CLIENT_ID, parts).catch(() => undefined);
+      reportPresence({ type, id }, CLIENT_ID, shadow).catch(() => undefined);
     };
-    report();
+    // Stopping, as when the draft has been saved, is told at once, so that
+    // others don't see the tab still editing beside its save.
+    let soon: number | undefined;
+    if (shadow === null) report();
+    else soon = window.setTimeout(report, REPORT_DELAY_MS);
     const timer = window.setInterval(report, HEARTBEAT_MS);
-    return () => window.clearInterval(timer);
-  }, [type, id, dirtyKey]);
+    return () => {
+      window.clearTimeout(soon);
+      window.clearInterval(timer);
+    };
+  }, [type, id, shadow]);
 
   // Leaving the page, or closing the tab, takes it off at once. The leave is
   // for this page only, so it can't undo the report from the next one.
