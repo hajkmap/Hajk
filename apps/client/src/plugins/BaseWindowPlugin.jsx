@@ -9,7 +9,7 @@ import Window from "../components/Window";
 import WindowSheet from "../components/WindowSheet";
 import Card from "../components/Card";
 import PluginControlButton from "../components/PluginControlButton";
-import { configText } from "src/i18n";
+import i18n, { configText } from "src/i18n";
 
 const SHEET_MIN_HEIGHT = 54;
 
@@ -34,7 +34,7 @@ class BaseWindowPlugin extends React.PureComponent {
     this.title = configText(
       `${i18nKey}.title`,
       props.options.title,
-      props.custom.title || "Unnamed plugin"
+      props.custom.title || i18n.t("common.unnamedPlugin")
     );
 
     // There will be defaults in props.custom, so that each plugin has own default title/description

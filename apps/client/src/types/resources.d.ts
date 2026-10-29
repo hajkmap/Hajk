@@ -23,6 +23,7 @@ export default interface Resources {
     app: {
       drawerContent: "Panelens innehåll";
       lockDrawer: "Lås fast verktygspanelen";
+      logoAltText: "Logotyp";
       mapTools: "Kartverktyg";
       unlockDrawer: "Lås upp verktygspanelen";
     };
@@ -418,7 +419,6 @@ export default interface Resources {
       decimals_one: "{{count}} decimal";
       decimals_other: "{{count}} decimaler";
       delete: "Ta bort";
-      demoLanguageSwitch: "common.demoLanguageSwitch";
       descriptionLabel: "Beskrivning";
       download: "Ladda ner";
       edit: "Redigera";
@@ -434,6 +434,7 @@ export default interface Resources {
       loading: "Laddar...";
       next: "Nästa";
       no: "Nej";
+      noDescription: "Ingen beskrivning";
       noResults: "Inga resultat";
       ok: "OK";
       previous: "Föregående";
@@ -443,6 +444,7 @@ export default interface Resources {
       settings: "Inställningar";
       titleLabel: "Titel";
       undo: "Ångra";
+      unnamedPlugin: "Namnlöst verktyg";
       value: "Värde";
       xOfY: "{{current}} av {{total}}";
       yes: "Ja";
@@ -459,6 +461,7 @@ export default interface Resources {
     };
     controls: {
       activeMap: "Aktiv karta";
+      changeLanguage: "Byt språk";
       clearMap: "Rensa kartan";
       currentMap: "Nuvarande karta: {{title}}";
       currentScale: "Nuvarande skala";
@@ -537,6 +540,7 @@ export default interface Resources {
       skipToMainMenu: "Till huvudmeny för webbplatsen";
       tableOfContents: "Innehållsförteckning";
       widgetDescription: "En kort beskrivning som visas i widgeten";
+      windowTitle: "Dokument";
     };
     dummy: {
       activateDraw: "Aktivera ritverktyg";
@@ -768,6 +772,17 @@ export default interface Resources {
     };
     infoDialog: {
       description: "Visa en informativ dialogruta";
+      dialogs: {
+        announcements: {
+          buttonText: "Ok, uppfattat!";
+          headerText: "Nyheter i Hajk";
+          title: "Visa nyheter";
+        };
+        help: {
+          buttonText: "Stäng";
+          title: "Visa hjälp";
+        };
+      };
       title: "Informationsdialog";
     };
     informative: {
@@ -1006,6 +1021,7 @@ export default interface Resources {
       description: "Välj vad du vill se i kartan";
       download: "download";
       dragToReorder: "Dra för att ändra ritordning";
+      drawOrderViewInfoText: "Här kan du ändra ritordning på tända lager i kartan. Dra lagret upp eller ner i listan och släpp på önskad plats.";
       editFavorites: "Redigera favoriter";
       export: "Exportera";
       favoriteAdded: "{{title}} har lagts till i favoriter.";
@@ -1054,6 +1070,7 @@ export default interface Resources {
       openData: "Öppna data";
       quickAccess: "Snabbåtkomst";
       quickAccessCookiesRequired: "Du har inte tillåtit funktionella kakor. För att använda snabbåtkomst så måste du tillåta funktionella kakor.";
+      quickAccessPresetsInfoText: "Här kan du ladda färdiga teman till snabbåtkomst. Teman innehåller tända och släckta lager, samt bakgrund.";
       removeAllContent: "Ta bort allt innehåll";
       removeFromQuickAccess: "Ta bort från snabbåtkomst";
       removeLayerFromMap: "Ta bort lagret från kartan";
@@ -1076,6 +1093,7 @@ export default interface Resources {
       themes: "Teman";
       title: "Visa";
       toggleLayerTemporarily: "Visa/dölj lagret tillfälligt";
+      userQuickAccessFavoritesInfoText: "Här kan du hantera och redigera dina sparade favoriter.";
       vf: {
         activate: "Aktivera";
         attribute: "Attribut";
@@ -1157,6 +1175,7 @@ export default interface Resources {
         text: "Det här kan ta en stund, speciellt om du har valt ett stort format (A2-A3) och hög upplösning (>72 dpi). Men när allt är klart kommer {{type}}-filen att laddas ner till din dator.<br/><br/>Om du inte vill vänta längre kan du avbryta utskriften genom att trycka på knappen nedan.";
         title: "Din {{type}} skapas";
       };
+      disclaimer: "Tänk på att gränserna i kartan inte alltid stämmer överens med verkligheten och de är inte juridiskt gällande.";
       done: "Din utskrift är klar!";
       fileName: "Kartexport";
       format: "Format";

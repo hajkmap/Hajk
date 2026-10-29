@@ -26,6 +26,7 @@
     "description": "Choose what to show in the map",
     "download": "Download",
     "dragToReorder": "Drag to change the draw order",
+    "drawOrderViewInfoText": "Here you can change the draw order of visible layers in the map. Drag a layer up or down in the list and drop it where you want it.",
     "editFavorites": "Edit favorites",
     "export": "Export",
     "favoriteAdded": "{{title}} has been added to favorites.",
@@ -74,6 +75,7 @@
     "openData": "Open data",
     "quickAccess": "Quick access",
     "quickAccessCookiesRequired": "You haven't allowed functional cookies. To use quick access, you need to allow functional cookies.",
+    "quickAccessPresetsInfoText": "Here you can load ready-made themes into quick access. Themes contain visible and hidden layers, as well as a background.",
     "removeAllContent": "Remove all content",
     "removedFromQuickAccess": "{{title}} has been removed from quick access.",
     "removeFromQuickAccess": "Remove from quick access",
@@ -96,6 +98,7 @@
     "themes": "Themes",
     "title": "Layers",
     "toggleLayerTemporarily": "Show/hide the layer temporarily",
+    "userQuickAccessFavoritesInfoText": "Here you can manage and edit your saved favorites.",
     "vf": {
       "activate": "Activate",
       "attribute": "Attribute",

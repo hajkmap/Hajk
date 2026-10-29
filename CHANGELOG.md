@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Client: i18n - LayerSwitcher info texts, the Print disclaimer, the logo alt text and the DocumentHandler window title have translated defaults (via `configText()`), and the remaining hard-coded fallback texts (e.g. "Unnamed plugin") are translated.
+- Client: i18n - InfoDialog texts can be translated per dialog, keyed by the dialog's `name` (`infoDialog.dialogs.<name>.*`).
+- Client: i18n - Language switcher button in the map controls, right above the cookie button. Hidden when only one language is available.
 - Client: i18n - Anchor, Buffer, Export, Feedback, InfoDialog, Location and StreetView are translated, and the Template and Dummy reference plugins show how new plugins use `t()` and their own `i18n/<lng>.json`.
 - Client: i18n - Collector, CommandPalette, Edit, Informative, LayerComparer, Routing and TimeSlider are translated, and Fir and Kir get translatable window titles. CommandPalette shows the same tool titles as the tools' own windows, and TimeSlider formats dates in the UI language.
 - Client: i18n - FloodSimulator, FmeServer and GeosuiteExport are translated. Their admin-configurable texts (e.g. FmeServer's group name, GeosuiteExport's step descriptions) follow `configText()`: shown as-is in Swedish, replaced by the translated default in other languages.

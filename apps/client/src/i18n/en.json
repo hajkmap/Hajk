@@ -6,6 +6,7 @@
   "app": {
     "drawerContent": "Panel content",
     "lockDrawer": "Lock the tool panel",
+    "logoAltText": "Logo",
     "mapTools": "Map tools",
     "unlockDrawer": "Unlock the tool panel"
   },
@@ -36,7 +37,6 @@
     "decimals_one": "{{count}} decimal",
     "decimals_other": "{{count}} decimals",
     "delete": "Delete",
-    "demoLanguageSwitch": "Demo language switch",
     "descriptionLabel": "Description",
     "download": "Download",
     "edit": "Edit",
@@ -52,6 +52,7 @@
     "loading": "Loading...",
     "next": "Next",
     "no": "No",
+    "noDescription": "No description",
     "noResults": "No results",
     "ok": "OK",
     "previous": "Previous",
@@ -61,6 +62,7 @@
     "settings": "Settings",
     "titleLabel": "Title",
     "undo": "Undo",
+    "unnamedPlugin": "Unnamed tool",
     "value": "Value",
     "xOfY": "{{current}} of {{total}}",
     "yes": "Yes"
@@ -77,6 +79,7 @@
   },
   "controls": {
     "activeMap": "Active map",
+    "changeLanguage": "Change language",
     "clearMap": "Clear the map",
     "currentMap": "Current map: {{title}}",
     "currentScale": "Current scale",

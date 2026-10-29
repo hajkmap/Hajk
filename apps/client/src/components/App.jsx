@@ -21,7 +21,6 @@ import CookieNotice from "./CookieNotice";
 import Introduction from "./Introduction/Introduction";
 import Announcement from "./Announcement/Announcement";
 import Alert from "./Alert";
-import DemoLanguageSwitcher from "./DemoLanguageSwitcher";
 import PluginWindows from "./PluginWindows";
 import SimpleDialog from "./SimpleDialog";
 import MapClickViewer from "./MapClickViewer/MapClickViewer";
@@ -30,6 +29,7 @@ import SnackbarProvider from "./SnackbarProvider";
 import Search from "./Search/Search";
 
 import CookieNoticeButton from "../controls/CookieNoticeButton";
+import LanguageSwitcher from "../controls/LanguageSwitcher";
 import Zoom from "../controls/Zoom";
 import User from "../controls/User";
 import Rotate from "../controls/Rotate";
@@ -63,7 +63,7 @@ import MapIcon from "@mui/icons-material/Map";
 import MenuIcon from "@mui/icons-material/Menu";
 import ThemeToggler from "../controls/ThemeToggler";
 import HajkToolTip from "components/HajkToolTip";
-import i18n, { setLanguage, configText } from "src/i18n";
+import i18n, { setLanguage, setAppStateInHash, configText } from "src/i18n";
 
 // A global that holds our windows, for use see components/Window.js
 document.windows = [];
@@ -572,6 +572,9 @@ class App extends React.PureComponent {
       dirtyLayers: {},
     };
 
+    // Lets setLanguage() write lang to the hash rather than the query.
+    setAppStateInHash(this.props.config.mapConfig.map.enableAppStateInHash);
+
     // Defined after the spread above, so the getter isn't flattened into a value.
     Object.defineProperties(window.hajkPublicApi, {
       language: { get: () => i18n.language, enumerable: true },
@@ -1033,7 +1036,10 @@ class App extends React.PureComponent {
       config.mapConfig.map.logo || // If neither was set, try to see if we have the legacy admin parameter.
       "logo.png"; // If we didn't have this either, fallback to hard-coded value.
 
-    const logoAltText = config.mapConfig.map.logoAltText || "Logotype";
+    const logoAltText = configText(
+      "app.logoAltText",
+      config.mapConfig.map.logoAltText
+    );
 
     return (
       <>
@@ -1277,7 +1283,6 @@ class App extends React.PureComponent {
             title={i18n.t("alert.title")}
           />
           <SrShortcuts globalObserver={this.globalObserver}></SrShortcuts>
-          <DemoLanguageSwitcher />
           {this.renderDrawer()}
           <AppBox
             id="appBox"
@@ -1377,6 +1382,7 @@ class App extends React.PureComponent {
                     mapConfig={this.appModel.config.mapConfig.map}
                   />
                 )}
+                {clean === false && <LanguageSwitcher />}
                 {clean === false && (
                   <CookieNoticeButton appModel={this.appModel} />
                 )}

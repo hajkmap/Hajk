@@ -141,7 +141,7 @@ Never hard-code user-facing text in client code.
   `"hits_one": "{{count}} träff", "hits_other": "{{count}} träffar"` → `t("search.hits", { count: 3 })`.
 - **Workflow** (in `apps/client`): add keys in code, run `npm run i18n:extract` (syncs the core and every
   plugin's `sv.json`/`en.json`, regenerates key types), fill in the Swedish and English values. `npm run i18n:lint` reports hard-coded
-  JSX strings, `npm run i18n:sv-check` lists other code with å/ä/ö, `npm run i18n:status` shows coverage.
+  JSX strings, `npm run i18n:status` shows coverage.
   Keys that only exist at runtime (e.g. `<plugin>.title`) must match `preservePatterns` in
   `i18next.config.ts`, or extract will remove them.
 - **New languages**: create `src/i18n/<lng>.json` with `{}` and run `npm run i18n:extract`, which fills it

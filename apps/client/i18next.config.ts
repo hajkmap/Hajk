@@ -89,8 +89,13 @@ export default defineConfig({
     // Keys built at runtime, so extract can't find them in source:
     // - BaseWindowPlugin reads "<pluginType>.title" and "<pluginType>.description".
     // - Introduction steps read "introduction.steps.<id>.*" (see steps/step.js).
+    // - InfoDialog reads "infoDialog.dialogs.<name>.*", <name> from the map config.
     preservePatterns: plugin
-      ? [`${toArea(plugin)}.title`, `${toArea(plugin)}.description`]
+      ? [
+          `${toArea(plugin)}.title`,
+          `${toArea(plugin)}.description`,
+          "infoDialog.dialogs.*",
+        ]
       : ["*.title", "*.description", "introduction.steps.*"],
   },
   plugins: [scopeKeys],

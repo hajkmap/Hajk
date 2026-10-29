@@ -10,6 +10,7 @@
       "text": "This may take a while, especially if you've chosen a large format (A2-A3) and a high resolution (>72 dpi). When it's done, the {{type}} file will be downloaded to your computer.<br/><br/>If you don't want to wait any longer, you can cancel the print by pressing the button below.",
       "title": "Your {{type}} is being created"
     },
+    "disclaimer": "Please note that the boundaries in the map do not always match reality and are not legally binding.",
     "done": "Your print is ready!",
     "fileName": "Map export",
     "format": "Format",

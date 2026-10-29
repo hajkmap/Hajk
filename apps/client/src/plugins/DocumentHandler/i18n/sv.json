@@ -29,6 +29,7 @@
     "scrollToTop": "Scrolla till toppen av dokumentet",
     "skipToMainMenu": "Till huvudmeny för webbplatsen",
     "tableOfContents": "Innehållsförteckning",
-    "widgetDescription": "En kort beskrivning som visas i widgeten"
+    "widgetDescription": "En kort beskrivning som visas i widgeten",
+    "windowTitle": "Dokument"
   }
 }

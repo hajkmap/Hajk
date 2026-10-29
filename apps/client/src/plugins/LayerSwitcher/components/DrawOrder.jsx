@@ -32,7 +32,7 @@ import GroupLayer from "./GroupLayer";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import HajkToolTip from "components/HajkToolTip";
 import SortableList from "./SortableList";
-import i18n from "src/i18n";
+import i18n, { configText } from "src/i18n";
 
 const reorder = (list, startIndex, endIndex) => {
   const result = Array.from(list);
@@ -369,7 +369,10 @@ function DrawOrder({ display, app, map, _localObserver, options }) {
           <Box sx={{ p: 1, pt: 0 }}>
             <hr></hr>
             <Typography variant="subtitle2">
-              {options.drawOrderViewInfoText}
+              {configText(
+                "layerSwitcher.drawOrderViewInfoText",
+                options.drawOrderViewInfoText
+              )}
             </Typography>
           </Box>
         </Collapse>

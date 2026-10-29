@@ -1,6 +1,17 @@
 {
   "infoDialog": {
     "description": "Show an informative dialog",
+    "dialogs": {
+      "announcements": {
+        "buttonText": "OK, got it!",
+        "headerText": "News in Hajk",
+        "title": "Show news"
+      },
+      "help": {
+        "buttonText": "Close",
+        "title": "Show help"
+      }
+    },
     "title": "Information dialog"
   }
 }

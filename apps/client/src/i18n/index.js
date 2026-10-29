@@ -8,7 +8,9 @@
  *   under its own area, e.g. `print.*`. These are merged in, but never
  *   overwrite core keys.
  * - The language is resolved once at startup (see resolveLanguage()). Switching
- *   language (setLanguage()) reloads the page: live switching is not supported.
+ *   language (setLanguage()) reloads the page: live switching is not supported,
+ *   since much text is computed once (constructors, models, OpenLayers styles,
+ *   configText()). See README.md, "Why not live switching?".
  *
  * Usage:
  *   React function components: `const { t } = useTranslation(); t("common.close")`
@@ -29,6 +31,9 @@ const URL_PARAM = "lang";
 // defaultLanguage. Updated by resolveLanguage() once appConfig is loaded.
 let defaultLanguage = SOURCE_LANGUAGE;
 let availableLanguages = DEFAULT_AVAILABLE_LANGUAGES;
+// Mirrors mapConfig.map.enableAppStateInHash, set by App via setAppStateInHash().
+// When true, setLanguage() always writes lang to the hash, never the query.
+let appStateInHash = false;
 
 // Reduce any BCP 47 tag ("sv-SE", "en_GB") to its bare language subtag ("sv", "en").
 const toBaseLanguage = (code) =>
@@ -152,6 +157,10 @@ export async function resolveLanguage(
 
 export const getDefaultLanguage = () => defaultLanguage;
 
+export const setAppStateInHash = (enabled) => {
+  appStateInHash = enabled === true;
+};
+
 // Languages that can be passed to setLanguage(): available in appConfig and bundled.
 export const getAvailableLanguages = () =>
   availableLanguages.filter((lng) => bundledLanguages.includes(lng));
@@ -178,6 +187,17 @@ export function setLanguage(lng) {
   const hashParams = new URLSearchParams(url.hash.replaceAll("#", ""));
   const inHash = hashParams.has(URL_PARAM);
   const inQuery = url.searchParams.has(URL_PARAM);
+
+  if (appStateInHash) {
+    // App state lives in the hash: put lang there and drop any query copy,
+    // which would otherwise compete with the hash after the reload.
+    hashParams.set(URL_PARAM, base);
+    url.hash = hashParams.toString();
+    url.searchParams.delete(URL_PARAM);
+    window.history.replaceState(null, "", url.toString());
+    window.location.reload();
+    return;
+  }
 
   // Update lang wherever it already is. If it's nowhere, put it in the hash
   // if the hash is in use, otherwise in the query.

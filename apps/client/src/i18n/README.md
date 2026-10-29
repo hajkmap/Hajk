@@ -99,6 +99,10 @@ Admin texts that have no client default, such as layer names, layer switcher gro
 templates, document content and search source names, are shown as entered in every language.
 They can't be translated in the client.
 
+The exception is InfoDialog: each dialog's texts can be translated under
+`infoDialog.dialogs.<name>.*`, keyed by the dialog's `name`, with the same rules as
+`configText()`. See the plugin's README.
+
 ## Which language is shown
 
 The language is picked once at startup, from the first of these that is available:
@@ -111,8 +115,40 @@ The language is picked once at startup, from the first of these that is availabl
 A language is available if it has a JSON file and is listed in `availableLanguages` in
 `appConfig.json` (default `["sv", "en"]`).
 
-To switch language, call `hajkPublicApi.setLanguage("en")`. It saves the choice, writes `lang` to
-the URL and reloads the page. Live switching isn't supported.
+Users switch language with the language button in the map controls, right above the cookie
+button. It shows the current language code (e.g. `SV`) and opens a list of the available languages.
+The button is hidden when only one language is available.
+
+From code, call `hajkPublicApi.setLanguage("en")`. The button uses the same function: it saves the
+choice, writes `lang` to the URL and reloads the page (live switching isn't supported, see below).
+
+Where `lang` ends up in the URL:
+
+- With `enableAppStateInHash`: always in the hash (`#lang=en`).
+- Otherwise: where it already is. If it isn't in the URL yet, in the hash if one is in use, else in
+  the query (`?lang=en`).
+
+### Why not live switching?
+
+Much of the text in Hajk is translated once and then stored, so a re-render alone doesn't update
+it:
+
+- Components store translated text in fields or state, often set in a constructor or on mount (tool
+  titles, option lists).
+- Models build their strings once.
+- OpenLayers styles, layer and feature labels, and other map objects get their text when created,
+  outside React.
+- Text from the map config (admin-entered, assumed Swedish) is usually picked once via `configText()`.
+
+Making all of this react to a language change would mean listening for `languageChanged`
+everywhere and rebuilding styles, models and plugin state, for a feature used rarely. A reload
+gives a consistent result with no such bookkeeping, and it means any code may safely compute text
+once. With `enableAppStateInHash`, the map state (position, layers…) is in the URL and survives the
+reload. Without it, the map starts over from its configured state.
+
+This isn't about class vs. function components. A class can re-render on a language change
+(`withTranslation()`), and a function component can hold on to old text just as well
+(`useState(t("…"))`, a `useMemo` without the language as a dependency).
 
 ## Adding a language
 
@@ -152,9 +188,9 @@ Create `src/plugins/<Plugin>/i18n/sv.json` with `{ "<area>": {} }`, e.g. `{ "myP
 
 Run in `apps/client`:
 
-| Script                  | What it does                                                    |
-| ----------------------- | --------------------------------------------------------------- |
-| `npm run i18n:extract`  | Syncs all language files with the keys used in code, and types. |
-| `npm run i18n:status`   | Shows translation coverage per language.                        |
-| `npm run i18n:lint`     | Reports hard-coded strings in JSX.                              |
-| `npm run i18n:sv-check` | Lists other code containing å/ä/ö (likely untranslated text).   |
+| Script                 | What it does                                                    |
+| ---------------------- | --------------------------------------------------------------- |
+| `npm run i18n:extract` | Syncs all language files with the keys used in code, and types. |
+| `npm run i18n:status`  | Shows translation coverage per language.                        |
+| `npm run i18n:lint`    | Reports hard-coded strings in JSX.                              |
+| `npm run i18n:types`   | Regenerates the key types only (also run by `i18n:extract`).    |

@@ -6,6 +6,7 @@
   "app": {
     "drawerContent": "Panelens innehåll",
     "lockDrawer": "Lås fast verktygspanelen",
+    "logoAltText": "Logotyp",
     "mapTools": "Kartverktyg",
     "unlockDrawer": "Lås upp verktygspanelen"
   },
@@ -36,7 +37,6 @@
     "decimals_one": "{{count}} decimal",
     "decimals_other": "{{count}} decimaler",
     "delete": "Ta bort",
-    "demoLanguageSwitch": "Demo: byt språk",
     "descriptionLabel": "Beskrivning",
     "download": "Ladda ner",
     "edit": "Redigera",
@@ -52,6 +52,7 @@
     "loading": "Laddar...",
     "next": "Nästa",
     "no": "Nej",
+    "noDescription": "Ingen beskrivning",
     "noResults": "Inga resultat",
     "ok": "OK",
     "previous": "Föregående",
@@ -61,6 +62,7 @@
     "settings": "Inställningar",
     "titleLabel": "Titel",
     "undo": "Ångra",
+    "unnamedPlugin": "Namnlöst verktyg",
     "value": "Värde",
     "xOfY": "{{current}} av {{total}}",
     "yes": "Ja"
@@ -77,6 +79,7 @@
   },
   "controls": {
     "activeMap": "Aktiv karta",
+    "changeLanguage": "Byt språk",
     "clearMap": "Rensa kartan",
     "currentMap": "Nuvarande karta: {{title}}",
     "currentScale": "Nuvarande skala",

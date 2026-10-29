@@ -29,6 +29,7 @@
     "scrollToTop": "Scroll to the top of the document",
     "skipToMainMenu": "To the website's main menu",
     "tableOfContents": "Table of contents",
-    "widgetDescription": "A short description shown in the widget"
+    "widgetDescription": "A short description shown in the widget",
+    "windowTitle": "Documents"
   }
 }

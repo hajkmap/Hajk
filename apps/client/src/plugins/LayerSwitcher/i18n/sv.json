@@ -26,6 +26,7 @@
     "description": "Välj vad du vill se i kartan",
     "download": "download",
     "dragToReorder": "Dra för att ändra ritordning",
+    "drawOrderViewInfoText": "Här kan du ändra ritordning på tända lager i kartan. Dra lagret upp eller ner i listan och släpp på önskad plats.",
     "editFavorites": "Redigera favoriter",
     "export": "Exportera",
     "favoriteAdded": "{{title}} har lagts till i favoriter.",
@@ -74,6 +75,7 @@
     "openData": "Öppna data",
     "quickAccess": "Snabbåtkomst",
     "quickAccessCookiesRequired": "Du har inte tillåtit funktionella kakor. För att använda snabbåtkomst så måste du tillåta funktionella kakor.",
+    "quickAccessPresetsInfoText": "Här kan du ladda färdiga teman till snabbåtkomst. Teman innehåller tända och släckta lager, samt bakgrund.",
     "removeAllContent": "Ta bort allt innehåll",
     "removedFromQuickAccess": "{{title}} har nu tagits bort från snabbåtkomst.",
     "removeFromQuickAccess": "Ta bort från snabbåtkomst",
@@ -96,6 +98,7 @@
     "themes": "Teman",
     "title": "Visa",
     "toggleLayerTemporarily": "Visa/dölj lagret tillfälligt",
+    "userQuickAccessFavoritesInfoText": "Här kan du hantera och redigera dina sparade favoriter.",
     "vf": {
       "activate": "Aktivera",
       "attribute": "Attribut",

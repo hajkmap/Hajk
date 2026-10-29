@@ -10,6 +10,7 @@
       "text": "Det här kan ta en stund, speciellt om du har valt ett stort format (A2-A3) och hög upplösning (>72 dpi). Men när allt är klart kommer {{type}}-filen att laddas ner till din dator.<br/><br/>Om du inte vill vänta längre kan du avbryta utskriften genom att trycka på knappen nedan.",
       "title": "Din {{type}} skapas"
     },
+    "disclaimer": "Tänk på att gränserna i kartan inte alltid stämmer överens med verkligheten och de är inte juridiskt gällande.",
     "done": "Din utskrift är klar!",
     "fileName": "Kartexport",
     "format": "Format",

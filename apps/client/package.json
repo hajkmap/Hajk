@@ -24,7 +24,6 @@
     "i18n:lint": "i18next-cli lint",
     "i18n:status": "i18next-cli status && node scripts/i18n-plugins.mjs status",
     "i18n:types": "node scripts/i18n-plugins.mjs merge-types && i18next-cli types && prettier --write --log-level warn src/types/resources.d.ts",
-    "i18n:sv-check": "node scripts/sv-check.mjs --summary",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

@@ -12,7 +12,7 @@ import DrawOrder from "./components/DrawOrder";
 import QuickAccessPresets from "./components/QuickAccessPresets";
 import LayerItemDetails from "./components/LayerItemDetails";
 import GroupDetails from "./components/GroupDetails";
-import i18n from "src/i18n";
+import i18n, { configText } from "src/i18n";
 
 const StyledAppBar = styled(AppBar)(() => ({
   zIndex: "1",
@@ -368,8 +368,10 @@ class LayersSwitcherView extends React.PureComponent {
             enableQuickAccessPresets: this.options.enableQuickAccessPresets,
             enableUserQuickAccessFavorites:
               this.options.enableUserQuickAccessFavorites,
-            userQuickAccessFavoritesInfoText:
-              this.options.userQuickAccessFavoritesInfoText,
+            userQuickAccessFavoritesInfoText: configText(
+              "layerSwitcher.userQuickAccessFavoritesInfoText",
+              this.options.userQuickAccessFavoritesInfoText
+            ),
             layerFilterMinLength: this.options.layerFilterMinLength,
           }}
           handleQuickAccessPresetsToggle={(e) =>
@@ -388,10 +390,11 @@ class LayersSwitcherView extends React.PureComponent {
             backButtonCallback={this.handleQuickAccessPresetsToggle}
             map={this.props.map}
             globalObserver={this.globalObserver}
-            quickAccessPresetsInfoText={
+            quickAccessPresetsInfoText={configText(
+              "layerSwitcher.quickAccessPresetsInfoText",
               this.options.quickAccessPresetsInfoText ??
-              this.options.quickAccessTopicsInfoText
-            }
+                this.options.quickAccessTopicsInfoText
+            )}
           ></QuickAccessPresets>
         )}
         <LayerItemDetails

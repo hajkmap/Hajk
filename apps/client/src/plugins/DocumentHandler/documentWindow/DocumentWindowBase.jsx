@@ -8,7 +8,7 @@ import Progress from "./Progress";
 import { CustomLink } from "../utils/ContentComponentFactory";
 import withSnackbar from "components/WithSnackbar";
 import PrintIcon from "@mui/icons-material/Print";
-import i18n from "src/i18n";
+import i18n, { configText } from "src/i18n";
 
 class DocumentWindowBase extends React.PureComponent {
   snackbarKey = null;
@@ -180,7 +180,9 @@ class DocumentWindowBase extends React.PureComponent {
         type="DocumentViewer"
         custom={{
           icon: <MenuBookIcon />,
-          title: document?.documentTitle || options.windowTitle || "Documents",
+          title:
+            document?.documentTitle ||
+            configText("documentHandler.windowTitle", options.windowTitle),
           color: document?.documentColor || "#ffffff",
           customPanelHeaderButtons: customHeaderButtons,
           description: i18n.t("documentHandler.widgetDescription"),
