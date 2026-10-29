@@ -250,11 +250,15 @@ export default function LayerSettings() {
   }, [tabFromUrl, settingsVisibility.tabs, setSearchParams]);
   const [settingsSearchQuery, setSettingsSearchQuery] = useState("");
   const showSettingsSearchUi = activeTab === "search";
-  const showGeneralTab = activeTab === "general" || showSettingsSearchUi;
-  const showDisplayTab = activeTab === "display" || showSettingsSearchUi;
-  const showMetadataTab = activeTab === "metadata" || showSettingsSearchUi;
-  const showInfoclickTab = activeTab === "infoclick" || showSettingsSearchUi;
-  const showEditingTab = activeTab === "editing" || showSettingsSearchUi;
+  // The search covers the tabs the layer has, and no others.
+  const showsTab = (tab: LayerSettingsTab) =>
+    activeTab === tab ||
+    (showSettingsSearchUi && settingsVisibility.tabs.includes(tab));
+  const showGeneralTab = showsTab("general");
+  const showDisplayTab = showsTab("display");
+  const showMetadataTab = showsTab("metadata");
+  const showInfoclickTab = showsTab("infoclick");
+  const showEditingTab = showsTab("editing");
   const settingsSearchTerm = showSettingsSearchUi ? settingsSearchQuery : "";
   const [searchTerm, setSearchTerm] = useState("");
   const [selectGridId, setSelectGridId] = useState<GridRowSelectionModel>();
@@ -2752,6 +2756,8 @@ export default function LayerSettings() {
                 selectGridId={selectGridId}
                 selectedRowObjects={selectedRowObjects}
                 onLayerClick={handleLayerClick}
+                // An editing layer edits one feature type.
+                singleSelection={layerCategory === "editing"}
               />
             </Box>
           )}

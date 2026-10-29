@@ -73,6 +73,10 @@ export function mergeDescribeWithSavedFields(
     .filter((p) => !p.type.includes("gml:"))
     .map((p, index) => {
       const saved = savedByName.get(p.name);
+      const allowed = textTypesFor(p.localType);
+      const normalized = normalizeTextType(saved?.textType);
+      const textType =
+        normalized && allowed.includes(normalized) ? normalized : allowed[0];
       return {
         index: saved?.index ?? index,
         name: p.name,
@@ -81,10 +85,8 @@ export function mergeDescribeWithSavedFields(
         alias: saved?.alias ?? p.name,
         description: saved?.description ?? "",
         dataType: saved?.dataType ?? p.localType,
-        textType: normalizeTextType(
-          saved?.textType ?? defaultTextType(p.localType),
-        ),
-        values: saved?.values ?? null,
+        textType,
+        values: isListTextType(textType) ? (saved?.values ?? null) : null,
         hidden: saved?.hidden ?? false,
         defaultValue: saved?.defaultValue ?? "",
         editable: saved ? editableNames.has(p.name) : false,
@@ -107,24 +109,77 @@ export function normalizeTextType(
   return TEXT_TYPE_ALIASES[textType] ?? textType;
 }
 
-export function defaultTextType(localType: string): string | null {
-  switch (localType) {
-    case "date":
-      return "datum";
-    case "date-time":
-      return "datumtid";
-    case "int":
-    case "integer":
-      return "heltal";
-    case "number":
-    case "decimal":
-      return "tal";
-    case "boolean":
-      return "boolean";
-    default:
-      return "fritext";
-  }
+/** A data type's family, which decides how a field of it can be edited. */
+export type EditingFieldKind =
+  "text" | "integer" | "decimal" | "boolean" | "date" | "dateTime";
+
+// GeoServer's JSON names and the XSD names other services give.
+const INTEGER_TYPES = new Set([
+  "int",
+  "integer",
+  "long",
+  "short",
+  "byte",
+  "unsignedint",
+  "unsignedlong",
+  "unsignedshort",
+  "unsignedbyte",
+  "positiveinteger",
+  "negativeinteger",
+  "nonnegativeinteger",
+  "nonpositiveinteger",
+]);
+const DECIMAL_TYPES = new Set(["number", "decimal", "double", "float"]);
+
+export function editingFieldKind(localType: string): EditingFieldKind {
+  const type = localType.toLowerCase();
+  if (INTEGER_TYPES.has(type)) return "integer";
+  if (DECIMAL_TYPES.has(type)) return "decimal";
+  if (type === "boolean") return "boolean";
+  if (type === "date") return "date";
+  if (type === "date-time" || type === "datetime") return "dateTime";
+  return "text";
 }
+
+/** How a field of each kind can be edited in the client; the first is its default. */
+const TEXT_TYPES: Record<EditingFieldKind, string[]> = {
+  text: ["fritext", "datum", "lista", "flerval", "url"],
+  integer: ["heltal", "positive", "negative", "boolean"],
+  decimal: ["tal"],
+  boolean: ["boolean"],
+  date: ["datum"],
+  dateTime: ["datumtid", "datum"],
+};
+
+export const textTypesFor = (localType: string) =>
+  TEXT_TYPES[editingFieldKind(localType)];
+
+const TEXT_TYPE_LABELS: Record<string, string> = {
+  fritext: "layers.editing.textType.text",
+  datum: "layers.editing.textType.date",
+  lista: "layers.editing.textType.list",
+  flerval: "layers.editing.textType.multiSelect",
+  url: "layers.editing.textType.url",
+  heltal: "layers.editing.textType.integer",
+  positive: "layers.editing.textType.positiveInteger",
+  negative: "layers.editing.textType.negativeInteger",
+  tal: "layers.editing.textType.number",
+  boolean: "layers.editing.textType.boolean",
+  datumtid: "layers.editing.textType.dateTime",
+};
+
+/** Ja/nej on an integer field is stored as 1 or 0, and named so. */
+export const textTypeLabelKey = (textType: string, localType: string) =>
+  textType === "boolean" && editingFieldKind(localType) === "integer"
+    ? "layers.editing.textType.trueFalse"
+    : (TEXT_TYPE_LABELS[textType] ?? TEXT_TYPE_LABELS.fritext);
+
+/** Whether the field takes its values from a list. */
+export const isListTextType = (textType: string | null | undefined) =>
+  textType === "lista" || textType === "flerval";
+
+/** Between the values of a multi-select, as the client stores them. */
+export const LIST_SEPARATOR = ";";
 
 export function splitEditingFields(rows: EditingFieldRow[]): {
   editableFields: EditableFieldConfig[];

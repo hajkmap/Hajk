@@ -60,7 +60,8 @@ enum HajkStatusCodes {
   SEARCH_SERVICE_NOT_AVAILABLE = "CF002",
 
   /**
-   * Selected layer names must exist on the remote service's GetCapabilities response.
+   * Selected layer names must exist on the remote service's GetCapabilities
+   * response, and an editing layer takes one.
    */
   INVALID_SELECTED_LAYERS = "CF003",
 

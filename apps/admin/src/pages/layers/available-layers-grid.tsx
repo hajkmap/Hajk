@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import {
   DataGrid,
+  GRID_CHECKBOX_SELECTION_COL_DEF,
   GridColDef,
   GridRenderCellParams,
   GridRowSelectionModel,
@@ -19,6 +20,7 @@ import { GRID_SWEDISH_LOCALE_TEXT } from "../../i18n/translations/datagrid/sv";
 import { useTranslation } from "react-i18next";
 import SearchIcon from "@mui/icons-material/Search";
 import DataGridBadgeButton from "./components/data-grid-badge";
+import GridRowRadio from "./components/grid-row-radio";
 import {
   emptyIncludeSelectionModel,
   includeSelectionModel,
@@ -39,6 +41,7 @@ function AvailableLayersGrid({
   selectGridId,
   selectedRowObjects,
   onLayerClick,
+  singleSelection = false,
 }: {
   isLoading: boolean;
   isError?: boolean;
@@ -53,6 +56,8 @@ function AvailableLayersGrid({
   selectGridId?: GridRowSelectionModel;
   selectedRowObjects?: string[];
   onLayerClick: (layerName: string) => void;
+  /** One layer at most: ticking one unticks the other. */
+  singleSelection?: boolean;
 }) {
   const themeMode = useAppStateStore((state) => state.themeMode);
   const language = useAppStateStore((state) => state.language);
@@ -107,12 +112,21 @@ function AvailableLayersGrid({
     { field: "infoClick", headerName: t("common.infoclick"), flex: 0.3 },
     { field: "publications", headerName: t("common.publications"), flex: 0.5 },
   ];
+  // With one layer to choose, its column has radio buttons and no "all".
+  const gridColumns = singleSelection
+    ? [
+        { ...GRID_CHECKBOX_SELECTION_COL_DEF, renderHeader: () => null },
+        ...columns,
+      ]
+    : columns;
 
   useEffect(() => {
     if (userHasInteractedRef.current) return;
     const expectedIds = filteredLayers
       .filter((layer) => selectedLayers.includes(layer?.layer as string))
-      .map((layer: GridValidRowModel) => layer.id as string);
+      .map((layer: GridValidRowModel) => layer.id as string)
+      // The grid takes one in single mode.
+      .slice(0, singleSelection ? 1 : undefined);
 
     const normalized = normalizeRowSelectionModel(selectGridId);
     const currentIdsArray =
@@ -126,7 +140,7 @@ function AvailableLayersGrid({
       setSelectGridId(emptyIncludeSelectionModel());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedLayers, filteredLayers]);
+  }, [selectedLayers, filteredLayers, singleSelection]);
 
   useEffect(() => {
     userHasInteractedRef.current = false;
@@ -210,7 +224,7 @@ function AvailableLayersGrid({
               backgroundColor: isDarkMode ? "#3b3b3b" : "#fbfbfb",
             }}
             rows={filteredLayers}
-            columns={columns}
+            columns={gridColumns}
             initialState={{
               pagination: {
                 paginationModel: {
@@ -242,6 +256,8 @@ function AvailableLayersGrid({
               }
             }}
             checkboxSelection
+            disableMultipleRowSelection={singleSelection}
+            slots={singleSelection ? { rowCheckbox: GridRowRadio } : undefined}
             disableRowSelectionOnClick
           />
         </>

@@ -187,6 +187,17 @@ class LayerService {
     logger.debug("Initiating Layer Service");
   }
 
+  /** An editing layer edits one layer of its service. */
+  private ensureOneEditedLayer(kind: LayerKind, selectedLayers: string[]) {
+    if (kind === "editing" && selectedLayers.length > 1) {
+      throw new HajkError(
+        HttpStatusCodes.BAD_REQUEST,
+        `An editing layer takes one layer of its service, not ${selectedLayers.length}: ${selectedLayers.join(", ")}`,
+        HajkStatusCodes.INVALID_SELECTED_LAYERS
+      );
+    }
+  }
+
   private async ensureSelectedLayersMatchCapabilities(
     service: { url: string; type: ServiceType },
     selectedLayers: string[]
@@ -395,6 +406,7 @@ class LayerService {
     }
 
     const selectedLayersList = coerceStringArray(picked.selectedLayers);
+    this.ensureOneEditedLayer(layerKind, selectedLayersList);
     await this.ensureSelectedLayersMatchCapabilities(
       service,
       selectedLayersList
@@ -487,6 +499,7 @@ class LayerService {
       pickLayerUpdateData(kind, data);
 
     if (data.selectedLayers !== undefined) {
+      this.ensureOneEditedLayer(kind, coerceStringArray(data.selectedLayers));
       let existingServiceId: string | null = null;
       if (kind === "display") {
         const existing = await prisma.displayLayer.findUnique({
