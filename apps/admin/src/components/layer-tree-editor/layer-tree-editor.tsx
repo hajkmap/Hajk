@@ -7,6 +7,7 @@ import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 
 import {
+  isSavedHere,
   LAYER_TREE_SAVE_KEY,
   useGroupTree,
   useLatestLayerTree,
@@ -192,7 +193,8 @@ export default function LayerTreeEditor({
   // save made here.
   const history = useDraftHistory({
     owner: `${mode}:${ownerId}`,
-    savedAt: baseline?.savedAt ?? null,
+    savedAt: baseline ? baseline.savedAt : undefined,
+    savedHere: (at) => isSavedHere(mode, ownerId, at),
     draft: activeDraft,
     onDraftChange,
     current: { nodes, settings, background, drawOrder: fullDrawOrder },

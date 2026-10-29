@@ -21,6 +21,17 @@ import {
 /** Shared by both saves, so an editor can tell when a save is running. */
 export const LAYER_TREE_SAVE_KEY = ["layerTree", "save"];
 
+// When this tab last saved each tree, so an editor can keep its undo steps
+// across its own saves and start afresh on anyone else's.
+const savedHere = new Map<string, string | null>();
+
+/** Whether this tab made the tree's save at that time. */
+export const isSavedHere = (
+  mode: "group" | "map",
+  ownerId: string,
+  savedAt: string | null,
+) => savedAt !== null && savedHere.get(`${mode}:${ownerId}`) === savedAt;
+
 export const useGroupTree = (groupId: string) =>
   useQuery({
     queryKey: ["layerTree", "group", groupId],
@@ -40,6 +51,8 @@ export const useUpdateGroupTree = () => {
       payload: GroupTreeWrite;
     }) => updateGroupTree(groupId, payload),
     onSuccess: (tree, { groupId }) => {
+      // Before the tree shows, so the editor knows the save is its own.
+      savedHere.set(`group:${groupId}`, tree.savedAt);
       queryClient.setQueryData(["layerTree", "group", groupId], tree);
       void queryClient.invalidateQueries({ queryKey: ["layerTree"] });
       void queryClient.invalidateQueries({ queryKey: ["groups"], exact: true });
@@ -66,6 +79,8 @@ export const useUpdateMapLayerTree = () => {
       payload: MapLayerTreeWrite;
     }) => updateMapLayerTree(mapName, payload),
     onSuccess: (tree, { mapName }) => {
+      // Before the tree shows, so the editor knows the save is its own.
+      savedHere.set(`map:${mapName}`, tree.savedAt);
       queryClient.setQueryData(["layerTree", "map", mapName], tree);
       void queryClient.invalidateQueries({ queryKey: ["layerTree"] });
       void queryClient.invalidateQueries({ queryKey: ["groups"], exact: true });

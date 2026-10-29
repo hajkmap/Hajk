@@ -27,8 +27,8 @@ export interface LayerTreeEditorState {
 interface History {
   /** The tree the history belongs to; another one starts afresh. */
   owner: string;
-  /** When the saved tree it was made on was saved. */
-  savedAt: string | null;
+  /** When the saved tree it was made on was saved; undefined until loaded. */
+  savedAt: string | null | undefined;
   past: LayerTreeEditorState[];
   future: LayerTreeEditorState[];
   /** The draft last set from here, to tell when the page changed it. */
@@ -38,8 +38,10 @@ interface History {
 interface UseDraftHistoryOptions {
   /** Which tree, e.g. "map:map_1". */
   owner: string;
-  /** When the saved tree shown was saved. */
-  savedAt: string | null;
+  /** When the saved tree shown was saved; undefined while it loads. */
+  savedAt: string | null | undefined;
+  /** Whether this tab made the tree's save at that time. */
+  savedHere: (savedAt: string | null) => boolean;
   draft: LayerTreeDraft | null;
   onDraftChange: (draft: LayerTreeDraft | null) => void;
   /** What the editor shows now. */
@@ -69,7 +71,7 @@ const createsGroups = (draft: LayerTreeDraft | null) =>
 
 const fresh = (
   owner: string,
-  savedAt: string | null,
+  savedAt: string | null | undefined,
   last: LayerTreeDraft | null,
 ): History => ({
   owner,
@@ -91,6 +93,7 @@ const fresh = (
 export function useDraftHistory({
   owner,
   savedAt,
+  savedHere,
   draft,
   onDraftChange,
   current,
@@ -103,23 +106,30 @@ export function useDraftHistory({
     fresh(owner, savedAt, draft),
   );
 
-  // Kept in step with the page while rendering.
+  // Kept in step with the page and the saved tree while rendering.
   let next = history;
   if (next.owner !== owner) next = fresh(owner, savedAt, draft);
-  if (next.savedAt !== savedAt) {
-    // The saved tree changed. Saved from the draft here, the steps stay;
-    // loaded without a draft, from a save made elsewhere, a step back would
-    // undo that save.
-    next =
-      next.last !== null ? { ...next, savedAt } : fresh(owner, savedAt, draft);
-  }
-  if (draft !== next.last) {
-    // The page dropped the draft, as when it has saved it: the steps stay,
-    // unless the save created groups, which a step back would create again.
-    next =
-      draft === null && next.last !== null && !createsGroups(next.last)
-        ? { ...next, last: null }
-        : fresh(owner, savedAt, draft);
+  // While the tree loads again there is nothing to compare; wait for it.
+  if (savedAt !== undefined) {
+    if (next.savedAt !== savedAt) {
+      // A save made here keeps the steps, unless it created groups, which a
+      // step back would create again; a step back past a save made
+      // elsewhere would undo it.
+      const keep =
+        next.savedAt !== undefined &&
+        savedHere(savedAt) &&
+        !createsGroups(next.last);
+      next = keep
+        ? { ...next, savedAt }
+        : { ...next, savedAt, past: [], future: [] };
+    }
+    if (draft !== next.last) {
+      // The page dropped the draft this tab just saved: the steps stay.
+      next =
+        draft === null && next.last !== null && savedHere(savedAt)
+          ? { ...next, last: null }
+          : fresh(owner, savedAt, draft);
+    }
   }
   if (next !== history) setHistory(next);
 
