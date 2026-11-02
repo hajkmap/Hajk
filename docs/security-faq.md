@@ -54,7 +54,7 @@ If a test or review finds a problem in Hajk itself, please report it as describe
 - **Protected branches.** Changes to the main branches (`develop` and `master`) go through pull requests that need approval from a reviewer, and commits must be signed. The history of these branches cannot be rewritten. Maintainers can push small changes, such as dependency updates, directly.
 - **Automated code analysis.** GitHub's CodeQL scans the code for common security weaknesses, and Dependabot alerts the maintainers when a dependency has a known vulnerability.
 - **Contribution rules.** All contributions follow [CONTRIBUTING.md](../CONTRIBUTING.md). Contributions written with AI tools follow a stricter [AI policy](../AI_POLICY.md).
-- **Traceable releases.** Every release is tagged in Git and published on the [releases page](https://github.com/hajkmap/Hajk/releases). All changes, including security fixes, are listed in the [CHANGELOG](../CHANGELOG.md).
+- **Traceable releases.** Every release is tagged in Git and published on the [releases page](https://github.com/hajkmap/Hajk/releases). All changes, including security fixes, are listed in the [CHANGELOG](../CHANGELOG.md). Which version to run is described in [Releases](releases.md), and how releases are made in the [release process](release-process.md).
 
 ### How are security vulnerabilities handled?
 

@@ -61,7 +61,7 @@ For a list of community extensions, please refer to [this page](https://github.c
 
 ## Quick start (for admins)
 
-Please refer to Hajk's official [installation guide](https://github.com/hajkmap/Hajk/wiki/Installation-guide-%28for-pre-packaged-releases%29).
+Please refer to Hajk's official [installation guide](https://github.com/hajkmap/Hajk/wiki/Installation-guide-%28for-pre-packaged-releases%29). For which version to run, the downloads and the Docker images, see [Releases](docs/releases.md).
 
 ## Quick start (for developers)
 
