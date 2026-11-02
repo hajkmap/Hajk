@@ -48,6 +48,10 @@ In short, developing a new feature, would look something like:
 1. When you're done coding, go to GitHub and create a new pull request. Make sure that you want to merge your branch into `develop`.
 1. Hajk maintainers will get notified when you create the PR. They will review your PR and either accept and merge your branch (as well as delete it from the remote, as it's no longer needed) or (if the code isn't considered ready) request changes. After a successful merge you will still have a copy of your feature branch locally, but it can be safely removed by running `git branch -d feature/1234-blue-button`.
 
+### Releases
+
+Maintainers who publish releases follow the [release process](docs/release-process.md).
+
 ### Code standard
 
 Hajk uses **ESLint** and **Prettier** to enforce code formatting across the project.
