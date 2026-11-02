@@ -1,4 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Tree } from "react-arborist";
 import type {
   CursorProps,
@@ -73,6 +80,30 @@ function ChapterCursor({ top, left, indent }: CursorProps) {
   );
 }
 
+interface NodeExtras {
+  selectedId: string | null;
+  onAddChild: (parentId: string) => void;
+  onDelete: (id: string) => void;
+}
+
+function noop() {
+  /* no tree mounted */
+}
+
+const NodeExtrasContext = createContext<NodeExtras>({
+  selectedId: null,
+  onAddChild: noop,
+  onDelete: noop,
+});
+
+// Defined once at module level: a renderer created inside ChapterTree would be
+// a new component type on every render, so react-arborist would remount every
+// row each time the parent re-renders (e.g. on each keystroke in a title).
+function NodeRenderer(props: NodeRendererProps<ChapterTreeNode>) {
+  const extras = useContext(NodeExtrasContext);
+  return <ChapterTreeNodeRenderer {...props} {...extras} />;
+}
+
 interface ChapterTreeProps {
   data: ChapterTreeNode[];
   selectedId: string | null;
@@ -105,55 +136,62 @@ export function ChapterTree({
     return () => observer.disconnect();
   }, []);
 
-  function NodeRenderer(props: NodeRendererProps<ChapterTreeNode>) {
-    return (
-      <ChapterTreeNodeRenderer
-        {...props}
-        selectedId={selectedId}
-        onAddChild={onAddChild}
-        onDelete={onDelete}
-      />
-    );
-  }
+  // The callbacks are recreated on every parent render; route them through a
+  // ref so the context value only changes when the selection does.
+  const callbacksRef = useRef({ onAddChild, onDelete });
+  useEffect(() => {
+    callbacksRef.current = { onAddChild, onDelete };
+  });
+  const extras = useMemo<NodeExtras>(
+    () => ({
+      selectedId,
+      onAddChild: (id) => callbacksRef.current.onAddChild(id),
+      onDelete: (id) => callbacksRef.current.onDelete(id),
+    }),
+    [selectedId],
+  );
 
   return (
-    <Box
-      ref={containerRef}
-      sx={{
-        flex: 1,
-        minHeight: 0,
-        minWidth: 0,
-        overflow: "hidden",
-        userSelect: "none",
-        "& [class*='List']": {
-          outline: "none",
-          overflowX: "hidden !important",
-        },
-      }}
-    >
-      <Tree<ChapterTreeNode>
-        data={data}
-        idAccessor="id"
-        childrenAccessor="children"
-        openByDefault
-        selection={selectedId ?? undefined}
-        rowHeight={36}
-        height={height}
-        width="100%"
-        indent={16}
-        disableEdit
-        renderRow={ChapterRow}
-        renderCursor={ChapterCursor}
-        onSelect={(nodes) => {
-          onSelect(nodes.length > 0 ? nodes[0].id : null);
-        }}
-        onMove={({ dragIds, parentId, index }) => {
-          const next = moveNodes(data, dragIds, parentId, index);
-          onChange(next);
+    <NodeExtrasContext.Provider value={extras}>
+      <Box
+        ref={containerRef}
+        sx={{
+          flex: 1,
+          minHeight: 0,
+          minWidth: 0,
+          overflow: "hidden",
+          userSelect: "none",
+          bgcolor: "background.paper",
+          "& [class*='List']": {
+            outline: "none",
+            overflowX: "hidden !important",
+          },
         }}
       >
-        {NodeRenderer}
-      </Tree>
-    </Box>
+        <Tree<ChapterTreeNode>
+          data={data}
+          idAccessor="id"
+          childrenAccessor="children"
+          openByDefault
+          selection={selectedId ?? undefined}
+          rowHeight={36}
+          height={height}
+          width="100%"
+          indent={16}
+          disableEdit
+          renderRow={ChapterRow}
+          renderCursor={ChapterCursor}
+          onSelect={(nodes) => {
+            onSelect(nodes.length > 0 ? nodes[0].id : null);
+          }}
+          onMove={({ dragIds, parentId, index }) => {
+            const next = moveNodes(data, dragIds, parentId, index);
+            onChange(next);
+          }}
+        >
+          {NodeRenderer}
+        </Tree>
+      </Box>
+    </NodeExtrasContext.Provider>
   );
 }

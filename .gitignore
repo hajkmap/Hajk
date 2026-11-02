@@ -183,3 +183,5 @@ Temporary Items
 
 
 apps/legacy/backend/*
+# graphify knowledge graph output
+graphify-out/

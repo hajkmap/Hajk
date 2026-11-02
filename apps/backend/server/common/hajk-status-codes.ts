@@ -82,6 +82,12 @@ enum HajkStatusCodes {
   LAYER_URL_NOT_ALLOWED = "CF006",
 
   /**
+   * The map's documenthandler does not have consolidateDocumentLoading enabled,
+   * so its documents can't be loaded in one request.
+   */
+  CONSOLIDATED_DOCUMENT_LOADING_DISABLED = "CF007",
+
+  /**
    * The requested document name does not exist in the given map + folder.
    */
   UNKNOWN_DOCUMENT = "DB012",
@@ -100,6 +106,11 @@ enum HajkStatusCodes {
    * The requested theme does not exist in the given map.
    */
   UNKNOWN_THEME = "DB014",
+
+  /**
+   * The requested map has no active documenthandler tool, or it is hidden from the user.
+   */
+  UNKNOWN_DOCUMENT_HANDLER = "DB015",
 
   /**
    * The folder cannot be deleted because it still contains documents.

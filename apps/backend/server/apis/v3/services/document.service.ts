@@ -14,6 +14,42 @@ interface Chapter {
 
 const SLUG_MAX_RETRIES = 5;
 
+interface MenuDocument {
+  /** The folder name the menu item names, "" when it names none. */
+  folder: string;
+  name: string;
+}
+
+/**
+ * The documents a documenthandler's `menuConfig.menu` references, nested `menu`
+ * arrays included, deduplicated by folder+name with the first occurrence kept
+ * (the same as v2's /informative/loadall).
+ */
+function uniqueMenuDocuments(menu: unknown): MenuDocument[] {
+  const result: MenuDocument[] = [];
+  const seen = new Set<string>();
+  const visit = (items: unknown) => {
+    if (!Array.isArray(items)) return;
+    for (const item of items) {
+      if (!item || typeof item !== "object") continue;
+      const {
+        document,
+        folder,
+        menu: children,
+      } = item as Record<string, unknown>;
+      visit(children);
+      if (typeof document !== "string" || document === "") continue;
+      const folderName = typeof folder === "string" ? folder : "";
+      const key = `${folderName}/${document}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      result.push({ folder: folderName, name: document });
+    }
+  };
+  visit(menu);
+  return result;
+}
+
 const logger = log4js.getLogger("service.v3.document");
 
 class DocumentService {
@@ -331,11 +367,85 @@ class DocumentService {
       );
     }
 
-    const chapters = this.#ensureHeaderIdentifiers(doc.content?.chapters || []);
+    return this.#toClientDocument(doc);
+  }
+
+  /**
+   * All documents a documenthandler menu references, in one query, for the
+   * consolidated document loading (`consolidateDocumentLoading`). Same shape as
+   * v2's /informative/loadall: one { folder, name, document } entry per unique
+   * folder+name, in menu order. A document that can't be loaded gets
+   * `document: null` and an `error: { code, message }`; it never fails the rest.
+   */
+  async loadAllDocumentsForClient(toolInstanceId: number, menu: unknown) {
+    const items = uniqueMenuDocuments(menu);
+    const names = [...new Set(items.map((item) => item.name))];
+
+    const docs =
+      names.length > 0
+        ? await prisma.document.findMany({
+            where: { toolInstanceId, name: { in: names } },
+            include: { folder: { select: { name: true } } },
+            orderBy: { folderId: "asc" },
+          })
+        : [];
+
+    const documents = items.map(({ folder, name }) => {
+      const label = `${folder && `${folder}/`}${name}`;
+      try {
+        // With a folder: that folder's document. Without one: the first by name,
+        // lowest folderId, the same rule as loadDocumentForClient's root load.
+        const doc = docs.find(
+          (d) => d.name === name && (!folder || d.folder.name === folder)
+        );
+        if (!doc) {
+          return {
+            folder,
+            name,
+            document: null,
+            error: {
+              code: "DOCUMENT_NOT_FOUND",
+              message: `Document "${label}" was not found.`,
+            },
+          };
+        }
+        return { folder, name, document: this.#toClientDocument(doc) };
+      } catch (error) {
+        logger.warn(
+          `Consolidated load for tool '${toolInstanceId}': could not load document "${label}".`,
+          error
+        );
+        return {
+          folder,
+          name,
+          document: null,
+          error: {
+            code: "DOCUMENT_LOAD_ERROR",
+            message:
+              (error instanceof Error && error.message) ||
+              `Could not load document "${label}".`,
+          },
+        };
+      }
+    });
+
+    return { documents };
+  }
+
+  #toClientDocument(doc: { title: string; content: Prisma.JsonValue }) {
+    const content =
+      doc.content &&
+      typeof doc.content === "object" &&
+      !Array.isArray(doc.content)
+        ? doc.content
+        : {};
+    const chapters = Array.isArray(content.chapters)
+      ? (content.chapters as unknown as Chapter[])
+      : [];
 
     return {
       title: doc.title,
-      chapters,
+      chapters: this.#ensureHeaderIdentifiers(chapters),
     };
   }
 

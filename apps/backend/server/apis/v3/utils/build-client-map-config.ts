@@ -2,6 +2,10 @@ import { UseType, type Prisma } from "@prisma/client";
 
 import prisma from "../../../common/prisma.ts";
 import { DEFAULT_MAP_OPTIONS } from "../../../common/defaults.ts";
+import { HajkError } from "../../../common/classes.ts";
+import HttpStatusCodes from "../../../common/http-status-codes.ts";
+import HajkStatusCodes from "../../../common/hajk-status-codes.ts";
+import { isVisibleToUser } from "./group-visibility.ts";
 import type {
   ClientLayerSwitcherLayerRef,
   ClientLayerTree,
@@ -212,6 +216,62 @@ function mergeJsonObjects(
       ? (override as Prisma.JsonObject)
       : {};
   return { ...baseObj, ...overrideObj };
+}
+
+/**
+ * The map's active documenthandler tool, as the client sees it: the tool's id and
+ * its options with the map's own overrides merged on top (the same merge
+ * buildClientToolsForMap does). Throws a 404 HajkError when the map has no
+ * documenthandler, or when its visibleForGroups hides it from `adUser`.
+ */
+export async function resolveClientDocumentHandler(
+  mapName: string,
+  adUser: string | undefined
+): Promise<{ toolInstanceId: number; options: Prisma.JsonObject }> {
+  const entry = await prisma.toolsOnMaps.findFirst({
+    where: {
+      mapName,
+      active: true,
+      map: { deletedAt: null },
+      tool: { type: "documenthandler" },
+    },
+    include: { tool: true },
+  });
+
+  const notFound = () =>
+    new HajkError(
+      HttpStatusCodes.NOT_FOUND,
+      `No documenthandler tool on map '${mapName}'.`,
+      HajkStatusCodes.UNKNOWN_DOCUMENT_HANDLER
+    );
+
+  if (!entry) {
+    const map = await prisma.map.findFirst({
+      where: { name: mapName, deletedAt: null },
+      select: { name: true },
+    });
+    if (!map) {
+      throw new HajkError(
+        HttpStatusCodes.NOT_FOUND,
+        `No map named '${mapName}'.`,
+        HajkStatusCodes.UNKNOWN_MAP_NAME
+      );
+    }
+    throw notFound();
+  }
+
+  const options = mergeJsonObjects(entry.tool.options, entry.options);
+  if (
+    !(await isVisibleToUser(
+      options.visibleForGroups,
+      adUser,
+      "tool documenthandler"
+    ))
+  ) {
+    throw notFound();
+  }
+
+  return { toolInstanceId: entry.tool.id, options };
 }
 
 export async function buildClientProjectionsForMap(mapName: string) {

@@ -54,11 +54,6 @@ export function DocumentEditorDialog({
   const [panelPending, setPanelPending] = useState(false);
   const panelSaveRef = useRef<() => void>(noop);
 
-  // Incremented to force-remount ChapterEditorPanel after a source-tab save
-  const [editorKey, setEditorKey] = useState(0);
-  // Set to true after a source save so the next activeDocument refetch triggers a remount
-  const pendingEditorRemountRef = useRef(false);
-
   // ── Document data ──────────────────────────────────────────────────────────
   const [docTitleDraft, setDocTitleDraft] = useState("");
 
@@ -93,10 +88,6 @@ export function DocumentEditorDialog({
       setSavedTitle(title);
       setSavedContentJson(contentJson);
       setContentError(null);
-      if (pendingEditorRemountRef.current) {
-        pendingEditorRemountRef.current = false;
-        setEditorKey((k) => k + 1);
-      }
     }
   }, [activeDocument]);
 
@@ -133,16 +124,7 @@ export function DocumentEditorDialog({
         title: docTitleDraft || undefined,
         content: parsed,
       },
-      {
-        onSuccess: () => {
-          setSavedTitle(docTitleDraft);
-          setSavedContentJson(contentDraft);
-          setPanelDirty(false);
-          // Allow the next activeDocument refetch to re-sync and remount the editor
-          lastSyncedDocIdRef.current = undefined;
-          pendingEditorRemountRef.current = true;
-        },
-      }
+      { onSuccess: onClose }
     );
   }
 
@@ -218,12 +200,15 @@ export function DocumentEditorDialog({
                 setDraftDocument(getDraftRef.current());
               }
               if (v === "source") {
-                const draft = getDraftRef.current();
-                if (draft) {
-                  const json = JSON.stringify(draft.content, null, 2);
-                  setContentDraft(json);
-                  setSavedContentJson(json);
-                }
+                // Carry unsaved editor changes over. The saved baseline stays
+                // as it is, so they still count as unsaved here.
+                const draft = panelDirty ? getDraftRef.current() : null;
+                setContentDraft(
+                  draft
+                    ? JSON.stringify(draft.content, null, 2)
+                    : savedContentJson
+                );
+                setContentError(null);
               }
               setTab(v);
             }}
@@ -266,7 +251,7 @@ export function DocumentEditorDialog({
                     }}
                   >
                     <ChapterEditorPanel
-                      key={`${activeDocument.id}-${editorKey}`}
+                      key={activeDocument.id}
                       document={activeDocument}
                       toolId={toolId}
                       folderName={folderName ?? ""}
@@ -278,7 +263,7 @@ export function DocumentEditorDialog({
                         setPanelPending(isPending);
                       }}
                       onSaveRef={panelSaveRef}
-                      onSaveSuccess={() => setSavedTitle(docTitleDraft)}
+                      onSaveSuccess={onClose}
                       getDraftRef={getDraftRef}
                     />
                   </Box>
@@ -369,7 +354,7 @@ export function DocumentEditorDialog({
                   !docName
                 }
               >
-                {t("common.save")}
+                {t("common.saveAndClose")}
               </Button>
             )}
 
@@ -392,7 +377,7 @@ export function DocumentEditorDialog({
                   !docName
                 }
               >
-                {t("common.save")}
+                {t("common.saveAndClose")}
               </Button>
             )}
           </DialogActions>

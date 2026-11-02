@@ -23,7 +23,7 @@ interface ChapterViewProps {
   toolId: number;
 }
 
-function ChapterView({ chapter, depth, toolId }: ChapterViewProps) {
+export function ChapterView({ chapter, depth, toolId }: ChapterViewProps) {
   const variant = HEADER_VARIANTS[Math.min(depth, HEADER_VARIANTS.length - 1)];
 
   return (

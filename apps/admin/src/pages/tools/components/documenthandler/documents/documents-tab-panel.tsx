@@ -29,6 +29,7 @@ import {
 } from "@/api/documents";
 import { getDocuments } from "@/api/documents/requests";
 import { DocumentsTree } from "./documents-tree";
+import { DocumentPreview } from "./document-preview";
 import type { DocTreeNode } from "./types.ts";
 
 interface DocumentsTabPanelProps {
@@ -63,8 +64,7 @@ export function DocumentsTabPanel({
 
   // ─── Data queries ────────────────────────────────────────────────────────────
 
-  const { data: folders = [], isLoading: foldersLoading } =
-    useFolders(toolId);
+  const { data: folders = [], isLoading: foldersLoading } = useFolders(toolId);
 
   // Fetch all documents for all folders so the tree is fully populated
   const allDocQueries = useQueries({
@@ -81,13 +81,11 @@ export function DocumentsTabPanel({
   // ─── Build sorted tree data ──────────────────────────────────────────────────
 
   const treeData = useMemo<DocTreeNode[]>(() => {
-    const sorted = [...folders].sort((a, b) =>
-      a.title.localeCompare(b.title)
-    );
+    const sorted = [...folders].sort((a, b) => a.title.localeCompare(b.title));
     return sorted.map((folder, idx) => {
       const docs = allDocQueries[idx]?.data ?? [];
       const sortedDocs = [...docs].sort((a, b) =>
-        a.title.localeCompare(b.title)
+        a.title.localeCompare(b.title),
       );
       return {
         id: `folder:${folder.name}`,
@@ -124,17 +122,26 @@ export function DocumentsTabPanel({
 
   const activeNewDocFolder = getNewDocFolder();
 
+  // The document clicked in the tree, shown in the preview pane.
+  const previewTarget = (() => {
+    if (!selectedNodeId?.startsWith("doc:")) return null;
+    const rest = selectedNodeId.slice("doc:".length);
+    const slashIdx = rest.indexOf("/");
+    if (slashIdx === -1) return null;
+    return { folder: rest.slice(0, slashIdx), name: rest.slice(slashIdx + 1) };
+  })();
+
   // ─── Mutations ───────────────────────────────────────────────────────────────
 
   const createFolderMutation = useCreateFolder(toolId ?? 0);
   const deleteFolderMutation = useDeleteFolder(toolId ?? 0);
   const createDocMutation = useCreateDocument(
     toolId ?? 0,
-    activeNewDocFolder ?? ""
+    activeNewDocFolder ?? "",
   );
   const deleteDocMutation = useDeleteDocument(
     toolId ?? 0,
-    deleteDocInfo?.folderName ?? ""
+    deleteDocInfo?.folderName ?? "",
   );
   const moveDocMutation = useMoveDocumentAcrossFolders(toolId ?? 0);
 
@@ -149,12 +156,13 @@ export function DocumentsTabPanel({
           setNewFolderDialogOpen(false);
           setNewFolderTitle("");
         },
-      }
+      },
     );
   }
 
   function handleCreateDocument() {
-    if (!newDocTitle.trim() || !activeNewDocFolder || toolId === undefined) return;
+    if (!newDocTitle.trim() || !activeNewDocFolder || toolId === undefined)
+      return;
     createDocMutation.mutate(
       { title: newDocTitle.trim() },
       {
@@ -163,7 +171,7 @@ export function DocumentsTabPanel({
           setNewDocTitle("");
           onOpenDocument(activeNewDocFolder, doc.name);
         },
-      }
+      },
     );
   }
 
@@ -213,9 +221,7 @@ export function DocumentsTabPanel({
         <Tooltip
           title={
             !activeNewDocFolder
-              ? t(
-                  "tools.documenthandler.documents.selectFolderForNewDocument"
-                )
+              ? t("tools.documenthandler.documents.selectFolderForNewDocument")
               : ""
           }
         >
@@ -244,27 +250,44 @@ export function DocumentsTabPanel({
           {t("tools.documenthandler.documents.noFolders")}
         </Alert>
       ) : (
-        <Box sx={{ maxWidth: { md: "50%" } }}>
-          {moveDocMutation.isError && (
-            <Alert severity="error" sx={{ mb: 1 }}>
-              {moveDocMutation.error instanceof Error
-                ? moveDocMutation.error.message
-                : t("tools.documenthandler.documents.moveError")}
-            </Alert>
-          )}
-          <DocumentsTree
-            data={treeData}
-            selectedDocId={selectedDocTreeId}
-            selectedNodeId={selectedNodeId}
-            activeFolderName={activeNewDocFolder ?? null}
-            onSelectNode={setSelectedNodeId}
-            onOpenDocument={onOpenDocument}
-            onDeleteFolder={handleDeleteFolder}
-            onDeleteDocument={handleDeleteDocument}
-            onMoveDocument={({ sourceFolder, name, targetFolder }) => {
-              moveDocMutation.mutate({ sourceFolder, name, targetFolder });
-            }}
-          />
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            gap: 2,
+            alignItems: "flex-start",
+          }}
+        >
+          <Box sx={{ flex: 1, minWidth: 0, width: "100%" }}>
+            {moveDocMutation.isError && (
+              <Alert severity="error" sx={{ mb: 1 }}>
+                {moveDocMutation.error instanceof Error
+                  ? moveDocMutation.error.message
+                  : t("tools.documenthandler.documents.moveError")}
+              </Alert>
+            )}
+            <DocumentsTree
+              data={treeData}
+              selectedDocId={selectedDocTreeId}
+              selectedNodeId={selectedNodeId}
+              activeFolderName={activeNewDocFolder ?? null}
+              onSelectNode={setSelectedNodeId}
+              onOpenDocument={onOpenDocument}
+              onDeleteFolder={handleDeleteFolder}
+              onDeleteDocument={handleDeleteDocument}
+              onMoveDocument={({ sourceFolder, name, targetFolder }) => {
+                moveDocMutation.mutate({ sourceFolder, name, targetFolder });
+              }}
+            />
+          </Box>
+          <Box sx={{ flex: 1, minWidth: 0, width: "100%" }}>
+            <DocumentPreview
+              toolId={toolId}
+              folder={previewTarget?.folder ?? null}
+              name={previewTarget?.name ?? null}
+              onEdit={onOpenDocument}
+            />
+          </Box>
         </Box>
       )}
 
@@ -384,7 +407,9 @@ export function DocumentsTabPanel({
           {t("tools.documenthandler.documents.confirmDeleteDocument")}
         </DialogTitle>
         <DialogContent>
-          <Typography>{deleteDocInfo?.docTitle ?? deleteDocInfo?.docName}</Typography>
+          <Typography>
+            {deleteDocInfo?.docTitle ?? deleteDocInfo?.docName}
+          </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteDocInfo(null)}>

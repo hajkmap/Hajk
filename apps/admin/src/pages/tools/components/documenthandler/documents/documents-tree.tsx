@@ -89,6 +89,11 @@ export function DocumentsTree({
     <Box
       sx={{
         userSelect: "none",
+        bgcolor: "background.paper",
+        border: "1px solid",
+        borderColor: "divider",
+        borderRadius: 1,
+        overflow: "hidden",
         "& [class*='List']": { outline: "none" },
       }}
     >

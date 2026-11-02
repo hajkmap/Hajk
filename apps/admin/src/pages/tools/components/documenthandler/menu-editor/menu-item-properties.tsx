@@ -207,7 +207,7 @@ export function MenuItemProperties({
       {/* Document */}
       <Box>
         {folders.length > 0 ? (
-          <FormControl fullWidth size="small" sx={{ mb: 1 }}>
+          <FormControl fullWidth size="small" sx={{ mb: 2 }}>
             <InputLabel>
               {t("tools.documenthandler.menuEditor.fields.folder")}
             </InputLabel>

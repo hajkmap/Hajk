@@ -358,9 +358,42 @@ export const collectorDefaults: Record<string, unknown> = {
   form: [],
 };
 
+// Matches the client DocumentHandler fallbacks. menuConfig must exist — the
+// client reads options.menuConfig.menu without a guard.
+export const documenthandlerDefaults: Record<string, unknown> = {
+  drawerButtonTitle: "Meny",
+  drawerTitle: "Översiktsplan",
+  drawerButtonIcon: "",
+  documentOnStart: "",
+  customThemeUrl: "",
+  showScrollButtonLimit: 400,
+  searchImplemented: false,
+  enablePrint: false,
+  consolidateDocumentLoading: false,
+  closePanelOnMapLinkOpen: false,
+  displayLoadingOnMapLinkOpen: false,
+  resizingEnabled: false,
+  draggingEnabled: false,
+  menuConfig: { menu: [] },
+  pdfLinks: [],
+  // Unset means "on" in the client (DocumentViewer.jsx), so the baseline is true.
+  tableOfContents: {
+    active: true,
+    expanded: true,
+    title: "Innehållsförteckning",
+    printMode: "none",
+    chapterLevelsToShow: 100,
+    chapterLevelsToShowForPrint: 100,
+  },
+  defaultDocumentColorSettings: {
+    textAreaBackgroundColor: "",
+    textAreaDividerColor: "",
+  },
+};
+
 // Per-type option defaults, used by settings.tsx as the isDirty baseline.
-// documenthandler isn't here yet — its fields don't use the `options.*` naming.
 const toolOptionDefaults: Record<string, Record<string, unknown>> = {
+  documenthandler: documenthandlerDefaults,
   print: printDefaults,
   infoclick: infoclickDefaults,
   anchor: anchorDefaults,
@@ -393,3 +426,26 @@ export const getToolOptionDefaults = (
   type: string | undefined,
 ): Record<string, unknown> =>
   (type ? toolOptionDefaults[type] : undefined) ?? {};
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+/**
+ * Saved options on top of the type's defaults. Nested option objects (e.g.
+ * documenthandler's tableOfContents) are merged one level deep, so a saved
+ * object missing some keys still gets a concrete isDirty baseline for them.
+ */
+export const withToolOptionDefaults = (
+  type: string | undefined,
+  options: Record<string, unknown> | undefined,
+): Record<string, unknown> => {
+  const defaults = getToolOptionDefaults(type);
+  const merged: Record<string, unknown> = { ...defaults, ...options };
+  for (const [key, value] of Object.entries(defaults)) {
+    const saved = options?.[key];
+    if (isPlainObject(value) && isPlainObject(saved)) {
+      merged[key] = { ...value, ...saved };
+    }
+  }
+  return merged;
+};

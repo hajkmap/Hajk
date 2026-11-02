@@ -371,6 +371,7 @@ export default function ServiceSettings() {
       }
     >
       <FormActionPanel
+        cancelTo={"/services"}
         updateStatus={updateStatus}
         onUpdate={handleExternalSubmit}
         saveButtonText={t("common.dialog.saveBtn")}

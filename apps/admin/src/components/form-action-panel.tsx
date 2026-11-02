@@ -2,6 +2,7 @@ import React from "react";
 import { Alert, Box, Button, Typography, Avatar, Tooltip } from "@mui/material";
 import CircularProgress from "../components/progress/circular-progress";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router";
 import { useUser } from "../api/users";
 
 // This custom component will replace the save/delete panel-buttons on all the forms
@@ -10,6 +11,8 @@ interface FormActionProps {
   updateStatus: "idle" | "pending" | "success" | "error";
   onUpdate: () => void | Promise<void>;
   onCancel?: () => void | Promise<void>;
+  /** Where Avbryt goes when no onCancel is given, usually the list page. */
+  cancelTo: string;
   saveButtonText?: string;
   backLink?: { label: string; href: string };
   createdBy?: string;
@@ -27,6 +30,7 @@ const FormActionPanel: React.FC<FormActionProps> = ({
   updateStatus,
   onUpdate,
   onCancel,
+  cancelTo,
   saveButtonText = "",
   backLink,
   createdBy,
@@ -39,6 +43,7 @@ const FormActionPanel: React.FC<FormActionProps> = ({
   sidebarExtra,
 }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { data: createdUser } = useUser(createdBy ?? "");
   const { data: lastSavedUser } = useUser(lastSavedBy ?? "");
 
@@ -55,7 +60,7 @@ const FormActionPanel: React.FC<FormActionProps> = ({
     if (onCancel) {
       void onCancel();
     } else {
-      window.history.back();
+      void navigate(cancelTo);
     }
   };
 

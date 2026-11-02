@@ -869,6 +869,7 @@ export default function MapSettings() {
         tabs={[...MAP_PAGE_TABS]}
       />
       <FormActionPanel
+        cancelTo={"/maps"}
         updateStatus={savePending ? "pending" : updateStatus}
         onUpdate={handleExternalSubmit}
         saveButtonText="Spara"

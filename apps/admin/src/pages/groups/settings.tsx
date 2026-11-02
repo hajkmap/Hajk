@@ -284,6 +284,7 @@ function GroupSettings() {
       }
     >
       <FormActionPanel
+        cancelTo={"/groups"}
         updateStatus={isSavingLayerTree ? "pending" : updateStatus}
         onUpdate={handleExternalSubmit}
         saveButtonText="Spara"

@@ -19,11 +19,13 @@ import {
   NumberListOption,
   NumberOption,
   TextOption,
+} from "./tool-option-fields";
+import {
   formatNumberList,
   formatTerrainBreakpoints,
   parseNumberList,
   parseTerrainBreakpoints,
-} from "./tool-option-fields";
+} from "./tool-option-parsers";
 
 interface FloodSimulatorRendererProps {
   tool: Tool;

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   Box,
@@ -36,6 +36,37 @@ function extractChapters(content: Record<string, unknown>): Chapter[] {
   return raw as Chapter[];
 }
 
+/** What is stored on the server, to compare the draft against. */
+interface SavedSnapshot {
+  signature: string;
+  htmlById: Map<string, string>;
+}
+
+function snapshotOf(tree: ChapterTreeNode[]): SavedSnapshot {
+  const htmlById = new Map<string, string>();
+  const walk = (nodes: ChapterTreeNode[]) =>
+    nodes.forEach((node) => {
+      htmlById.set(node.id, node.data.html);
+      walk(node.children);
+    });
+  walk(tree);
+  return { signature: JSON.stringify(fromChapterTree(tree)), htmlById };
+}
+
+function withHtml(
+  tree: ChapterTreeNode[],
+  id: string | null,
+  html: string | undefined,
+): ChapterTreeNode[] {
+  if (!id || html === undefined) return tree;
+  return updateNodeById(tree, id, (node) => ({
+    ...node,
+    data: { ...node.data, html },
+  }));
+}
+
+function noop() { /* until the chapter editor has mounted */ }
+
 export const CHAPTER_PANEL_WIDTH = 340;
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -51,8 +82,8 @@ interface ChapterEditorPanelProps {
   onStateChange?: (state: { isDirty: boolean; isPending: boolean }) => void;
   /** Called by the dialog's Save button — triggers the actual save */
   onSaveRef?: React.MutableRefObject<() => void>;
-  /** Called after a successful save so the dialog can update its dirty baseline */
-  onSaveSuccess?: () => void;
+  /** Called after a successful save with the saved content, so the dialog can update its dirty baseline */
+  onSaveSuccess?: (content: Record<string, unknown>) => void;
   /** Ref populated with a function that returns the current unsaved draft on demand */
   getDraftRef?: React.MutableRefObject<() => Document>;
 }
@@ -75,10 +106,17 @@ export function ChapterEditorPanel({
   const [selectedId, setSelectedId] = useState<string | null>(
     initialTree.length > 0 ? initialTree[0].id : null
   );
-  const [isDirty, setIsDirty] = useState(false);
+  // Dirty = the draft differs from what is saved, like the rest of the admin.
+  // Undoing an edit makes it clean again.
+  const [saved, setSaved] = useState<SavedSnapshot>(() =>
+    snapshotOf(initialTree)
+  );
+  // Whether the mounted chapter editor differs from that chapter's saved HTML
+  const [editorChanged, setEditorChanged] = useState(false);
 
   // Ref to the currently-mounted RichTextEditor's HTML getter
   const getHtmlRef = useRef<() => string>(() => "");
+  const resetEditorBaselineRef = useRef<() => void>(noop);
 
   // Dialog states
   const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -89,6 +127,33 @@ export function ChapterEditorPanel({
 
   const saveDocMutation = useSaveDocument(toolId, folderName, docName);
 
+  const selectedChapter = selectedId ? findNodeById(tree, selectedId) : null;
+  const selectedSavedHtml = selectedId ? saved.htmlById.get(selectedId) : undefined;
+  const currentEditorChanged = selectedChapter !== null && editorChanged;
+
+  // The tree with the open chapter's text taken from the editor. An unchanged
+  // editor gives back the saved HTML as stored, not the editor's re-serialized
+  // form, so opening a chapter is not a change.
+  const effectiveHtml = useCallback(
+    () =>
+      currentEditorChanged || selectedSavedHtml === undefined
+        ? getHtmlRef.current()
+        : selectedSavedHtml,
+    [currentEditorChanged, selectedSavedHtml]
+  );
+
+  // Comparing serializes the whole document, and redrawing the tree is not
+  // free either. Both run on a deferred copy so typing a title stays responsive.
+  const deferredTree = useDeferredValue(tree);
+  const treeDirty = useMemo(
+    () =>
+      JSON.stringify(
+        fromChapterTree(withHtml(deferredTree, selectedId, selectedSavedHtml))
+      ) !== saved.signature,
+    [deferredTree, selectedId, selectedSavedHtml, saved]
+  );
+  const isDirty = treeDirty || currentEditorChanged;
+
   // Expose dirty/pending state to parent dialog
   useEffect(() => {
     onStateChange?.({ isDirty, isPending: saveDocMutation.isPending });
@@ -98,7 +163,6 @@ export function ChapterEditorPanel({
 
   function mutate(updater: (draft: ChapterTreeNode[]) => ChapterTreeNode[]) {
     setTree((prev) => updater(prev));
-    setIsDirty(true);
   }
 
   // ── Chapter HTML sync ─────────────────────────────────────────────────────
@@ -107,19 +171,18 @@ export function ChapterEditorPanel({
   // when the draft is read for the "Visa" preview.
 
   const flushCurrentHtml = useCallback(() => {
-    if (!selectedId) return;
-    const html = getHtmlRef.current();
-    setTree((prev) =>
-      updateNodeById(prev, selectedId, (node) => ({
-        ...node,
-        data: { ...node.data, html },
-      }))
-    );
-  }, [selectedId]);
+    if (!selectedChapter) return;
+    const html = effectiveHtml();
+    setTree((prev) => withHtml(prev, selectedId, html));
+  }, [selectedChapter, selectedId, effectiveHtml]);
 
-  const handleEditorDirty = useCallback(() => {
-    setIsDirty(true);
-  }, []);
+  /** Switches the editor to another chapter, keeping the current one's text. */
+  function selectChapter(id: string | null) {
+    if (id === selectedId) return;
+    flushCurrentHtml();
+    setEditorChanged(false);
+    setSelectedId(id);
+  }
 
   const handleHeaderChange = useCallback((id: string, header: string) => {
     setTree((prev) =>
@@ -128,30 +191,30 @@ export function ChapterEditorPanel({
         data: { ...node.data, header },
       }))
     );
-    setIsDirty(true);
   }, []);
 
   // ── Save ─────────────────────────────────────────────────────────────────────
 
   function handleSave() {
-    // Flush the active editor's HTML into the tree before reading it for save.
-    flushCurrentHtml();
-    setTree((latestTree) => {
-      const final = fromChapterTree(latestTree);
-      saveDocMutation.mutate(
-        {
-          title: docTitle || undefined,
-          content: { ...document.content, chapters: final },
+    // Put the active editor's HTML into the tree before reading it for save.
+    const latestTree = selectedChapter
+      ? withHtml(tree, selectedId, effectiveHtml())
+      : tree;
+    setTree(latestTree);
+    const content = {
+      ...document.content,
+      chapters: fromChapterTree(latestTree),
+    };
+    saveDocMutation.mutate(
+      { title: docTitle || undefined, content },
+      {
+        onSuccess: () => {
+          setSaved(snapshotOf(latestTree));
+          resetEditorBaselineRef.current();
+          onSaveSuccess?.(content);
         },
-        {
-          onSuccess: () => {
-            setIsDirty(false);
-            onSaveSuccess?.();
-          },
-        }
-      );
-      return latestTree;
-    });
+      }
+    );
   }
 
   // Keep save and draft refs up to date after every render (no deps — intentional ref sync)
@@ -159,12 +222,8 @@ export function ChapterEditorPanel({
     if (onSaveRef) onSaveRef.current = handleSave;
     if (getDraftRef) {
       getDraftRef.current = () => {
-        const currentHtml = selectedId ? getHtmlRef.current() : "";
-        const treeWithLatestHtml = selectedId
-          ? updateNodeById(tree, selectedId, (node) => ({
-              ...node,
-              data: { ...node.data, html: currentHtml },
-            }))
+        const treeWithLatestHtml = selectedChapter
+          ? withHtml(tree, selectedId, effectiveHtml())
           : tree;
         return {
           ...document,
@@ -190,7 +249,7 @@ export function ChapterEditorPanel({
     if (!addTitle.trim()) return;
     const newNode = createChapterNode(addTitle);
     mutate((prev) => addChildNode(prev, addParentId, newNode));
-    setSelectedId(newNode.id);
+    selectChapter(newNode.id);
     setAddTitle("");
     setAddDialogOpen(false);
   }
@@ -205,13 +264,15 @@ export function ChapterEditorPanel({
   function handleDeleteConfirm() {
     if (!deleteTargetId) return;
     mutate((prev) => removeNodeById(prev, deleteTargetId));
-    setSelectedId((prev) => (prev === deleteTargetId ? null : prev));
+    if (selectedId === deleteTargetId) {
+      setEditorChanged(false);
+      setSelectedId(null);
+    }
     setDeleteDialogOpen(false);
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
 
-  const selectedChapter = selectedId ? findNodeById(tree, selectedId) : null;
   const deleteTarget = deleteTargetId
     ? findNodeById(tree, deleteTargetId)
     : null;
@@ -279,16 +340,10 @@ export function ChapterEditorPanel({
             </Box>
           ) : (
             <ChapterTree
-              data={tree}
+              data={deferredTree}
               selectedId={selectedId}
-              onSelect={(id) => {
-                flushCurrentHtml();
-                setSelectedId(id);
-              }}
-              onChange={(next) => {
-                setTree(next);
-                setIsDirty(true);
-              }}
+              onSelect={selectChapter}
+              onChange={setTree}
               onAddChild={(parentId) => openAddDialog(parentId)}
               onDelete={handleDeleteOpen}
             />
@@ -325,7 +380,9 @@ export function ChapterEditorPanel({
               <RichTextEditor
                 key={selectedId ?? "none"}
                 html={selectedChapter.data.html}
-                onDirty={handleEditorDirty}
+                baselineHtml={selectedSavedHtml}
+                onChangedChange={setEditorChanged}
+                resetBaselineRef={resetEditorBaselineRef}
                 getHtmlRef={getHtmlRef}
                 toolId={toolId}
               />

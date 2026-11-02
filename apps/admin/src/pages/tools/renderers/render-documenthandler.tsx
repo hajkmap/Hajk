@@ -12,6 +12,7 @@ import { DocumentEditorDialog } from "../components/documenthandler/documents/do
 import { SettingsTabPanel } from "../components/documenthandler/settings/settings-tab-panel";
 import { useDocumentById } from "../../../api/documents";
 import { getDocuments } from "../../../api/documents/requests";
+import FormPanel from "../../../components/form-components/form-panel";
 
 interface DocumentHandlerRendererProps {
   tool: Tool;
@@ -141,29 +142,33 @@ export default function DocumentHandlerRenderer({
 
       {/* Menu settings tab */}
       <Box sx={{ display: activeTab === "menuSettings" ? "block" : "none" }}>
-        <Controller
-          name="menuConfig"
-          control={control}
-          render={({ field }) => (
-            <MenuEditor
-              value={field.value as MenuConfig | undefined}
-              onChange={field.onChange}
-              toolId={toolId}
-              onOpenDocument={handleOpenDocument}
-            />
-          )}
-        />
+        <FormPanel title={t("tools.documenthandler.menuEditor.tabLabel")}>
+          <Controller
+            name="options.menuConfig"
+            control={control}
+            render={({ field }) => (
+              <MenuEditor
+                value={field.value as MenuConfig | undefined}
+                onChange={field.onChange}
+                toolId={toolId}
+                onOpenDocument={handleOpenDocument}
+              />
+            )}
+          />
+        </FormPanel>
       </Box>
 
       {/* Documents tab */}
       <Box sx={{ display: activeTab === "documents" ? "block" : "none" }}>
-        <DocumentsTabPanel
-          key={toolId ?? "none"}
-          toolId={toolId}
-          openDocument={openDocument}
-          onOpenDocument={handleOpenDocument}
-          onCloseDocument={handleCloseDocument}
-        />
+        <FormPanel title={t("tools.documenthandler.documents.tabLabel")}>
+          <DocumentsTabPanel
+            key={toolId ?? "none"}
+            toolId={toolId}
+            openDocument={openDocument}
+            onOpenDocument={handleOpenDocument}
+            onCloseDocument={handleCloseDocument}
+          />
+        </FormPanel>
       </Box>
 
       {toolId !== undefined && openDocument && (

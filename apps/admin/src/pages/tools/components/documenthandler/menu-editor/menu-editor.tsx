@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useDeferredValue, useEffect, useRef, useState } from "react";
 import {
   Box,
   Button,
@@ -8,7 +8,6 @@ import {
   DialogContentText,
   DialogTitle,
   Divider,
-  Paper,
   Tooltip,
   Typography,
 } from "@mui/material";
@@ -38,10 +37,15 @@ interface MenuEditorProps {
   toolId?: number;
 }
 
-export function MenuEditor({ value, onChange, onOpenDocument, toolId }: MenuEditorProps) {
+export function MenuEditor({
+  value,
+  onChange,
+  onOpenDocument,
+  toolId,
+}: MenuEditorProps) {
   const { t } = useTranslation();
   const [tree, setTree] = useState<MenuTreeNode[]>(() =>
-    toTree(value?.menu ?? [])
+    toTree(value?.menu ?? []),
   );
 
   // Track the last menu we emitted via onChange to distinguish external resets
@@ -95,6 +99,9 @@ export function MenuEditor({ value, onChange, onOpenDocument, toolId }: MenuEdit
     setNodeToDelete(null);
   }
 
+  // The tree redraws on a deferred copy so typing in the properties panel
+  // stays responsive.
+  const deferredTree = useDeferredValue(tree);
   const selectedNode = selectedId ? findNodeById(tree, selectedId) : null;
   const pendingDeleteNode = nodeToDelete
     ? findNodeById(tree, nodeToDelete)
@@ -117,11 +124,7 @@ export function MenuEditor({ value, onChange, onOpenDocument, toolId }: MenuEdit
           pb: 1,
         }}
       >
-        <Button
-          size="small"
-          startIcon={<AddIcon />}
-          onClick={handleAddRoot}
-        >
+        <Button size="small" startIcon={<AddIcon />} onClick={handleAddRoot}>
           {t("tools.documenthandler.menuEditor.addRoot")}
         </Button>
         <Tooltip title={t("tools.documenthandler.menuEditor.expandAll")}>
@@ -174,7 +177,13 @@ export function MenuEditor({ value, onChange, onOpenDocument, toolId }: MenuEdit
           sx={{
             flex: "0 0 55%",
             maxWidth: "55%",
+            minWidth: 0,
             minHeight: 500,
+            bgcolor: "background.paper",
+            border: "1px solid",
+            borderColor: "divider",
+            borderRadius: 1,
+            overflow: "hidden",
           }}
         >
           {tree.length === 0 ? (
@@ -200,7 +209,7 @@ export function MenuEditor({ value, onChange, onOpenDocument, toolId }: MenuEdit
           ) : (
             <MenuTree
               treeRef={treeRef}
-              data={tree}
+              data={deferredTree}
               selectedId={selectedId}
               onSelect={setSelectedId}
               onChange={handleTreeChange}
@@ -213,11 +222,16 @@ export function MenuEditor({ value, onChange, onOpenDocument, toolId }: MenuEdit
         </Box>
 
         {/* Right: properties panel */}
-        <Paper
-          variant="outlined"
+        {/* A Box, not a Paper: global .form-container styles recolor Papers grey and drop their border. */}
+        <Box
           sx={{
             flex: 1,
+            minWidth: 0,
             minHeight: 500,
+            bgcolor: "background.paper",
+            border: "1px solid",
+            borderColor: "divider",
+            borderRadius: 1,
             overflow: "auto",
           }}
         >
@@ -228,7 +242,7 @@ export function MenuEditor({ value, onChange, onOpenDocument, toolId }: MenuEdit
             onOpenDocument={onOpenDocument}
             toolId={toolId}
           />
-        </Paper>
+        </Box>
       </Box>
 
       <Dialog
@@ -248,7 +262,7 @@ export function MenuEditor({ value, onChange, onOpenDocument, toolId }: MenuEdit
                   {
                     title: pendingDeleteTitle,
                     count: pendingDeleteChildCount,
-                  }
+                  },
                 )
               : t("tools.documenthandler.menuEditor.deleteConfirmMessage", {
                   title: pendingDeleteTitle,

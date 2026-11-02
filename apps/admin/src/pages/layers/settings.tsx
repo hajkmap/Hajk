@@ -163,6 +163,7 @@ export default function LayerSettings() {
         }
       : undefined;
 
+
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteConfirmName, setDeleteConfirmName] = useState("");
   const handleDeleteClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -945,6 +946,11 @@ export default function LayerSettings() {
         updateStatus={updateStatus}
         onUpdate={handleExternalSubmit}
         onCancel={handleCancelNewLayer}
+        cancelTo={
+          fromService
+            ? `/services/${fromService}?tab=layers`
+            : getLayersListPath()
+        }
         saveButtonText="Spara"
         backLink={
           service

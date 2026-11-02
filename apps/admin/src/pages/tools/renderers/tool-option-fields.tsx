@@ -5,55 +5,21 @@ import { useTranslation } from "react-i18next";
 import { FormFieldRow } from "../../../components/form-components/form-field-grid";
 import { TextFieldWithHelp } from "../../../components/form-components/field-label-with-help";
 import { FieldLabelWithHelp } from "../../../components/form-components/field-help-tooltip";
+import {
+  decodeInstruction,
+  encodeInstruction,
+  formatGroups,
+  formatNumberList,
+  parseGroups,
+  parseNumberList,
+  storedNumber,
+} from "./tool-option-parsers";
 
 interface OptionFieldProps {
   control: Control<FieldValues>;
   name: string;
   labelKey: string;
   helpKey?: string;
-}
-
-export function parseNumberList(text: string): number[] | null {
-  const numbers = text
-    .split(",")
-    .map((part) => parseFloat(part.trim()))
-    .filter((n) => Number.isFinite(n));
-  return numbers.length > 0 ? numbers : null;
-}
-
-export function formatNumberList(value: unknown): string {
-  return Array.isArray(value) ? value.join(", ") : "";
-}
-
-export function parseTerrainBreakpoints(
-  text: string,
-): Record<string, number> | null {
-  const result: Record<string, number> = {};
-  text.split(",").forEach((part) => {
-    const trimmed = part.trim();
-    const separator = trimmed.indexOf(":");
-    if (separator === -1) return;
-    const zoom = parseFloat(trimmed.slice(0, separator));
-    const terrainZoom = parseFloat(trimmed.slice(separator + 1));
-    if (Number.isFinite(zoom) && Number.isFinite(terrainZoom)) {
-      result[String(Math.trunc(zoom))] = terrainZoom;
-    }
-  });
-  return Object.keys(result).length > 0 ? result : null;
-}
-
-export function formatTerrainBreakpoints(value: unknown): string {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return "";
-  return Object.keys(value)
-    .sort((a, b) => Number(a) - Number(b))
-    .map((zoom) => `${zoom}:${(value as Record<string, number>)[zoom]}`)
-    .join(", ");
-}
-
-function storedNumber(raw: string): number | null {
-  if (raw === "") return null;
-  const parsed = Number(raw);
-  return Number.isFinite(parsed) ? parsed : null;
 }
 
 export function TextOption({
@@ -241,13 +207,15 @@ export function CheckboxOption({
   );
 }
 
-/** Instruction is stored base64-encoded, the same way the client reads it. */
+/** Instruction is stored base64-encoded, the same way the legacy admin did. */
 export function InstructionOption({
   control,
 }: {
   control: Control<FieldValues>;
 }) {
   const { t } = useTranslation();
+  const [draft, setDraft] = useState<string | null>(null);
+  const [invalid, setInvalid] = useState(false);
   return (
     <FormFieldRow>
       <Controller
@@ -259,13 +227,23 @@ export function InstructionOption({
             fullWidth
             multiline
             minRows={3}
-            value={
-              typeof field.value === "string" && field.value
-                ? atob(field.value)
-                : ""
+            error={invalid}
+            helperText={
+              invalid ? t("tools.instructionUnsupportedCharacters") : undefined
             }
-            onChange={(event) => field.onChange(btoa(event.target.value))}
-            onBlur={field.onBlur}
+            value={draft ?? decodeInstruction(field.value)}
+            onChange={(event) => {
+              const text = event.target.value;
+              const encoded = encodeInstruction(text);
+              setDraft(text);
+              setInvalid(encoded === null);
+              if (encoded !== null) field.onChange(encoded);
+            }}
+            onBlur={() => {
+              setDraft(null);
+              setInvalid(false);
+              field.onBlur();
+            }}
           />
         )}
       />
@@ -273,8 +251,10 @@ export function InstructionOption({
   );
 }
 
+/** Keeps the typed text so spaces inside group names survive until blur. */
 export function GroupsOption({ control }: { control: Control<FieldValues> }) {
   const { t } = useTranslation();
+  const [draft, setDraft] = useState<string | null>(null);
   return (
     <FormFieldRow>
       <Controller
@@ -284,17 +264,15 @@ export function GroupsOption({ control }: { control: Control<FieldValues> }) {
           <TextField
             label={t("tools.visibleForGroups")}
             fullWidth
-            value={
-              Array.isArray(field.value) ? (field.value as string[]).join(", ") : ""
-            }
-            onChange={(event) =>
-              field.onChange(
-                event.target.value
-                  ? event.target.value.split(",").map((part) => part.trim())
-                  : [],
-              )
-            }
-            onBlur={field.onBlur}
+            value={draft ?? formatGroups(field.value)}
+            onChange={(event) => {
+              setDraft(event.target.value);
+              field.onChange(parseGroups(event.target.value));
+            }}
+            onBlur={() => {
+              setDraft(null);
+              field.onBlur();
+            }}
           />
         )}
       />

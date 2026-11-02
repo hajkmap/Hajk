@@ -71,6 +71,7 @@ export default function FormComponentsExamplePage() {
   return (
     <Page title="Examples">
       <FormActionPanel
+        cancelTo={"/"}
         updateStatus="idle"
         onUpdate={() => {
           void handleSubmit(onSubmit)();

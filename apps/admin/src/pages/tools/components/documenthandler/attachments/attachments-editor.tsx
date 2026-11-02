@@ -42,7 +42,7 @@ export function AttachmentsEditor({ control }: AttachmentsEditorProps) {
 
   return (
     <Controller
-      name="pdfLinks"
+      name="options.pdfLinks"
       control={control}
       render={({ field }) => {
         const attachments = normalizeAttachments(field.value);

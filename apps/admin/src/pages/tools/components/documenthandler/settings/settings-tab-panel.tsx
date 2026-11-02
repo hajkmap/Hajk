@@ -30,7 +30,9 @@ import { getDocuments, useFolders } from "@/api/documents";
 import FormAccordion from "@/components/form-components/form-accordion";
 import FormColorPicker from "@/components/form-components/form-color-picker";
 import FormPanel from "@/components/form-components/form-panel";
+import { FieldLabelWithHelp } from "@/components/form-components/field-help-tooltip";
 import { AttachmentsEditor } from "../attachments/attachments-editor";
+import { storedNumber } from "@/pages/tools/renderers/tool-option-parsers";
 
 interface SettingsTabPanelProps {
   control: Control<FieldValues>;
@@ -68,15 +70,15 @@ export function SettingsTabPanel({
   const bgColor =
     (useWatch({
       control,
-      name: "defaultDocumentColorSettings.textAreaBackgroundColor",
+      name: "options.defaultDocumentColorSettings.textAreaBackgroundColor",
     }) as string) ?? "";
   const dividerColor =
     (useWatch({
       control,
-      name: "defaultDocumentColorSettings.textAreaDividerColor",
+      name: "options.defaultDocumentColorSettings.textAreaDividerColor",
     }) as string) ?? "";
   const { field: tocActiveField } = useController({
-    name: "tableOfContents.active",
+    name: "options.tableOfContents.active",
     control,
   });
   const tocActive = !!tocActiveField.value;
@@ -94,10 +96,10 @@ export function SettingsTabPanel({
   const handleFactBoxToggle = (_: React.SyntheticEvent, checked: boolean) => {
     setFactBoxColorsEnabled(checked);
     if (!checked) {
-      setValue("defaultDocumentColorSettings.textAreaBackgroundColor", "", {
+      setValue("options.defaultDocumentColorSettings.textAreaBackgroundColor", "", {
         shouldDirty: true,
       });
-      setValue("defaultDocumentColorSettings.textAreaDividerColor", "", {
+      setValue("options.defaultDocumentColorSettings.textAreaDividerColor", "", {
         shouldDirty: true,
       });
     }
@@ -109,7 +111,7 @@ export function SettingsTabPanel({
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 6 }}>
             <Controller
-              name="title"
+              name="options.title"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -124,7 +126,7 @@ export function SettingsTabPanel({
 
           <Grid size={{ xs: 12, md: 6 }}>
             <Controller
-              name="drawerButtonTitle"
+              name="options.drawerButtonTitle"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -139,7 +141,7 @@ export function SettingsTabPanel({
 
           <Grid size={{ xs: 12, md: 6 }}>
             <Controller
-              name="drawerTitle"
+              name="options.drawerTitle"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -154,7 +156,7 @@ export function SettingsTabPanel({
 
           <Grid size={{ xs: 12, md: 6 }}>
             <Controller
-              name="drawerButtonIcon"
+              name="options.drawerButtonIcon"
               control={control}
               render={({ field }) => {
                 const iconName = (field.value as string) ?? "";
@@ -200,7 +202,7 @@ export function SettingsTabPanel({
 
           <Grid size={{ xs: 12, md: 6 }}>
             <Controller
-              name="documentOnStart"
+              name="options.documentOnStart"
               control={control}
               render={({ field }) => {
                 const value = (field.value as string) ?? "";
@@ -248,7 +250,7 @@ export function SettingsTabPanel({
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 8 }}>
             <Controller
-              name="customThemeUrl"
+              name="options.customThemeUrl"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -263,15 +265,18 @@ export function SettingsTabPanel({
 
           <Grid size={{ xs: 12, md: 4 }}>
             <Controller
-              name="showScrollButtonLimit"
+              name="options.showScrollButtonLimit"
               control={control}
               render={({ field }) => (
                 <TextField
                   type="number"
                   label={t("tools.documenthandler.showScrollButtonLimit")}
                   fullWidth
-                  {...field}
-                  value={(field.value as number | string) ?? ""}
+                  name={field.name}
+                  inputRef={field.ref}
+                  onBlur={field.onBlur}
+                  value={(field.value as number | string | null) ?? ""}
+                  onChange={(event) => field.onChange(storedNumber(event.target.value))}
                 />
               )}
             />
@@ -281,7 +286,7 @@ export function SettingsTabPanel({
         <Grid container rowSpacing={0} columnSpacing={2} sx={{ mt: 2 }}>
           <Grid size={{ xs: 12, md: 6 }}>
             <Controller
-              name="searchImplemented"
+              name="options.searchImplemented"
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -299,7 +304,7 @@ export function SettingsTabPanel({
 
           <Grid size={{ xs: 12, md: 6 }}>
             <Controller
-              name="enablePrint"
+              name="options.enablePrint"
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -317,7 +322,34 @@ export function SettingsTabPanel({
 
           <Grid size={{ xs: 12, md: 6 }}>
             <Controller
-              name="closePanelOnMapLinkOpen"
+              name="options.consolidateDocumentLoading"
+              control={control}
+              render={({ field }) => (
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={!!field.value}
+                      onChange={(_, checked) => field.onChange(checked)}
+                    />
+                  }
+                  label={
+                    <FieldLabelWithHelp
+                      label={t(
+                        "tools.documenthandler.consolidateDocumentLoading",
+                      )}
+                      help={t(
+                        "tools.documenthandler.consolidateDocumentLoadingHelp",
+                      )}
+                    />
+                  }
+                />
+              )}
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Controller
+              name="options.closePanelOnMapLinkOpen"
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -335,7 +367,7 @@ export function SettingsTabPanel({
 
           <Grid size={{ xs: 12, md: 6 }}>
             <Controller
-              name="displayLoadingOnMapLinkOpen"
+              name="options.displayLoadingOnMapLinkOpen"
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -353,7 +385,7 @@ export function SettingsTabPanel({
 
           <Grid size={{ xs: 12, md: 6 }}>
             <Controller
-              name="resizingEnabled"
+              name="options.resizingEnabled"
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -371,7 +403,7 @@ export function SettingsTabPanel({
 
           <Grid size={{ xs: 12, md: 6 }}>
             <Controller
-              name="draggingEnabled"
+              name="options.draggingEnabled"
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -407,7 +439,7 @@ export function SettingsTabPanel({
             <>
               <Grid size={{ xs: 12, md: 6 }}>
                 <Controller
-                  name="tableOfContents.title"
+                  name="options.tableOfContents.title"
                   control={control}
                   render={({ field }) => (
                     <TextField
@@ -422,7 +454,7 @@ export function SettingsTabPanel({
 
               <Grid size={{ xs: 12, md: 6 }}>
                 <Controller
-                  name="tableOfContents.printMode"
+                  name="options.tableOfContents.printMode"
                   control={control}
                   render={({ field }) => (
                     <FormControl fullWidth>
@@ -452,15 +484,18 @@ export function SettingsTabPanel({
 
               <Grid size={{ xs: 12, sm: 6 }}>
                 <Controller
-                  name="tableOfContents.chapterLevelsToShow"
+                  name="options.tableOfContents.chapterLevelsToShow"
                   control={control}
                   render={({ field }) => (
                     <TextField
                       type="number"
                       label={t("tools.documenthandler.chapterLevelsToShow")}
                       fullWidth
-                      {...field}
-                      value={(field.value as number | string) ?? ""}
+                      name={field.name}
+                      inputRef={field.ref}
+                      onBlur={field.onBlur}
+                      value={(field.value as number | string | null) ?? ""}
+                      onChange={(event) => field.onChange(storedNumber(event.target.value))}
                     />
                   )}
                 />
@@ -468,7 +503,7 @@ export function SettingsTabPanel({
 
               <Grid size={{ xs: 12, sm: 6 }}>
                 <Controller
-                  name="tableOfContents.chapterLevelsToShowForPrint"
+                  name="options.tableOfContents.chapterLevelsToShowForPrint"
                   control={control}
                   render={({ field }) => (
                     <TextField
@@ -477,8 +512,11 @@ export function SettingsTabPanel({
                         "tools.documenthandler.chapterLevelsToShowForPrint"
                       )}
                       fullWidth
-                      {...field}
-                      value={(field.value as number | string) ?? ""}
+                      name={field.name}
+                      inputRef={field.ref}
+                      onBlur={field.onBlur}
+                      value={(field.value as number | string | null) ?? ""}
+                      onChange={(event) => field.onChange(storedNumber(event.target.value))}
                     />
                   )}
                 />
@@ -486,7 +524,7 @@ export function SettingsTabPanel({
 
               <Grid size={12}>
                 <Controller
-                  name="tableOfContents.expanded"
+                  name="options.tableOfContents.expanded"
                   control={control}
                   render={({ field }) => (
                     <FormControlLabel
@@ -534,7 +572,7 @@ export function SettingsTabPanel({
                   value={bgColor}
                   onChange={(hex) =>
                     setValue(
-                      "defaultDocumentColorSettings.textAreaBackgroundColor",
+                      "options.defaultDocumentColorSettings.textAreaBackgroundColor",
                       hex,
                       { shouldDirty: true }
                     )
@@ -548,7 +586,7 @@ export function SettingsTabPanel({
                   value={dividerColor}
                   onChange={(hex) =>
                     setValue(
-                      "defaultDocumentColorSettings.textAreaDividerColor",
+                      "options.defaultDocumentColorSettings.textAreaDividerColor",
                       hex,
                       { shouldDirty: true }
                     )

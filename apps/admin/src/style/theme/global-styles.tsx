@@ -45,6 +45,11 @@ export function GlobalStylesComponent({ mode }: { mode: PaletteMode }) {
         ".form-container .MuiSwitch-root": {
           marginLeft: 6,
         },
+        // Open tooltips shouldn't block clicks/hover on what's underneath.
+        // "body" bumps specificity above MUI's own interactive pointerEvents rule.
+        "body .MuiTooltip-popper": {
+          pointerEvents: "none",
+        },
       }}
     />
   );

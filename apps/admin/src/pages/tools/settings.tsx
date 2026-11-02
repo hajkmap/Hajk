@@ -16,7 +16,7 @@ import { applySettingsSearch } from "../../components/form-components/settings-s
 import { useRef, useEffect, useState, type RefObject } from "react";
 import { toast } from "react-toastify";
 import RenderTool from "./renderers/render-tool";
-import { getToolOptionDefaults } from "./renderers/tool-option-defaults";
+import { withToolOptionDefaults } from "./renderers/tool-option-defaults";
 import UsedInMapsPanel from "../../components/used-in-maps-panel";
 import { useForm, FieldValues } from "react-hook-form";
 
@@ -118,15 +118,13 @@ export default function ToolSettings() {
       // Fill in defaults for any field missing from saved options (e.g. a
       // freshly created tool) so the isDirty baseline isn't `undefined` for
       // fields a widget will write a concrete value to on first touch.
-      const options = { ...getToolOptionDefaults(tool.type), ...tool.options };
+      const options = withToolOptionDefaults(tool.type, tool.options);
       const optionsTitle =
         typeof options.title === "string" && options.title
           ? options.title
           : (tool.title ?? "");
       reset({
         type: tool.type ?? "",
-        // Flat title field (e.g. documenthandler) — same seed as options.title
-        title: optionsTitle,
         options: {
           ...options,
           title: optionsTitle,
@@ -145,24 +143,14 @@ export default function ToolSettings() {
   const onSubmit = (data: FieldValues) => {
     if (!tool) return;
 
-    const { type, title: formTitle, options: nestedOptions, ...rest } = data;
-    const nested =
-      nestedOptions && typeof nestedOptions === "object"
-        ? (nestedOptions as Record<string, unknown>)
-        : null;
-    const submittedOptions = nested ? { ...rest, ...nested } : rest;
+    const type = data.type as string;
+    const nestedOptions: unknown = data.options;
     const options: Record<string, unknown> = {
       ...(tool.options ?? {}),
-      ...submittedOptions,
+      ...(nestedOptions && typeof nestedOptions === "object"
+        ? (nestedOptions as Record<string, unknown>)
+        : {}),
     };
-
-    // options.title wins when present (layerswitcher etc.). Flat `title`
-    // (documenthandler) only fills in when options.title was not submitted.
-    if (nested && "title" in nested) {
-      options.title = nested.title;
-    } else if (typeof formTitle === "string") {
-      options.title = formTitle;
-    }
 
     // Strip attachments where both name and link are blank
     if (Array.isArray(options.pdfLinks)) {
@@ -179,7 +167,7 @@ export default function ToolSettings() {
       {
         id: tool.id,
         data: {
-          type: type as string,
+          type,
           title: syncedTitle,
           options,
         },
@@ -187,11 +175,7 @@ export default function ToolSettings() {
       {
         onSuccess: () => {
           toast.success(t("common.dialog.saveSuccess"));
-          reset({
-            ...data,
-            title: syncedTitle ?? "",
-            options,
-          });
+          reset({ type, options });
         },
         onError: (error: Error) => {
           toast.error(error.message);
@@ -231,6 +215,7 @@ export default function ToolSettings() {
       }
     >
       <FormActionPanel
+        cancelTo={"/tools"}
         updateStatus={updateStatus}
         onUpdate={handleExternalSubmit}
         saveButtonText={t("common.dialog.saveBtn")}
