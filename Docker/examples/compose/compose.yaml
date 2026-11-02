@@ -1,63 +1,234 @@
-# EXAMPLE ONLY, NOT FOR PRODUCTION. See Docker/README.md.
+# EXAMPLE ONLY, NOT FOR PRODUCTION. See README.md.
 #
-# Hajk with a PostGIS database and a GeoServer, behind an nginx reverse proxy.
+# Hajk with a PostGIS database and a GeoServer, behind an nginx reverse proxy
+# that only lets in users who have logged in with Keycloak.
 #
 #   cd Docker/examples/compose
-#   cp example.env .env   # then set the passwords in .env
+#   cp example.env .env   # then set the secrets in .env
 #   docker compose up
 #
-# Hajk:      http://localhost:1337 (Admin at http://localhost:1337/admin)
+# Hajk:      http://localhost:8080 (Admin at http://localhost:8080/admin)
 # GeoServer: http://localhost:8080/geoserver
-# PostGIS:   localhost:5432
+# Keycloak:  http://localhost:8180 (users and groups)
+# PostGIS:   localhost:5433
+#
+# How a request reaches Hajk:
+#
+#   browser -> nginx -> oauth2-proxy: is there a valid session cookie?
+#                 |       no:  redirect the browser to Keycloak to log in
+#                 |       yes: reply with the user name, email and groups
+#                 v
+#               Hajk, with the user in X-Control-Header and the groups in
+#               X-Control-Group-Header, separated by ","
+#               GeoServer, with the user in X-GeoServer-User and the groups
+#               in X-GeoServer-Roles, separated by ";"
+#
+# Hajk believes those headers only when the request comes from nginx's IP
+# address (AD_TRUSTED_PROXY_IPS), so nginx has a fixed address, 172.28.0.10.
+# See the network at the end of this file.
+# GeoServer cannot check that, so it must only be reachable through nginx.
+#
+# See README.md for more.
 
 services:
   hajk:
-    image: ghcr.io/hajkmap/hajk:${HAJK_TAG:-nightly-master}
+    image: ghcr.io/hajkmap/hajk:${HAJK_TAG:-nightly}
     volumes:
       - hajk-appdata:/usr/app/App_Data
+    environment:
+      # Only API v2. API v1 would look for an LDAP server.
+      API_VERSIONS: "2"
+      # Take the client's IP from X-Forwarded-For, but only from nginx.
+      EXPRESS_TRUST_PROXY: 172.28.0.10
+      # Read the user and groups from the headers set by nginx.
+      AD_LOOKUP_ACTIVE: "true"
+      AD_USE_GROUPS_FROM_HEADER: "true"
+      # Hajk listens on IPv6 as well, so Node.js sees nginx's IPv4 address
+      # as ::ffff:172.28.0.10. Both forms are listed to be safe.
+      AD_TRUSTED_PROXY_IPS: "::ffff:172.28.0.10,172.28.0.10"
+      AD_TRUSTED_HEADER: X-Control-Header
+      AD_TRUSTED_GROUP_HEADER: X-Control-Group-Header
+      AD_TRUSTED_EMAIL_HEADER: X-Control-Email-Header
+      # Send the user's name, email and groups to the Client.
+      AD_EXPOSE_USER_OBJECT: "true"
+      # Admin, and the API it uses, is only for this Keycloak group.
+      RESTRICT_ADMIN_ACCESS_TO_AD_GROUPS: GIS_ADMIN
+      EXPOSE_AND_RESTRICT_STATIC_ADMIN: GIS_ADMIN
+    networks:
+      - hajk
     restart: unless-stopped
 
   nginx:
     image: nginx:stable-alpine
     ports:
-      - "1337:1337"
+      - "8080:8080"
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/geoserver-roles.js:/etc/nginx/geoserver-roles.js:ro
+    networks:
+      hajk:
+        ipv4_address: 172.28.0.10
     depends_on:
+      - hajk
+      - geoserver
+      - oauth2-proxy
+    restart: unless-stopped
+
+  # Checks the session cookie for nginx, and runs the login with Keycloak.
+  # To log in with another identity provider, such as Microsoft Entra ID,
+  # replace Keycloak and change the OIDC settings here.
+  oauth2-proxy:
+    image: quay.io/oauth2-proxy/oauth2-proxy:v7.12.0
+    environment:
+      OAUTH2_PROXY_HTTP_ADDRESS: 0.0.0.0:4180
+      OAUTH2_PROXY_REVERSE_PROXY: "true"
+      OAUTH2_PROXY_PROVIDER: oidc
+      OAUTH2_PROXY_CLIENT_ID: hajk
+      OAUTH2_PROXY_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:?Set OIDC_CLIENT_SECRET in .env}
+      OAUTH2_PROXY_COOKIE_SECRET: ${OAUTH2_PROXY_COOKIE_SECRET:?Set OAUTH2_PROXY_COOKIE_SECRET in .env}
+      # Allowed without TLS only because this example runs on localhost.
+      OAUTH2_PROXY_COOKIE_SECURE: "false"
+      OAUTH2_PROXY_EMAIL_DOMAINS: "*"
+      OAUTH2_PROXY_REDIRECT_URL: http://localhost:8080/oauth2/callback
+      OAUTH2_PROXY_SKIP_PROVIDER_BUTTON: "true"
+      # Reply to nginx with X-Auth-Request-User, -Email and -Groups.
+      OAUTH2_PROXY_SET_XAUTHREQUEST: "true"
+      OAUTH2_PROXY_UPSTREAMS: static://202
+      # Allows the logout link to continue to Keycloak's logout page.
+      OAUTH2_PROXY_WHITELIST_DOMAINS: localhost:8180
+      # The browser reaches Keycloak on localhost:8180, but this container
+      # reaches it on keycloak:8080, so the endpoints are given one by one.
+      # With an identity provider that has one address for everyone, only
+      # OAUTH2_PROXY_OIDC_ISSUER_URL is needed.
+      OAUTH2_PROXY_OIDC_ISSUER_URL: http://localhost:8180/realms/hajk
+      OAUTH2_PROXY_SKIP_OIDC_DISCOVERY: "true"
+      OAUTH2_PROXY_LOGIN_URL: http://localhost:8180/realms/hajk/protocol/openid-connect/auth
+      OAUTH2_PROXY_REDEEM_URL: http://keycloak:8080/realms/hajk/protocol/openid-connect/token
+      OAUTH2_PROXY_OIDC_JWKS_URL: http://keycloak:8080/realms/hajk/protocol/openid-connect/certs
+      OAUTH2_PROXY_CODE_CHALLENGE_METHOD: S256
+    networks:
+      - hajk
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Runs in development mode, which keeps its data inside the container.
+  # Users, groups and the hajk client are imported from keycloak/ when the
+  # container is created, so changes made in Keycloak's admin console are
+  # lost when it is recreated. Add permanent changes to the realm file.
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.4
+    command: start-dev --import-realm
+    ports:
+      - "127.0.0.1:8180:8080"
+    volumes:
+      - ./keycloak:/opt/keycloak/data/import:ro
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?Set KEYCLOAK_ADMIN_PASSWORD in .env}
+      # Tokens always name http://localhost:8180 as issuer, while
+      # oauth2-proxy can still use http://keycloak:8080.
+      KC_HOSTNAME: http://localhost:8180
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+      KC_HEALTH_ENABLED: "true"
+      # Used in keycloak/hajk-realm.json.
+      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET}
+      DEMO_USER_PASSWORD: ${DEMO_USER_PASSWORD:?Set DEMO_USER_PASSWORD in .env}
+    healthcheck:
+      # The image has no curl, so talk HTTP to the management port with bash.
+      test:
+        - CMD-SHELL
+        - >-
+          exec 3<>/dev/tcp/localhost/9000 &&
+          printf 'GET /health/ready HTTP/1.0\r\n\r\n' >&3 &&
+          grep -q '"UP"' <&3
+      interval: 10s
+      retries: 20
+      start_period: 20s
+    networks:
       - hajk
     restart: unless-stopped
 
+  # The PostGIS project's image. It is only built for amd64, so on ARM, such
+  # as Apple silicon, it runs emulated.
   db:
-    image: kartoza/postgis:18-3.6
+    image: postgis/postgis:18-3.6
+    platform: linux/amd64
     volumes:
       - geo-db-data:/var/lib/postgresql
+    # 5433 on your computer, so it does not collide with a PostgreSQL you
+    # already run on 5432. Other containers use db:5432.
     ports:
-      - "127.0.0.1:5432:5432"
+      - "127.0.0.1:5433:5432"
     environment:
       POSTGRES_DB: hajkGeoData
       POSTGRES_USER: postgres
-      POSTGRES_PASS: ${POSTGRES_PASS:?Set POSTGRES_PASS in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -h localhost -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d hajkGeoData"]
       interval: 10s
       retries: 10
+    networks:
+      - hajk
     restart: unless-stopped
 
+  # The GeoServer project's image.
   geoserver:
-    image: kartoza/geoserver:2.28.5
+    image: docker.osgeo.org/geoserver:3.0.2
     volumes:
-      - geoserver-data:/opt/geoserver/data_dir
-    ports:
-      - "127.0.0.1:8080:8080"
+      - geoserver-data:/opt/geoserver_data
     environment:
       GEOSERVER_ADMIN_USER: admin
       GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD:?Set GEOSERVER_ADMIN_PASSWORD in .env}
-      INITIAL_MEMORY: 1G
-      MAXIMUM_MEMORY: 2G
+      EXTRA_JAVA_OPTS: -Xms1g -Xmx2g
+      # Take the client's IP from X-Forwarded-For, but only from nginx.
+      GEOSERVER_TRUSTED_PROXIES: 172.28.0.10
+    # The image's own test, checked more often so geoserver-init starts sooner.
+    healthcheck:
+      interval: 10s
+      retries: 30
+      start_period: 30s
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - hajk
     restart: unless-stopped
+
+  # Runs once, after GeoServer has started, and sets GeoServer up to log in
+  # users from the headers that nginx sets. See geoserver/configure-security.sh.
+  geoserver-init:
+    image: curlimages/curl:8.17.0
+    entrypoint: ["/bin/sh", "/configure-security.sh"]
+    volumes:
+      - ./geoserver/configure-security.sh:/configure-security.sh:ro
+    environment:
+      GEOSERVER_URL: http://geoserver:8080/geoserver
+      GEOSERVER_ADMIN_USER: admin
+      GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD}
+    depends_on:
+      geoserver:
+        condition: service_healthy
+    networks:
+      - hajk
+    restart: on-failure
+
+# Hajk compares the address of the connecting container with
+# AD_TRUSTED_PROXY_IPS, exactly, so nginx needs an address that never changes.
+# Docker hands out addresses as containers start, so the subnet is fixed here,
+# and nginx gets 172.28.0.10. The other containers get addresses from
+# ip_range, 172.28.0.128 and up, so none of them can take nginx's address.
+#
+# If 172.28.0.0/24 is already used on your computer, change the subnet and
+# nginx's address, and also AD_TRUSTED_PROXY_IPS, EXPRESS_TRUST_PROXY and
+# GEOSERVER_TRUSTED_PROXIES.
+networks:
+  hajk:
+    ipam:
+      config:
+        - subnet: 172.28.0.0/24
+          ip_range: 172.28.0.128/25
 
 volumes:
   hajk-appdata:

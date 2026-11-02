@@ -69,28 +69,14 @@ docker build --file Docker/Dockerfile.ubi9-nodejs --tag hajk-ubi9 .
 > [!CAUTION]
 > **The files in [`examples/`](examples) are examples, not for production.** They show ways to build and run Hajk, but are not maintained or tested like the official images, may be out of date, and leave out things a production setup needs, such as TLS, secrets management, resource limits and backups. Use them as a starting point, and review them before using anything from them.
 
-| Example                                                                 | What it shows                                                      |
-| ----------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| [`compose/`](examples/compose)                                          | Hajk with PostGIS and GeoServer behind nginx, using Docker Compose |
-| [`backend-and-admin.dockerfile`](examples/backend-and-admin.dockerfile) | Backend and Admin only, for developing the Client outside Docker   |
+| Example                                                                 | What it shows                                                                                   |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| [`compose/`](examples/compose)                                          | Hajk with PostGIS and GeoServer behind nginx, with login through Keycloak, using Docker Compose |
+| [`backend-and-admin.dockerfile`](examples/backend-and-admin.dockerfile) | Backend and Admin only, for developing the Client outside Docker                                |
 
 ### Docker Compose
 
-The [compose example](examples/compose/compose.yaml) runs Hajk together with a [PostGIS](https://postgis.net/) database and a [GeoServer](https://geoserver.org/), behind an nginx reverse proxy:
-
-```bash
-cd Docker/examples/compose
-cp example.env .env   # then set the passwords in .env
-docker compose up
-```
-
-| Service   | Address                                                                        |
-| --------- | ------------------------------------------------------------------------------ |
-| Hajk      | <http://localhost:1337>, and Admin on <http://localhost:1337/admin>            |
-| GeoServer | <http://localhost:8080/geoserver>, log in as `admin` with the password you set |
-| PostGIS   | `localhost:5432`, database `hajkGeoData`, user `postgres`                      |
-
-In GeoServer, create a workspace and a PostGIS store with host `db` and database `hajkGeoData`. Load data into PostGIS through port 5432. GeoServer and PostGIS are only reachable from your own computer.
+The [compose example](examples/compose) is a complete setup: Hajk, PostGIS and GeoServer behind nginx, where users log in once, with Keycloak, and both Hajk and GeoServer get their user name and groups. See its [README](examples/compose/README.md).
 
 ### Backend and Admin only
 
@@ -105,4 +91,4 @@ Set `mapserviceBase` to `http://localhost:3002/api/v2` in `apps/client/public/ap
 
 ## Ports
 
-The port a container listens on is not always the port you open in the browser. In `-p 1337:3002`, Hajk listens on `3002` inside the container, and you open <http://localhost:1337>. Hajk logs the port inside the container, so it prints `3002` either way.
+The port a container listens on is not always the port you open in the browser. In `-p 8080:3002`, Hajk listens on `3002` inside the container, and you open <http://localhost:8080>. Hajk logs the port inside the container, so it prints `3002` either way.
