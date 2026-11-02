@@ -7,7 +7,7 @@
 #   docker run --rm -p 8080:8080 hajk-simple
 
 # --- CLIENT --- #
-FROM node:24-alpine AS buildimage
+FROM node:26-alpine AS buildimage
 WORKDIR /tmp/build/client
 
 COPY /apps/client/package*.json ./
@@ -36,7 +36,7 @@ RUN npm run build --ignore-scripts
 
 # --- FINAL ASSEMBLY --- #
 # Runs nginx as a non-root user, listening on port 8080.
-FROM nginxinc/nginx-unprivileged:stable-alpine
+FROM nginx/nginx-unprivileged:stable-alpine
 
 COPY Docker/nginx-simple.conf /etc/nginx/conf.d/default.conf
 COPY --from=buildimage /tmp/build/client/build /usr/share/nginx/html

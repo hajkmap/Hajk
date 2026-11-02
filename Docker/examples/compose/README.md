@@ -7,7 +7,7 @@ A complete Hajk setup in Docker Compose: Hajk, a [PostGIS](https://postgis.net/)
 
 | Service          | Image                                                                                              | Does                                                       |
 | ---------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| `nginx`          | [`nginx`](https://hub.docker.com/_/nginx)                                                          | The only way in. Asks oauth2-proxy who the user is.        |
+| `nginx`          | [`nginx/nginx-unprivileged`](https://hub.docker.com/r/nginx/nginx-unprivileged)                    | The only way in. Asks oauth2-proxy who the user is.        |
 | `oauth2-proxy`   | [`oauth2-proxy`](https://oauth2-proxy.github.io/oauth2-proxy/)                                     | Keeps the session cookie and runs the login with Keycloak. |
 | `keycloak`       | [`keycloak`](https://www.keycloak.org/server/containers)                                           | Users and groups.                                          |
 | `hajk`           | [`ghcr.io/hajkmap/hajk`](../../README.md#official-images)                                          | Hajk: Backend, Client and Admin.                           |

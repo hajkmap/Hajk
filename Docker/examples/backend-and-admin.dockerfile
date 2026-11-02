@@ -4,7 +4,7 @@
 # same Node.js images as the official Dockerfile in the repository root.
 
 # Stage 1 - Building the backend
-FROM node:24-alpine AS backend-builder
+FROM node:26-alpine AS backend-builder
 WORKDIR /usr/app
 COPY /apps/backend/package*.json ./
 RUN npm ci
@@ -12,7 +12,7 @@ COPY ./apps/backend .
 RUN npm run compile
 
 # Stage 2 - Building the admin
-FROM node:24-alpine AS admin-builder
+FROM node:26-alpine AS admin-builder
 WORKDIR /usr/app
 COPY /apps/admin/package*.json ./
 RUN npm ci
@@ -22,7 +22,7 @@ RUN mv ./public/config.docker.json ./public/config.json
 RUN npm run build
 
 # Stage 3 - Combine everything and fire it up
-FROM node:24-slim
+FROM node:26-slim
 WORKDIR /usr/app
 COPY /apps/backend/package*.json ./
 RUN npm ci --omit=dev

@@ -59,7 +59,7 @@ services:
     restart: unless-stopped
 
   nginx:
-    image: nginx:stable-alpine
+    image: nginx/nginx-unprivileged:stable-alpine
     ports:
       - "8080:8080"
     volumes:
