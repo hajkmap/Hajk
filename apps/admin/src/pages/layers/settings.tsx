@@ -129,6 +129,12 @@ const ALL_SETTINGS_TABS: {
   },
 ];
 
+const withTab = (tab: LayerSettingsTab) => (prev: URLSearchParams) => {
+  const next = new URLSearchParams(prev);
+  next.set("tab", tab);
+  return next;
+};
+
 export default function LayerSettings() {
   const { t } = useTranslation();
   const settingsSearchLabels = useSettingsSearchLabels();
@@ -141,8 +147,11 @@ export default function LayerSettings() {
   const { data: layer, isLoading, isError } = useLayerById(layerId ?? "");
   const { mutateAsync: updateLayer, status: updateStatus } = useUpdateLayer();
   const { mutateAsync: createRoleOnLayer } = useCreateAndUpdateRoleOnLayer();
-  const { mutateAsync: removeLayer, isPending: isDeletingLayer } =
-    useDeleteLayer(layer?.serviceId ?? fromService ?? "");
+  const {
+    mutateAsync: removeLayer,
+    isPending: isDeletingLayer,
+    isSuccess: isLayerDeleted,
+  } = useDeleteLayer(layer?.serviceId ?? fromService ?? "");
   const queryClient = useQueryClient();
   const { palette } = useTheme();
   const { data: services } = useServices();
@@ -155,10 +164,12 @@ export default function LayerSettings() {
     !!layer?.id,
   );
 
+  // A layer created from its service exists from the start, so Avbryt takes it
+  // back for as long as it has never been saved.
   const handleCancelNewLayer =
-    fromService && layerId
+    fromService && layer && !layer.lastSavedDate
       ? async () => {
-          await removeLayer(layerId);
+          await removeLayer(layer.id);
           void navigate(`/services/${fromService}?tab=layers`);
         }
       : undefined;
@@ -241,12 +252,12 @@ export default function LayerSettings() {
       ? tabFromUrl
       : settingsVisibility.tabs[0];
   const setActiveTab = (tab: LayerSettingsTab) => {
-    setSearchParams({ tab }, { replace: true });
+    setSearchParams(withTab(tab), { replace: true });
   };
 
   useEffect(() => {
     if (tabFromUrl && !settingsVisibility.tabs.includes(tabFromUrl)) {
-      setSearchParams({ tab: settingsVisibility.tabs[0] }, { replace: true });
+      setSearchParams(withTab(settingsVisibility.tabs[0]), { replace: true });
     }
   }, [tabFromUrl, settingsVisibility.tabs, setSearchParams]);
   const [settingsSearchQuery, setSettingsSearchQuery] = useState("");
@@ -2932,7 +2943,13 @@ export default function LayerSettings() {
           disabled={isDeletingLayer}
         />
       </DialogWrapper>
-      <UnsavedChangesGuard when={isDirty || selectedLayersDirty} />
+      <UnsavedChangesGuard
+        when={
+          !isDeletingLayer &&
+          !isLayerDeleted &&
+          (isDirty || selectedLayersDirty)
+        }
+      />
     </Page>
   );
 }
