@@ -27,6 +27,21 @@ jobs:
         with:
           fetch-depth: 0
 
+      # A published release never changes, so stop before any image is pushed. A draft is fine: it means a run is being retried.
+      - name: Verify tag is not already released
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if is_draft=$(gh release view "$GITHUB_REF_NAME" --json isDraft --jq .isDraft 2>&1); then
+            if [ "$is_draft" != "true" ]; then
+              echo "::error::Release $GITHUB_REF_NAME is already published. Make a new release instead."
+              exit 1
+            fi
+          elif [ "$is_draft" != "release not found" ]; then
+            echo "::error::Could not look up release $GITHUB_REF_NAME: $is_draft"
+            exit 1
+          fi
+
       - name: Verify tag and branch
         run: |
           if [[ "$GITHUB_REF_NAME" =~ ^v([0-9]+)\.([0-9]+)\.0-rc\.[0-9]+$ ]]; then
@@ -123,16 +138,24 @@ jobs:
           fi
 
       # A draft can still get assets when immutable releases are enabled; a published release cannot.
+      # Checked again here since Re-run failed jobs does not repeat the check job, and the draft may have been published since.
       - name: Create draft release with packages
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+          if is_draft=$(gh release view "$GITHUB_REF_NAME" --json isDraft --jq .isDraft 2>&1); then
+            if [ "$is_draft" != "true" ]; then
+              echo "::error::Release $GITHUB_REF_NAME is already published. Not changing its packages."
+              exit 1
+            fi
             gh release upload "$GITHUB_REF_NAME" releases/*.zip --clobber
-          else
+          elif [ "$is_draft" = "release not found" ]; then
             flags=(--draft --verify-tag --title "$GITHUB_REF_NAME" --notes-file "$RUNNER_TEMP/notes.md")
             if [[ "$GITHUB_REF_NAME" == *-* ]]; then
               flags+=(--prerelease)
             fi
             gh release create "$GITHUB_REF_NAME" "${flags[@]}" releases/*.zip
+          else
+            echo "::error::Could not look up release $GITHUB_REF_NAME: $is_draft"
+            exit 1
           fi

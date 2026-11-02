@@ -235,7 +235,7 @@ Security fixes follow the [disclosure policy](../SECURITY.md#disclosure-policy).
 
 Pushing a tag that starts with `v` runs the [release workflow](../.github/workflows/release.yml):
 
-1. **Checks the tag.** A release (`v4.4.0`) must point to a commit on `master`. A release candidate must look like `vX.Y.0-rc.N` and point to a commit on `release/X.Y`. The version in all three `package.json` files must match the tag. If anything is wrong, nothing is published.
+1. **Checks the tag.** The tag must not already have a published release. A release (`v4.4.0`) must point to a commit on `master`. A release candidate must look like `vX.Y.0-rc.N` and point to a commit on `release/X.Y`. The version in all three `package.json` files must match the tag. If anything is wrong, nothing is published.
 2. **Publishes the Docker images** `ghcr.io/hajkmap/hajk` and `ghcr.io/hajkmap/hajk-simple` for `linux/amd64` and `linux/arm64`, with the tags described in [Docker images](releases.md#docker-images).
 3. **Creates a draft release** on the [releases page](https://github.com/hajkmap/Hajk/releases). It takes the release notes from the version's section in the CHANGELOG, and attaches the `nodejs` and `simple` zip packages built by [`scripts/create-release.mjs`](../scripts/create-release.mjs) after a clean install of the dependencies. Release candidates are marked as pre-releases.
 
@@ -245,3 +245,4 @@ The release is not public until you publish the draft. With immutable releases, 
 
 - **The tag check fails**, for example because a `package.json` version is wrong: nothing has been published. Delete the tag (`git push --delete origin v4.4.0` and `git tag -d v4.4.0`), fix the problem through a pull request, and tag again.
 - **A later step fails**, for example because of a network error: click **Re-run failed jobs** on the run under the **Actions** tab. If the draft release already exists, the packages are uploaded to it again.
+- **The release is already published**: the tag has been run before, and nothing has been changed. A published release never changes, so make a new release instead.
