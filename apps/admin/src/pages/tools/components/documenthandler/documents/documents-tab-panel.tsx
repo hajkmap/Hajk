@@ -195,6 +195,10 @@ export function DocumentsTabPanel({
   }
 
   const isLoading = foldersLoading || allDocsLoading;
+  const documentCount = treeData.reduce(
+    (sum, folder) => sum + (folder.docCount ?? 0),
+    0,
+  );
   const selectedDocTreeId = openDocument
     ? `doc:${openDocument.folder}/${openDocument.document}`
     : null;
@@ -236,6 +240,14 @@ export function DocumentsTabPanel({
             </Button>
           </span>
         </Tooltip>
+        <Box sx={{ flex: 1 }} />
+        {!isLoading && folders.length > 0 && (
+          <Typography variant="caption" color="text.secondary">
+            {t("tools.documenthandler.documents.documentCount", {
+              count: documentCount,
+            })}
+          </Typography>
+        )}
       </Box>
 
       <Divider />

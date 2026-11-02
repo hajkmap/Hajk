@@ -1564,6 +1564,8 @@
           "deleteFolder": "Ta bort mapp",
           "deleteFolderDisabled": "Kan inte ta bort mapp — ta bort alla dokument först",
           "confirmDeleteFolder": "Ta bort denna mapp?",
+          "documentCount_one": "{{count}} dokument",
+          "documentCount_other": "{{count}} dokument",
           "newDocument": "Nytt dokument",
           "noDocuments": "Inga dokument i denna mapp.",
           "deleteDocument": "Ta bort dokument",

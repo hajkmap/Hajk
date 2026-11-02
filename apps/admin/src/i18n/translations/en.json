@@ -1564,6 +1564,8 @@
           "deleteFolder": "Delete folder",
           "deleteFolderDisabled": "Cannot delete folder — remove all documents first",
           "confirmDeleteFolder": "Delete this folder?",
+          "documentCount_one": "{{count}} document",
+          "documentCount_other": "{{count}} documents",
           "newDocument": "New document",
           "noDocuments": "No documents in this folder.",
           "deleteDocument": "Delete document",

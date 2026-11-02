@@ -4,10 +4,16 @@ import { useSettingsSearchTerm } from "./settings-search";
 
 interface FormPanelProps {
   title: string;
+  /** Keep the title for settings search, but don't render it (e.g. when a tab already names the panel). */
+  hideTitle?: boolean;
   children: React.ReactNode;
 }
 
-export default function FormPanel({ title, children }: FormPanelProps) {
+export default function FormPanel({
+  title,
+  hideTitle,
+  children,
+}: FormPanelProps) {
   const searching = useSettingsSearchTerm() !== null;
 
   return (
@@ -23,9 +29,11 @@ export default function FormPanel({ title, children }: FormPanelProps) {
         display: "block",
       }}
     >
-      <Typography variant="h6" sx={{ mb: 1.5 }}>
-        {title}
-      </Typography>
+      {!hideTitle && (
+        <Typography variant="h6" sx={{ mb: 1.5 }}>
+          {title}
+        </Typography>
+      )}
       {children}
     </Paper>
   );

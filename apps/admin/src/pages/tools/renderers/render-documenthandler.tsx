@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Box, Tab, Tabs } from "@mui/material";
-import { Control, Controller, FieldValues, useForm, UseFormSetValue } from "react-hook-form";
+import {
+  Control,
+  Controller,
+  FieldValues,
+  useForm,
+  UseFormSetValue,
+} from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router";
 import { useQueryClient } from "@tanstack/react-query";
@@ -59,12 +65,12 @@ export default function DocumentHandlerRenderer({
   const { data: linkedDoc } = useDocumentById(validUrlDocId);
   const lastAppliedIdRef = useRef<number | undefined>(undefined);
   useEffect(() => {
-    if (
-      linkedDoc &&
-      linkedDoc.id !== lastAppliedIdRef.current
-    ) {
+    if (linkedDoc && linkedDoc.id !== lastAppliedIdRef.current) {
       lastAppliedIdRef.current = linkedDoc.id;
-      setOpenDocument({ folder: linkedDoc.folderName, document: linkedDoc.name });
+      setOpenDocument({
+        folder: linkedDoc.folderName,
+        document: linkedDoc.name,
+      });
       setActiveTab("documents");
     }
     if (!validUrlDocId && lastAppliedIdRef.current !== undefined) {
@@ -104,7 +110,11 @@ export default function DocumentHandlerRenderer({
         }
       })
       .catch((err) => {
-        console.warn('DocumentHandler: Failed to fetch documents for', { folder, document }, err);
+        console.warn(
+          "DocumentHandler: Failed to fetch documents for",
+          { folder, document },
+          err,
+        );
       });
   }
 
@@ -142,7 +152,10 @@ export default function DocumentHandlerRenderer({
 
       {/* Menu settings tab */}
       <Box sx={{ display: activeTab === "menuSettings" ? "block" : "none" }}>
-        <FormPanel title={t("tools.documenthandler.menuEditor.tabLabel")}>
+        <FormPanel
+          title={t("tools.documenthandler.menuEditor.tabLabel")}
+          hideTitle
+        >
           <Controller
             name="options.menuConfig"
             control={control}
@@ -160,7 +173,10 @@ export default function DocumentHandlerRenderer({
 
       {/* Documents tab */}
       <Box sx={{ display: activeTab === "documents" ? "block" : "none" }}>
-        <FormPanel title={t("tools.documenthandler.documents.tabLabel")}>
+        <FormPanel
+          title={t("tools.documenthandler.documents.tabLabel")}
+          hideTitle
+        >
           <DocumentsTabPanel
             key={toolId ?? "none"}
             toolId={toolId}
