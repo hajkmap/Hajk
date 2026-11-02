@@ -1,5 +1,14 @@
-import { useEffect, useRef, useState } from "react";
-import { Box, Tab, Tabs } from "@mui/material";
+import {
+  lazy,
+  memo,
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
+import { Backdrop, Box, CircularProgress, Tab, Tabs } from "@mui/material";
 import {
   Control,
   Controller,
@@ -14,11 +23,70 @@ import { Tool } from "../../../api/tools";
 import { MenuEditor } from "../components/documenthandler/menu-editor/menu-editor";
 import type { MenuConfig } from "../components/documenthandler/menu-editor/types";
 import { DocumentsTabPanel } from "../components/documenthandler/documents/documents-tab-panel";
-import { DocumentEditorDialog } from "../components/documenthandler/documents/document-editor-dialog";
 import { SettingsTabPanel } from "../components/documenthandler/settings/settings-tab-panel";
 import { useDocumentById } from "../../../api/documents";
 import { getDocuments } from "../../../api/documents/requests";
 import FormPanel from "../../../components/form-components/form-panel";
+
+// The editor dialog pulls in the rich-text editor, so it is loaded only when a
+// document is opened.
+const DocumentEditorDialog = lazy(() =>
+  import("../components/documenthandler/documents/document-editor-dialog").then(
+    (m) => ({ default: m.DocumentEditorDialog }),
+  ),
+);
+
+function TabLoading() {
+  return (
+    <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+      <CircularProgress size={24} />
+    </Box>
+  );
+}
+
+// Switching tabs re-renders this component, so each tab's contents are
+// memoized: a click then only redraws the tab bar and the visibility toggles,
+// not the forms and trees inside every tab.
+const MemoSettingsTabPanel = memo(SettingsTabPanel);
+const MemoDocumentsTabPanel = memo(DocumentsTabPanel);
+
+interface MenuTabProps {
+  control: Control<FieldValues>;
+  toolId: number | undefined;
+  mounted: boolean;
+  onOpenDocument: (folder: string, document: string) => void;
+}
+
+// The Controller stays registered before the tab is first opened, so the menu
+// config remains part of the form; only the editor itself waits.
+const MenuTab = memo(function MenuTab({
+  control,
+  toolId,
+  mounted,
+  onOpenDocument,
+}: MenuTabProps) {
+  const { t } = useTranslation();
+  return (
+    <FormPanel title={t("tools.documenthandler.menuEditor.tabLabel")} hideTitle>
+      <Controller
+        name="options.menuConfig"
+        control={control}
+        render={({ field }) =>
+          mounted ? (
+            <MenuEditor
+              value={field.value as MenuConfig | undefined}
+              onChange={field.onChange}
+              toolId={toolId}
+              onOpenDocument={onOpenDocument}
+            />
+          ) : (
+            <TabLoading />
+          )
+        }
+      />
+    </FormPanel>
+  );
+});
 
 interface DocumentHandlerRendererProps {
   tool: Tool;
@@ -47,6 +115,23 @@ export default function DocumentHandlerRenderer({
   const setValue = parentSetValue ?? localForm.setValue;
 
   const [activeTab, setActiveTab] = useState<ActiveTab>("settings");
+  // Tabs are mounted the first time they are opened and then kept mounted, so
+  // the heavy Menu and Documents trees aren't built for tabs nobody opens.
+  // Mounting runs in a transition: the tab switches at once and shows a
+  // spinner while React builds the tab's contents.
+  const [visitedTabs, setVisitedTabs] = useState<ReadonlySet<ActiveTab>>(
+    () => new Set<ActiveTab>(["settings"]),
+  );
+  const [, startTransition] = useTransition();
+
+  function showTab(tab: ActiveTab) {
+    setActiveTab(tab);
+    startTransition(() => {
+      setVisitedTabs((prev) =>
+        prev.has(tab) ? prev : new Set<ActiveTab>([...prev, tab]),
+      );
+    });
+  }
   const [openDocument, setOpenDocument] = useState<{
     folder: string;
     document: string;
@@ -71,7 +156,7 @@ export default function DocumentHandlerRenderer({
         folder: linkedDoc.folderName,
         document: linkedDoc.name,
       });
-      setActiveTab("documents");
+      showTab("documents");
     }
     if (!validUrlDocId && lastAppliedIdRef.current !== undefined) {
       lastAppliedIdRef.current = undefined;
@@ -94,34 +179,37 @@ export default function DocumentHandlerRenderer({
     },
   ];
 
-  function handleOpenDocument(folder: string, document: string) {
-    setOpenDocument({ folder, document });
-    if (toolId === undefined) return;
-    queryClient
-      .fetchQuery({
-        queryKey: ["documents", toolId, folder],
-        queryFn: () => getDocuments(toolId, folder),
-        staleTime: 30_000,
-      })
-      .then((docs) => {
-        const id = docs.find((d) => d.name === document)?.id;
-        if (id !== undefined) {
-          setSearchParams({ documentId: String(id) });
-        }
-      })
-      .catch((err) => {
-        console.warn(
-          "DocumentHandler: Failed to fetch documents for",
-          { folder, document },
-          err,
-        );
-      });
-  }
+  const handleOpenDocument = useCallback(
+    (folder: string, document: string) => {
+      setOpenDocument({ folder, document });
+      if (toolId === undefined) return;
+      queryClient
+        .fetchQuery({
+          queryKey: ["documents", toolId, folder],
+          queryFn: () => getDocuments(toolId, folder),
+          staleTime: 30_000,
+        })
+        .then((docs) => {
+          const id = docs.find((d) => d.name === document)?.id;
+          if (id !== undefined) {
+            setSearchParams({ documentId: String(id) });
+          }
+        })
+        .catch((err) => {
+          console.warn(
+            "DocumentHandler: Failed to fetch documents for",
+            { folder, document },
+            err,
+          );
+        });
+    },
+    [toolId, queryClient, setSearchParams],
+  );
 
-  function handleCloseDocument() {
+  const handleCloseDocument = useCallback(() => {
     setOpenDocument(null);
     setSearchParams({});
-  }
+  }, [setSearchParams]);
 
   return (
     <>
@@ -132,7 +220,7 @@ export default function DocumentHandlerRenderer({
       <Box sx={{ mb: 2 }}>
         <Tabs
           value={activeTab}
-          onChange={(_, value) => setActiveTab(value as ActiveTab)}
+          onChange={(_, value) => showTab(value as ActiveTab)}
           sx={{ flex: 1 }}
         >
           {tabs.map((tab) => (
@@ -143,7 +231,7 @@ export default function DocumentHandlerRenderer({
 
       {/* Settings tab */}
       <Box sx={{ display: activeTab === "settings" ? "block" : "none" }}>
-        <SettingsTabPanel
+        <MemoSettingsTabPanel
           control={control}
           setValue={setValue}
           toolId={toolId}
@@ -152,23 +240,12 @@ export default function DocumentHandlerRenderer({
 
       {/* Menu settings tab */}
       <Box sx={{ display: activeTab === "menuSettings" ? "block" : "none" }}>
-        <FormPanel
-          title={t("tools.documenthandler.menuEditor.tabLabel")}
-          hideTitle
-        >
-          <Controller
-            name="options.menuConfig"
-            control={control}
-            render={({ field }) => (
-              <MenuEditor
-                value={field.value as MenuConfig | undefined}
-                onChange={field.onChange}
-                toolId={toolId}
-                onOpenDocument={handleOpenDocument}
-              />
-            )}
-          />
-        </FormPanel>
+        <MenuTab
+          control={control}
+          toolId={toolId}
+          mounted={visitedTabs.has("menuSettings")}
+          onOpenDocument={handleOpenDocument}
+        />
       </Box>
 
       {/* Documents tab */}
@@ -177,24 +254,36 @@ export default function DocumentHandlerRenderer({
           title={t("tools.documenthandler.documents.tabLabel")}
           hideTitle
         >
-          <DocumentsTabPanel
-            key={toolId ?? "none"}
-            toolId={toolId}
-            openDocument={openDocument}
-            onOpenDocument={handleOpenDocument}
-            onCloseDocument={handleCloseDocument}
-          />
+          {visitedTabs.has("documents") ? (
+            <MemoDocumentsTabPanel
+              key={toolId ?? "none"}
+              toolId={toolId}
+              openDocument={openDocument}
+              onOpenDocument={handleOpenDocument}
+              onCloseDocument={handleCloseDocument}
+            />
+          ) : (
+            <TabLoading />
+          )}
         </FormPanel>
       </Box>
 
       {toolId !== undefined && openDocument && (
-        <DocumentEditorDialog
-          open
-          toolId={toolId}
-          folderName={openDocument.folder}
-          docName={openDocument.document}
-          onClose={handleCloseDocument}
-        />
+        <Suspense
+          fallback={
+            <Backdrop open sx={{ zIndex: (theme) => theme.zIndex.modal }}>
+              <CircularProgress />
+            </Backdrop>
+          }
+        >
+          <DocumentEditorDialog
+            open
+            toolId={toolId}
+            folderName={openDocument.folder}
+            docName={openDocument.document}
+            onClose={handleCloseDocument}
+          />
+        </Suspense>
       )}
     </>
   );
