@@ -90,10 +90,11 @@ jobs:
           digest="${{ steps.build.outputs.digest }}"
           touch "${{ runner.temp }}/digests/${digest#sha256:}"
 
+      # The image name goes last so that the merge job's pattern for hajk doesn't also match hajk-simple. Both build in the same run and share its artifacts.
       - name: Upload digest
         uses: actions/upload-artifact@v7
         with:
-          name: digests-${{ inputs.image }}-${{ matrix.arch }}
+          name: digests-${{ matrix.arch }}-${{ inputs.image }}
           path: ${{ runner.temp }}/digests/*
           if-no-files-found: error
           retention-days: 1
@@ -126,7 +127,7 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           path: ${{ runner.temp }}/digests
-          pattern: digests-${{ inputs.image }}-*
+          pattern: digests-*-${{ inputs.image }}
           merge-multiple: true
 
       - name: Set up Docker Buildx
