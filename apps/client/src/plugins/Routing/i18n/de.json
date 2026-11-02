@@ -1,0 +1,36 @@
+{
+  "routing": {
+    "clickToSelectEnd": "Klicken Sie in die Karte, um Ihr Ziel auszuwählen.",
+    "clickToSelectStart": "Klicken Sie in die Karte, um einen Startpunkt auszuwählen.",
+    "description": "Den richtigen Weg zu Ihrem Ziel finden",
+    "errors": {
+      "loadFailed": "Die Google Maps API konnte nicht geladen werden. Wenden Sie sich an den Systemadministrator.",
+      "other": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+      "pointsMissing": "Wählen Sie einen Startpunkt und ein Ziel, um eine Wegbeschreibung zu erhalten.",
+      "requestDenied": "Die Wegbeschreibung konnte nicht abgerufen werden. Wenden Sie sich an den Systemadministrator und melden Sie, dass eine gültige Google Maps API-Lizenz fehlt.",
+      "zeroResults": "Für die gewählte Verkehrsart wurde keine Route zwischen den ausgewählten Punkten gefunden. Versuchen Sie eine andere Verkehrsart und suchen Sie erneut."
+    },
+    "myPosition": "Meine Position",
+    "positionUnavailable": "Ihre Position kann nicht ermittelt werden. Geben Sie eine Startposition in das Feld ein oder klicken Sie auf eine Position in der Karte.",
+    "result": {
+      "distance": "Entfernung",
+      "duration": "Zeit",
+      "endAddress": "Zieladresse",
+      "startAddress": "Startadresse",
+      "travelMode": "Verkehrsart"
+    },
+    "selectInMap": "In der Karte auswählen",
+    "steps": {
+      "end": "Ziel auswählen",
+      "start": "Startpunkt auswählen",
+      "travelMode": "Verkehrsart auswählen"
+    },
+    "title": "Wegbeschreibung",
+    "travelModes": {
+      "bicycling": "Fahrrad",
+      "driving": "Auto",
+      "transit": "Öffentliche Verkehrsmittel",
+      "walking": "Zu Fuß"
+    }
+  }
+}

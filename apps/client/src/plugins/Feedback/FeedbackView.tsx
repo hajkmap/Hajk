@@ -11,13 +11,17 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
-// Registers the <altcha-widget> web component, and its Swedish translation
-// (English is built in)
+// Registers the <altcha-widget> web component, and its Swedish and German
+// translations (English is built in)
 import "altcha";
 import "altcha/i18n/sv";
+import "altcha/i18n/de";
 import { useTranslation } from "react-i18next";
 
 import type { FeedbackViewProps } from "./types";
+
+// Languages with a registered altcha translation (see imports above).
+const ALTCHA_LANGUAGES = ["sv", "en", "de"];
 
 type AltchaStateChangeEvent = CustomEvent<{ state: string; payload?: string }>;
 
@@ -124,7 +128,11 @@ function FeedbackView({
           key={widgetKey}
           ref={widgetRef}
           challenge={model.getChallengeUrl()}
-          language={i18n.resolvedLanguage === "sv" ? "sv" : "en"}
+          language={
+            ALTCHA_LANGUAGES.includes(i18n.resolvedLanguage ?? "")
+              ? i18n.resolvedLanguage
+              : "en"
+          }
           style={widgetStyle}
         />
         {error && <Alert severity="error">{error}</Alert>}

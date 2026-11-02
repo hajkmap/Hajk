@@ -1,0 +1,29 @@
+{
+  "measurer": {
+    "area": "Fläche",
+    "circle": "Kreis",
+    "clearAll": "Alle Messungen löschen",
+    "clearAllConfirm": "Möchten Sie wirklich alle Messungen löschen?",
+    "clearAllConfirmButton": "Ja, löschen",
+    "deleteOne": "Eine einzelne Messung löschen",
+    "description": "Längen und Flächen messen",
+    "help": {
+      "text": "<strong>Messung beenden</strong><br/>Drücken Sie Esc/Enter oder klicken Sie erneut auf den letzten Punkt, um die Messung zu beenden.<br/><br/><strong>Freihand zeichnen</strong><br/>Halten Sie die Umschalttaste gedrückt, um freihand zu zeichnen. Das funktioniert beim Zeichnen von Linien oder Flächen.<br/><br/><strong>Fangen ausschalten</strong><br/>Halten Sie die Leertaste gedrückt, um das Fangen vorübergehend auszuschalten.<br/><br/><strong>Senkrecht messen</strong><br/>Halten Sie unter Windows Strg oder auf dem Mac Cmd (⌘) gedrückt und klicken Sie auf eine Linie, um senkrecht zu dieser Linie zu messen. Hinweis: Die angeklickte Linie muss eine Vektorlinie sein, an der Sie fangen."
+    },
+    "line": "Strecke",
+    "measureType": "Messart",
+    "point": "Punkt (zeigt Koordinate)",
+    "segments": "Segmentlängen der Messungen anzeigen",
+    "select": "In der Karte auswählen",
+    "selectFeaturesTitle": "Wählen Sie die Objekte aus, die Sie messen möchten",
+    "settings": {
+      "pointPrecision": "Messgenauigkeit, Punkte",
+      "pointPrecisionHelp": "Wählen Sie die Genauigkeit für die Koordinaten von Punktmessungen.",
+      "precision": "Messgenauigkeit, Länge/Fläche",
+      "precisionHelp": "Wählen Sie die Genauigkeit für Längen- und Flächenmessungen.",
+      "title": "Einstellungen"
+    },
+    "settingsTooltip": "Einstellungen – Anzahl der Dezimalstellen wählen",
+    "title": "Messen"
+  }
+}

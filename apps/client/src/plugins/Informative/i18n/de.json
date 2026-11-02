@@ -1,0 +1,11 @@
+{
+  "informative": {
+    "description": "Lesen Sie mehr darüber, was in der Gemeinde geplant ist",
+    "loadFailed": "Das Laden des Informative-Werkzeugs ist fehlgeschlagen. Das Werkzeug scheint falsch konfiguriert zu sein. Bitte wenden Sie sich an den Systemadministrator.",
+    "map": "Karte",
+    "print": "Drucken",
+    "printFailed": "Drucken ist derzeit nicht möglich, bitte versuchen Sie es später erneut",
+    "tableOfContents": "Inhaltsverzeichnis",
+    "title": "Flächennutzungsplan"
+  }
+}

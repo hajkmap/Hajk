@@ -1,0 +1,10 @@
+{
+  "streetView": {
+    "description": "Sehen Sie, wie die Umgebung von der Straße aus aussieht",
+    "imageDate": "Aufnahmedatum: {{date}}",
+    "instructions": "Klicken Sie in die Karte, um Street View zu aktivieren. <br/>Vergrößern Sie das Fenster, indem Sie auf das Symbol in der oberen rechten Ecke klicken.",
+    "loadFailed": "Google Maps konnte nicht geladen werden. Wenden Sie sich an den Systemadministrator und bitten Sie ihn, den API-Schlüssel zu prüfen.",
+    "noImage": "Kein Bild für die ausgewählte Position.",
+    "title": "Street View"
+  }
+}

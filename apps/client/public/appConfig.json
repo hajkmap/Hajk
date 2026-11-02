@@ -4,7 +4,8 @@
   "defaultLanguage": "sv",
   "availableLanguages": [
     "sv",
-    "en"
+    "en",
+    "de"
   ],
   "availableTools": [
     "Anchor",

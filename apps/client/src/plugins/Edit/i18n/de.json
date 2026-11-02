@@ -1,0 +1,47 @@
+{
+  "edit": {
+    "clickFeatureToEdit": "Klicken Sie auf ein Objekt in der Karte, um seine Attribute zu bearbeiten",
+    "continueEditing": "Weiter bearbeiten",
+    "dataSource": "Datenquelle",
+    "description": "Objekte in der Karte bearbeiten (WFS)",
+    "editableFields": "Bearbeitbare Felder:",
+    "enterAttributes": "Geben Sie die Attribute des Objekts ein:",
+    "invalidUrl": "Geben Sie eine gültige URL ein, z. B. https://www.example.com",
+    "loadFailed": "Fehler beim Laden der Daten. Wenden Sie sich an den Systemadministrator.",
+    "nonEditableFields": "Nicht bearbeitbare Felder:",
+    "readFailed": "Fehler: Die Daten können nicht gelesen werden. Prüfen Sie das Koordinatensystem.",
+    "selectValue": "-Wert auswählen-",
+    "status": {
+      "deleted": "Anzahl gelöschter Objekte: {{number}}",
+      "failed": "Die Aktualisierung ist fehlgeschlagen: {{message}}",
+      "inserted": "Anzahl erstellter Objekte: {{number}}",
+      "noChanges": "Die Aktualisierung war erfolgreich, es wurden aber keine Änderungen festgestellt.",
+      "succeeded": "Die Aktualisierung war erfolgreich.",
+      "unknown": "Der Status der Aktualisierung konnte nicht aus der Antwort des Servers gelesen werden.",
+      "updated": "Anzahl aktualisierter Objekte: {{number}}"
+    },
+    "steps": {
+      "done": "Fertig!",
+      "edit": "Bearbeiten",
+      "editing": "Bearbeitung von {{name}}",
+      "selectSource": "Wählen Sie einen Datensatz zum Bearbeiten aus"
+    },
+    "title": "Bearbeiten",
+    "toolbar": {
+      "add": "Hinzufügen",
+      "addLine": "Linie hinzufügen",
+      "addPoint": "Punkt hinzufügen",
+      "addPolygon": "Polygon hinzufügen",
+      "edit": "Bearbeiten",
+      "line": "Linie",
+      "modify": "Ändern",
+      "modifyGeometry": "Geometrie ändern",
+      "move": "Verschieben",
+      "moveGeometry": "Geometrie verschieben",
+      "point": "Punkt",
+      "polygon": "Polygon",
+      "remove": "Löschen",
+      "removeGeometry": "Geometrie löschen"
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "documentHandler": {
+    "chapterLink": "Link zu einem Kapitel in einem Dokument",
+    "collapseSubmenu": "Untermenü einklappen",
+    "contents": "Inhalt",
+    "couldNotOpenDocument": "Das Dokument konnte nicht geöffnet werden",
+    "couldNotRenderLink": "Der Dokumentlink konnte nicht angezeigt werden",
+    "documentLink": "Link zu einem Dokument",
+    "drawerButtonTitle": "Menü",
+    "drawerTitle": "Flächennutzungsplan",
+    "expandSubmenu": "Untermenü aufklappen",
+    "externalLink": "Link, der in einem anderen Fenster geöffnet wird",
+    "mapLink": "Link, der Änderungen an der Karte vornimmt",
+    "mapLoading": "Die Karte wird geladen...",
+    "openPrint": "Druck öffnen",
+    "print": {
+      "attachments": "Anhänge",
+      "createPdf": "PDF erstellen",
+      "creatingPdf": "Ihr PDF wird erstellt",
+      "linkMissing": "Link fehlt",
+      "mayTakeAWhile": "Das kann eine Weile dauern, besonders wenn Sie viele Dokumente zum Drucken ausgewählt haben.",
+      "open": "Öffnen",
+      "print": "Drucken",
+      "selectAll": "Alle Dokumente auswählen",
+      "selectedContent": "Ausgewählter Inhalt",
+      "settings": "Einstellungen"
+    },
+    "printActivePage": "Aktive Seite drucken",
+    "scrollToTop": "Zum Anfang des Dokuments scrollen",
+    "skipToMainMenu": "Zum Hauptmenü der Website",
+    "tableOfContents": "Inhaltsverzeichnis",
+    "widgetDescription": "Eine kurze Beschreibung, die im Widget angezeigt wird",
+    "windowTitle": "Dokumente"
+  }
+}

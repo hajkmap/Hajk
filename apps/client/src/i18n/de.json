@@ -1,0 +1,413 @@
+{
+  "alert": {
+    "missingMessage": "Keine Nachricht",
+    "title": "Meldung"
+  },
+  "app": {
+    "drawerContent": "Inhalt des Seitenbereichs",
+    "lockDrawer": "Werkzeugleiste fixieren",
+    "logoAltText": "Logo",
+    "mapTools": "Kartenwerkzeuge",
+    "unlockDrawer": "Werkzeugleiste lösen"
+  },
+  "backgroundLayers": {
+    "black": "Schwarz",
+    "legendLink": "Link zur Legende",
+    "moreInfo": "Weitere Informationen",
+    "osmInfoText": "OpenStreetMap ist eine offene, von Nutzern erstellte Karte, zu der jeder beitragen kann. Der Inhalt wird von Lantmäteriet (der schwedischen Vermessungsbehörde) weder qualitätsgesichert noch geprüft oder freigegeben.",
+    "osmInfoTitle": "Über OpenStreetMap",
+    "osmVector": "OpenStreetMap (Vektor)",
+    "osmVectorInfoText": "OpenStreetMap ist eine offene, von Nutzern erstellte Karte, zu der jeder beitragen kann. Der Inhalt wird von Lantmäteriet (der schwedischen Vermessungsbehörde) weder qualitätsgesichert noch geprüft oder freigegeben. Diese Variante wird als Vektordaten geladen und bleibt daher auch auf hochauflösenden Bildschirmen scharf.",
+    "osmVectorInfoTitle": "Über OpenStreetMap (Vektor)",
+    "white": "Weiß"
+  },
+  "card": {
+    "missingDescription": "Beschreibung fehlt",
+    "missingTitle": "Titel fehlt"
+  },
+  "common": {
+    "back": "Zurück",
+    "backToPreviousView": "Zurück zur vorherigen Ansicht",
+    "breadcrumb": "Brotkrümelnavigation",
+    "cancel": "Abbrechen",
+    "clear": "Leeren",
+    "close": "Schließen",
+    "continue": "Weiter",
+    "cookieSettings": "Cookie-Einstellungen",
+    "decimals_one": "{{count}} Dezimalstelle",
+    "decimals_other": "{{count}} Dezimalstellen",
+    "delete": "Löschen",
+    "descriptionLabel": "Beschreibung",
+    "download": "Herunterladen",
+    "edit": "Bearbeiten",
+    "errorTitle": "Fehler",
+    "generalSettings": "Allgemeine Einstellungen",
+    "geolocationPermissionDenied": "Sie müssen der Anwendung erlauben, Ihre Position anzuzeigen. Am Computer: Die meisten Browser haben in der Adressleiste ein Schloss-Symbol, über das Sie den Standortzugriff erlauben können.",
+    "help": "Hilfe",
+    "hits_one": "{{count}} Treffer",
+    "hits_other": "{{count}} Treffer",
+    "info": "Info",
+    "key": "Schlüssel",
+    "legend": "Legende",
+    "loading": "Wird geladen...",
+    "next": "Weiter",
+    "no": "Nein",
+    "noDescription": "Keine Beschreibung",
+    "noResults": "Keine Ergebnisse",
+    "ok": "OK",
+    "previous": "Zurück",
+    "replace": "Ersetzen",
+    "reset": "Zurücksetzen",
+    "save": "Speichern",
+    "settings": "Einstellungen",
+    "titleLabel": "Titel",
+    "undo": "Rückgängig",
+    "unnamedPlugin": "Unbenanntes Werkzeug",
+    "value": "Wert",
+    "xOfY": "{{current}} von {{total}}",
+    "yes": "Ja"
+  },
+  "confirmServiceSwitch": {
+    "clearDrawings": "Gezeichnete Objekte löschen",
+    "drawingCount_one": "Sie haben {{count}} gezeichnetes Objekt in der Karte, das mit keiner bearbeitbaren Ebene verbunden ist.",
+    "drawingCount_other": "Sie haben {{count}} gezeichnete Objekte in der Karte, die mit keiner bearbeitbaren Ebene verbunden sind.",
+    "keepDrawings": "Gezeichnete Objekte behalten (nur zur Orientierung)",
+    "note": "<strong>Hinweis:</strong> Gezeichnete Objekte und bearbeitbare Ebenen sind getrennte Systeme. Wenn Sie die gezeichneten Objekte behalten, bleiben sie in der Karte, können aber nicht zusammen mit der bearbeitbaren Ebene gespeichert werden.",
+    "question": "Was möchten Sie tun?",
+    "selectingService": "Sie sind dabei, die bearbeitbare Ebene <strong>{{name}}</strong> auszuwählen.",
+    "title": "Gezeichnete Objekte in der Karte"
+  },
+  "controls": {
+    "activeMap": "Aktive Karte",
+    "changeLanguage": "Sprache wechseln",
+    "clearMap": "Karte leeren",
+    "currentMap": "Aktuelle Karte: {{title}}",
+    "currentScale": "Aktueller Maßstab",
+    "externalLinksTitle": "Koordinate in externer Anwendung öffnen",
+    "hideAllLayers": "Alle aktiven Ebenen ausblenden",
+    "informationTitle": "Über die Karte",
+    "presetDialogText": "Alle sichtbaren Ebenen in der Karte werden jetzt ausgeblendet. Stattdessen werden die vordefinierten Ebenen des Schnellzugriffs angezeigt.",
+    "presetDialogTitle": "Schnellzugriff anzeigen",
+    "presetInvalidLink": "Der Link zu diesem Ort ist leider ungültig. Bitte wenden Sie sich an den Administrator des Kartendienstes, um ihn korrigieren zu lassen.",
+    "presetTitle": "Schnellzugriff",
+    "recentlyUsedPlugins": "Zuletzt verwendete Werkzeuge",
+    "resetMap": "Karte auf den Ausgangszustand zurücksetzen",
+    "resetRotation": "Drehung zurücksetzen",
+    "showCookieNotice": "Cookie-Hinweis anzeigen",
+    "switchMap": "Karte wechseln",
+    "toggleAttribution": "Urheberrechtsangaben zu den Kartendaten ein-/ausblenden",
+    "toggleTheme": "Design wechseln",
+    "toggleThemeTooltip": "Zwischen dunklem und hellem Design wechseln",
+    "untitledMap": "Unbenannte Karte",
+    "zoomIn": "Vergrößern",
+    "zoomOut": "Verkleinern"
+  },
+  "cookieNotice": {
+    "allowAll": "Alle erlauben",
+    "allowSelected": "Auswahl erlauben",
+    "functional": "Funktional",
+    "message": "Wir verwenden notwendige Cookies, damit die Website für Sie gut funktioniert. Außerdem verwenden wir funktionale Cookies, um Ihnen das bestmögliche Erlebnis zu bieten, sofern Sie diese akzeptieren.",
+    "moreInfo": "Weitere Informationen zu Cookies",
+    "necessary": "Notwendig",
+    "thirdParty": "Drittanbieter"
+  },
+  "editing": {
+    "editingService": "Bearbeitung von {{name}}",
+    "noService": "Keine"
+  },
+  "featureInfo": {
+    "tableLabel": "Tabelle mit Objekteigenschaften"
+  },
+  "introduction": {
+    "buttonAbstract": "Geführte Tour öffnen",
+    "buttonTitle": "Einführung",
+    "chooseIntroduction": "Einführung auswählen",
+    "done": "Fertig",
+    "fullIntroduction": "Vollständige Einführung",
+    "layerSearchExamples": [
+      "Badestrände",
+      "Spielplätze",
+      "Schulen",
+      "Sehenswürdigkeiten"
+    ],
+    "newIn": "Neu in {{title}}",
+    "steps": {
+      "actionsMenu": {
+        "intro": "<b>Alle aktiven Ebenen ausblenden:</b> schaltet alle Ebenen in der Karte aus. <br><br> <b>Nach oben scrollen:</b> springt zum Anfang der Ebenenliste. <br><br> <b>Nach unten scrollen:</b> springt zum Ende der Ebenenliste.",
+        "title": "Menüfunktionen"
+      },
+      "actionsMenuButton": {
+        "intro": "Klicken Sie auf die Menüschaltfläche (die drei Punkte). <br><br> <b>Im Menü können Sie:</b> alle aktiven Ebenen ausblenden, zum Anfang der Ebenenliste springen oder zum Ende der Ebenenliste springen.",
+        "title": "Menü neben dem Suchfeld"
+      },
+      "documentHandler": {
+        "intro": "Die Dokumentverwaltung zeigt und verwaltet Texte, die mit der Karte verbunden sind. Die Dokumente sind eigenständig und können in mehreren Karten wiederverwendet werden.<br><br>Mit der Dokumentverwaltung können Sie: <ul><li>Ausführliche Texte zu Kartenlesezeichen anzeigen.</li><li>Text und Karte kombinieren, indem Sie Kartenlinks hinzufügen, die Ebenen in der Karte entsprechen.</li></ul>",
+        "title": "Dokumentverwaltung"
+      },
+      "done": {
+        "intro": "Sie haben die gesamte Einführung abgeschlossen. Möchten Sie noch eine Runde drehen?<br><br>Klicken Sie auf die Schaltfläche in den Kartensteuerelementen, um von vorn zu beginnen.",
+        "title": "Einführung abgeschlossen 🎉"
+      },
+      "drawOrder": {
+        "intro": "Klicken Sie auf den Reiter Zeichenreihenfolge, um die Reihenfolge der Ebenen anzuzeigen und zu ändern.",
+        "title": "Zeichenreihenfolge"
+      },
+      "editFavorites": {
+        "intro": "Die Schaltfläche öffnet eine Ansicht, in der Sie gespeicherte Favoriten verwalten können.",
+        "title": "Favoriten bearbeiten"
+      },
+      "favorites": {
+        "intro": "Klicken Sie auf die Favoriten-Schaltfläche. <br><br> Hier können Sie Favoriten speichern, bearbeiten und laden.{{note}}",
+        "noFavorites": "<br><br><i>Derzeit gibt es keine Favoriten. Fügen Sie einen Favoriten hinzu, um diesen Teil der Anleitung zu aktivieren.</i>",
+        "title": "Favoriten"
+      },
+      "favoritesList": {
+        "intro": "Hier werden Ihre gespeicherten Favoriten angezeigt. Klicken Sie auf einen Favoriten, um die aktuellen Ebenen durch ihn zu ersetzen.",
+        "title": "Favoritenliste"
+      },
+      "favoritesMenu": {
+        "intro": "- <b>Als Favorit speichern:</b> speichert eine Gruppe von Ebenen als Favorit. Sie können einen Titel und eine Beschreibung festlegen. <br><br> - <b>Favoriten bearbeiten:</b> verwalten Sie Ihre gespeicherten Favoriten. <br><br> - <b>Favorit laden:</b> lädt den ausgewählten Favoriten. Alle aktiven Ebenen werden durch die Ebenen des Favoriten ersetzt.",
+        "title": "Favoritenmenü"
+      },
+      "favoritesOptions": {
+        "intro": "<b>Im Menü können Sie:</b> Informationen zum Favoriten anzeigen, ihn bearbeiten, löschen oder als .json-Datei exportieren.",
+        "title": "Favoritenoptionen"
+      },
+      "favoritesOptionsMenu": {
+        "intro": "<b>Bearbeiten:</b> Titel und Beschreibung ändern <br><br> <b>Löschen:</b> entfernt den Favoriten aus der Liste <br><br> <b>Exportieren:</b> speichert den Favoriten als .json-Datei",
+        "title": "Menü der Favoritenoptionen"
+      },
+      "hajk4": {
+        "intro": "Diese Einführung zeigt, wie das neue {{title}} funktioniert. <br><br>Sie veranschaulicht die Änderungen, die mit Hajk 4 gekommen sind. <br></br> <i>Beachten Sie, dass Sie während der Einführung nichts anderes in der Anwendung tun können, z. B. Schaltflächen anklicken oder andere Funktionen verwenden.</i> <br><br> Kommen Sie mit!",
+        "title": "Hajk 4"
+      },
+      "importFavorites": {
+        "intro": "Klicken Sie hier, um Favoriten aus einer .json-Datei zu importieren.",
+        "title": "Favoriten importieren"
+      },
+      "layerDetails": {
+        "intro": "Klicken Sie auf die Schaltfläche, um weitere Informationen zur Ebene anzuzeigen.",
+        "title": "Weitere Informationen"
+      },
+      "layerGroup": {
+        "intro": "Der Pfeil zeigt, dass es sich um eine Ebenengruppe handelt. Klicken Sie, um die enthaltenen Ebenen anzuzeigen. <br><br> Beachten Sie, dass <b>fett</b> dargestellte Ebenengruppen aktive Ebenen enthalten.",
+        "title": "Ebenengruppe"
+      },
+      "layerInfo": {
+        "intro": "Hier werden alle mit der Ebene verbundenen Informationen angezeigt.",
+        "title": "Ebeneninformationen"
+      },
+      "layerList": {
+        "intro": "Die Ebenenliste zeigt alle in der Karte verfügbaren Ebenen. <br><br>Hier können Sie: <ul><li>nach Ebenen suchen</li><li>Ebenen ein- oder ausschalten</li><li>Informationen zu jeder Ebene anzeigen</li></ul>",
+        "title": "Ebenenliste"
+      },
+      "layerSearch": {
+        "intro": "Geben Sie etwas in das Feld ein, um nach Ebenen zu suchen.<br><br>Die Ergebnisse werden in der Ebenenliste darunter angezeigt.",
+        "title": "Ebenen suchen"
+      },
+      "legend": {
+        "intro": "Die Schaltfläche klappt einen Bereich mit der Legende auf. <br><br> Klicken Sie, um sie ein- oder auszublenden.",
+        "title": "Legende"
+      },
+      "lockDrawer": {
+        "intro": "Klicken Sie auf die Schaltfläche, um das Seitenmenü zu fixieren.",
+        "title": "Seitenmenü fixieren"
+      },
+      "mapControls": {
+        "intro": "Ganz rechts auf dem Bildschirm befinden sich Steuerelemente, mit denen Sie in der Karte navigieren können.",
+        "title": "Kartensteuerelemente"
+      },
+      "mapTools": {
+        "intro": "Die Kartenwerkzeuge bieten Funktionen, die Ihnen beim Navigieren in der Karte helfen.<br><br>Hier werden die Werkzeuge angezeigt, die im Seitenmenü platziert sind.<br><br>Administratoren können ändern, wo die Werkzeuge platziert werden.",
+        "title": "Kartenwerkzeuge"
+      },
+      "opacity": {
+        "intro": "Verwenden Sie den Schieberegler, um die Deckkraft der Ebene zu ändern.",
+        "title": "Deckkraft"
+      },
+      "quickAccess": {
+        "intro": "Hier werden die für den Schnellzugriff gespeicherten Ebenen aufgelistet und verwaltet.",
+        "title": "Schnellzugriff"
+      },
+      "quickAccessButton": {
+        "intro": "<b>Zum Schnellzugriff hinzufügen:</b> Die Ebene wird dem Schnellzugriffsmenü im Reiter Kartenebenen hinzugefügt. <br><br> <b>Aus dem Schnellzugriff entfernen:</b> Die Ebene wird aus dem Schnellzugriffsmenü im Reiter Kartenebenen entfernt.",
+        "title": "Schnellzugriffs-Schaltfläche"
+      },
+      "quickAccessMenu": {
+        "intro": "<b>Aktive Ebenen hinzufügen:</b> fügt alle aktiven Ebenen zum Schnellzugriff hinzu. <br><br> <b>Alles leeren:</b> entfernt alle Ebenen aus dem Schnellzugriff.",
+        "title": "Schnellzugriffsoptionen"
+      },
+      "quickAccessMenuButton": {
+        "intro": "Klicken Sie im Schnellzugriff auf die Menüschaltfläche (die drei Punkte). <br><br> <b>Im Menü können Sie:</b> <br> - aktive Ebenen hinzufügen <br> - alles leeren",
+        "title": "Schnellzugriffsmenü"
+      },
+      "searchBar": {
+        "intro": "Mit dem Suchwerkzeug finden Sie schnell den richtigen Ort in der Karte.",
+        "title": "Suchfeld"
+      },
+      "searchOptions": {
+        "intro": "Hier finden Sie erweiterte Suchoptionen.",
+        "title": "Weitere Suchoptionen"
+      },
+      "searchToolsMenu": {
+        "intro": "Hier können Sie zwischen verschiedenen Suchwerkzeugen für Ihre Suche wählen.<br><br>Sie können auch auf <b>Sucheinstellungen</b> klicken, um ein separates Menü zu öffnen.",
+        "title": "Menü der Suchwerkzeuge"
+      },
+      "systemLayerList": {
+        "intro": "Hier können Sie die Reihenfolge der Systemebenen anzeigen und ändern. <br><br> Ziehen Sie Ebenen per Drag & Drop, um die Reihenfolge zu ändern.",
+        "title": "Systemebenenliste"
+      },
+      "systemLayers": {
+        "intro": "Klicken Sie, um Systemebenen in der Ebenenliste darunter anzuzeigen.<br><br>Systemebenen sind Ebenen, die von Werkzeugen erstellt werden, zum Beispiel vom Zeichenwerkzeug.",
+        "title": "Systemebenen anzeigen"
+      },
+      "tabs": {
+        "drawOrder": "- <b>Zeichenreihenfolge:</b> die Zeichenreihenfolge der aktiven Ebenen in der Karte ändern",
+        "intro": "Klicken Sie hier, um zwischen Ansichten zu wechseln: <br><br> - <b>Kartenebenen:</b> zeigt die Liste der verfügbaren Ebenen <br><br/> - <b>Hintergrund:</b> zeigt alle verfügbaren Hintergrundebenen <br><br/>{{drawOrder}}",
+        "title": "Reiter in {{title}}"
+      },
+      "themeList": {
+        "intro": "Hier sehen Sie die in der Karte verfügbaren Themen. <br><br> Klicken Sie auf ein Thema, um alle seine Ebenen zu aktivieren. <br><br> Sie können im Suchfeld auch nach Themen suchen.",
+        "title": "Themenliste"
+      },
+      "themes": {
+        "intro": "Klicken Sie auf die Schaltfläche, um Themen anzuzeigen. <br> Themen sind vordefinierte Gruppen von Ebenen, die von Administratoren erstellt werden.{{note}}",
+        "noThemes": "<br><br><i>Es sind keine Themen verfügbar. Bitten Sie einen Administrator, Themen zu erstellen, um diese Funktion zu nutzen.</i>",
+        "title": "Themen"
+      },
+      "toggleLayer": {
+        "intro": "Klicken Sie auf das Kästchen, um eine Ebene ein- oder auszuschalten. Ein <b>fett</b> dargestellter Ebenenname bedeutet, dass die Ebene aktiv ist.",
+        "title": "Ebenen ein- oder ausschalten"
+      },
+      "toolPanel": {
+        "documentHandlerIntro": "<br /><br /><b>{{name}}:</b> ist ein Werkzeug zum Anzeigen größerer Textmengen in Hajk. Klicken Sie auf die Schaltfläche, um das Seitenmenü anzuzeigen.",
+        "intro": "<b>{{name}}:</b> Hier finden Sie Funktionen und Werkzeuge, die Ihnen bei der Arbeit mit der Karte helfen.{{documentHandler}}",
+        "title": "Werkzeugleiste"
+      },
+      "welcome": {
+        "intro": "Diese kurze Anleitung führt Sie durch die Anwendung. Sie gibt einen Überblick über die grundlegenden Funktionen und die Neuerungen in Hajk 4. <br><br>Beachten Sie, dass Sie während der Einführung nichts anderes in der Anwendung tun können, z. B. Schaltflächen anklicken oder andere Funktionen verwenden. <br><br>👉 Kommen Sie mit!",
+        "title": "Willkommen"
+      }
+    }
+  },
+  "mapClickViewer": {
+    "keyboardHint": "Tipp: Sie können mit den Tasten ← und → auf Ihrer Tastatur durch die Ergebnisse blättern",
+    "overview": "Übersicht"
+  },
+  "search": {
+    "clearSearch": "Suche leeren",
+    "defaultHitName": "Suchergebnis",
+    "doSearch": "Suchen",
+    "drawCircleHint": "Drücken Sie in der Karte auf die Stelle, an der der Mittelpunkt liegen soll, ziehen Sie dann nach außen und lassen Sie los.",
+    "drawPolygonHint": "Drücken Sie für jeden Eckpunkt des Polygons einmal in die Karte. Starten Sie die Suche, indem Sie den letzten Eckpunkt noch einmal drücken.",
+    "exportName": "Suchexport",
+    "extentSearchFailed": "Bei der Suche im Gebiet ist ein Problem aufgetreten. Bitte wenden Sie sich an den Systemadministrator.",
+    "fetchFailed": "Hinweis: Daten konnten nicht abgerufen werden von: {{sources}}",
+    "hideResultList": "Liste der Suchergebnisse ausblenden",
+    "hideResultsInMap": "Suchergebnisse in der Karte ausblenden",
+    "inputLabel": "Inhalte der Website durchsuchen",
+    "missingDisplayFields": "Anzeigefelder fehlen",
+    "missingName": "Name fehlt",
+    "moreTools": "Weitere Suchwerkzeuge und Einstellungen",
+    "openMoreSettings": "Dialog mit weiteren Einstellungen öffnen",
+    "placeholder": "Suchen",
+    "results": {
+      "addToSelection": "Zur Auswahl hinzufügen",
+      "backToAll": "Zurück zu allen Suchergebnissen",
+      "clear": "Leeren",
+      "clearFilter": "Filter zurücksetzen",
+      "clearSelected": "Alle ausgewählten Objekte entfernen",
+      "download": "Herunterladen",
+      "downloadExcel": "Als Excel herunterladen",
+      "downloadFeatures": "Objekte herunterladen",
+      "downloadKml": "Als KML herunterladen",
+      "filter": "Filtern",
+      "filterActive": "Der Filter ist aktiv",
+      "filterFieldLabel": "Textfeld zum Filtern der Ergebnisse",
+      "filterResult": "Ergebnisse filtern",
+      "filterResults": "Suchergebnisse filtern",
+      "hideTools": "Werkzeuge ausblenden",
+      "maxHitsReached": "Die maximale Anzahl an Suchtreffern wurde erreicht. Verfeinern Sie Ihre Suche, damit keine wichtigen Informationen übersehen werden.",
+      "noResults": "Die Suche hat keine Ergebnisse geliefert.",
+      "preview": "Vorschau",
+      "removeFromSelection": "Aus der Auswahl entfernen",
+      "showingResults_one": "{{count}} Ergebnis wird angezeigt",
+      "showingResults_other": "{{count}} Ergebnisse werden angezeigt",
+      "showNextFeature": "Nächstes Objekt in der Ergebnisliste anzeigen",
+      "showPreviousFeature": "Vorheriges Objekt in der Ergebnisliste anzeigen",
+      "showTools": "Werkzeuge anzeigen",
+      "sort": "Sortieren",
+      "sortAtoZ": "alphabetisch aufsteigend",
+      "sortNumHits": "Anzahl der Treffer",
+      "sortTooltip": "Ergebnisse sortieren, derzeit sortiert nach {{strategy}}",
+      "sortZtoA": "alphabetisch absteigend",
+      "title": "Suchergebnisse",
+      "userSelected": "Ausgewählte Objekte"
+    },
+    "searchingInArea": "Suche im Gebiet",
+    "searchingWithObject": "Suche mit Objekten",
+    "selectHint": "Drücken Sie auf das Gebiet in der Karte, das Sie durchsuchen möchten. Halten Sie STRG gedrückt, um mehrere Gebiete auszuwählen.",
+    "settings": {
+      "activeSpatialFilter": "Ganzes Objekt muss im Suchgebiet liegen",
+      "activeSpatialFilterTooltip": "Wenn aktiv, muss das ganze Objekt (z. B. ein Grundstück) im Suchgebiet liegen, um im Ergebnis zu erscheinen. Wenn inaktiv, genügt es, dass ein kleiner Teil des Objekts im Suchgebiet liegt oder es berührt.",
+      "caseSensitive": "Groß-/Kleinschreibung beachten",
+      "caseSensitiveTooltip": "Wenn aktiv, findet eine Suche nach 'a' kein 'A'. Deaktivieren Sie die Option, um unabhängig von Groß-/Kleinschreibung zu suchen.",
+      "display": "Anzeige der Ergebnisse",
+      "general": "Allgemeine Sucheinstellungen",
+      "labelOnHighlight": "Textbeschriftung in der Karte anzeigen",
+      "labelOnHighlightTooltip": "Wenn aktiv, wird neben dem hervorgehobenen Suchergebnis eine Beschriftung in der Karte angezeigt",
+      "limitSources": "Suchquellen einschränken",
+      "limitSourcesTooltip": "Aktivieren Sie die Option, um die zu durchsuchenden Datenquellen auszuwählen. Wenn deaktiviert, werden alle verfügbaren Suchquellen durchsucht.",
+      "spatial": "Einstellungen für die räumliche Suche",
+      "text": "Einstellungen für die Textsuche",
+      "title": "Sucheinstellungen",
+      "visibleLayersOnly": "Nur sichtbare Ebenen durchsuchen",
+      "visibleLayersOnlyTooltip": "Wenn aktiv, werden nur Ebenen durchsucht, die sichtbar sind und die der Systemadministrator für die Suche eingerichtet hat.",
+      "wildcardAfter": "Platzhalter danach",
+      "wildcardAfterTooltip": "Wenn aktiv, findet eine Suche nach 'Weg' z. B. auch 'Wege'.",
+      "wildcardBefore": "Platzhalter davor",
+      "wildcardBeforeTooltip": "Wenn aktiv, findet eine Suche nach 'weg' z. B. auch 'Radweg'."
+    },
+    "showResultList": "Liste der Suchergebnisse anzeigen",
+    "showResultsInMap": "Suchergebnisse in der Karte anzeigen",
+    "tools": {
+      "extent": "Im Kartenausschnitt suchen",
+      "extentTooltip": "Das gesamte in der Karte angezeigte Gebiet durchsuchen.",
+      "polygon": "Mit Polygon suchen",
+      "polygonTooltip": "Ein Gebiet durch Zeichnen eines Polygons durchsuchen.",
+      "radius": "Mit Radius suchen",
+      "radiusTooltip": "Ein Gebiet durch Zeichnen eines Kreises durchsuchen",
+      "select": "Mit Objekten suchen",
+      "selectTooltip": "Durch Auswahl eines oder mehrerer Gebiete in der Karte suchen.",
+      "settingsTooltip": "Sucheinstellungen ändern."
+    },
+    "visibleLayersOnly": "{{placeholder}} (nur sichtbare Ebenen)"
+  },
+  "snackbar": {
+    "layerNotVisibleAtZoom": "Die Ebene '{{layer}}' ist in der aktuellen Zoomstufe nicht sichtbar.",
+    "layersNotVisibleAtZoom_one": "Die Ebene '{{layer}}' und {{count}} weitere Ebene sind in der aktuellen Zoomstufe nicht sichtbar.",
+    "layersNotVisibleAtZoom_other": "Die Ebene '{{layer}}' und {{count}} weitere Ebenen sind in der aktuellen Zoomstufe nicht sichtbar."
+  },
+  "startup": {
+    "accessDeniedMessage": "Sie haben keinen Zugriff auf diese Karte.",
+    "accessDeniedTitle": "Zugriff verweigert",
+    "errorMessage": "Die Anwendung konnte nicht geladen werden. Sie können versuchen, die Anwendung über die Schaltfläche unten zurückzusetzen. Wenn das Problem weiterhin besteht, wenden Sie sich bitte an Ihren Systemadministrator.",
+    "errorTitle": "Ein Fehler ist aufgetreten",
+    "notFoundMessage": "Die Karte, die Sie öffnen möchten, existiert nicht.",
+    "notFoundTitle": "Karte nicht gefunden",
+    "reloadButton": "Anwendung zurücksetzen"
+  },
+  "transformer": {
+    "lineNotCrossed": "Die Linie konnte nicht geteilt werden – die Schnittlinie muss die Linie kreuzen",
+    "polygonNotCrossedTwice": "Die Schnittlinie muss das Polygon an mindestens zwei Stellen kreuzen",
+    "polygonNotFullySplit": "Die Schnittlinie hat das Polygon nicht vollständig geteilt – stellen Sie sicher, dass die Linie das ganze Polygon durchquert",
+    "polygonSplitFailed": "Das Polygon konnte nicht geteilt werden",
+    "unexpectedSplitResult": "Unerwartetes Ergebnis beim Teilen des Polygons",
+    "unsupportedGeometry": "Der Geometrietyp {{geomType}} kann nicht geteilt werden"
+  },
+  "window": {
+    "close": "Fenster schließen",
+    "maximize": "Fenster maximieren",
+    "minimize": "Fenster minimieren"
+  }
+}

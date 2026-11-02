@@ -1,0 +1,20 @@
+{
+  "dummy": {
+    "activateDraw": "Zeicheninteraktion aktivieren",
+    "alert": "Hinweis",
+    "clicked_one": "{{count}}-mal geklickt",
+    "clicked_other": "{{count}}-mal geklickt",
+    "defaultSnackbarMessage": "Juhu, eine schöne Nachricht im Standardstil.",
+    "description": "Eine kurze Beschreibung, die im Widget angezeigt wird",
+    "disableDraw": "Zeicheninteraktion deaktivieren",
+    "drawerText": "Dummy hat globalObserver aufgerufen und darum gebeten, der Kopfzeile eine Schaltfläche hinzuzufügen. Wenn Sie auf die Schaltfläche klicken, wird dieser Inhalt im Seitenbereich angezeigt.",
+    "drawerTitle": "Dummy-Werkzeug",
+    "errorSnackbarMessage": "Hoppla, eine Nachricht im Fehlerstil!",
+    "randomBorderColor": "Zufällige Rahmenfarbe festlegen",
+    "randomTitleAndColor": "Zufälligen Titel und Farbe festlegen",
+    "showDefaultSnackbar": "Standard-Snackbar anzeigen",
+    "showErrorSnackbar": "Fehler-Snackbar anzeigen",
+    "snackbarKey": "Ich gehöre zur Snackbar mit dem Schlüssel {{key}}",
+    "title": "Dummy"
+  }
+}
