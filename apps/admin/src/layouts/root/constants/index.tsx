@@ -15,7 +15,7 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
 export const HEADER_HEIGHT = 64;
 export const HEADER_Z_INDEX = 1001;
 export const SIDEBAR_Z_INDEX = 1000;
-export const SIDEBAR_WIDTH = 280;
+export const SIDEBAR_WIDTH = 240;
 export const SIDEBAR_MINI_WIDTH = 58;
 
 export const SIDEBAR_MENU = [
