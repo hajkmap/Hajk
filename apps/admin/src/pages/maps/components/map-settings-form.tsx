@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   TextField,
   FormControl,
@@ -10,10 +10,12 @@ import {
   Checkbox,
   Switch,
   Box,
-  Chip,
-  OutlinedInput,
+  Badge,
+  IconButton,
+  Tooltip,
   alpha,
 } from "@mui/material";
+import TuneIcon from "@mui/icons-material/Tune";
 import {
   Control,
   Controller,
@@ -31,13 +33,14 @@ import { SettingsSearchField } from "../../../components/form-components/searcha
 import { SelectWithHelp } from "../../../components/form-components/field-label-with-help";
 import FormColorPicker from "../../../components/form-components/form-color-picker";
 import { useSettingsSearchLabels } from "../../../hooks/use-settings-search-labels";
+import ProjectionsDialog from "./projections";
+import {
+  getMainProjectionChoices,
+  groupProjectionCodes,
+} from "../projection-codes";
 
 export type MapSettingsSection =
-  | "map"
-  | "controls"
-  | "appearance"
-  | "content"
-  | "search";
+  "map" | "controls" | "appearance" | "content" | "search";
 
 interface MapSettingsFormProps {
   register: UseFormRegister<FieldValues>;
@@ -46,8 +49,6 @@ interface MapSettingsFormProps {
   settingsSearchTerm: string;
   showSettingsSearchUi: boolean;
   getValues: () => FieldValues;
-  defaultCoordinates: string[];
-  projectionOptions: { title: string; value: string }[];
   /** Map-tools board asked to show this field. `highlightTick` changes on every request. */
   highlightField?: string | null;
   highlightTick?: number;
@@ -160,8 +161,6 @@ export default function MapSettingsForm({
   settingsSearchTerm,
   showSettingsSearchUi,
   getValues,
-  defaultCoordinates,
-  projectionOptions,
   highlightField = null,
   highlightTick = 0,
 }: MapSettingsFormProps) {
@@ -171,6 +170,20 @@ export default function MapSettingsForm({
   const handledHighlightTick = useRef(0);
   const mapSelectorOn =
     useWatch({ control, name: "options.mapselector" }) === true;
+  const linkedProjections = useWatch({ control, name: "projections" }) as
+    string[] | undefined;
+  const mainProjectionCode = useWatch({ control, name: "projection.code" }) as
+    string | undefined;
+  // One per EPSG number, matching the dialog's rows.
+  const linkedProjectionCount = groupProjectionCodes(
+    Array.from(
+      new Set([
+        ...(Array.isArray(linkedProjections) ? linkedProjections : []),
+        ...(mainProjectionCode ? [mainProjectionCode] : []),
+      ]),
+    ),
+  ).length;
+  const [projectionsDialogOpen, setProjectionsDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!highlightField || highlightTick === 0) return;
@@ -209,11 +222,6 @@ export default function MapSettingsForm({
     activeSection === "content" || showSettingsSearchUi;
 
   const searchValues = showSettingsSearchUi ? getValues() : undefined;
-
-  const projectionMultiOptions =
-    projectionOptions.length > 0
-      ? projectionOptions
-      : defaultCoordinates.map((value) => ({ title: value, value }));
 
   return (
     <Box ref={rootRef}>
@@ -314,101 +322,62 @@ export default function MapSettingsForm({
             <FormPanel title={t("map.baseSettings")}>
               <FormFieldGrid>
                 <SettingsSearchField
-                  labelKeys={["map.projection"]}
-                  fields={["projection.code"]}
-                  synonyms={["projection", "epsg"]}
-                  searchTerm={settingsSearchTerm}
-                  allValues={searchValues}
-                >
-                  <FormFieldRow>
-                    <Controller
-                      name="projection.code"
-                      control={control}
-                      render={({ field }) => (
-                        <SelectWithHelp
-                          labelKey="map.projection"
-                          helpKey="map.projectionHelp"
-                          {...field}
-                          value={(field.value as string) ?? ""}
-                        >
-                          {defaultCoordinates.map((value) => {
-                            const opt = projectionOptions.find(
-                              (projection) => projection.value === value,
-                            );
-                            return (
-                              <MenuItem key={value} value={opt?.value ?? value}>
-                                {opt?.title ?? value}
-                              </MenuItem>
-                            );
-                          })}
-                        </SelectWithHelp>
-                      )}
-                    />
-                  </FormFieldRow>
-                </SettingsSearchField>
-                <SettingsSearchField
-                  labelKeys={["map.projections"]}
-                  fields={["projections"]}
+                  labelKeys={["map.projection", "map.projections"]}
+                  fields={["projection.code", "projections"]}
                   synonyms={["projection", "epsg", "coordinate"]}
                   searchTerm={settingsSearchTerm}
                   allValues={searchValues}
                 >
                   <FormFieldRow>
-                    <FormControl fullWidth>
-                      <InputLabel id="map-projections-label">
-                        {t("map.projections")}
-                      </InputLabel>
-                      <Controller
-                        name="projections"
-                        control={control}
-                        render={({ field }) => {
-                          const selected = Array.isArray(field.value)
-                            ? (field.value as string[])
-                            : [];
-                          return (
-                            <Select
-                              labelId="map-projections-label"
-                              multiple
-                              value={selected}
-                              onChange={(e) => {
-                                const value = e.target.value;
-                                field.onChange(
-                                  typeof value === "string"
-                                    ? value.split(",")
-                                    : value,
-                                );
-                              }}
-                              input={
-                                <OutlinedInput label={t("map.projections")} />
-                              }
-                              renderValue={(value) => (
-                                <Box
-                                  sx={{
-                                    display: "flex",
-                                    flexWrap: "wrap",
-                                    gap: 0.5,
-                                  }}
-                                >
-                                  {value.map((code) => (
-                                    <Chip
-                                      key={code}
-                                      label={code}
-                                      size="small"
-                                    />
-                                  ))}
-                                </Box>
-                              )}
+                    <Box
+                      sx={{ display: "flex", alignItems: "flex-end", gap: 1 }}
+                    >
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Controller
+                          name="projection.code"
+                          control={control}
+                          render={({ field }) => (
+                            <SelectWithHelp
+                              labelKey="map.projection"
+                              helpKey="map.projectionHelp"
+                              {...field}
+                              value={(field.value as string) ?? ""}
                             >
-                              {projectionMultiOptions.map((opt) => (
-                                <MenuItem key={opt.value} value={opt.value}>
-                                  {opt.title}
+                              {getMainProjectionChoices(
+                                linkedProjections,
+                                field.value as string | undefined,
+                              ).map((value) => (
+                                <MenuItem key={value} value={value}>
+                                  {value}
                                 </MenuItem>
                               ))}
-                            </Select>
-                          );
-                        }}
-                      />
-                    </FormControl>
+                            </SelectWithHelp>
+                          )}
+                        />
+                      </Box>
+                      <Tooltip
+                        title={`${t("map.projections")} (${linkedProjectionCount})`}
+                      >
+                        <IconButton
+                          aria-label={t("map.projections")}
+                          onClick={() => setProjectionsDialogOpen(true)}
+                          sx={{ mb: 0.25 }}
+                        >
+                          <Badge
+                            badgeContent={linkedProjectionCount}
+                            color="primary"
+                            max={99}
+                          >
+                            <TuneIcon />
+                          </Badge>
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                    <ProjectionsDialog
+                      open={projectionsDialogOpen}
+                      onClose={() => setProjectionsDialogOpen(false)}
+                      control={control}
+                    />
                   </FormFieldRow>
                 </SettingsSearchField>
                 <SettingsSearchField
@@ -761,7 +730,9 @@ export default function MapSettingsForm({
                               fullWidth={false}
                               {...field}
                               value={
-                                field.value === "dropdown" ? "dropdown" : "button"
+                                field.value === "dropdown"
+                                  ? "dropdown"
+                                  : "button"
                               }
                               onChange={(event) =>
                                 field.onChange(event.target.value)

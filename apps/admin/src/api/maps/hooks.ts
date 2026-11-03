@@ -178,6 +178,9 @@ export const useCreateMap = () => {
     mutationFn: createMap,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["maps"] });
+      void queryClient.invalidateQueries({
+        queryKey: ["projectionsWithUsage"],
+      });
     },
     onError: (error) => {
       console.error(error);
@@ -200,6 +203,10 @@ export const useUpdateMap = () => {
     onSuccess: (_, { mapName }) => {
       void queryClient.invalidateQueries({ queryKey: ["maps"] });
       void queryClient.invalidateQueries({ queryKey: ["maps", mapName] });
+      // The map's projections decide which projections are in use.
+      void queryClient.invalidateQueries({
+        queryKey: ["projectionsWithUsage"],
+      });
     },
     onError: (error) => {
       console.error(error);
@@ -218,6 +225,7 @@ const invalidateMapUsage = (queryClient: QueryClient) => {
   void queryClient.invalidateQueries({ queryKey: ["mapsByGroupId"] });
   void queryClient.invalidateQueries({ queryKey: ["mapsByServiceId"] });
   void queryClient.invalidateQueries({ queryKey: ["layerTree"] });
+  void queryClient.invalidateQueries({ queryKey: ["projectionsWithUsage"] });
 };
 
 // React mutation to delete a map

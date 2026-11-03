@@ -118,6 +118,22 @@ enum HajkStatusCodes {
   FOLDER_NOT_EMPTY = "DB011",
 
   /**
+   * The requested projection does not exist.
+   */
+  UNKNOWN_PROJECTION = "DB016",
+
+  /**
+   * A projection with the given code already exists.
+   */
+  PROJECTION_ALREADY_EXISTS = "DB017",
+
+  /**
+   * The projection is locked, or still used by maps or services, and cannot
+   * be changed or deleted.
+   */
+  PROJECTION_CHANGE_BLOCKED = "DB018",
+
+  /**
    * The request body is invalid, e.g. lacks some required fields.
    */
   INVALID_REQUEST_BODY = "RQ001",

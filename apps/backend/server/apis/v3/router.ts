@@ -10,6 +10,7 @@ import layersRouter from "./controllers/layers/router.ts";
 import mapsRouter from "./controllers/maps/router.ts";
 import ogcRouter from "./controllers/ogc/router.ts";
 import presenceRouter from "./controllers/presence/router.ts";
+import projectionsRouter from "./controllers/projections/router.ts";
 import publicRouter from "./controllers/public/router.ts";
 import servicesRouter from "./controllers/services/router.ts";
 import themesGlobalRouter from "./controllers/themes/global.router.ts";
@@ -36,6 +37,7 @@ export default Router()
   .use("/layers", isAdmin, layersRouter)
   .use("/maps", isAdmin, mapsRouter)
   .use("/presence", isAdmin, presenceRouter)
+  .use("/projections", isAdmin, projectionsRouter)
   .use("/services", isAdmin, servicesRouter)
   .use("/themes", isAdmin, themesGlobalRouter)
   .use("/tools", isAdmin, toolsRouter)

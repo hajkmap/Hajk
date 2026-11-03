@@ -84,9 +84,7 @@ import {
   getTakenIndexesForPlacement,
 } from "./tool-placement-indexes";
 import { type ToolColumnOrder } from "./map-tools-layout";
-import { useProjections } from "../../api/services";
 import { usePresence } from "../../api/presence";
-import useAppStateStore from "../../store/use-app-state-store";
 import { SettingsPageTabs } from "../../components/settings-page-tabs";
 import UnsavedChangesGuard from "../../components/unsaved-changes-guard";
 import {
@@ -164,9 +162,7 @@ export default function MapSettings() {
   const [isSaving, setIsSaving] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = (searchParams.get("tab") ?? "settings") as
-    | "menu"
-    | "settings"
-    | "tools";
+    "menu" | "settings" | "tools";
   const setActiveTab = (tab: string) =>
     setSearchParams(
       (prev) => {
@@ -219,20 +215,6 @@ export default function MapSettings() {
   const settingsSearchTerm = showSettingsSearchUi ? settingsSearchQuery : "";
   const { data: mapTools } = useToolsByMapName(mapName ?? "");
   const { data: catalogTools } = useTools();
-  const { data: projections } = useProjections();
-  const { defaultCoordinates } = useAppStateStore.getState();
-
-  const projectionOptions = useMemo(
-    () =>
-      (projections ?? [])
-        .filter((projection) => projection.code.startsWith("EPSG:"))
-        .map((projection) => ({
-          title: projection.code,
-          value: projection.code,
-        })),
-    [projections],
-  );
-
   // The map's layer tree, saved with the rest of the map (see handleUpdateMap).
   const [layerTreeDraft, setLayerTreeDraft] = useState<LayerTreeDraft | null>(
     null,
@@ -355,9 +337,7 @@ export default function MapSettings() {
         const nextWindowSizes = { ...base.windowSizes };
         const nextIndexes = { ...base.indexes };
         const nextInactiveTargets = { ...base.inactiveTargets };
-        const mapToolIds = new Set(
-          (mapTools ?? []).map((tool) => tool.toolId),
-        );
+        const mapToolIds = new Set((mapTools ?? []).map((tool) => tool.toolId));
 
         const clearDraftOnlyToolMeta = (id: number) => {
           // Tools never persisted on the map should leave no draft residue so
@@ -447,13 +427,7 @@ export default function MapSettings() {
         };
       });
     },
-    [
-      mapName,
-      mapTools,
-      resolveToolsDraft,
-      resolveToolName,
-      toolTypesById,
-    ],
+    [mapName, mapTools, resolveToolsDraft, resolveToolName, toolTypesById],
   );
 
   const setToolWindowPosition = useCallback(
@@ -1016,8 +990,6 @@ export default function MapSettings() {
               settingsSearchTerm={settingsSearchTerm}
               showSettingsSearchUi={showSettingsSearchUi}
               getValues={getValues}
-              defaultCoordinates={defaultCoordinates}
-              projectionOptions={projectionOptions}
               highlightField={settingFocus?.field ?? null}
               highlightTick={settingFocus?.tick ?? 0}
             />
