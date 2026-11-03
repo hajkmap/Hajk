@@ -22,6 +22,7 @@ import {
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import FormColorPicker from "@/components/form-components/form-color-picker";
+import { FieldHelpTooltip } from "@/components/form-components/field-help-tooltip";
 import type { MenuConfigItem, MenuTreeNode } from "./types";
 import { isNodeValid, updateNodeById } from "./utils";
 import {
@@ -54,7 +55,7 @@ export function MenuItemProperties({
     toolId,
     node?.data.document,
     node?.data.folder,
-    folders
+    folders,
   );
   const { data: documents = [] } = useDocuments(toolId, effectiveFolder);
 
@@ -104,7 +105,7 @@ export function MenuItemProperties({
 
   function patch(
     dataChanges: Partial<MenuConfigItem>,
-    metaChanges?: Partial<MenuNodeMeta>
+    metaChanges?: Partial<MenuNodeMeta>,
   ) {
     const next = updateNodeById(tree, selectedNode.id, (n) => ({
       ...n,
@@ -155,6 +156,11 @@ export function MenuItemProperties({
               ) : undefined,
               endAdornment: (
                 <InputAdornment position="end">
+                  <FieldHelpTooltip
+                    title={t(
+                      "tools.documenthandler.menuEditor.fields.iconHelp",
+                    )}
+                  />
                   <Tooltip title={t("tools.documenthandler.browseIcons")}>
                     <IconButton
                       size="small"
@@ -163,7 +169,7 @@ export function MenuItemProperties({
                         window.open(
                           "https://fonts.google.com/icons",
                           "_blank",
-                          "noopener,noreferrer"
+                          "noopener,noreferrer",
                         )
                       }
                     >
@@ -218,7 +224,7 @@ export function MenuItemProperties({
               onChange={(e) => {
                 patch(
                   { folder: e.target.value, document: "" },
-                  { userTouchedFolder: true, hadFolder: true }
+                  { userTouchedFolder: true, hadFolder: true },
                 );
               }}
             >
@@ -275,9 +281,7 @@ export function MenuItemProperties({
             <span>
               <IconButton
                 size="small"
-                disabled={
-                  !d.document.trim() || !effectiveFolder || isResolving
-                }
+                disabled={!d.document.trim() || !effectiveFolder || isResolving}
                 onClick={() =>
                   onOpenDocument(effectiveFolder!, d.document.trim())
                 }
@@ -353,14 +357,12 @@ export function MenuItemProperties({
                 onChange={(_, checked) => {
                   patch(
                     { expandedSubMenu: checked },
-                    { userTouchedExpandedSubMenu: true }
+                    { userTouchedExpandedSubMenu: true },
                   );
                 }}
               />
             }
-            label={t(
-              "tools.documenthandler.menuEditor.fields.expandedSubMenu"
-            )}
+            label={t("tools.documenthandler.menuEditor.fields.expandedSubMenu")}
           />
         </>
       )}

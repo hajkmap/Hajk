@@ -1537,6 +1537,7 @@
           "fields": {
             "title": "Title",
             "icon": "Icon (Material UI name)",
+            "iconHelp": "Use the icon's name in lowercase snake_case, i.e. lowercase letters with underscores between words, e.g. \"menu_book\" or \"info_outline\". Not PascalCase like \"MenuBook\".",
             "fontSize": "Icon size",
             "color": "Color",
             "document": "Document",

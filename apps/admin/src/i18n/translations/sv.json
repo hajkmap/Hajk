@@ -1537,6 +1537,7 @@
           "fields": {
             "title": "Titel",
             "icon": "Ikon (Material UI-namn)",
+            "iconHelp": "Ange ikonens namn med gemener och understreck mellan orden (snake_case), t.ex. \"menu_book\" eller \"info_outline\". Inte PascalCase som \"MenuBook\".",
             "fontSize": "Ikonstorlek",
             "color": "Färg",
             "document": "Dokument",

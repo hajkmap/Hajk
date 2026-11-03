@@ -31,16 +31,16 @@ const StyledButton = styled(Button, {
   textTransform: "none",
   display: "flex",
   width: "100%",
-  borderRadius: 14,
+  borderRadius: 8,
   justifyContent: "space-between",
   color: theme.palette.text.primary,
-  paddingTop: theme.spacing(2),
-  paddingBottom: theme.spacing(2),
-  paddingLeft: theme.spacing(2),
+  minHeight: 44,
+  paddingTop: 0,
+  paddingBottom: 0,
+  paddingLeft: theme.spacing(1.5),
   paddingRight: theme.spacing(1),
-  marginTop: theme.spacing(0.6),
-  marginBottom: theme.spacing(0.6),
-  minHeight: 48,
+  marginTop: theme.spacing(0.25),
+  marginBottom: theme.spacing(0.25),
   transition: "all 200ms ease",
   backgroundColor: hasActiveSubItem
     ? theme.palette.action.focus
@@ -58,8 +58,11 @@ const StyledButton = styled(Button, {
     opacity: 0.7,
   },
   "& .MuiButton-startIcon": {
-    fontSize: "1.25rem",
-    marginRight: theme.spacing(2),
+    marginLeft: 0,
+    marginRight: theme.spacing(1.5),
+  },
+  "& .MuiButton-startIcon > svg": {
+    fontSize: 20,
   },
 }));
 
@@ -80,24 +83,19 @@ const CollapsibleNavItem = (props: Props) => {
         <StyledButton
           hasActiveSubItem={hasActiveSubItem}
           onClick={props.onToggle}
-          size="large"
           startIcon={props.icon}
         >
-          <Box sx={{ display: "flex", alignItems: "center", flex: 1 }}>
-            <Typography sx={{ fontSize: "1.10rem" }}>
+          <Box
+            sx={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}
+          >
+            <Typography noWrap sx={{ fontSize: "0.9375rem", fontWeight: 500 }}>
               {t(props.titleKey)}
             </Typography>
           </Box>
           {props.collapsed ? (
-            <ExpandMoreIcon
-              className="expand-arrow"
-              sx={{ fontSize: "1.8rem" }}
-            />
+            <ExpandMoreIcon className="expand-arrow" sx={{ fontSize: 20 }} />
           ) : (
-            <ExpandLessIcon
-              className="expand-arrow"
-              sx={{ fontSize: "1.8rem" }}
-            />
+            <ExpandLessIcon className="expand-arrow" sx={{ fontSize: 20 }} />
           )}
         </StyledButton>
       </ListItem>

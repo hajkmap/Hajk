@@ -16,12 +16,40 @@ interface FormFieldGridProps {
   children: ReactNode;
   /** @deprecated column layout is no longer used; kept for call-site compatibility */
   columnSpacing?: number;
+  /**
+   * 2 = two equal columns from `md` up. 4 = four columns from `md` up, two
+   * from `sm`. One column below that. Default 1.
+   */
+  columns?: 1 | 2 | 4;
   sx?: SxProps<Theme>;
 }
 
-/** One full-width form field row inside a settings panel. */
-export function FormFieldRow({ children }: { children: ReactNode }) {
-  return <Box sx={{ width: "100%", minWidth: 0 }}>{children}</Box>;
+/**
+ * One form field inside a settings panel. In a column grid it takes one
+ * column; `span={2}` takes two and `fullWidth` takes the whole row.
+ * `newRow` starts it in the first column of a new row.
+ */
+export function FormFieldRow({
+  children,
+  fullWidth = false,
+  span,
+  newRow = false,
+}: {
+  children: ReactNode;
+  fullWidth?: boolean;
+  span?: 2;
+  newRow?: boolean;
+}) {
+  return (
+    <Box
+      data-grid-full={fullWidth ? "" : undefined}
+      data-grid-span={span}
+      data-grid-new-row={newRow ? "" : undefined}
+      sx={{ width: "100%", minWidth: 0 }}
+    >
+      {children}
+    </Box>
+  );
 }
 
 /** Marks one grid row so the settings search can show or hide it without re-rendering. */
@@ -33,21 +61,68 @@ function SettingsSearchItem({ children }: { children: ReactNode }) {
   );
 }
 
-/** Standard single-column field layout for FormPanel / FormAccordion content. */
-export default function FormFieldGrid({ children, sx }: FormFieldGridProps) {
+/** Field layout for FormPanel / FormAccordion content: one column, or two with `columns={2}`. */
+export default function FormFieldGrid({
+  children,
+  columns = 1,
+  sx,
+}: FormFieldGridProps) {
   const term = useSettingsSearchTerm();
+
+  const content =
+    term === null
+      ? children
+      : Children.map(children, (child) =>
+          child == null || typeof child === "boolean" ? (
+            child
+          ) : (
+            <SettingsSearchItem>{child}</SettingsSearchItem>
+          ),
+        );
+
+  if (columns === 2 || columns === 4) {
+    return (
+      <Box
+        sx={{
+          width: "100%",
+          display: "grid",
+          gridTemplateColumns:
+            columns === 4
+              ? {
+                  xs: "minmax(0, 1fr)",
+                  sm: "repeat(2, minmax(0, 1fr))",
+                  md: "repeat(4, minmax(0, 1fr))",
+                }
+              : {
+                  xs: "minmax(0, 1fr)",
+                  md: "repeat(2, minmax(0, 1fr))",
+                },
+          columnGap: 2,
+          rowGap: FORM_FIELD_ROW_SPACING,
+          alignItems: "start",
+          // Full-width rows span both columns, also when search wraps them.
+          "& > [data-grid-full], & > *:has(> [data-grid-full])": {
+            gridColumn: "1 / -1",
+          },
+          "& > [data-grid-span='2'], & > *:has(> [data-grid-span='2'])": {
+            // On the end line, so `newRow` (which sets the start) keeps the span.
+            gridColumnEnd: "span 2",
+          },
+          // After the span rule so a spanning field can also start a new row.
+          "& > [data-grid-new-row], & > *:has(> [data-grid-new-row])": {
+            gridColumnStart: 1,
+          },
+          ...sx,
+        }}
+      >
+        {content}
+      </Box>
+    );
+  }
 
   return (
     <Stack spacing={FORM_FIELD_ROW_SPACING} sx={{ width: "100%", ...sx }}>
-      {term === null
-        ? children
-        : Children.map(children, (child) =>
-            child == null || typeof child === "boolean" ? (
-              child
-            ) : (
-              <SettingsSearchItem>{child}</SettingsSearchItem>
-            ),
-          )}
+      {content}
     </Stack>
   );
 }

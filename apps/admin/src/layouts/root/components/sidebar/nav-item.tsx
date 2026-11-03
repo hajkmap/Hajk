@@ -20,18 +20,21 @@ const StyledButton = styled(Button, {
   to?: string;
 }>(({ theme, isActive, isSubItem }) => ({
   textTransform: "none",
-  width: "100%",
-  borderRadius: 14,
+  // Nested items are indented with a margin (and a matching width reduction)
+  // so the selected background is inset, which keeps the hierarchy clear
+  // without overflowing the sidebar.
+  width: isSubItem ? `calc(100% - ${theme.spacing(2)})` : "100%",
+  marginLeft: isSubItem ? theme.spacing(2) : 0,
+  marginTop: theme.spacing(0.25),
+  marginBottom: theme.spacing(0.25),
+  borderRadius: 8,
   justifyContent: "flex-start",
   color: theme.palette.text.primary,
-  paddingTop: theme.spacing(1.8),
-  paddingBottom: theme.spacing(1.8),
-  paddingLeft: theme.spacing(isSubItem ? 2 : 2),
-  paddingRight: theme.spacing(2),
-  marginLeft: theme.spacing(4),
-  marginTop: theme.spacing(0.5),
-  marginBottom: theme.spacing(0.5),
-  minHeight: 48,
+  minHeight: 44,
+  paddingTop: 0,
+  paddingBottom: 0,
+  paddingLeft: theme.spacing(1.5),
+  paddingRight: theme.spacing(1.5),
   backgroundColor: isActive ? theme.palette.action.focus : "transparent",
   transition: "all 200ms ease",
   "&:hover": {
@@ -40,8 +43,11 @@ const StyledButton = styled(Button, {
       : theme.palette.action.hover,
   },
   "& .MuiButton-startIcon": {
-    fontSize: "1.25rem",
-    marginRight: theme.spacing(2),
+    marginLeft: 0,
+    marginRight: theme.spacing(1.5),
+  },
+  "& .MuiButton-startIcon > svg": {
+    fontSize: 20,
   },
 }));
 
@@ -60,7 +66,9 @@ const NavItem = (props: Props) => {
         isActive={active}
         isSubItem={props.isSubItem}
       >
-        <Typography>{t(props.titleKey)}</Typography>
+        <Typography noWrap sx={{ fontSize: "0.875rem" }}>
+          {t(props.titleKey)}
+        </Typography>
       </StyledButton>
     </ListItem>
   );
