@@ -1,9 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
   TextField,
-  FormControl,
-  InputLabel,
-  Select,
   MenuItem,
   FormGroup,
   FormControlLabel,
@@ -14,6 +11,8 @@ import {
   IconButton,
   Tooltip,
   alpha,
+  type SxProps,
+  type Theme,
 } from "@mui/material";
 import TuneIcon from "@mui/icons-material/Tune";
 import {
@@ -30,7 +29,11 @@ import FormFieldGrid, {
 } from "../../../components/form-components/form-field-grid";
 import SearchablePanel from "../../../components/form-components/searchable-panel";
 import { SettingsSearchField } from "../../../components/form-components/searchable-field";
-import { SelectWithHelp } from "../../../components/form-components/field-label-with-help";
+import {
+  InlineLabelWithHelp,
+  SelectWithHelp,
+  TextFieldWithHelp,
+} from "../../../components/form-components/field-label-with-help";
 import FormColorPicker from "../../../components/form-components/form-color-picker";
 import { useSettingsSearchLabels } from "../../../hooks/use-settings-search-labels";
 import ProjectionsDialog from "./projections";
@@ -69,7 +72,9 @@ function MapCheckboxField({
   showSettingsSearchUi: boolean;
   getValues: () => FieldValues;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const helpKey = `${labelKey}Help`;
+  const label = t(labelKey as never);
 
   return (
     <SettingsSearchField
@@ -104,7 +109,13 @@ function MapCheckboxField({
               )}
             />
           }
-          label={t(labelKey as never)}
+          label={
+            i18n.exists(helpKey) ? (
+              <InlineLabelWithHelp label={label} help={t(helpKey as never)} />
+            ) : (
+              label
+            )
+          }
         />
       </Box>
     </SettingsSearchField>
@@ -149,6 +160,85 @@ function MapColorField({
             />
           )}
         />
+      </FormFieldRow>
+    </SettingsSearchField>
+  );
+}
+
+/** Checkbox lists flow top-to-bottom in two columns from `md` up. */
+const CHECKBOX_COLUMNS_SX: SxProps<Theme> = {
+  display: "block",
+  columns: { xs: 1, md: 2 },
+  columnGap: 3,
+  "& > *": { breakInside: "avoid" },
+};
+
+/**
+ * Searchable text field. Uses the label-above layout with a help icon when a
+ * `<labelKey>Help` translation exists, so fields in the same row line up.
+ */
+function MapTextField({
+  name,
+  labelKey,
+  register,
+  settingsSearchTerm,
+  searchValues,
+  synonyms,
+  placeholder,
+  type,
+  inputMode,
+  multiline,
+  rows,
+  fullWidth = false,
+  span,
+  newRow,
+}: {
+  name: string;
+  labelKey: string;
+  register: UseFormRegister<FieldValues>;
+  settingsSearchTerm: string;
+  searchValues: FieldValues | undefined;
+  synonyms?: string[];
+  placeholder?: string;
+  type?: string;
+  inputMode?: "decimal" | "numeric";
+  multiline?: boolean;
+  rows?: number;
+  fullWidth?: boolean;
+  span?: 2;
+  newRow?: boolean;
+}) {
+  const { t, i18n } = useTranslation();
+  const helpKey = `${labelKey}Help`;
+  const inputProps = {
+    fullWidth: true,
+    placeholder,
+    type,
+    multiline,
+    rows,
+    slotProps: inputMode ? { htmlInput: { inputMode } } : undefined,
+    ...register(name),
+  };
+
+  return (
+    <SettingsSearchField
+      labelKeys={[labelKey]}
+      fields={[name]}
+      synonyms={synonyms}
+      searchTerm={settingsSearchTerm}
+      allValues={searchValues}
+    >
+      <FormFieldRow fullWidth={fullWidth} span={span} newRow={newRow}>
+        {i18n.exists(helpKey) ? (
+          <TextFieldWithHelp
+            labelKey={labelKey}
+            helpKey={helpKey}
+            size="small"
+            {...inputProps}
+          />
+        ) : (
+          <TextField label={t(labelKey as never)} {...inputProps} />
+        )}
       </FormFieldRow>
     </SettingsSearchField>
   );
@@ -239,7 +329,7 @@ export default function MapSettingsForm({
             searchTerm={settingsSearchTerm}
           >
             <FormPanel title={t("common.general")}>
-              <FormFieldGrid>
+              <FormFieldGrid columns={2} sx={{ alignItems: "center" }}>
                 <SettingsSearchField
                   labelKeys={["map.name"]}
                   fields={["name"]}
@@ -320,7 +410,7 @@ export default function MapSettingsForm({
             searchTerm={settingsSearchTerm}
           >
             <FormPanel title={t("map.baseSettings")}>
-              <FormFieldGrid>
+              <FormFieldGrid columns={4}>
                 <SettingsSearchField
                   labelKeys={["map.projection", "map.projections"]}
                   fields={["projection.code", "projections"]}
@@ -328,7 +418,7 @@ export default function MapSettingsForm({
                   searchTerm={settingsSearchTerm}
                   allValues={searchValues}
                 >
-                  <FormFieldRow>
+                  <FormFieldRow span={2}>
                     <Box
                       sx={{ display: "flex", alignItems: "flex-end", gap: 1 }}
                     >
@@ -380,129 +470,85 @@ export default function MapSettingsForm({
                     />
                   </FormFieldRow>
                 </SettingsSearchField>
-                <SettingsSearchField
-                  labelKeys={["map.startZoom"]}
-                  fields={["options.startZoom"]}
+                <MapTextField
+                  name="options.startZoom"
+                  labelKey="map.startZoom"
                   synonyms={["zoom", "start"]}
-                  searchTerm={settingsSearchTerm}
-                  allValues={searchValues}
-                >
-                  <FormFieldRow>
-                    <TextField
-                      label={t("map.startZoom")}
-                      fullWidth
-                      slotProps={{
-                        htmlInput: { inputMode: "decimal" },
-                      }}
-                      {...register("options.startZoom")}
-                    />
-                  </FormFieldRow>
-                </SettingsSearchField>
-                <SettingsSearchField
-                  labelKeys={["map.maxZoom"]}
-                  fields={["options.maxZoom"]}
-                  synonyms={["zoom", "max"]}
-                  searchTerm={settingsSearchTerm}
-                  allValues={searchValues}
-                >
-                  <FormFieldRow>
-                    <TextField
-                      label={t("map.maxZoom")}
-                      fullWidth
-                      type="number"
-                      {...register("options.maxZoom")}
-                    />
-                  </FormFieldRow>
-                </SettingsSearchField>
-                <SettingsSearchField
-                  labelKeys={["map.minZoom"]}
-                  fields={["options.minZoom"]}
+                  inputMode="decimal"
+                  placeholder="2"
+                  newRow
+                  register={register}
+                  settingsSearchTerm={settingsSearchTerm}
+                  searchValues={searchValues}
+                />
+                <MapTextField
+                  name="options.minZoom"
+                  labelKey="map.minZoom"
                   synonyms={["zoom", "min"]}
-                  searchTerm={settingsSearchTerm}
-                  allValues={searchValues}
-                >
-                  <FormFieldRow>
-                    <TextField
-                      label={t("map.minZoom")}
-                      fullWidth
-                      type="number"
-                      {...register("options.minZoom")}
-                    />
-                  </FormFieldRow>
-                </SettingsSearchField>
-                <SettingsSearchField
-                  labelKeys={["map.centerCoordinate"]}
-                  fields={["options.centerCoordinate"]}
-                  synonyms={["center", "coordinate"]}
-                  searchTerm={settingsSearchTerm}
-                  allValues={searchValues}
-                >
-                  <FormFieldRow>
-                    <TextField
-                      label={t("map.centerCoordinate")}
-                      fullWidth
-                      {...register("options.centerCoordinate")}
-                    />
-                  </FormFieldRow>
-                </SettingsSearchField>
-                <SettingsSearchField
-                  labelKeys={["map.origin"]}
-                  fields={["options.origin"]}
-                  searchTerm={settingsSearchTerm}
-                  allValues={searchValues}
-                >
-                  <FormFieldRow>
-                    <TextField
-                      label={t("map.origin")}
-                      fullWidth
-                      {...register("options.origin")}
-                    />
-                  </FormFieldRow>
-                </SettingsSearchField>
-                <SettingsSearchField
-                  labelKeys={["map.extent"]}
-                  fields={["options.extent"]}
-                  searchTerm={settingsSearchTerm}
-                  allValues={searchValues}
-                >
-                  <FormFieldRow>
-                    <TextField
-                      label={t("map.extent")}
-                      fullWidth
-                      {...register("options.extent")}
-                    />
-                  </FormFieldRow>
-                </SettingsSearchField>
-                <SettingsSearchField
-                  labelKeys={["map.resolutions"]}
-                  fields={["options.resolutions"]}
+                  type="number"
+                  register={register}
+                  settingsSearchTerm={settingsSearchTerm}
+                  searchValues={searchValues}
+                />
+                <MapTextField
+                  name="options.maxZoom"
+                  labelKey="map.maxZoom"
+                  synonyms={["zoom", "max"]}
+                  type="number"
+                  register={register}
+                  settingsSearchTerm={settingsSearchTerm}
+                  searchValues={searchValues}
+                />
+                <MapTextField
+                  name="options.resolutions"
+                  labelKey="map.resolutions"
                   synonyms={["resolution"]}
-                  searchTerm={settingsSearchTerm}
-                  allValues={searchValues}
-                >
-                  <FormFieldRow>
-                    <TextField
-                      label={t("map.resolutions")}
-                      fullWidth
-                      {...register("options.resolutions")}
-                    />
-                  </FormFieldRow>
-                </SettingsSearchField>
-                <SettingsSearchField
-                  labelKeys={["map.printResolutions"]}
-                  fields={["options.printResolutions"]}
+                  placeholder="4096, 2048, 1024, 512, …"
+                  span={2}
+                  newRow
+                  register={register}
+                  settingsSearchTerm={settingsSearchTerm}
+                  searchValues={searchValues}
+                />
+                <MapTextField
+                  name="options.printResolutions"
+                  labelKey="map.printResolutions"
                   synonyms={["print", "resolution"]}
-                  searchTerm={settingsSearchTerm}
-                  allValues={searchValues}
-                >
-                  <FormFieldRow>
-                    <TextField
-                      label={t("map.printResolutions")}
-                      fullWidth
-                      {...register("options.printResolutions")}
-                    />
-                  </FormFieldRow>
-                </SettingsSearchField>
+                  placeholder="0.5, 0.25, …"
+                  span={2}
+                  newRow
+                  register={register}
+                  settingsSearchTerm={settingsSearchTerm}
+                  searchValues={searchValues}
+                />
+                <MapTextField
+                  name="options.centerCoordinate"
+                  labelKey="map.centerCoordinate"
+                  synonyms={["center", "coordinate"]}
+                  placeholder="110600, 6283796"
+                  newRow
+                  register={register}
+                  settingsSearchTerm={settingsSearchTerm}
+                  searchValues={searchValues}
+                />
+                <MapTextField
+                  name="options.origin"
+                  labelKey="map.origin"
+                  placeholder="0, 0"
+                  register={register}
+                  settingsSearchTerm={settingsSearchTerm}
+                  searchValues={searchValues}
+                />
+                <MapTextField
+                  name="options.extent"
+                  labelKey="map.extent"
+                  placeholder="minX, minY, maxX, maxY"
+                  span={2}
+                  newRow
+                  register={register}
+                  settingsSearchTerm={settingsSearchTerm}
+                  searchValues={searchValues}
+                />
               </FormFieldGrid>
             </FormPanel>
           </SearchablePanel>
@@ -542,9 +588,9 @@ export default function MapSettingsForm({
             searchTerm={settingsSearchTerm}
           >
             <FormPanel title={t("map.extraSettings")}>
-              <FormFieldGrid>
-                <FormFieldRow>
-                  <FormGroup>
+              <FormFieldGrid columns={2}>
+                <FormFieldRow fullWidth>
+                  <FormGroup sx={CHECKBOX_COLUMNS_SX}>
                     <MapCheckboxField
                       name="options.constrainResolution"
                       labelKey="map.constrainResolution"
@@ -595,65 +641,37 @@ export default function MapSettingsForm({
                     />
                   </FormGroup>
                 </FormFieldRow>
-                <SettingsSearchField
-                  labelKeys={["map.logoLight"]}
-                  fields={["options.logoLight"]}
+                <MapTextField
+                  name="options.logoLight"
+                  labelKey="map.logoLight"
                   synonyms={["logo", "light"]}
-                  searchTerm={settingsSearchTerm}
-                  allValues={searchValues}
-                >
-                  <FormFieldRow>
-                    <TextField
-                      label={t("map.logoLight")}
-                      fullWidth
-                      {...register("options.logoLight")}
-                    />
-                  </FormFieldRow>
-                </SettingsSearchField>
-                <SettingsSearchField
-                  labelKeys={["map.logoDark"]}
-                  fields={["options.logoDark"]}
+                  register={register}
+                  settingsSearchTerm={settingsSearchTerm}
+                  searchValues={searchValues}
+                />
+                <MapTextField
+                  name="options.logoDark"
+                  labelKey="map.logoDark"
                   synonyms={["logo", "dark"]}
-                  searchTerm={settingsSearchTerm}
-                  allValues={searchValues}
-                >
-                  <FormFieldRow>
-                    <TextField
-                      label={t("map.logoDark")}
-                      fullWidth
-                      {...register("options.logoDark")}
-                    />
-                  </FormFieldRow>
-                </SettingsSearchField>
-                <SettingsSearchField
-                  labelKeys={["map.legendOptions"]}
-                  fields={["options.legendOptions"]}
+                  register={register}
+                  settingsSearchTerm={settingsSearchTerm}
+                  searchValues={searchValues}
+                />
+                <MapTextField
+                  name="options.legendOptions"
+                  labelKey="map.legendOptions"
                   synonyms={["legend"]}
-                  searchTerm={settingsSearchTerm}
-                  allValues={searchValues}
-                >
-                  <FormFieldRow>
-                    <TextField
-                      label={t("map.legendOptions")}
-                      fullWidth
-                      {...register("options.legendOptions")}
-                    />
-                  </FormFieldRow>
-                </SettingsSearchField>
-                <SettingsSearchField
-                  labelKeys={["map.crossOrigin"]}
-                  fields={["options.crossOrigin"]}
-                  searchTerm={settingsSearchTerm}
-                  allValues={searchValues}
-                >
-                  <FormFieldRow>
-                    <TextField
-                      label={t("map.crossOrigin")}
-                      fullWidth
-                      {...register("options.crossOrigin")}
-                    />
-                  </FormFieldRow>
-                </SettingsSearchField>
+                  register={register}
+                  settingsSearchTerm={settingsSearchTerm}
+                  searchValues={searchValues}
+                />
+                <MapTextField
+                  name="options.crossOrigin"
+                  labelKey="map.crossOrigin"
+                  register={register}
+                  settingsSearchTerm={settingsSearchTerm}
+                  searchValues={searchValues}
+                />
               </FormFieldGrid>
             </FormPanel>
           </SearchablePanel>
@@ -693,7 +711,7 @@ export default function MapSettingsForm({
             <FormPanel title={t("map.extraMapControls")}>
               <FormFieldGrid>
                 <FormFieldRow>
-                  <FormGroup>
+                  <FormGroup sx={CHECKBOX_COLUMNS_SX}>
                     <MapCheckboxField
                       name="options.mapselector"
                       labelKey="map.mapselector"
@@ -737,7 +755,7 @@ export default function MapSettingsForm({
                               onChange={(event) =>
                                 field.onChange(event.target.value)
                               }
-                              sx={{ minWidth: 280 }}
+                              sx={{ minWidth: 220, maxWidth: "100%" }}
                             >
                               <MenuItem value="button">
                                 {t("map.mapSelectorStyleButton")}
@@ -833,9 +851,9 @@ export default function MapSettingsForm({
             searchTerm={settingsSearchTerm}
           >
             <FormPanel title={t("map.interactions")}>
-              <FormFieldGrid>
-                <FormFieldRow>
-                  <FormGroup>
+              <FormFieldGrid columns={2}>
+                <FormFieldRow fullWidth>
+                  <FormGroup sx={CHECKBOX_COLUMNS_SX}>
                     <MapCheckboxField
                       name="options.altShiftDragRotate"
                       labelKey="map.altShiftDragRotate"
@@ -910,38 +928,24 @@ export default function MapSettingsForm({
                     />
                   </FormGroup>
                 </FormFieldRow>
-                <SettingsSearchField
-                  labelKeys={["map.zoomLevelDelta"]}
-                  fields={["options.zoomLevelDelta"]}
+                <MapTextField
+                  name="options.zoomLevelDelta"
+                  labelKey="map.zoomLevelDelta"
                   synonyms={["zoom"]}
-                  searchTerm={settingsSearchTerm}
-                  allValues={searchValues}
-                >
-                  <FormFieldRow>
-                    <TextField
-                      label={t("map.zoomLevelDelta")}
-                      fullWidth
-                      type="number"
-                      {...register("options.zoomLevelDelta")}
-                    />
-                  </FormFieldRow>
-                </SettingsSearchField>
-                <SettingsSearchField
-                  labelKeys={["map.zoomAnimationDuration"]}
-                  fields={["options.zoomAnimationDuration"]}
+                  type="number"
+                  register={register}
+                  settingsSearchTerm={settingsSearchTerm}
+                  searchValues={searchValues}
+                />
+                <MapTextField
+                  name="options.zoomAnimationDuration"
+                  labelKey="map.zoomAnimationDuration"
                   synonyms={["zoom", "animation"]}
-                  searchTerm={settingsSearchTerm}
-                  allValues={searchValues}
-                >
-                  <FormFieldRow>
-                    <TextField
-                      label={t("map.zoomAnimationDuration")}
-                      fullWidth
-                      type="number"
-                      {...register("options.zoomAnimationDuration")}
-                    />
-                  </FormFieldRow>
-                </SettingsSearchField>
+                  type="number"
+                  register={register}
+                  settingsSearchTerm={settingsSearchTerm}
+                  searchValues={searchValues}
+                />
               </FormFieldGrid>
             </FormPanel>
           </SearchablePanel>
@@ -974,7 +978,7 @@ export default function MapSettingsForm({
           searchTerm={settingsSearchTerm}
         >
           <FormPanel title={t("map.colors")}>
-            <FormFieldGrid>
+            <FormFieldGrid columns={2}>
               <SettingsSearchField
                 labelKeys={["map.preferredColorScheme"]}
                 fields={["options.preferredColorScheme"]}
@@ -982,33 +986,29 @@ export default function MapSettingsForm({
                 searchTerm={settingsSearchTerm}
                 allValues={searchValues}
               >
-                <FormFieldRow>
-                  <FormControl fullWidth>
-                    <InputLabel id="preferredColorScheme-label">
-                      {t("map.preferredColorScheme")}
-                    </InputLabel>
-                    <Controller
-                      name="options.preferredColorScheme"
-                      control={control}
-                      render={({ field }) => (
-                        <Select
-                          labelId="preferredColorScheme-label"
-                          label={t("map.preferredColorScheme")}
-                          {...field}
-                        >
-                          <MenuItem value="user">
-                            {t("map.colorSchemeUser")}
-                          </MenuItem>
-                          <MenuItem value="light">
-                            {t("map.colorSchemeLight")}
-                          </MenuItem>
-                          <MenuItem value="dark">
-                            {t("map.colorSchemeDark")}
-                          </MenuItem>
-                        </Select>
-                      )}
-                    />
-                  </FormControl>
+                <FormFieldRow fullWidth>
+                  <Controller
+                    name="options.preferredColorScheme"
+                    control={control}
+                    render={({ field }) => (
+                      <SelectWithHelp
+                        labelKey="map.preferredColorScheme"
+                        helpKey="map.preferredColorSchemeHelp"
+                        {...field}
+                        value={(field.value as string) ?? ""}
+                      >
+                        <MenuItem value="user">
+                          {t("map.colorSchemeUser")}
+                        </MenuItem>
+                        <MenuItem value="light">
+                          {t("map.colorSchemeLight")}
+                        </MenuItem>
+                        <MenuItem value="dark">
+                          {t("map.colorSchemeDark")}
+                        </MenuItem>
+                      </SelectWithHelp>
+                    )}
+                  />
                 </FormFieldRow>
               </SettingsSearchField>
               <MapColorField
@@ -1064,9 +1064,9 @@ export default function MapSettingsForm({
           searchTerm={settingsSearchTerm}
         >
           <FormPanel title={t("map.sidepanel")}>
-            <FormFieldGrid>
-              <FormFieldRow>
-                <FormGroup>
+            <FormFieldGrid columns={2}>
+              <FormFieldRow fullWidth>
+                <FormGroup sx={CHECKBOX_COLUMNS_SX}>
                   <MapCheckboxField
                     name="options.drawerStatic"
                     labelKey="map.drawerStatic"
@@ -1101,51 +1101,30 @@ export default function MapSettingsForm({
                   />
                 </FormGroup>
               </FormFieldRow>
-              <SettingsSearchField
-                labelKeys={["map.drawerContent"]}
-                fields={["options.drawerContent"]}
+              <MapTextField
+                name="options.drawerContent"
+                labelKey="map.drawerContent"
                 synonyms={["drawer"]}
-                searchTerm={settingsSearchTerm}
-                allValues={searchValues}
-              >
-                <FormFieldRow>
-                  <TextField
-                    label={t("map.drawerContent")}
-                    fullWidth
-                    {...register("options.drawerContent")}
-                  />
-                </FormFieldRow>
-              </SettingsSearchField>
-              <SettingsSearchField
-                labelKeys={["map.drawerTitle"]}
-                fields={["options.drawerTitle"]}
+                register={register}
+                settingsSearchTerm={settingsSearchTerm}
+                searchValues={searchValues}
+              />
+              <MapTextField
+                name="options.drawerTitle"
+                labelKey="map.drawerTitle"
                 synonyms={["drawer", "title"]}
-                searchTerm={settingsSearchTerm}
-                allValues={searchValues}
-              >
-                <FormFieldRow>
-                  <TextField
-                    label={t("map.drawerTitle")}
-                    fullWidth
-                    {...register("options.drawerTitle")}
-                  />
-                </FormFieldRow>
-              </SettingsSearchField>
-              <SettingsSearchField
-                labelKeys={["map.drawerButtonTitle"]}
-                fields={["options.drawerButtonTitle"]}
+                register={register}
+                settingsSearchTerm={settingsSearchTerm}
+                searchValues={searchValues}
+              />
+              <MapTextField
+                name="options.drawerButtonTitle"
+                labelKey="map.drawerButtonTitle"
                 synonyms={["drawer", "button"]}
-                searchTerm={settingsSearchTerm}
-                allValues={searchValues}
-              >
-                <FormFieldRow>
-                  <TextField
-                    label={t("map.drawerButtonTitle")}
-                    fullWidth
-                    {...register("options.drawerButtonTitle")}
-                  />
-                </FormFieldRow>
-              </SettingsSearchField>
+                register={register}
+                settingsSearchTerm={settingsSearchTerm}
+                searchValues={searchValues}
+              />
               <SettingsSearchField
                 labelKeys={["map.drawerButtonIcon"]}
                 fields={["options.drawerButtonIcon"]}
@@ -1154,25 +1133,21 @@ export default function MapSettingsForm({
                 allValues={searchValues}
               >
                 <FormFieldRow>
-                  <FormControl fullWidth>
-                    <InputLabel id="drawerButtonIcon-label">
-                      {t("map.drawerButtonIcon")}
-                    </InputLabel>
-                    <Controller
-                      name="options.drawerButtonIcon"
-                      control={control}
-                      render={({ field }) => (
-                        <Select
-                          labelId="drawerButtonIcon-label"
-                          label={t("map.drawerButtonIcon")}
-                          {...field}
-                        >
-                          <MenuItem value="MapIcon">MapIcon</MenuItem>
-                          <MenuItem value="MenuIcon">MenuIcon</MenuItem>
-                        </Select>
-                      )}
-                    />
-                  </FormControl>
+                  <Controller
+                    name="options.drawerButtonIcon"
+                    control={control}
+                    render={({ field }) => (
+                      <SelectWithHelp
+                        labelKey="map.drawerButtonIcon"
+                        helpKey="map.drawerButtonIconHelp"
+                        {...field}
+                        value={(field.value as string) ?? ""}
+                      >
+                        <MenuItem value="MapIcon">MapIcon</MenuItem>
+                        <MenuItem value="MenuIcon">MenuIcon</MenuItem>
+                      </SelectWithHelp>
+                    )}
+                  />
                 </FormFieldRow>
               </SettingsSearchField>
             </FormFieldGrid>
@@ -1206,9 +1181,9 @@ export default function MapSettingsForm({
             searchTerm={settingsSearchTerm}
           >
             <FormPanel title={t("map.cookies")}>
-              <FormFieldGrid>
-                <FormFieldRow>
-                  <FormGroup>
+              <FormFieldGrid columns={2}>
+                <FormFieldRow fullWidth>
+                  <FormGroup sx={CHECKBOX_COLUMNS_SX}>
                     <MapCheckboxField
                       name="options.showCookieNotice"
                       labelKey="map.showCookieNotice"
@@ -1235,38 +1210,26 @@ export default function MapSettingsForm({
                     />
                   </FormGroup>
                 </FormFieldRow>
-                <SettingsSearchField
-                  labelKeys={["map.cookieLink"]}
-                  fields={["options.cookieLink"]}
+                <MapTextField
+                  name="options.cookieLink"
+                  labelKey="map.cookieLink"
                   synonyms={["cookie", "link"]}
-                  searchTerm={settingsSearchTerm}
-                  allValues={searchValues}
-                >
-                  <FormFieldRow>
-                    <TextField
-                      label={t("map.cookieLink")}
-                      fullWidth
-                      {...register("options.cookieLink")}
-                    />
-                  </FormFieldRow>
-                </SettingsSearchField>
-                <SettingsSearchField
-                  labelKeys={["map.cookieMessage"]}
-                  fields={["options.cookieMessage"]}
+                  placeholder="https://…"
+                  register={register}
+                  settingsSearchTerm={settingsSearchTerm}
+                  searchValues={searchValues}
+                />
+                <MapTextField
+                  name="options.cookieMessage"
+                  labelKey="map.cookieMessage"
                   synonyms={["cookie", "message"]}
-                  searchTerm={settingsSearchTerm}
-                  allValues={searchValues}
-                >
-                  <FormFieldRow>
-                    <TextField
-                      label={t("map.cookieMessage")}
-                      fullWidth
-                      multiline
-                      rows={3}
-                      {...register("options.cookieMessage")}
-                    />
-                  </FormFieldRow>
-                </SettingsSearchField>
+                  multiline
+                  rows={3}
+                  fullWidth
+                  register={register}
+                  settingsSearchTerm={settingsSearchTerm}
+                  searchValues={searchValues}
+                />
               </FormFieldGrid>
             </FormPanel>
           </SearchablePanel>
@@ -1313,23 +1276,16 @@ export default function MapSettingsForm({
                     />
                   </FormGroup>
                 </FormFieldRow>
-                <SettingsSearchField
-                  labelKeys={["map.introductionSteps"]}
-                  fields={["options.introductionSteps"]}
+                <MapTextField
+                  name="options.introductionSteps"
+                  labelKey="map.introductionSteps"
                   synonyms={["intro", "guide", "steps"]}
-                  searchTerm={settingsSearchTerm}
-                  allValues={searchValues}
-                >
-                  <FormFieldRow>
-                    <TextField
-                      label={t("map.introductionSteps")}
-                      fullWidth
-                      multiline
-                      rows={8}
-                      {...register("options.introductionSteps")}
-                    />
-                  </FormFieldRow>
-                </SettingsSearchField>
+                  multiline
+                  rows={8}
+                  register={register}
+                  settingsSearchTerm={settingsSearchTerm}
+                  searchValues={searchValues}
+                />
               </FormFieldGrid>
             </FormPanel>
           </SearchablePanel>
