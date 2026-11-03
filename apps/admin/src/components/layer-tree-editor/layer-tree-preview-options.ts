@@ -31,7 +31,6 @@ function catalogToolAsMapEntry(tool: Tool): ToolOnMap {
     toolId: Number(tool.id),
     active: true,
     index: 0,
-    target: null,
     tool: { id: Number(tool.id), type: tool.type, options: tool.options ?? {} },
   };
 }

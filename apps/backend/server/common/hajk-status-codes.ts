@@ -134,6 +134,12 @@ enum HajkStatusCodes {
   PROJECTION_CHANGE_BLOCKED = "DB018",
 
   /**
+   * The tool type has one instance, made by the seed, which can be neither
+   * created again nor deleted.
+   */
+  SINGLE_INSTANCE_TOOL_TYPE = "DB019",
+
+  /**
    * The request body is invalid, e.g. lacks some required fields.
    */
   INVALID_REQUEST_BODY = "RQ001",

@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import {
   Box,
   ButtonBase,
@@ -46,14 +46,16 @@ function columnCountFor(width: number): number {
   return 1;
 }
 
+/** Top to bottom, column by column, with columns that differ by one item at most. */
 function stackByColumn<T>(items: T[], columnCount: number): T[][] {
-  if (items.length === 0) return [];
   const count = Math.min(columnCount, items.length);
-  const rows = Math.ceil(items.length / count);
-  const columns: T[][] = Array.from({ length: count }, () => []);
-  items.forEach((item, index) => {
-    columns[Math.floor(index / rows)]?.push(item);
-  });
+  const columns: T[][] = [];
+  let start = 0;
+  for (let column = 0; column < count; column++) {
+    const size = Math.ceil((items.length - start) / (count - column));
+    columns.push(items.slice(start, start + size));
+    start += size;
+  }
   return columns;
 }
 
@@ -89,6 +91,9 @@ export default function MapToolsUnplaced({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [columnCount, setColumnCount] = useState(1);
+  const [expandedIds, setExpandedIds] = useState<Set<number>>(
+    () => new Set(),
+  );
   const columnsRef = useRef<HTMLDivElement>(null);
   const activeCount = tools.filter((tool) => tool.active).length;
   const orderedTools = [
@@ -96,6 +101,15 @@ export default function MapToolsUnplaced({
     ...tools.filter((tool) => hasWindowSettings(tool)),
   ];
   const columns = stackByColumn(orderedTools, columnCount);
+
+  const toggleExpanded = useCallback((toolId: number) => {
+    setExpandedIds((current) => {
+      const next = new Set(current);
+      if (next.has(toolId)) next.delete(toolId);
+      else next.add(toolId);
+      return next;
+    });
+  }, []);
 
   useLayoutEffect(() => {
     const node = columnsRef.current;
@@ -191,9 +205,9 @@ export default function MapToolsUnplaced({
             ref={columnsRef}
             sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}
           >
-            {columns.map((column) => (
+            {columns.map((column, index) => (
               <Box
-                key={column[0]?.toolId}
+                key={index}
                 sx={{
                   flex: 1,
                   minWidth: 0,
@@ -207,6 +221,8 @@ export default function MapToolsUnplaced({
                     key={tool.toolId}
                     tool={tool}
                     where={t(whereKey(tool.type))}
+                    expanded={expandedIds.has(tool.toolId)}
+                    onToggleExpanded={toggleExpanded}
                     onRemove={onRemove}
                     onOpenSettings={onOpenSettings}
                     onWindowPositionChange={onWindowPositionChange}

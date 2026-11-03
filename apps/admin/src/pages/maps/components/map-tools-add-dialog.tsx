@@ -18,26 +18,14 @@ import CheckIcon from "@mui/icons-material/Check";
 import SearchIcon from "@mui/icons-material/Search";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { useTranslation } from "react-i18next";
-import type { TFunction } from "i18next";
 import type { ToolZone } from "../../../api/maps";
 import type { AddableTool } from "../map-tools-board-model";
+import { toolLabels } from "../map-tools-utils";
 
 /** The tool instance of a given type already on the map, and where it sits. */
 export interface PlacedToolOfType {
   title: string;
   zone: ToolZone | "unplaced";
-}
-
-function toolLabels(tool: AddableTool, t: TFunction) {
-  const typeName = t(`tools.typeNames.${tool.type}`, {
-    defaultValue: tool.type,
-  });
-  const title = tool.title.trim();
-  const hasTitle = title !== "" && title !== tool.type;
-  return {
-    hasTitle,
-    label: hasTitle ? tool.title : typeName,
-  };
 }
 
 interface MapToolsAddDialogProps {
@@ -205,7 +193,7 @@ function MapToolsAddDialog({
           <List disablePadding>
             {filtered.map((tool) => {
               const placed = placedByType.get(tool.type);
-              const { hasTitle, label } = toolLabels(tool, t);
+              const { typeName, hasTitle, label } = toolLabels(tool, t);
               const selected = selectedIds.includes(tool.toolId);
               return (
                 <Box
@@ -251,7 +239,7 @@ function MapToolsAddDialog({
                         color="text.secondary"
                         component="div"
                       >
-                        {tool.type}
+                        {typeName}
                       </Typography>
                     ) : null}
                     {placed ? (

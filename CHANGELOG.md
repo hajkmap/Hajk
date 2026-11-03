@@ -47,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Admin + Backend: A tool's placement on a map is kept beside its window's position and size in the map's options for it, `ToolsOnMaps.options.target` (`toolbar`, `left`, `right` or `control`), as the client reads it. The `target` column is gone, so databases are rebuilt with `npm run reset:db`. Verktyg utan placering shows the window settings of the tools that have them, like the document handler's and infoclick's. The deprecated `measure` tool type is gone (`measurer` replaces it), and the one `commandpalette` instance can be neither created nor deleted (400, DB019).
 - Backend: Upgraded `write-excel-file` from 3.x to 4.x.
 - Backend: Enhance detailed request logger with structured output and file logging configuration [#1836](https://github.com/hajkmap/Hajk/pull/1836)
 - Backend: Bumped the [API Explorer](https://github.com/swagger-api/swagger-ui) to v5.32.6.

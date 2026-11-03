@@ -14,7 +14,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useDrag } from "react-dnd";
 import { useTranslation } from "react-i18next";
 import type { ToolWindowPosition } from "../../../api/maps";
-import type { ToolWindowSize } from "../map-tools-utils";
+import { toolLabels, type ToolWindowSize } from "../map-tools-utils";
 import { MAP_TOOL_DND_TYPE, type MapToolDragItem } from "../map-tools-layout";
 import type { BoardTool } from "../map-tools-board-model";
 import MapToolWindowSettings from "./map-tool-window-settings";
@@ -116,13 +116,7 @@ function MapToolCard({
 
   const showWindow =
     tool.showWindowPosition || tool.showWindowWidth || tool.showWindowHeight;
-  const typeName = t(`tools.typeNames.${tool.type}`, {
-    defaultValue: tool.type,
-  });
-  const title = tool.title.trim();
-  const hasTitle =
-    title !== "" && title !== tool.type && title !== typeName;
-  const primaryLabel = hasTitle ? tool.title : typeName || tool.title;
+  const { typeName, hasTitle, label: primaryLabel } = toolLabels(tool, t);
 
   return (
     <Box

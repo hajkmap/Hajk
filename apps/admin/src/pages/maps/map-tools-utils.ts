@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import type {
   ToolOnMap,
   ToolTarget,
@@ -350,6 +351,22 @@ export function getCatalogToolDisplayName(tool: Tool): string {
     return tool.title.trim();
   }
   return tool.type;
+}
+
+/**
+ * A tool's name on the tools tab: its own title, or its type's name when the
+ * title is only the type. A title of its own shows the type's name under it.
+ */
+export function toolLabels(
+  tool: { title: string; type: string },
+  t: TFunction,
+) {
+  const typeName = t(`tools.typeNames.${tool.type}`, {
+    defaultValue: tool.type,
+  });
+  const title = tool.title.trim();
+  const hasTitle = title !== "" && title !== tool.type && title !== typeName;
+  return { typeName, hasTitle, label: hasTitle ? title : typeName || title };
 }
 
 function optionsTarget(options: Record<string, unknown> | undefined) {

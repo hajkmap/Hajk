@@ -93,7 +93,7 @@ class ToolService {
       throw new HajkError(
         HttpStatusCodes.BAD_REQUEST,
         `Tool type "${data.type}" already exists and cannot be created again.`,
-        HajkStatusCodes.UNKNOWN_TOOL_TYPE
+        HajkStatusCodes.SINGLE_INSTANCE_TOOL_TYPE
       );
     }
 
@@ -131,7 +131,7 @@ class ToolService {
       throw new HajkError(
         HttpStatusCodes.BAD_REQUEST,
         `Tool type "${tool.type}" cannot be deleted.`,
-        HajkStatusCodes.UNKNOWN_TOOL_TYPE
+        HajkStatusCodes.SINGLE_INSTANCE_TOOL_TYPE
       );
     }
 

@@ -7,6 +7,7 @@ import { useDrag, useDragLayer, useDrop } from "react-dnd";
 import { useTranslation } from "react-i18next";
 import { MAP_TOOL_DND_TYPE, type MapToolDragItem } from "../map-tools-layout";
 import type { BoardTool } from "../map-tools-board-model";
+import { toolLabels } from "../map-tools-utils";
 
 export type MapToolsInteractionMode = "drag" | "click";
 
@@ -37,12 +38,7 @@ function HeldToolRow({
   onCancel: (toolId: number) => void;
 }) {
   const { t } = useTranslation();
-  const typeName = t(`tools.typeNames.${tool.type}`, {
-    defaultValue: tool.type,
-  });
-  const title = tool.title.trim();
-  const hasTitle = title !== "" && title !== tool.type;
-  const label = hasTitle ? tool.title : typeName;
+  const { typeName, hasTitle, label } = toolLabels(tool, t);
   const [{ isDragging }, dragRef] = useDrag(
     () => ({
       type: MAP_TOOL_DND_TYPE,
@@ -96,7 +92,7 @@ function HeldToolRow({
         />
       )}
       <Tooltip
-        title={hasTitle ? `${tool.title} (${tool.type})` : label}
+        title={hasTitle ? `${label} (${typeName})` : label}
         placement="left"
       >
         <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -125,7 +121,7 @@ function HeldToolRow({
                 whiteSpace: "nowrap",
               }}
             >
-              {tool.type}
+              {typeName}
             </Typography>
           ) : null}
         </Box>

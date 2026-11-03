@@ -1,10 +1,10 @@
-import { memo, useState } from "react";
+import { memo } from "react";
 import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import { useTranslation } from "react-i18next";
 import type { ToolWindowPosition } from "../../../api/maps";
-import type { ToolWindowSize } from "../map-tools-utils";
+import { toolLabels, type ToolWindowSize } from "../map-tools-utils";
 import type { BoardTool } from "../map-tools-board-model";
 import MapToolWindowSettings from "./map-tool-window-settings";
 
@@ -12,6 +12,9 @@ interface MapToolsUnplacedRowProps {
   tool: BoardTool;
   /** Where the map shows the tool, since it has no column. */
   where: string;
+  /** Kept by the list, so a row that moves to another column stays open. */
+  expanded: boolean;
+  onToggleExpanded: (toolId: number) => void;
   onRemove: (toolId: number) => void;
   onOpenSettings: (toolId: number) => void;
   onWindowPositionChange: (
@@ -30,6 +33,8 @@ interface MapToolsUnplacedRowProps {
 function MapToolsUnplacedRow({
   tool,
   where,
+  expanded,
+  onToggleExpanded,
   onRemove,
   onOpenSettings,
   onWindowPositionChange,
@@ -37,12 +42,7 @@ function MapToolsUnplacedRow({
   onPendingSizeChange,
 }: MapToolsUnplacedRowProps) {
   const { t } = useTranslation();
-  const [expanded, setExpanded] = useState(false);
-  const typeName = t(`tools.typeNames.${tool.type}`, {
-    defaultValue: tool.type,
-  });
-  const title = tool.title.trim();
-  const hasTitle = title !== "" && title !== tool.type && title !== typeName;
+  const { typeName, hasTitle, label } = toolLabels(tool, t);
 
   return (
     <Box
@@ -66,7 +66,7 @@ function MapToolsUnplacedRow({
       >
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography variant="body2" noWrap sx={{ fontWeight: 600 }}>
-            {hasTitle ? tool.title : typeName || tool.title}
+            {label}
           </Typography>
           {hasTitle ? (
             <Typography
@@ -109,7 +109,7 @@ function MapToolsUnplacedRow({
         <MapToolWindowSettings
           tool={tool}
           expanded={expanded}
-          onToggle={() => setExpanded((open) => !open)}
+          onToggle={() => onToggleExpanded(tool.toolId)}
           onWindowPositionChange={onWindowPositionChange}
           onWindowSizeChange={onWindowSizeChange}
           onPendingSizeChange={onPendingSizeChange}

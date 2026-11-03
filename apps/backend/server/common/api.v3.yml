@@ -175,12 +175,13 @@ paths:
                         type: integer
                       active:
                         type: boolean
-                      target:
-                        type: string
-                        nullable: true
-                        enum: [drawer, widgetLeft, widgetRight, controlButton, null]
                       options:
                         type: object
+                        description: The map's own options for the tool. `target` places it, and without it the tool has no placement. `position`, `width` and `height` set its window.
+                        properties:
+                          target:
+                            type: string
+                            enum: [toolbar, left, right, control]
                         additionalProperties: true
                     required:
                       - toolId
