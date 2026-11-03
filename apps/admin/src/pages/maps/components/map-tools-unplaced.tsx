@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import {
   Box,
   ButtonBase,
@@ -9,21 +9,52 @@ import {
   Typography,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import { useTranslation } from "react-i18next";
+import type { ToolWindowPosition } from "../../../api/maps";
+import type { ToolWindowSize } from "../map-tools-utils";
+import type { BoardTool } from "../map-tools-board-model";
+import MapToolsUnplacedRow from "./map-tools-unplaced-row";
 
 interface MapToolsUnplacedProps {
-  tools: {
-    toolId: number;
-    title: string;
-    type: string;
-    active: boolean;
-  }[];
+  tools: (BoardTool & { active: boolean })[];
   onAdd: () => void;
   onRemove: (toolId: number) => void;
   onOpenSettings: (toolId: number) => void;
+  onWindowPositionChange: (
+    toolId: number,
+    position: ToolWindowPosition,
+  ) => void;
+  onWindowSizeChange: (toolId: number, size: Partial<ToolWindowSize>) => void;
+  onPendingSizeChange: (
+    toolId: number,
+    dimension: "width" | "height",
+    nextValue: number | undefined,
+    committedValue: number | undefined,
+  ) => void;
+}
+
+function hasWindowSettings(tool: BoardTool): boolean {
+  return (
+    tool.showWindowPosition || tool.showWindowWidth || tool.showWindowHeight
+  );
+}
+
+function columnCountFor(width: number): number {
+  if (width >= 1160) return 3;
+  if (width >= 720) return 2;
+  return 1;
+}
+
+function stackByColumn<T>(items: T[], columnCount: number): T[][] {
+  if (items.length === 0) return [];
+  const count = Math.min(columnCount, items.length);
+  const rows = Math.ceil(items.length / count);
+  const columns: T[][] = Array.from({ length: count }, () => []);
+  items.forEach((item, index) => {
+    columns[Math.floor(index / rows)]?.push(item);
+  });
+  return columns;
 }
 
 function whereKey(type: string): string {
@@ -51,10 +82,30 @@ export default function MapToolsUnplaced({
   onAdd,
   onRemove,
   onOpenSettings,
+  onWindowPositionChange,
+  onWindowSizeChange,
+  onPendingSizeChange,
 }: MapToolsUnplacedProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const [columnCount, setColumnCount] = useState(1);
+  const columnsRef = useRef<HTMLDivElement>(null);
   const activeCount = tools.filter((tool) => tool.active).length;
+  const orderedTools = [
+    ...tools.filter((tool) => !hasWindowSettings(tool)),
+    ...tools.filter((tool) => hasWindowSettings(tool)),
+  ];
+  const columns = stackByColumn(orderedTools, columnCount);
+
+  useLayoutEffect(() => {
+    const node = columnsRef.current;
+    if (!node) return;
+    const update = () => setColumnCount(columnCountFor(node.clientWidth));
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [open]);
 
   return (
     <Box
@@ -132,88 +183,39 @@ export default function MapToolsUnplaced({
           <Typography
             variant="body2"
             color="text.secondary"
-            sx={{ mb: 1.5, maxWidth: 760,mt:2 }}
+            sx={{ mb: 1.5, mt: 2, maxWidth: 760 }}
           >
             {t("maps.toolsUnplacedHelp")}
           </Typography>
           <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: "minmax(0, 1fr)",
-              gap: 1,
-              "@container (min-width: 720px)": {
-                gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-              },
-              "@container (min-width: 1160px)": {
-                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-              },
-            }}
+            ref={columnsRef}
+            sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}
           >
-            {tools.map((tool) => {
-              const where = t(whereKey(tool.type));
-              const typeName = t(`tools.typeNames.${tool.type}`, {
-                defaultValue: tool.type,
-              });
-              const title = tool.title.trim();
-              const hasTitle =
-                title !== "" && title !== tool.type && title !== typeName;
-              return (
-                <Box
-                  key={tool.toolId}
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    px: 1.25,
-                    py: 0.75,
-                    minWidth: 0,
-                borderRadius: 1.5,
-                border: "1px dashed",
-                borderColor: "divider",
-                bgcolor: "action.hover",
-              }}
-                >
-                  <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography variant="body2" noWrap sx={{ fontWeight: 600 }}>
-                      {hasTitle ? tool.title : typeName || tool.title}
-                    </Typography>
-                    {hasTitle ? (
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        noWrap
-                        component="div"
-                      >
-                        {typeName}
-                      </Typography>
-                    ) : null}
-                    <Typography variant="caption" color="text.secondary" noWrap>
-                      {where}
-                    </Typography>
-                  </Box>
-                  <Tooltip title={t("maps.toolsWindowSettings")}>
-                    <IconButton
-                      size="small"
-                      aria-label={t("maps.toolsWindowSettings")}
-                      onClick={() => onOpenSettings(tool.toolId)}
-                    >
-                      <SettingsOutlinedIcon sx={{ fontSize: 18 }} />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title={t("maps.toolsRemoveFromMap")}>
-                    <IconButton
-                      size="small"
-                      type="button"
-                      aria-label={t("maps.toolsRemoveFromMap")}
-                      onClick={() => onRemove(tool.toolId)}
-                      sx={{ p: 0.5, flexShrink: 0, "&:hover": { color: "error.main" } }}
-                    >
-                      <CloseIcon sx={{ fontSize: 18 }} />
-                    </IconButton>
-                  </Tooltip>
-                </Box>
-              );
-            })}
+            {columns.map((column) => (
+              <Box
+                key={column[0]?.toolId}
+                sx={{
+                  flex: 1,
+                  minWidth: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 1,
+                }}
+              >
+                {column.map((tool) => (
+                  <MapToolsUnplacedRow
+                    key={tool.toolId}
+                    tool={tool}
+                    where={t(whereKey(tool.type))}
+                    onRemove={onRemove}
+                    onOpenSettings={onOpenSettings}
+                    onWindowPositionChange={onWindowPositionChange}
+                    onWindowSizeChange={onWindowSizeChange}
+                    onPendingSizeChange={onPendingSizeChange}
+                  />
+                ))}
+              </Box>
+            ))}
           </Box>
         </Box>
       </Collapse>

@@ -287,11 +287,13 @@ export default function ToolsList({
                   error={!!errors.type}
                   helperText={errors.type?.message}
                 >
-                  {(toolTypes ?? []).map((toolType) => (
-                    <MenuItem key={toolType.type} value={toolType.type}>
-                      {typeLabel(toolType.type)}
-                    </MenuItem>
-                  ))}
+                  {(toolTypes ?? [])
+                    .filter((toolType) => toolType.type !== "commandpalette")
+                    .map((toolType) => (
+                      <MenuItem key={toolType.type} value={toolType.type}>
+                        {typeLabel(toolType.type)}
+                      </MenuItem>
+                    ))}
                 </TextField>
               )}
             />
@@ -435,18 +437,19 @@ export default function ToolsList({
                   headerName: t("common.actions"),
                   flex: 0.2,
                   sortable: false,
-                  renderCell: (params: { row: Tool }) => (
-                    <IconButton
-                      size="small"
-                      color="error"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setToolToDelete(params.row);
-                      }}
-                    >
-                      <DeleteOutlineIcon fontSize="small" />
-                    </IconButton>
-                  ),
+                  renderCell: (params: { row: Tool }) =>
+                    params.row.type === "commandpalette" ? null : (
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setToolToDelete(params.row);
+                        }}
+                      >
+                        <DeleteOutlineIcon fontSize="small" />
+                      </IconButton>
+                    ),
                 },
               ]}
               onRowClick={({ row }) => {

@@ -23,11 +23,6 @@ interface MapToolsMoveZoneProps {
   onCancel: (toolId: number) => void;
 }
 
-function zoneLabel(tool: BoardTool): string {
-  const title = tool.title.trim();
-  return title && title !== tool.type ? title : tool.type;
-}
-
 function HeldToolRow({
   tool,
   picked = false,
@@ -42,7 +37,12 @@ function HeldToolRow({
   onCancel: (toolId: number) => void;
 }) {
   const { t } = useTranslation();
-  const label = zoneLabel(tool);
+  const typeName = t(`tools.typeNames.${tool.type}`, {
+    defaultValue: tool.type,
+  });
+  const title = tool.title.trim();
+  const hasTitle = title !== "" && title !== tool.type;
+  const label = hasTitle ? tool.title : typeName;
   const [{ isDragging }, dragRef] = useDrag(
     () => ({
       type: MAP_TOOL_DND_TYPE,
@@ -95,22 +95,40 @@ function HeldToolRow({
           sx={{ color: "text.secondary", flexShrink: 0 }}
         />
       )}
-      <Tooltip title={label} placement="left">
-        <Typography
-          variant="caption"
-          component="div"
-          sx={{
-            flex: 1,
-            minWidth: 0,
-            fontWeight: 600,
-            lineHeight: 1.3,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {label}
-        </Typography>
+      <Tooltip
+        title={hasTitle ? `${tool.title} (${tool.type})` : label}
+        placement="left"
+      >
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography
+            variant="caption"
+            component="div"
+            sx={{
+              fontWeight: 600,
+              lineHeight: 1.3,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {label}
+          </Typography>
+          {hasTitle ? (
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              component="div"
+              sx={{
+                lineHeight: 1.3,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {tool.type}
+            </Typography>
+          ) : null}
+        </Box>
       </Tooltip>
       <Tooltip title={t("maps.toolsMoveZoneCancel")} placement="right">
         <IconButton

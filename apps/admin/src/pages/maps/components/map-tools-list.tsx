@@ -21,6 +21,7 @@ import { getMapToolFieldConfig } from "../map-tool-field-config";
 import {
   getCatalogToolDisplayName,
   getToolDisplayName,
+  isFixedControlTool,
   type ToolWindowSize,
   type ToolZones,
 } from "../map-tools-utils";
@@ -31,8 +32,10 @@ import {
 } from "../map-tools-layout";
 import {
   buildToolBoard,
+  describeUnplacedTool,
   toolsAvailableToAdd,
   type AddableTool,
+  type BoardTool,
 } from "../map-tools-board-model";
 import MapToolColumn, {
   type FixedControlItem,
@@ -46,6 +49,7 @@ interface UnplacedBoardTool {
   type: string;
   active: boolean;
 }
+
 import MapToolsAddDialog, {
   type PlacedToolOfType,
 } from "./map-tools-add-dialog";
@@ -62,7 +66,7 @@ interface MapToolsListProps {
   windowSizes: Record<number, ToolWindowSize>;
   indexes: Record<number, number>;
   onToggleActive: (toolId: number, active: boolean) => void;
-  onAddTool: (toolId: number, target: ToolZone) => void;
+  onAddTool: (toolId: number, zone: ToolZone) => void;
   onCommitColumns: (order: ToolColumnOrder) => void;
   onWindowPositionChange: (
     toolId: number,
@@ -296,6 +300,22 @@ function MapToolsList({
   const unplacedTools = useMemo((): UnplacedBoardTool[] => {
     return listUnplacedTools(catalogTools, mapTools, activeToolIds);
   }, [activeToolIds, catalogTools, mapTools]);
+
+  const unplacedBoardTools = useMemo(() => {
+    const tools: (BoardTool & { active: boolean })[] = [];
+    for (const tool of unplacedTools) {
+      if (!tool.active || isFixedControlTool(tool.type)) continue;
+      const described: BoardTool = describeUnplacedTool(
+        tool.toolId,
+        catalogTools,
+        mapTools,
+        windowPositions,
+        windowSizes,
+      );
+      tools.push({ ...described, title: tool.title, active: tool.active });
+    }
+    return tools;
+  }, [catalogTools, mapTools, unplacedTools, windowPositions, windowSizes]);
 
   const fixedControls = useMemo(() => {
     const before: FixedControlItem[] = [
@@ -656,23 +676,15 @@ function MapToolsList({
       >
         {t("maps.toolsBoardHelp")}
       </Typography>
-      {unplacedTools.some(
-        (tool) =>
-          tool.type !== "information" &&
-          tool.type !== "preset" &&
-          tool.type !== "externalLinks",
-      ) ? (
+      {unplacedTools.some((tool) => !isFixedControlTool(tool.type)) ? (
         <MapToolsUnplaced
-          tools={unplacedTools.filter(
-            (tool) =>
-              tool.active &&
-              tool.type !== "information" &&
-              tool.type !== "preset" &&
-              tool.type !== "externalLinks",
-          )}
+          tools={unplacedBoardTools}
           onAdd={() => setAddTarget("unplaced")}
           onOpenSettings={openSettings}
           onRemove={(toolId: number) => onToggleActive(toolId, false)}
+          onWindowPositionChange={onWindowPositionChange}
+          onWindowSizeChange={onWindowSizeChange}
+          onPendingSizeChange={setPendingFieldState}
         />
       ) : null}
       {clickMode && armedToolId != null ? (

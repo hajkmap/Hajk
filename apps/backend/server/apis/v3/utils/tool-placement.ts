@@ -1,27 +1,16 @@
-/** Admin/backend zone id → legacy client `options.target`. */
-const BACKEND_TARGET_TO_LEGACY: Record<string, string> = {
-  drawer: "toolbar",
-  widgetLeft: "left",
-  widgetRight: "right",
-  controlButton: "control",
-};
+/** Placements a tool can have on a map, as the client reads `options.target`. */
+const TOOL_TARGETS = new Set(["toolbar", "left", "right", "control"]);
 
-export function legacyTargetForBackendZone(
-  target: string | null | undefined,
-): string | undefined {
-  if (!target) return undefined;
-  return BACKEND_TARGET_TO_LEGACY[target];
-}
-
-/** Per-map options override so legacy `options.target: hidden` does not win. */
-export function toolsOnMapsOptionsForTarget(
-  target: string | null | undefined,
-  extra?: Record<string, unknown>,
+/** The map's own options for a tool: its placement, window position and size. */
+export function toolsOnMapsOptions(
+  extra?: Record<string, unknown>
 ): Record<string, string | number> {
-  const legacyTarget = legacyTargetForBackendZone(target);
-  const options: Record<string, string | number> = legacyTarget
-    ? { target: legacyTarget }
-    : {};
+  const options: Record<string, string | number> = {};
+
+  const target = extra?.target;
+  if (typeof target === "string" && TOOL_TARGETS.has(target)) {
+    options.target = target;
+  }
 
   const position = extra?.position;
   if (position === "left" || position === "right") {
@@ -49,4 +38,17 @@ export function toolsOnMapsOptionsForTarget(
   }
 
   return options;
+}
+
+/** True when the map's options place the tool somewhere. */
+export function isToolPlaced(options: unknown): boolean {
+  if (
+    options === null ||
+    typeof options !== "object" ||
+    Array.isArray(options)
+  ) {
+    return false;
+  }
+  const target = (options as Record<string, unknown>).target;
+  return typeof target === "string" && TOOL_TARGETS.has(target);
 }

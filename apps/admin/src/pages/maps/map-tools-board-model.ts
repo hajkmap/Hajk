@@ -28,8 +28,8 @@ export interface BoardTool {
   showWindowHeight: boolean;
   windowWidth?: number;
   windowHeight?: number;
-  defaultWidth?: number;
-  defaultHeight?: number;
+  defaultWidth?: number | string;
+  defaultHeight?: number | string;
 }
 
 /** A tool instance that can be added to the map from the add dialog. */
@@ -132,6 +132,23 @@ export function buildToolBoard(
   }
 
   return { columns, order };
+}
+
+export function describeUnplacedTool(
+  toolId: number,
+  catalogTools: Tool[],
+  mapTools: ToolOnMap[],
+  windowPositions: Record<number, ToolWindowPosition>,
+  windowSizes: Record<number, ToolWindowSize>,
+): BoardTool {
+  return describeTool(
+    toolId,
+    new Map(catalogTools.map((tool) => [Number(tool.id), tool])),
+    new Map(mapTools.map((tool) => [tool.toolId, tool])),
+    windowPositions,
+    windowSizes,
+    false,
+  );
 }
 
 export function toolsAvailableToAdd(

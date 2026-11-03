@@ -254,9 +254,8 @@ model ToolsOnMaps {
   active  Boolean      @default(true)
   /// Determines the sort between tools within a zone
   index   Int          @default(0)
-  /// Placement zone in the map UI: drawer | widgetLeft | widgetRight | controlButton. Null means unplaced (managed via admin UI).
-  target  String?
-  /// Overrides ToolInstance.options for this map only
+  /// Overrides ToolInstance.options for this map only. `target` is the tool's
+  /// placement: toolbar | left | right | control. Without it the tool is unplaced.
   options Json         @default("{}")
   map     Map          @relation(fields: [mapName], references: [name])
   tool    ToolInstance @relation(fields: [toolId], references: [id])

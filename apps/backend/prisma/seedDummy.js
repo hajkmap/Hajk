@@ -508,7 +508,9 @@ const toolsOnMapsData = [
     mapName: "default",
     toolType: "documenthandler",
     index: 3,
-    target: "toolbar",
+    options: {
+      target: "toolbar",
+    },
   },
 ];
 

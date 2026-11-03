@@ -15,7 +15,7 @@ import {
   layerInstanceIncludeAll,
   resolveLayerPlacementById,
 } from "../utils/layer-instance.ts";
-import { toolsOnMapsOptionsForTarget } from "../utils/tool-placement.ts";
+import { toolsOnMapsOptions } from "../utils/tool-placement.ts";
 import LayerTreeService, { type MapContent } from "./layer-tree.service.ts";
 
 const logger = log4js.getLogger("service.v3.map");
@@ -396,7 +396,6 @@ class MapService {
     tools: {
       toolId: number;
       index: number;
-      target: string | null;
       active?: boolean;
       options?: Record<string, unknown>;
     }[]
@@ -415,8 +414,7 @@ class MapService {
                 toolId: t.toolId,
                 active: t.active ?? true,
                 index: t.index,
-                target: t.target,
-                options: toolsOnMapsOptionsForTarget(t.target, t.options),
+                options: toolsOnMapsOptions(t.options),
               })),
             }),
           ]
@@ -834,7 +832,6 @@ class MapService {
               toolId: tool.toolId,
               active: tool.active,
               index: tool.index,
-              target: tool.target,
               options: toInputJsonValue(tool.options),
             })),
           });

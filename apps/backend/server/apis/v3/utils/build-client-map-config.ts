@@ -11,7 +11,6 @@ import type {
   ClientLayerTree,
 } from "./build-client-layer-tree.ts";
 import { activeLayerInstanceWhere } from "./layer-instance.ts";
-import { legacyTargetForBackendZone } from "./tool-placement.ts";
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return (
@@ -396,12 +395,7 @@ export async function buildClientToolsForMap(
 
   const tools: { type: string; index: number; options: unknown }[] =
     toolsOnMap.map((entry) => {
-      const mergedOptions = mergeJsonObjects(entry.tool.options, entry.options);
-      const legacyTarget = legacyTargetForBackendZone(entry.target);
-      const options =
-        legacyTarget != null
-          ? mergeJsonObjects(mergedOptions, { target: legacyTarget })
-          : mergedOptions;
+      const options = mergeJsonObjects(entry.tool.options, entry.options);
 
       if (entry.tool.type === "layerswitcher") {
         return {
@@ -421,7 +415,7 @@ export async function buildClientToolsForMap(
           type: entry.tool.type,
           index: entry.index,
           options: {
-            ...mergedOptions,
+            ...options,
             // Expose the tool's own id so the client plugin can load documents
             // directly from /api/v3/tools/:documentHandlerId/documenthandler/load/...
             // without relying on the active map name.

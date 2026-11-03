@@ -85,12 +85,14 @@ export type ToolZone =
 
 export type ToolWindowPosition = "left" | "right";
 
+/** A tool's placement on a map, stored in `ToolOnMap.options.target`. */
+export type ToolTarget = "toolbar" | "left" | "right" | "control";
+
 export interface ToolOnMap {
   mapName: string;
   toolId: number;
   active?: boolean;
   index: number;
-  target: ToolZone | null;
   options?: Record<string, unknown>;
   tool: {
     id: number;

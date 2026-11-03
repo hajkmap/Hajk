@@ -1,4 +1,9 @@
-import type { ToolOnMap, ToolWindowPosition, ToolZone } from "../../api/maps";
+import type {
+  ToolOnMap,
+  ToolTarget,
+  ToolWindowPosition,
+  ToolZone,
+} from "../../api/maps";
 import type { Tool } from "../../api/tools";
 import { getMapToolFieldConfig, type MapToolFieldConfig } from "./map-tool-field-config";
 
@@ -41,11 +46,18 @@ export const EMPTY_TOOL_ZONES: ToolZones = {
 
 export type ToolZoneKey = keyof ToolZones;
 
-const ZONE_TO_TARGET: Record<ToolZoneKey, string> = {
+const ZONE_KEY_TO_ZONE: Record<ToolZoneKey, ToolZone> = {
   drawer: "drawer",
   widgetLeft: "widgetLeft",
   widgetRight: "widgetRight",
   control: "controlButton",
+};
+
+const ZONE_KEY_TO_OPTIONS_TARGET: Record<ToolZoneKey, ToolTarget> = {
+  drawer: "toolbar",
+  widgetLeft: "left",
+  widgetRight: "right",
+  control: "control",
 };
 
 const TARGET_TO_ZONE: Record<ToolZone, ToolZoneKey> = {
@@ -72,7 +84,7 @@ export interface MapToolPayloadEntry {
   toolId: number;
   active: boolean;
   index: number;
-  target: string | null;
+  /** `target` is the placement; without it the tool is unplaced. */
   options?: Record<string, string | number>;
 }
 
@@ -136,10 +148,25 @@ export function getMapToolWindowSize(tool: ToolOnMap): ToolWindowSize {
   return { width, height };
 }
 
-export function getCatalogToolWindowSize(tool: Tool): ToolWindowSize {
-  const width = parseOptionNumber(tool.options?.width);
-  const height = parseOptionNumber(tool.options?.height);
-  return { width, height };
+/** A tool's own window size: pixels, or a value the client takes as is, like "90vh" or "dynamic". */
+export interface ToolDefaultWindowSize {
+  width?: number | string;
+  height?: number | string;
+}
+
+function parseDefaultSize(value: unknown): number | string | undefined {
+  const parsed = parseOptionNumber(value);
+  if (parsed !== undefined) return parsed;
+  return typeof value === "string" && value.trim() !== ""
+    ? value.trim()
+    : undefined;
+}
+
+export function getCatalogToolWindowSize(tool: Tool): ToolDefaultWindowSize {
+  return {
+    width: parseDefaultSize(tool.options?.width),
+    height: parseDefaultSize(tool.options?.height),
+  };
 }
 
 export function isMapToolActive(tool: ToolOnMap): boolean {
@@ -192,7 +219,7 @@ export function findToolZoneForId(
 }
 
 export function zoneKeyToTarget(zone: ToolZoneKey): ToolZone {
-  return ZONE_TO_TARGET[zone] as ToolZone;
+  return ZONE_KEY_TO_ZONE[zone];
 }
 
 export function targetToZoneKey(target: ToolZone): ToolZoneKey {
@@ -301,15 +328,8 @@ export function removeToolFromZones(
   return moveToolToZone(zones, toolId, "", null);
 }
 
-const BACKEND_TARGET_TO_ZONE: Record<string, ToolZoneKey> = {
-  drawer: "drawer",
-  widgetLeft: "widgetLeft",
-  widgetRight: "widgetRight",
-  controlButton: "control",
-};
-
-/** Legacy client `options.target` values mapped to admin placement zones. */
-const LEGACY_TARGET_TO_ZONE: Record<string, ToolZoneKey | null> = {
+/** `options.target` values mapped to admin placement zones. */
+const OPTIONS_TARGET_TO_ZONE: Record<string, ToolZoneKey | null> = {
   toolbar: "drawer",
   left: "widgetLeft",
   right: "widgetRight",
@@ -332,23 +352,16 @@ export function getCatalogToolDisplayName(tool: Tool): string {
   return tool.type;
 }
 
-function legacyOptionsTarget(tool: ToolOnMap): string | null {
-  const target = tool.tool.options?.target;
+function optionsTarget(options: Record<string, unknown> | undefined) {
+  const target = options?.target;
   return typeof target === "string" ? target : null;
 }
 
-/** Resolves which placement zone a map tool belongs in, if any. */
+/** Resolves which placement zone a map tool belongs in, if any. The map's own
+ * `options.target` wins over the tool's. */
 export function resolveToolZone(tool: ToolOnMap): ToolZoneKey | null {
-  if (tool.target) {
-    return BACKEND_TARGET_TO_ZONE[tool.target] ?? null;
-  }
-
-  const legacyTarget = legacyOptionsTarget(tool);
-  if (legacyTarget) {
-    return LEGACY_TARGET_TO_ZONE[legacyTarget] ?? null;
-  }
-
-  return null;
+  const target = optionsTarget(tool.options) ?? optionsTarget(tool.tool.options);
+  return target ? (OPTIONS_TARGET_TO_ZONE[target] ?? null) : null;
 }
 
 function toZoneItem(tool: ToolOnMap): ToolZoneItem {
@@ -360,7 +373,7 @@ function toZoneItem(tool: ToolOnMap): ToolZoneItem {
   };
 }
 
-/** Groups map tools into placement zones using backend target or legacy options.target. */
+/** Groups map tools into placement zones using options.target. */
 export function mapToolsToZones(mapTools: ToolOnMap[]): ToolZones {
   const zones: ToolZones = {
     drawer: [],
@@ -394,11 +407,15 @@ export function mapToolsToZones(mapTools: ToolOnMap[]): ToolZones {
 
 function buildToolPayloadOptions(
   fields: MapToolFieldConfig,
+  target: ToolTarget | null,
   windowPosition?: ToolWindowPosition,
   windowSize?: ToolWindowSize,
 ): Record<string, string | number> | undefined {
   const options: Record<string, string | number> = {};
 
+  if (target) {
+    options.target = target;
+  }
   if (fields.windowPosition && windowPosition) {
     options.position = windowPosition;
   }
@@ -436,11 +453,6 @@ export function zonesToToolsPayload(
     const existing = mapToolsById.get(toolId);
     const toolType = resolveToolType(toolId, mapToolsById, toolTypesById);
     const fields = getMapToolFieldConfig(toolType);
-    const options = buildToolPayloadOptions(
-      fields,
-      windowPositions[toolId],
-      windowSizes[toolId],
-    );
 
     const zoneKey = findToolZoneForId(zones, toolId);
     // Tools without a placement stay active on their own. A column is not required.
@@ -448,7 +460,16 @@ export function zonesToToolsPayload(
       ? activeToolIds.has(toolId) && zoneKey != null
       : activeToolIds.has(toolId);
     const target =
-      fields.target && isActive && zoneKey ? ZONE_TO_TARGET[zoneKey] : null;
+      fields.target && isActive && zoneKey
+        ? ZONE_KEY_TO_OPTIONS_TARGET[zoneKey]
+        : null;
+
+    const options = buildToolPayloadOptions(
+      fields,
+      target,
+      windowPositions[toolId],
+      windowSizes[toolId],
+    );
 
     const index = fields.index
       ? (indexes[toolId] ?? existing?.index ?? 0)
@@ -458,7 +479,6 @@ export function zonesToToolsPayload(
       toolId,
       active: isActive,
       index,
-      target,
       ...(options ? { options } : {}),
     });
   }
@@ -471,11 +491,10 @@ export function toolsPayloadSignature(payload: MapToolPayloadEntry[]): string {
     payload
       .slice()
       .sort((a, b) => a.toolId - b.toolId)
-      .map(({ toolId, active, index, target, options }) => ({
+      .map(({ toolId, active, index, options }) => ({
         toolId,
         active,
         index,
-        target,
         options: options ?? {},
       })),
   );
@@ -500,12 +519,11 @@ function effectiveToolsSignature(
   const entries = payload
     .slice()
     .sort((a, b) => a.toolId - b.toolId)
-    .map(({ toolId, active, index, target, options }) => ({
+    .map(({ toolId, active, index, options }) => ({
       toolId,
       active,
-      target,
       options: options ?? {},
-      ...(active && target != null ? {} : { index }),
+      ...(active && options?.target != null ? {} : { index }),
     }));
   const mapToolsById = new Map(mapTools.map((tool) => [tool.toolId, tool]));
   const order = activeColumnOrder(

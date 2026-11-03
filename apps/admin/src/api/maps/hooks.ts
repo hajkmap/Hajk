@@ -101,7 +101,6 @@ export const useUpdateMapTools = () => {
       tools: {
         toolId: number;
         index: number;
-        target: string | null;
         active?: boolean;
         options?: Record<string, string | number>;
       }[];
@@ -125,8 +124,7 @@ export const useUpdateMapTools = () => {
               toolId: entry.toolId,
               active: entry.active !== false,
               index: entry.index,
-              target: entry.target as ToolOnMap["target"],
-              options: entry.options ?? existing?.options,
+              options: entry.options ?? {},
               tool: existing?.tool ?? {
                 id: entry.toolId,
                 type: "",

@@ -44,7 +44,6 @@ class MapsController {
       tools: {
         toolId: number;
         index: number;
-        target: string | null;
         active?: boolean;
         options?: Record<string, unknown>;
       }[];

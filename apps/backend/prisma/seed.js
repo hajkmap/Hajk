@@ -50,7 +50,6 @@ const KNOWN_TOOL_TYPES = [
   { type: "layercomparer", title: "Lagerjämförare" },
   { type: "layerswitcher", title: "Lagerhanterare" },
   { type: "location", title: "Positionera" },
-  { type: "measure", title: "Mät" },
   { type: "measurer", title: "Mät" },
   { type: "preset", title: "Snabbval" },
   { type: "print", title: "Utskrift" },
@@ -60,6 +59,32 @@ const KNOWN_TOOL_TYPES = [
   { type: "streetview", title: "Gatuvy" },
   { type: "timeslider", title: "Tidslinje" },
 ];
+
+const TOOL_TARGETS = new Set(["toolbar", "left", "right", "control"]);
+
+function toOptionNumber(value) {
+  if (typeof value === "number") return Number.isNaN(value) ? undefined : value;
+  if (typeof value === "string" && value.trim() !== "") {
+    const parsed = Number(value);
+    return Number.isNaN(parsed) ? undefined : parsed;
+  }
+  return undefined;
+}
+
+function toolsOnMapsOptions(toolOptions) {
+  const options = {};
+  if (TOOL_TARGETS.has(toolOptions.target)) {
+    options.target = toolOptions.target;
+  }
+  if (toolOptions.position === "left" || toolOptions.position === "right") {
+    options.position = toolOptions.position;
+  }
+  const width = toOptionNumber(toolOptions.width);
+  if (width !== undefined) options.width = width;
+  const height = toOptionNumber(toolOptions.height);
+  if (height !== undefined) options.height = height;
+  return options;
+}
 
 // layerswitcher options hold map-specific groups/baselayers used when seeding
 // the maps' layer trees — keep one Tool instance per map for that type.
@@ -192,6 +217,12 @@ async function readMapConfigAndPopulateMap(file) {
   for await (const t of mapConfig.tools) {
     const toolType = t.type;
 
+    // map_1.json still lists the removed "measure" plugin. Don't create it.
+    if (toolType === "measure") {
+      console.log(`  Skipping deprecated ${toolType} tool`);
+      continue;
+    }
+
     // Make sure the tool type exists — map configs may contain types
     // missing from KNOWN_TOOL_TYPES.
     await prisma.toolType.upsert({
@@ -249,13 +280,12 @@ async function readMapConfigAndPopulateMap(file) {
     }
     toolIdsOnThisMap.add(toolId);
 
-    // Connect tool to map — target is intentionally null (unplaced).
-    // Placement is managed via the admin UI, not seeded.
     toolsToConnectToMap.push({
       toolId,
       mapName: file,
       index: t.index,
       active: toolOptions.active !== false,
+      options: toolsOnMapsOptions(toolOptions),
     });
   }
 
@@ -1316,6 +1346,7 @@ async function createToolTypes() {
   });
   console.log(`Created ${created.count} tool types`);
 }
+
 function remapLayerIdInLayerswitcherOptions(options, idMap) {
   if (!options || typeof options !== "object") {
     return options;
