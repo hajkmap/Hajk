@@ -144,7 +144,7 @@ export default function ToolsList({
     reset,
     formState: { errors },
   } = useForm<ToolCreateInput>({
-    defaultValues: { type: "", title: "" },
+    defaultValues: { type: "", internalName: "" },
     mode: "onChange",
   });
 
@@ -183,9 +183,9 @@ export default function ToolsList({
     const needle = searchTerm.toLowerCase();
     return pageTools.filter((tool) => {
       if (typeFilter && tool.type !== typeFilter) return false;
-      const titleText = tool.title ?? "";
-      const combinedText =
-        `${tool.type} ${typeLabel(tool.type)} ${titleText}`.toLowerCase();
+      const combinedText = `${tool.type} ${typeLabel(tool.type)} ${
+        tool.internalName ?? ""
+      }`.toLowerCase();
       return combinedText.includes(needle);
     });
   }, [pageTools, searchTerm, typeFilter, typeLabel]);
@@ -194,8 +194,7 @@ export default function ToolsList({
     try {
       const response = await createTool({
         type: data.type,
-        title: data.title,
-        options: data.title ? { title: data.title } : undefined,
+        internalName: data.internalName,
       });
       toast.success(t("tools.createSuccess"), {
         position: "bottom-left",
@@ -300,9 +299,9 @@ export default function ToolsList({
           </Grid>
           <Grid size={12}>
             <TextField
-              label={t("tools.title")}
+              label={t("layers.internalName")}
               fullWidth
-              {...register("title")}
+              {...register("internalName")}
             />
           </Grid>
         </Grid>
@@ -334,7 +333,10 @@ export default function ToolsList({
       >
         <Typography>
           {t("tools.deleteConfirm", {
-            title: toolToDelete?.title ?? toolToDelete?.type ?? "",
+            title:
+              toolToDelete?.internalName?.trim() ||
+              toolToDelete?.type ||
+              "",
           })}
         </Typography>
         {(toolToDelete?.mapsCount ?? 0) > 0 && (
@@ -401,9 +403,9 @@ export default function ToolsList({
               rows={filteredTools}
               columns={[
                 {
-                  field: "title",
-                  headerName: t("tools.title"),
-                  flex: 0.3,
+                  field: "internalName",
+                  headerName: t("layers.internalName"),
+                  flex: 0.6,
                 },
                 {
                   field: "type",

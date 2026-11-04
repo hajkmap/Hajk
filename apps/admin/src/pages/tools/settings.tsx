@@ -119,16 +119,10 @@ export default function ToolSettings() {
       // freshly created tool) so the isDirty baseline isn't `undefined` for
       // fields a widget will write a concrete value to on first touch.
       const options = withToolOptionDefaults(tool.type, tool.options);
-      const optionsTitle =
-        typeof options.title === "string" && options.title
-          ? options.title
-          : (tool.title ?? "");
       reset({
         type: tool.type ?? "",
-        options: {
-          ...options,
-          title: optionsTitle,
-        },
+        internalName: tool.internalName ?? "",
+        options,
       });
     }
   }, [tool, reset]);
@@ -159,23 +153,22 @@ export default function ToolSettings() {
       ).filter((a) => a.name.trim() !== "" || a.link.trim() !== "");
     }
 
-    // After create, options.title is source of truth and keeps tool.title in sync
-    const syncedTitle =
-      typeof options.title === "string" ? options.title : undefined;
+    const internalName =
+      typeof data.internalName === "string" ? data.internalName.trim() : "";
 
     updateToolMutation.mutate(
       {
         id: tool.id,
         data: {
           type,
-          title: syncedTitle,
+          internalName,
           options,
         },
       },
       {
         onSuccess: () => {
           toast.success(t("common.dialog.saveSuccess"));
-          reset({ type, options });
+          reset({ type, internalName, options });
         },
         onError: (error: Error) => {
           toast.error(error.message);
@@ -199,12 +192,7 @@ export default function ToolSettings() {
         ? "error"
         : "idle";
 
-  const displayName =
-    (typeof tool?.options?.title === "string" && tool.options.title
-      ? tool.options.title
-      : undefined) ??
-    tool?.title ??
-    tool?.type;
+  const displayName = tool?.internalName?.trim() || tool?.type;
 
   return (
     <Page

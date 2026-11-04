@@ -23,6 +23,7 @@ import FormFieldGrid, {
 } from "../../../components/form-components/form-field-grid";
 import { useTranslation } from "react-i18next";
 import { Tool } from "../../../api/tools";
+import ToolNameField from "./tool-name-field";
 import { coordinatesDefaults } from "./tool-option-defaults";
 
 interface CoordinatesRendererProps {
@@ -95,6 +96,7 @@ export default function CoordinatesRenderer({
     <>
       <FormPanel title={t("common.information")}>
         <FormFieldGrid>
+          <ToolNameField control={control} />
           <FormFieldRow>
             <Controller
               name="options.visibleAtStart"

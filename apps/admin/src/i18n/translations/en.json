@@ -1086,6 +1086,8 @@
     "tools": {
       "type": "Type",
       "title": "Title",
+      "titleHelp": "The tool's title that users see on the map.",
+      "internalNameHelp": "Only shown in admin. Tells the tool apart from others of the same type.",
       "search": {
         "infoText": "Information text",
         "infoTextPlaceholder": "Enter information text...",

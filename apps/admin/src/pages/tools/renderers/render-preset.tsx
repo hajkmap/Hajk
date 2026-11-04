@@ -14,6 +14,7 @@ import FormFieldGrid, {
 } from "../../../components/form-components/form-field-grid";
 import { useTranslation } from "react-i18next";
 import { Tool } from "../../../api/tools";
+import ToolNameField from "./tool-name-field";
 import { presetDefaults } from "./tool-option-defaults";
 
 interface PresetRendererProps {
@@ -57,16 +58,7 @@ export default function PresetRenderer({
     <>
       <FormPanel title={t("common.information")}>
         <FormFieldGrid>
-          <FormFieldRow>
-            <Controller
-              name="options.title"
-              control={control}
-              defaultValue={tool?.options?.title ?? presetDefaults.title}
-              render={({ field }) => (
-                <TextField label={t("tools.title")} fullWidth {...field} />
-              )}
-            />
-          </FormFieldRow>
+          <ToolNameField control={control} />
 
           <FormFieldRow>
             <Controller

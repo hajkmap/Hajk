@@ -33,6 +33,7 @@ import FormPanel from "@/components/form-components/form-panel";
 import { FieldLabelWithHelp } from "@/components/form-components/field-help-tooltip";
 import { AttachmentsEditor } from "../attachments/attachments-editor";
 import { storedNumber } from "@/pages/tools/renderers/tool-option-parsers";
+import ToolNameField from "@/pages/tools/renderers/tool-name-field";
 
 interface SettingsTabPanelProps {
   control: Control<FieldValues>;
@@ -109,21 +110,9 @@ export function SettingsTabPanel({
     <>
       <FormPanel title={t("common.information")}>
         <Grid container spacing={2}>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Controller
-              name="options.title"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  label={t("tools.title")}
-                  fullWidth
-                  {...field}
-                  value={(field.value as string) ?? ""}
-                />
-              )}
-            />
+          <Grid size={12}>
+            <ToolNameField control={control} />
           </Grid>
-
           <Grid size={{ xs: 12, md: 6 }}>
             <Controller
               name="options.drawerButtonTitle"

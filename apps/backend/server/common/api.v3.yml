@@ -909,9 +909,9 @@ paths:
                   type: string
                   description: Plugin type, must exist in ToolType
                   example: infoclick
-                title:
+                internalName:
                   type: string
-                  description: Instance name
+                  description: Shown in admin, distinguishes instances of the same type
                   example: Infoklick standard
                 options:
                   type: object
@@ -953,7 +953,7 @@ paths:
               properties:
                 type:
                   type: string
-                title:
+                internalName:
                   type: string
                 options:
                   type: object

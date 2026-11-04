@@ -99,17 +99,13 @@ function listUnplacedTools(
 ): UnplacedBoardTool[] {
   const byId = new Map<number, UnplacedBoardTool>();
 
+  // Catalog tools come first, so their internal name wins over the map's title.
   const consider = (toolId: number, type: string, title: string) => {
     if (!Number.isFinite(toolId) || getMapToolFieldConfig(type).target) return;
-    const nextTitle = title.trim() || type;
-    const current = byId.get(toolId);
-    if (current) {
-      if (title.trim()) current.title = nextTitle;
-      return;
-    }
+    if (byId.has(toolId)) return;
     byId.set(toolId, {
       toolId,
-      title: nextTitle,
+      title: title.trim() || type,
       type,
       active: activeToolIds.has(toolId),
     });

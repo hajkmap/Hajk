@@ -19,6 +19,7 @@ import { Control, Controller, FieldValues, useForm } from "react-hook-form";
 import { SketchPicker } from "react-color";
 import { useTranslation } from "react-i18next";
 import { Tool } from "../../../api/tools";
+import ToolNameField from "./tool-name-field";
 import { printDefaults } from "./tool-option-defaults";
 
 interface PrintToolRendererProps {
@@ -50,6 +51,7 @@ export default function PrintToolRenderer({
       ───────────────────────────────────────────── */}
       <FormPanel title={t("common.information")}>
         <FormFieldGrid>
+          <ToolNameField control={control} />
           <FormFieldRow>
             <Controller
               name="options.instruction"

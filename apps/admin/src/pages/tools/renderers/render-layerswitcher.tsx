@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { Control, Controller, FieldValues, useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { Tool } from "../../../api/tools";
+import ToolNameField from "./tool-name-field";
 import { layerswitcherDefaults } from "./tool-option-defaults";
 
 // Helper function to safely get option values
@@ -44,10 +45,6 @@ export default function LayerSwitcherRenderer({
         options: {
           ...layerswitcherDefaults,
           ...options,
-          title:
-            getOption(options, "title", "") ||
-            (typeof tool.title === "string" ? tool.title : "") ||
-            "",
         },
       });
     }
@@ -55,23 +52,9 @@ export default function LayerSwitcherRenderer({
 
   return (
     <>
-      {/* Basic Information Panel */}
       <FormPanel title={t("common.information")}>
         <FormFieldGrid>
-          <FormFieldRow>
-            <Controller
-              name="options.title"
-              control={control}
-              defaultValue={
-                getOption(options, "title", "") ||
-                (typeof tool.title === "string" ? tool.title : "") ||
-                ""
-              }
-              render={({ field }) => (
-                <TextField label={t("tools.title")} fullWidth {...field} />
-              )}
-            />
-          </FormFieldRow>
+          <ToolNameField control={control} />
           <FormFieldRow>
             <Controller
               name="options.description"

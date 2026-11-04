@@ -228,8 +228,8 @@ model ToolInstance {
   id                Int                  @id @default(autoincrement())
   locked            Boolean              @default(false)
   type              String
-  /// Instance name, distinguishes instances of the same type
-  title             String?
+  /// Shown in admin, distinguishes instances of the same type
+  internalName      String?
   /// Default options for this instance. ToolsOnMaps.options overrides them per map.
   options           Json                 @default("{}")
   createdBy         String?

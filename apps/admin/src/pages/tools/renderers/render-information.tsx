@@ -6,6 +6,7 @@ import FormFieldGrid, {
 } from "../../../components/form-components/form-field-grid";
 import { useTranslation } from "react-i18next";
 import { Tool } from "../../../api/tools";
+import ToolNameField from "./tool-name-field";
 import { informationDefaults } from "./tool-option-defaults";
 
 interface InformationRendererProps {
@@ -35,20 +36,7 @@ export default function InformationRenderer({
     <>
       <FormPanel title={t("common.information")}>
         <FormFieldGrid>
-          <FormFieldRow>
-            <Controller
-              name="options.title"
-              control={control}
-              defaultValue={tool?.options?.title ?? ""}
-              render={({ field }) => (
-                <TextField
-                  label={t("tools.information.title")}
-                  fullWidth
-                  {...field}
-                />
-              )}
-            />
-          </FormFieldRow>
+          <ToolNameField control={control} />
 
           <FormFieldRow>
             <Controller

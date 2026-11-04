@@ -7,6 +7,7 @@ import FormFieldGrid, {
 } from "../../../components/form-components/form-field-grid";
 import { useTranslation } from "react-i18next";
 import { Tool } from "../../../api/tools";
+import ToolNameField from "./tool-name-field";
 import { sketchDefaults } from "./tool-option-defaults";
 
 interface SketchRendererProps {
@@ -35,6 +36,7 @@ export default function SketchRenderer({
     <>
       <FormPanel title={t("common.information")}>
         <FormFieldGrid>
+          <ToolNameField control={control} />
           <FormFieldRow>
             <Controller
               name="options.visibleAtStart"

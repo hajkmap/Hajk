@@ -9,11 +9,7 @@ import { useLayers } from "../../../api/layers";
 import { Tool } from "../../../api/tools";
 import LayerPicker from "../components/layer-picker";
 import { timesliderDefaults } from "./tool-option-defaults";
-import {
-  CheckboxOption,
-  InstructionOption,
-  TextOption,
-} from "./tool-option-fields";
+import { CheckboxOption, InstructionOption } from "./tool-option-fields";
 
 interface TimeSliderRendererProps {
   tool: Tool;
@@ -38,11 +34,6 @@ export default function TimeSliderRenderer({
     <>
       <FormAccordion title={t("tools.generalSettings")} defaultExpanded>
         <FormFieldGrid>
-          <TextOption
-            control={control}
-            name="options.title"
-            labelKey="tools.title"
-          />
           <CheckboxOption
             control={control}
             name="options.visibleAtStart"

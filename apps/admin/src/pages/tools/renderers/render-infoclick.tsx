@@ -16,6 +16,7 @@ import { useTranslation } from "react-i18next";
 import { Control, Controller, FieldValues, useForm } from "react-hook-form";
 import { SketchPicker, type RGBColor } from "react-color";
 import { Tool } from "../../../api/tools";
+import ToolNameField from "./tool-name-field";
 import { infoclickDefaults } from "./tool-option-defaults";
 
 const DEFAULT_STROKE_COLOR: RGBColor = { r: 200, g: 0, b: 0, a: 0.7 };
@@ -65,16 +66,7 @@ export default function InfoClickRenderer({
     <>
       <FormPanel title={t("common.information")}>
         <FormFieldGrid>
-          <FormFieldRow>
-            <Controller
-              name="options.title"
-              control={control}
-              defaultValue={tool?.options?.title ?? ""}
-              render={({ field }) => (
-                <TextField label={t("tools.title")} fullWidth {...field} />
-              )}
-            />
-          </FormFieldRow>
+          <ToolNameField control={control} />
           <FormFieldRow>
             <Controller
               name="options.description"

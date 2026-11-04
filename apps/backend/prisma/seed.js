@@ -251,7 +251,6 @@ async function readMapConfigAndPopulateMap(file) {
       const tool = await prisma.toolInstance.create({
         data: {
           type: toolType,
-          title: toolOptions.title ?? null,
           options: toolOptions,
         },
       });

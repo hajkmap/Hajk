@@ -25,9 +25,29 @@ import LayerComparerRenderer from "./render-layercomparer";
 import EditRenderer from "./render-edit";
 import TimeSliderRenderer from "./render-timeslider";
 import CollectorRenderer from "./render-collector";
+import ToolNameField from "./tool-name-field";
 import React from "react";
 import { Control, FieldValues, UseFormSetValue } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import FormPanel from "../../../components/form-components/form-panel";
+import FormFieldGrid from "../../../components/form-components/form-field-grid";
 import { Tool } from "../../../api/tools";
+
+/** These renderers show the name field in their own information panel. */
+const TYPES_WITH_INFORMATION_PANEL = new Set([
+  "coordinates",
+  "documenthandler",
+  "externalLinks",
+  "fmeserver",
+  "infoclick",
+  "information",
+  "layerswitcher",
+  "location",
+  "measurer",
+  "preset",
+  "print",
+  "sketch",
+]);
 
 interface ToolRendererProps {
   tool: Tool;
@@ -79,11 +99,23 @@ interface RenderToolProps {
 }
 
 export default function RenderTool({ tool, control, setValue }: RenderToolProps) {
+  const { t } = useTranslation();
   const Renderer = toolRenderers[tool?.type];
 
   if (!Renderer) {
     return <div> Not rendering from render function: {tool?.type}</div>;
   }
 
-  return <Renderer tool={tool} control={control} setValue={setValue} />;
+  return (
+    <>
+      {TYPES_WITH_INFORMATION_PANEL.has(tool.type) ? null : (
+        <FormPanel title={t("common.information")}>
+          <FormFieldGrid>
+            <ToolNameField control={control} />
+          </FormFieldGrid>
+        </FormPanel>
+      )}
+      <Renderer tool={tool} control={control} setValue={setValue} />
+    </>
+  );
 }

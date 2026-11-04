@@ -6,6 +6,7 @@ import FormFieldGrid, {
 } from "../../../components/form-components/form-field-grid";
 import { useTranslation } from "react-i18next";
 import { Tool } from "../../../api/tools";
+import ToolNameField from "./tool-name-field";
 import { measurerDefaults } from "./tool-option-defaults";
 
 interface MeasurerRendererProps {
@@ -35,6 +36,7 @@ export default function MeasurerRenderer({
     <>
       <FormPanel title={t("common.information")}>
         <FormFieldGrid>
+          <ToolNameField control={control} />
           <FormFieldRow>
             <Controller
               name="options.visibleAtStart"

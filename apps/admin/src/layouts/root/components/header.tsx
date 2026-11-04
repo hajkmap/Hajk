@@ -29,9 +29,7 @@ export default function Header() {
   const mapName = maps?.find((m) => m.id == mapId)?.name;
   const tool = tools?.find((item) => String(item.id) === toolId);
   const toolLabel =
-    typeof tool?.title === "string" && tool.title.trim()
-      ? tool.title.trim()
-      : tool?.type;
+    tool?.internalName?.trim() || tool?.type;
 
   useServicesHealthCheck(services ?? []);
 

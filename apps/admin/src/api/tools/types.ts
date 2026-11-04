@@ -6,7 +6,8 @@
 export interface Tool {
   id: string;
   type: string;
-  title?: string | null;
+  /** Shown in admin, distinguishes instances of the same type. */
+  internalName?: string | null;
   options: Record<string, unknown>;
   createdBy?: string;
   createdDate?: string;
@@ -34,14 +35,14 @@ export interface ToolTypesApiResponse {
 /** Body for creating a new tool instance of the given ToolType. */
 export interface ToolCreateInput {
   type: string;
-  title?: string;
+  internalName?: string;
   options?: Record<string, unknown>;
 }
 
 /** Body for updating a tool instance. Changes apply to every map using it. */
 export interface ToolUpdateInput {
   type?: string;
-  title?: string;
+  internalName?: string;
   options?: Record<string, unknown>;
   locked?: boolean;
 }

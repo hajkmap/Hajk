@@ -1085,6 +1085,8 @@
     "tools": {
       "type": "Typ",
       "title": "Titel",
+      "titleHelp": "Verktygets titel som användarna ser på kartan.",
+      "internalNameHelp": "Visas bara i admin. Skiljer verktyget från andra av samma typ.",
       "description": "Beskrivning",
       "createTool": "Skapa verktyg",
       "createDialogTitle": "Skapa nytt verktyg",

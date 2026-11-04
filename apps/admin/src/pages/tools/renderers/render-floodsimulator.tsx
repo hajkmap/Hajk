@@ -84,11 +84,6 @@ export default function FloodSimulatorRenderer({
           />
           <TextOption
             control={control}
-            name="options.title"
-            labelKey="tools.title"
-          />
-          <TextOption
-            control={control}
             name="options.description"
             labelKey="tools.description"
             helpKey="tools.floodsimulator.descriptionHelp"
