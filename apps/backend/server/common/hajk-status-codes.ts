@@ -140,6 +140,12 @@ enum HajkStatusCodes {
   SINGLE_INSTANCE_TOOL_TYPE = "DB019",
 
   /**
+   * The map exists but is hidden from its users: its `visible` option is
+   * "false", or the time is outside its `visibleFrom` to `visibleUntil` period.
+   */
+  MAP_NOT_VISIBLE = "DB020",
+
+  /**
    * The request body is invalid, e.g. lacks some required fields.
    */
   INVALID_REQUEST_BODY = "RQ001",

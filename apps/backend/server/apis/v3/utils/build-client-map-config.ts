@@ -6,6 +6,7 @@ import { HajkError } from "../../../common/classes.ts";
 import HttpStatusCodes from "../../../common/http-status-codes.ts";
 import HajkStatusCodes from "../../../common/hajk-status-codes.ts";
 import { isVisibleToUser } from "./group-visibility.ts";
+import { requireVisibleMap } from "./map-visibility.ts";
 import type {
   ClientLayerSwitcherLayerRef,
   ClientLayerTree,
@@ -231,13 +232,15 @@ function mergeJsonObjects(
 /**
  * The map's active documenthandler tool, as the client sees it: the tool's id and
  * its options with the map's own overrides merged on top (the same merge
- * buildClientToolsForMap does). Throws a 404 HajkError when the map has no
- * documenthandler, or when its visibleForGroups hides it from `adUser`.
+ * buildClientToolsForMap does). Throws a 404 HajkError when the map is missing
+ * or hidden from its users, when it has no documenthandler, or when the
+ * tool's visibleForGroups hides it from `adUser`.
  */
 export async function resolveClientDocumentHandler(
   mapName: string,
   adUser: string | undefined
 ): Promise<{ toolInstanceId: number; options: Prisma.JsonObject }> {
+  await requireVisibleMap(mapName);
   const entry = await prisma.toolsOnMaps.findFirst({
     where: {
       mapName,
@@ -255,20 +258,7 @@ export async function resolveClientDocumentHandler(
       HajkStatusCodes.UNKNOWN_DOCUMENT_HANDLER
     );
 
-  if (!entry) {
-    const map = await prisma.map.findFirst({
-      where: { name: mapName, deletedAt: null },
-      select: { name: true },
-    });
-    if (!map) {
-      throw new HajkError(
-        HttpStatusCodes.NOT_FOUND,
-        `No map named '${mapName}'.`,
-        HajkStatusCodes.UNKNOWN_MAP_NAME
-      );
-    }
-    throw notFound();
-  }
+  if (!entry) throw notFound();
 
   const options = mergeJsonObjects(entry.tool.options, entry.options);
   if (

@@ -43,6 +43,7 @@ import {
 } from "../../../components/form-components/list-filter-row";
 import CreateMapDialog from "./create-map-dialog";
 import DuplicateMapDialog from "./duplicate-map-dialog";
+import MapVisibilityChip from "./map-visibility-chip";
 
 interface MapsListProps {
   filterMaps: (maps: MapRecord[]) => MapRecord[];
@@ -346,14 +347,25 @@ export default function MapsList({
                         : title ?? description ?? undefined;
 
                     return (
-                      <ListItemText
-                        primary={params.row.name}
-                        secondary={secondary}
-                        slotProps={{
-                          primary: { noWrap: true },
-                          secondary: { noWrap: true },
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1,
+                          height: "100%",
                         }}
-                      />
+                      >
+                        <ListItemText
+                          primary={params.row.name}
+                          secondary={secondary}
+                          slotProps={{
+                            primary: { noWrap: true },
+                            secondary: { noWrap: true },
+                          }}
+                          sx={{ minWidth: 0 }}
+                        />
+                        <MapVisibilityChip options={params.row.options} />
+                      </Box>
                     );
                   },
                 },

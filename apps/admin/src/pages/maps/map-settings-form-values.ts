@@ -2,6 +2,7 @@ import type { FieldValues } from "react-hook-form";
 import type { Map as MapRecord, MapMutation } from "../../api/maps/types";
 import { getDefaultMapProjectionCode } from "../../lib/map-defaults";
 import { deriveScalesFromOptions } from "./map-scales";
+import { fromDateTimeLocal, toDateTimeLocal } from "./map-visibility";
 
 interface MapProjectionSource {
   projection?: { code: string } | null;
@@ -190,6 +191,9 @@ function buildOptionsFormValues(
       options.introductionShowControlButton,
     ),
     introductionSteps: stepsAsText(options.introductionSteps) ?? "[]",
+    visible: options.visible !== "false",
+    visibleFrom: toDateTimeLocal(options.visibleFrom),
+    visibleUntil: toDateTimeLocal(options.visibleUntil),
   };
 }
 
@@ -292,6 +296,10 @@ function formOptionsFromValues(data: FieldValues): Record<string, unknown> {
       options.introductionShowControlButton,
     ),
     introductionSteps: toStringValue(options.introductionSteps, "[]"),
+    // Only an unticked box hides the map.
+    visible: options.visible === false ? "false" : "true",
+    visibleFrom: fromDateTimeLocal(options.visibleFrom),
+    visibleUntil: fromDateTimeLocal(options.visibleUntil),
   };
 }
 

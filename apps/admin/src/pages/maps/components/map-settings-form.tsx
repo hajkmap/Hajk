@@ -40,6 +40,7 @@ import FormColorPicker from "../../../components/form-components/form-color-pick
 import { useSettingsSearchLabels } from "../../../hooks/use-settings-search-labels";
 import ProjectionsDialog from "./projections";
 import MapScaleFields from "./map-scale-fields";
+import MapVisibilityStatus from "./map-visibility-status";
 import {
   getMainProjectionChoices,
   groupProjectionCodes,
@@ -438,6 +439,59 @@ export default function MapSettingsForm({
                   </FormFieldRow>
                 </SettingsSearchField>
               </FormFieldGrid>
+            </FormPanel>
+          </SearchablePanel>
+
+          <SearchablePanel
+            panelTitleKeywords={settingsSearchLabels("map.visibility")}
+            keywords={[
+              ...settingsSearchLabels(
+                "map.visible",
+                "map.visibleFrom",
+                "map.visibleUntil",
+              ),
+              "availability",
+              "available",
+              "visibility",
+              "hidden",
+              "publish",
+            ]}
+            fields={[
+              "options.visible",
+              "options.visibleFrom",
+              "options.visibleUntil",
+            ]}
+            allValues={searchValues}
+            searchTerm={settingsSearchTerm}
+          >
+            <FormPanel title={t("map.visibility")}>
+              <MapCheckboxField
+                name="options.visible"
+                labelKey="map.visible"
+                control={control}
+                settingsSearchTerm={settingsSearchTerm}
+                showSettingsSearchUi={showSettingsSearchUi}
+                getValues={getValues}
+              />
+              <FormFieldGrid columns={2}>
+                <MapTextField
+                  name="options.visibleFrom"
+                  labelKey="map.visibleFrom"
+                  type="datetime-local"
+                  register={register}
+                  settingsSearchTerm={settingsSearchTerm}
+                  searchValues={searchValues}
+                />
+                <MapTextField
+                  name="options.visibleUntil"
+                  labelKey="map.visibleUntil"
+                  type="datetime-local"
+                  register={register}
+                  settingsSearchTerm={settingsSearchTerm}
+                  searchValues={searchValues}
+                />
+              </FormFieldGrid>
+              <MapVisibilityStatus control={control} />
             </FormPanel>
           </SearchablePanel>
 

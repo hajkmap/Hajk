@@ -47,6 +47,7 @@ import {
 } from "./map-settings-form-values";
 import { SquareSpinnerComponent } from "../../components/progress/square-progress";
 import FormActionPanel from "../../components/form-action-panel";
+import { hasValidPeriod, mapVisibilityOf } from "./map-visibility";
 import { toast } from "react-toastify";
 import { HttpError } from "../../lib/http-error";
 import FormContainer from "../../components/form-components/form-container";
@@ -709,6 +710,15 @@ export default function MapSettings() {
     [isDirty, toolsDirty, hasPendingWindowSizeInput, layerTreeDirty],
   );
 
+  // Saving waits until "Tillgänglig till" lies after "Tillgänglig från".
+  const [visible, visibleFrom, visibleUntil] = useWatch({
+    control,
+    name: ["options.visible", "options.visibleFrom", "options.visibleUntil"],
+  }) as [unknown, unknown, unknown];
+  const visibilityPeriodValid = hasValidPeriod(
+    mapVisibilityOf({ visible, visibleFrom, visibleUntil }),
+  );
+
   // Told to the other tabs on this map from every tab of the page, and shown
   // in the tree.
   const presenceResource = mapName
@@ -726,7 +736,13 @@ export default function MapSettings() {
   const savePending = isSaving || updateStatus === "pending";
 
   const handleUpdateMap = async (formData: FieldValues) => {
-    if (!map || saveInFlightRef.current || scalesBlockSave) return;
+    if (
+      !map ||
+      saveInFlightRef.current ||
+      scalesBlockSave ||
+      !visibilityPeriodValid
+    )
+      return;
 
     saveInFlightRef.current = true;
     setIsSaving(true);
@@ -874,7 +890,12 @@ export default function MapSettings() {
         createdDate={map?.createdDate}
         lastSavedBy={map?.lastSavedBy}
         lastSavedDate={map?.lastSavedDate}
-        isDirty={mapSettingsDirty && !savePending && !scalesBlockSave}
+        isDirty={
+          mapSettingsDirty &&
+          !savePending &&
+          !scalesBlockSave &&
+          visibilityPeriodValid
+        }
         sidebarExtra={
           mapLayersMoveZoneVisible || activeTab === "tools" ? (
             <Box

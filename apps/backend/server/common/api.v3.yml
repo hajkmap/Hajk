@@ -1278,6 +1278,28 @@ paths:
           description: Document deleted
         404:
           description: Document not found
+  /public/maps/{mapName}:
+    get:
+      tags:
+        - Client-accessible
+      summary: The map's client config
+      description: The map, its layers, projections and tools as the client reads them, and the other maps for its map selector. Maps hidden from their users are left out of the map selector.
+      parameters:
+        - in: path
+          name: mapName
+          required: true
+          schema:
+            type: string
+          description: Name of the map
+      responses:
+        200:
+          description: The client config
+        404:
+          description: The map does not exist (DB003), or it is hidden from its users now by its visible, visibleFrom and visibleUntil options (DB020). The map's documenthandler routes answer the same.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /public/maps/{mapName}/documenthandler/loadall:
     get:
       tags:
@@ -1957,6 +1979,18 @@ components:
               items:
                 type: number
               description: "Map center coordinates [longitude, latitude]"
+        visible:
+          type: string
+          enum: ["true", "false"]
+          description: '"false" hides the map from its users without deleting it'
+        visibleFrom:
+          type: string
+          description: "When the map is shown from, as an ISO date-time, or empty. The map is hidden before it."
+          example: "2026-11-18T07:00:00.000Z"
+        visibleUntil:
+          type: string
+          description: "When the map is hidden from, as an ISO date-time, or empty. Must be after visibleFrom."
+          example: "2026-12-02T07:00:00.000Z"
               example: [18.0686, 59.3293]
             zoom:
               type: number

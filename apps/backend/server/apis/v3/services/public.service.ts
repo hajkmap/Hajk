@@ -16,6 +16,7 @@ import {
   buildClientToolsForMap,
 } from "../utils/build-client-map-config.ts";
 import { washClientTools } from "../utils/group-visibility.ts";
+import { isMapVisible, requireVisibleMap } from "../utils/map-visibility.ts";
 
 const logger = log4js.getLogger("service.v3.public");
 
@@ -40,11 +41,15 @@ class PublicService {
 
     // Now let's iterate and drop everything but name and title. Also, if we're set to
     // legacy mode, we must follow the old key names.
-    const formattedMaps = maps.map((map) => ({
-      [this.#useLegacyConfig ? "mapConfigurationName" : "name"]: map.name,
-      [this.#useLegacyConfig ? "mapConfigurationTitle" : "title"]:
-        (map.options as Prisma.JsonObject)?.title || `Untitled map ${map.name}`,
-    }));
+    const now = new Date();
+    const formattedMaps = maps
+      .filter((map) => isMapVisible(map.options, now))
+      .map((map) => ({
+        [this.#useLegacyConfig ? "mapConfigurationName" : "name"]: map.name,
+        [this.#useLegacyConfig ? "mapConfigurationTitle" : "title"]:
+          (map.options as Prisma.JsonObject)?.title ||
+          `Untitled map ${map.name}`,
+      }));
 
     return formattedMaps;
   }
@@ -60,6 +65,8 @@ class PublicService {
     );
 
     logger.debug(`USE_LEGACY_MAP_CONFIG is set to ${this.#useLegacyConfig}`);
+
+    await requireVisibleMap(mapName);
 
     // For the legacy config, we want 3 top-level properties:
     // - layersConfig
