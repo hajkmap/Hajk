@@ -36,6 +36,7 @@ export default function ServiceNameCell({
       <ListItemText
         primary={name}
         secondary={url}
+        sx={{ minWidth: 0 }}
         slotProps={{
           secondary: {
             sx: {

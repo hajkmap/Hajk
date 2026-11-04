@@ -12,10 +12,10 @@ function timeOf(value: Prisma.JsonValue | undefined): number | null {
 }
 
 /**
- * Whether a map or a layer is available to the client's users at `now`, from
- * its options: `visible` ("false" withholds it) and the optional period from
- * `visibleFrom` to `visibleUntil` (ISO date-times; unavailable from
- * `visibleUntil` on). Admin sees everything regardless.
+ * Whether a map, a layer or a service is available to the client's users at
+ * `now`, from its options: `visible` ("false" withholds it) and the optional
+ * period from `visibleFrom` to `visibleUntil` (ISO date-times; unavailable
+ * from `visibleUntil` on). Admin sees everything regardless.
  */
 export function isAvailable(
   options: Prisma.JsonValue,
@@ -32,12 +32,25 @@ export function isAvailable(
   return (from === null || from <= at) && (until === null || at < until);
 }
 
-/** The rows available to the client's users now. */
-export function onlyAvailable<T extends { options: Prisma.JsonValue }>(
-  rows: T[],
+interface WithOptions {
+  options: Prisma.JsonValue;
+}
+
+/** Whether a layer is available to the client's users at `now`: it and its service both are. */
+export function isLayerAvailable(
+  layer: WithOptions & { service: WithOptions },
   now: Date = new Date()
-): T[] {
-  return rows.filter((row) => isAvailable(row.options, now));
+): boolean {
+  return (
+    isAvailable(layer.options, now) && isAvailable(layer.service.options, now)
+  );
+}
+
+/** The layers available to the client's users now. */
+export function onlyAvailableLayers<
+  T extends WithOptions & { service: WithOptions },
+>(layers: T[], now: Date = new Date()): T[] {
+  return layers.filter((layer) => isLayerAvailable(layer, now));
 }
 
 /** The map, when it exists and is available to its users now. */

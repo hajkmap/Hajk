@@ -2,7 +2,10 @@ import prisma from "../../../common/prisma.ts";
 import { HajkError } from "../../../common/classes.ts";
 import HttpStatusCodes from "../../../common/http-status-codes.ts";
 import HajkStatusCodes from "../../../common/hajk-status-codes.ts";
-import { isAvailable, onlyAvailable } from "../utils/availability.ts";
+import {
+  isLayerAvailable,
+  onlyAvailableLayers,
+} from "../utils/availability.ts";
 import { toClientWfstLayer } from "../utils/build-legacy-layers-config.ts";
 
 // The WFS-T layers the client's attribute editor lists and edits, as the
@@ -61,8 +64,8 @@ const editingLayerInclude = {
 
 class OgcService {
   /**
-   * The editing layers, leaving out those not available to users now and
-   * those whose url isn't allowed.
+   * The editing layers, leaving out those not available to users now (the
+   * layer or its service) and those whose url isn't allowed.
    */
   async listWfstLayers(fields?: string) {
     const layers = await prisma.editingLayer.findMany({
@@ -70,7 +73,7 @@ class OgcService {
       include: editingLayerInclude,
       orderBy: { name: "asc" },
     });
-    return onlyAvailable(layers)
+    return onlyAvailableLayers(layers)
       .map((layer) => toClientWfstLayer(layer))
       .filter((layer) => isAllowedUrl(layer.url))
       .map((layer) => pickFields(layer, fields));
@@ -95,7 +98,7 @@ class OgcService {
         HajkStatusCodes.UNKNOWN_LAYER_ID
       );
     }
-    if (!isAvailable(layer.options)) {
+    if (!isLayerAvailable(layer)) {
       throw new HajkError(
         HttpStatusCodes.NOT_FOUND,
         `Editing layer ${id} is not available to users now.`,

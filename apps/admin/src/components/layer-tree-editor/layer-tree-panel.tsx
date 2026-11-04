@@ -14,6 +14,7 @@ import { toast } from "react-toastify";
 
 import { getGroupTree } from "../../api/layer-tree";
 import { useLayers } from "../../api/layers";
+import { useServices } from "../../api/services";
 import LayerTreeCatalog from "./layer-tree-catalog";
 import LayerTreeCatalogColumn from "./layer-tree-catalog-column";
 import LayerTreeEditorWindow from "./layer-tree-editor-window";
@@ -124,12 +125,22 @@ export default function LayerTreePanel({
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const getDetails = useItemDetails();
-  // The layers' own options, read for whether users get each layer now.
+  // The layers' and their services' options, read for whether users get each
+  // layer now.
   const { data: layers } = useLayers();
+  const { data: services } = useServices();
   const layerOptionsById = useMemo(
     () => new Map((layers ?? []).map((layer) => [layer.id, layer.options])),
     [layers],
   );
+  const serviceOptionsByLayerId = useMemo(() => {
+    const byService = new Map(
+      (services ?? []).map((service) => [service.id, service.options]),
+    );
+    return new Map(
+      (layers ?? []).map((layer) => [layer.id, byService.get(layer.serviceId)]),
+    );
+  }, [layers, services]);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   // The "new group" dialog. The group goes last on the top level, and from
@@ -625,6 +636,11 @@ export default function LayerTreePanel({
                   availability={
                     kind === "layer"
                       ? layerOptionsById.get(flatNode.data.sourceId)
+                      : undefined
+                  }
+                  serviceAvailability={
+                    kind === "layer"
+                      ? serviceOptionsByLayerId.get(flatNode.data.sourceId)
                       : undefined
                   }
                   {...rowSettings(flatNode)}

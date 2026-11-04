@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { AvailabilityOptionsSchema } from "./availability.schemas.ts";
+
 const MetadataSchema = z.object({
   title: z.string().nullable().optional(),
   description: z.string().nullable().optional(),
@@ -37,6 +39,7 @@ export const ServiceCreateSchema = z.object({
   locked: z.boolean().default(false),
   projection: ProjectionSchema,
   metadata: MetadataSchema.optional(),
+  options: AvailabilityOptionsSchema.optional(),
 });
 
 export const ServiceUpdateSchema = z.object({
@@ -52,6 +55,7 @@ export const ServiceUpdateSchema = z.object({
   locked: z.boolean().optional(),
   projection: ProjectionSchema.optional(),
   metadata: MetadataSchema.optional(),
+  options: AvailabilityOptionsSchema.optional(),
 });
 
 export type ServiceCreateInput = z.infer<typeof ServiceCreateSchema>;

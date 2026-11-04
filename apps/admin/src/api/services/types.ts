@@ -32,6 +32,7 @@ export interface Service {
   lastChecked?: string;
   deletedAt?: string | null;
   layerCount?: number;
+  options: Record<string, unknown>;
 }
 
 export interface Projection {
@@ -89,6 +90,7 @@ export interface ServiceUpdateInput {
   projection?: {
     code?: string;
   };
+  options?: Record<string, unknown>;
   metadata?: {
     title?: string;
     description?: string;

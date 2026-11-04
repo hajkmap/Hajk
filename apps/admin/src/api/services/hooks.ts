@@ -162,6 +162,7 @@ export const useUpdateService = () => {
     onSuccess: (data, { serviceId }) => {
       queryClient.setQueryData(["services", serviceId], data);
       void queryClient.invalidateQueries({ queryKey: ["services"] });
+      void queryClient.invalidateQueries({ queryKey: ["serviceByLayerId"] });
     },
     onError: (error) => {
       console.error(error);

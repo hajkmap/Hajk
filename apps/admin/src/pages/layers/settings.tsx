@@ -103,6 +103,7 @@ import {
   availabilityOf,
   fromDateTimeLocal,
   hasValidPeriod,
+  isAvailableNow,
 } from "../../lib/availability";
 
 const ALL_SETTINGS_TABS: {
@@ -1440,6 +1441,13 @@ export default function LayerSettings() {
                   </SettingsSearchField>
                   <FormFieldRow fullWidth>
                     <AvailabilityStatus control={control} />
+                    {service && !isAvailableNow(service.options) ? (
+                      <Alert severity="warning" sx={{ mt: 2 }}>
+                        {t("availability.status.serviceUnavailable", {
+                          name: service.name,
+                        })}
+                      </Alert>
+                    ) : null}
                   </FormFieldRow>
                 </FormFieldGrid>
               </FormPanel>

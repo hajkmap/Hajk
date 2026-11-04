@@ -2,7 +2,7 @@ import log4js from "log4js";
 import { UseType, type Prisma } from "@prisma/client";
 
 import prisma from "../../../common/prisma.ts";
-import { isAvailable, onlyAvailable } from "./availability.ts";
+import { isLayerAvailable, onlyAvailableLayers } from "./availability.ts";
 import {
   toClientLayerBucket,
   toClientServiceFields,
@@ -351,7 +351,7 @@ export async function buildLegacyLayersConfigForMap(
   // Layers not available to users now are left out, as deleted ones are.
   const instances = allInstances.filter((inst) => {
     const layer = inst.displayLayer ?? inst.searchLayer ?? inst.editingLayer;
-    return layer !== null && isAvailable(layer.options);
+    return layer !== null && isLayerAvailable(layer);
   });
 
   const searchLayerIdsOnMap = instances
@@ -362,7 +362,7 @@ export async function buildLegacyLayersConfigForMap(
     .map((inst) => inst.editingLayerId)
     .filter((id): id is string => Boolean(id));
 
-  const searchLayers = onlyAvailable(
+  const searchLayers = onlyAvailableLayers(
     await prisma.searchLayer.findMany({
       where: {
         deletedAt: null,
@@ -378,7 +378,7 @@ export async function buildLegacyLayersConfigForMap(
     })
   );
 
-  const editingLayers = onlyAvailable(
+  const editingLayers = onlyAvailableLayers(
     await prisma.editingLayer.findMany({
       where: {
         deletedAt: null,

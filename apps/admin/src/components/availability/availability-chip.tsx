@@ -7,7 +7,7 @@ import {
   formatWhen,
 } from "../../lib/availability";
 
-/** Marks a map or a layer its users don't get now, or will stop getting. */
+/** Marks a map, a layer or a service its users don't get now, or will stop getting. */
 export default function AvailabilityChip({
   options,
 }: {

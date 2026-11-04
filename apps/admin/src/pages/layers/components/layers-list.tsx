@@ -57,7 +57,11 @@ import {
 } from "../../../components/form-components/list-filter-row";
 import { CapabilityRow, CreateLayerGrid } from "./create-layer-grid";
 import AvailabilityChip from "../../../components/availability/availability-chip";
-import { availabilityOf, availabilityState } from "../../../lib/availability";
+import ServiceAvailabilityChip from "../../../components/availability/service-availability-chip";
+import {
+  isAvailableNow,
+  type AvailabilityFilter,
+} from "../../../lib/availability";
 
 interface LayersListProps {
   layerKind: LayerCategory;
@@ -71,13 +75,12 @@ type LayersGridRow = Omit<Layer, "status"> & {
   url: string;
   status: SERVICE_STATUS | undefined;
   lastChecked: string | undefined;
+  serviceOptions: Record<string, unknown> | undefined;
   usedInMapsCount: number;
   usedInMapNames: string[];
 };
 
 type CreateLayerStep = "details" | "capabilities";
-
-type AvailabilityFilter = "" | "available" | "unavailable";
 
 function LayerUsedInMapsCell({
   count,
@@ -299,7 +302,7 @@ export default function LayersList({
         return false;
       if (availabilityFilter) {
         const available =
-          availabilityState(availabilityOf(layer.options)).kind === "shown";
+          isAvailableNow(layer.options) && isAvailableNow(service?.options);
         if (available !== (availabilityFilter === "available")) return false;
       }
       const combinedText = `${layer.name} ${service?.url ?? ""}`.toLowerCase();
@@ -317,6 +320,7 @@ export default function LayersList({
         url: service?.url ?? "",
         status: service?.status,
         lastChecked: service?.lastChecked,
+        serviceOptions: service?.options,
         usedInMapsCount: usage?.mapCount ?? 0,
         usedInMapNames: usage?.mapNames ?? [],
       };
@@ -770,6 +774,9 @@ export default function LayersList({
                           sx={{ minWidth: 0 }}
                         />
                         <AvailabilityChip options={params.row.options} />
+                        <ServiceAvailabilityChip
+                          options={params.row.serviceOptions}
+                        />
                       </Box>
                     ),
                   },

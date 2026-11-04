@@ -47,6 +47,11 @@ import { toast } from "react-toastify";
 import StyledDataGrid from "../../../components/data-grid";
 import { GridRenderCellParams } from "@mui/x-data-grid";
 import ServiceNameCell from "./service-name-cell";
+import AvailabilityChip from "../../../components/availability/availability-chip";
+import {
+  isAvailableNow,
+  type AvailabilityFilter,
+} from "../../../lib/availability";
 import ServiceStatusIndicator from "../components/service-status-indicator";
 import ServiceTypeBadge from "../components/service-type-badge";
 import { SquareSpinnerComponent } from "../../../components/progress/square-progress";
@@ -129,6 +134,8 @@ export default function ServicesList({
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [typeFilter, setTypeFilter] = useState<SERVICE_TYPE | "">("");
   const [statusFilter, setStatusFilter] = useState<SERVICE_STATUS | "">("");
+  const [availabilityFilter, setAvailabilityFilter] =
+    useState<AvailabilityFilter>("");
   const [open, setOpen] = useState<boolean>(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
@@ -221,9 +228,22 @@ export default function ServicesList({
       }
       if (typeFilter && service.type !== typeFilter) return false;
       if (statusFilter !== "" && service.status !== statusFilter) return false;
+      if (
+        availabilityFilter &&
+        isAvailableNow(service.options) !== (availabilityFilter === "available")
+      ) {
+        return false;
+      }
       return true;
     });
-  }, [services, searchTerm, typeFilter, statusFilter, filterServices]);
+  }, [
+    services,
+    searchTerm,
+    typeFilter,
+    statusFilter,
+    availabilityFilter,
+    filterServices,
+  ]);
 
   const defaultValues: ServiceCreateInput = {
     name: "",
@@ -545,6 +565,27 @@ export default function ServicesList({
                   </Select>
                 </FormControl>
               </ListFilterField>
+              <ListFilterField>
+                <FormControl fullWidth variant="outlined">
+                  <InputLabel id="services-availability-filter-label">
+                    {t("services.availability")}
+                  </InputLabel>
+                  <Select
+                    labelId="services-availability-filter-label"
+                    label={t("services.availability")}
+                    value={availabilityFilter}
+                    onChange={(e) => setAvailabilityFilter(e.target.value)}
+                  >
+                    <MenuItem value="">{t("common.all")}</MenuItem>
+                    <MenuItem value="available">
+                      {t("availability.filter.available")}
+                    </MenuItem>
+                    <MenuItem value="unavailable">
+                      {t("availability.filter.unavailable")}
+                    </MenuItem>
+                  </Select>
+                </FormControl>
+              </ListFilterField>
             </ListFilterRow>
             <Grid size={12}>
               <StyledDataGrid<Service>
@@ -566,11 +607,21 @@ export default function ServicesList({
                     flex: 0.5,
                     headerName: t("common.name"),
                     renderCell: (params: GridRenderCellParams<Service>) => (
-                      <ServiceNameCell
-                        name={params.row.name}
-                        url={params.row.url}
-                        comment={params.row.comment}
-                      />
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1,
+                          height: "100%",
+                        }}
+                      >
+                        <ServiceNameCell
+                          name={params.row.name}
+                          url={params.row.url}
+                          comment={params.row.comment}
+                        />
+                        <AvailabilityChip options={params.row.options} />
+                      </Box>
                     ),
                   },
                   {

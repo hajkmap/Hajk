@@ -16,7 +16,8 @@ import { memo, type MouseEvent as ReactMouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 
 import AvailabilityChip from "../availability/availability-chip";
-import { availabilityOf, availabilityState } from "../../lib/availability";
+import ServiceAvailabilityChip from "../availability/service-availability-chip";
+import { isAvailableNow } from "../../lib/availability";
 import LayerTreeItemTooltip from "./layer-tree-item-tooltip";
 import type { LayerTreeClickPart, LayerTreeFlatNode } from "./layer-tree-model";
 import { LayerTreePlaceLine } from "./layer-tree-place-line";
@@ -80,6 +81,8 @@ interface LayerTreeRowProps {
   inMoveZone?: boolean;
   /** A layer's own options, for marking it when users don't get it now. */
   availability?: Record<string, unknown>;
+  /** The options of the layer's service: users don't get the layer without it. */
+  serviceAvailability?: Record<string, unknown>;
   /**
    * Click and place: a click on the row picks it or places what is held,
    * before, in or after the row by where it lands.
@@ -119,6 +122,7 @@ function LayerTreeRow({
   onEditSettings,
   inMoveZone = false,
   availability,
+  serviceAvailability,
   onRowClick,
   onRowHover,
   picked = false,
@@ -128,8 +132,7 @@ function LayerTreeRow({
   const toggleOpen = () => onToggle(node.id, isOpen);
   const isHidden = node.data.hidden === true || hiddenWith !== undefined;
   const unavailable =
-    availability !== undefined &&
-    availabilityState(availabilityOf(availability)).kind !== "shown";
+    !isAvailableNow(availability) || !isAvailableNow(serviceAvailability);
   /** Upper edge: before the row; middle: in a group; lower edge: after it. */
   const partAt = (event: ReactMouseEvent<HTMLElement>): LayerTreeClickPart => {
     const box = event.currentTarget.getBoundingClientRect();
@@ -292,6 +295,7 @@ function LayerTreeRow({
         />
       ) : null}
       {availability ? <AvailabilityChip options={availability} /> : null}
+      <ServiceAvailabilityChip options={serviceAvailability} />
       {exceptionIn ? (
         // Purple as the map's own changes: here only, the group is left as is.
         <Tooltip

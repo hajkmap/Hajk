@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, type FormEvent, type MouseEvent } from "react";
 import { useTranslation, Trans } from "react-i18next";
 import Page from "../../layouts/root/components/page";
-import { Controller, FieldValues, useForm } from "react-hook-form";
+import { Controller, FieldValues, useForm, useWatch } from "react-hook-form";
 import {
   useTheme,
   Button,
@@ -14,6 +14,9 @@ import {
   Alert,
   CircularProgress,
   Typography,
+  Checkbox,
+  FormControlLabel,
+  FormGroup,
 } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
 import LayersIcon from "@mui/icons-material/Layers";
@@ -41,6 +44,14 @@ import {
   SelectWithHelp,
   TextFieldWithHelp,
 } from "../../components/form-components/field-label-with-help";
+import { FieldLabelWithHelp } from "../../components/form-components/field-help-tooltip";
+import AvailabilityStatus from "../../components/availability/availability-status";
+import {
+  availabilityOf,
+  fromDateTimeLocal,
+  hasValidPeriod,
+  toDateTimeLocal,
+} from "../../lib/availability";
 import FormFieldGrid, { FormFieldRow } from "../../components/form-components/form-field-grid";
 import { SettingsPageTabs } from "../../components/settings-page-tabs";
 import UnsavedChangesGuard from "../../components/unsaved-changes-guard";
@@ -177,9 +188,27 @@ export default function ServiceSettings() {
           description: service.metadata?.description ?? "",
           owner: service.metadata?.owner ?? "",
         },
+        options: {
+          visible: service.options?.visible !== "false",
+          visibleFrom: toDateTimeLocal(service.options?.visibleFrom),
+          visibleUntil: toDateTimeLocal(service.options?.visibleUntil),
+        },
       });
     }
   }, [service, reset]);
+
+  // Saving waits until "Tillgänglig till" lies after "Tillgänglig från".
+  const [watchVisible, watchVisibleFrom, watchVisibleUntil] = useWatch({
+    control,
+    name: ["options.visible", "options.visibleFrom", "options.visibleUntil"],
+  }) as [unknown, unknown, unknown];
+  const availabilityPeriodValid = hasValidPeriod(
+    availabilityOf({
+      visible: watchVisible,
+      visibleFrom: watchVisibleFrom,
+      visibleUntil: watchVisibleUntil,
+    }),
+  );
 
   const handleDialogOpen = () => {
     setIsDialogOpen(true);
@@ -247,6 +276,7 @@ export default function ServiceSettings() {
   };
 
   const handleUpdateService = async (serviceData: ServiceUpdateInput) => {
+    if (!availabilityPeriodValid) return;
     try {
       const payload = {
         name: serviceData.name,
@@ -264,6 +294,12 @@ export default function ServiceSettings() {
         metadata: {
           description: serviceData.metadata?.description,
           owner: serviceData.metadata?.owner,
+        },
+        options: {
+          // Only an unticked box makes the service unavailable.
+          visible: serviceData.options?.visible === false ? "false" : "true",
+          visibleFrom: fromDateTimeLocal(serviceData.options?.visibleFrom),
+          visibleUntil: fromDateTimeLocal(serviceData.options?.visibleUntil),
         },
       };
       await updateService({
@@ -379,7 +415,7 @@ export default function ServiceSettings() {
         createdDate={service?.createdDate}
         lastSavedBy={service?.lastSavedBy}
         lastSavedDate={service?.lastSavedDate}
-        isDirty={isDirty}
+        isDirty={isDirty && availabilityPeriodValid}
         warning={
           <Box sx={{ mt: 1 }}>
             {count > 0 ? (
@@ -514,6 +550,101 @@ export default function ServiceSettings() {
                       />
                     </FormFieldRow>
                   </SettingsSearchField>
+                </FormFieldGrid>
+              </FormPanel>
+            </SearchablePanel>
+
+            <SearchablePanel
+              panelTitleKeywords={settingsSearchLabels("services.availability")}
+              keywords={[
+                ...settingsSearchLabels(
+                  "services.available",
+                  "services.availableFrom",
+                  "services.availableUntil",
+                ),
+                "tillgänglig",
+                "available",
+                "publicera",
+                "publish",
+              ]}
+              fields={[
+                "options.visible",
+                "options.visibleFrom",
+                "options.visibleUntil",
+              ]}
+              allValues={showSearchUi ? getValues() : undefined}
+              searchTerm={settingsSearchTerm}
+            >
+              <FormPanel title={t("services.availability")}>
+                <FormFieldGrid columns={2}>
+                  <SettingsSearchField
+                    labelKeys={["services.available"]}
+                    fields={["options.visible"]}
+                    searchTerm={settingsSearchTerm}
+                    allValues={showSearchUi ? getValues() : undefined}
+                  >
+                    <FormFieldRow fullWidth>
+                      <FormGroup>
+                        <Controller
+                          name="options.visible"
+                          control={control}
+                          render={({ field }) => (
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={Boolean(field.value as boolean)}
+                                  onChange={(e) =>
+                                    field.onChange(e.target.checked)
+                                  }
+                                />
+                              }
+                              label={
+                                <FieldLabelWithHelp
+                                  label={t("services.available")}
+                                  help={t("services.help.available")}
+                                />
+                              }
+                            />
+                          )}
+                        />
+                      </FormGroup>
+                    </FormFieldRow>
+                  </SettingsSearchField>
+                  <SettingsSearchField
+                    labelKeys={["services.availableFrom"]}
+                    fields={["options.visibleFrom"]}
+                    searchTerm={settingsSearchTerm}
+                    allValues={showSearchUi ? getValues() : undefined}
+                  >
+                    <FormFieldRow>
+                      <TextFieldWithHelp
+                        labelKey="services.availableFrom"
+                        helpKey="services.help.availableFrom"
+                        type="datetime-local"
+                        fullWidth
+                        {...register("options.visibleFrom")}
+                      />
+                    </FormFieldRow>
+                  </SettingsSearchField>
+                  <SettingsSearchField
+                    labelKeys={["services.availableUntil"]}
+                    fields={["options.visibleUntil"]}
+                    searchTerm={settingsSearchTerm}
+                    allValues={showSearchUi ? getValues() : undefined}
+                  >
+                    <FormFieldRow>
+                      <TextFieldWithHelp
+                        labelKey="services.availableUntil"
+                        helpKey="services.help.availableUntil"
+                        type="datetime-local"
+                        fullWidth
+                        {...register("options.visibleUntil")}
+                      />
+                    </FormFieldRow>
+                  </SettingsSearchField>
+                  <FormFieldRow fullWidth>
+                    <AvailabilityStatus control={control} />
+                  </FormFieldRow>
                 </FormFieldGrid>
               </FormPanel>
             </SearchablePanel>

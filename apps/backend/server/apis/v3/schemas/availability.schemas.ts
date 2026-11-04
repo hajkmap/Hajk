@@ -6,16 +6,17 @@ const dateTimeOrEmpty = z.union([
 ]);
 
 /**
- * The options of a map or a layer. They are free-form, but the ones that
- * decide whether the client's users get it are checked, see
+ * The options of a map, a layer or a service. They are free-form, but the
+ * ones that decide whether the client's users get it are checked, see
  * utils/availability.ts.
  */
 export const AvailabilityOptionsSchema = z
-  .looseObject({
+  .object({
     visible: z.enum(["true", "false"]).optional(),
     visibleFrom: dateTimeOrEmpty.optional(),
     visibleUntil: dateTimeOrEmpty.optional(),
   })
+  .catchall(z.json())
   .refine(
     ({ visibleFrom, visibleUntil }) =>
       !visibleFrom ||

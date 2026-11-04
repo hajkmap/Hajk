@@ -590,7 +590,7 @@ paths:
             type: string
       responses:
         200:
-          description: The editing layers as the client config's wfstlayers have them, leaving out those not available to users now (their visible, visibleFrom and visibleUntil options) and those whose url is empty, not http(s), or on a host WFS_ALLOWED_HOSTS leaves out
+          description: The editing layers as the client config's wfstlayers have them, leaving out those not available to users now (by their own or their service's visible, visibleFrom and visibleUntil options) and those whose url is empty, not http(s), or on a host WFS_ALLOWED_HOSTS leaves out
           content:
             application/json:
               schema:
@@ -629,7 +629,7 @@ paths:
         400:
           description: Invalid layer id
         404:
-          description: No such editing layer (DB002), or it is not available to users now by its visible, visibleFrom and visibleUntil options (DB021)
+          description: No such editing layer (DB002), or it or its service is not available to users now by the visible, visibleFrom and visibleUntil options (DB021)
         500:
           description: The layer's url is empty, not http(s), or on a host WFS_ALLOWED_HOSTS leaves out
   /presence:
@@ -750,6 +750,7 @@ paths:
         - Admin only
       requestBody:
         required: true
+        description: The service. Its options visible ("true" or "false"), visibleFrom and visibleUntil (ISO date-times or empty) decide, as on maps and layers, whether the client's users get the service's layers.
         content:
           application/json:
             schema:
@@ -792,6 +793,7 @@ paths:
             type: string
       requestBody:
         required: true
+        description: The fields to change. options, when sent, replaces the stored options (visible, visibleFrom and visibleUntil, as on create).
         content:
           application/json:
             schema:
@@ -799,6 +801,8 @@ paths:
       responses:
         200:
           description: Service updated
+        400:
+          description: Invalid request body, e.g. visibleUntil before visibleFrom
         404:
           description: Service not found
     delete:
@@ -1283,7 +1287,7 @@ paths:
       tags:
         - Client-accessible
       summary: The map's client config
-      description: The map, its layers, projections and tools as the client reads them, and the other maps for its map selector. What is not available to users now, by its visible, visibleFrom and visibleUntil options, is left out, so unavailable maps are missing from the map selector and unavailable layers from the layer tree, the backgrounds, the search layers and the editing layers. A tool's activeServices names only the editing layers users can have now.
+      description: The map, its layers, projections and tools as the client reads them, and the other maps for its map selector. What is not available to users now, by its visible, visibleFrom and visibleUntil options, is left out, so unavailable maps are missing from the map selector and unavailable layers from the layer tree, the backgrounds, the search layers and the editing layers. A layer is unavailable while its service is. A tool's activeServices names only the editing layers users can have now.
       parameters:
         - in: path
           name: mapName

@@ -10,8 +10,9 @@ import {
 } from "../../lib/availability";
 
 /**
- * Whether users get the map or the layer now, as the availability fields
- * (options.visible, options.visibleFrom, options.visibleUntil) are filled in.
+ * Whether users get the map, the layer or the service now, as the
+ * availability fields (options.visible, options.visibleFrom,
+ * options.visibleUntil) are filled in.
  */
 export default function AvailabilityStatus({
   control,

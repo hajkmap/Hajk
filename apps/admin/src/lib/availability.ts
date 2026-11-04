@@ -1,7 +1,8 @@
 /**
- * Whether a map's or a layer's users get it: its `visible` option and the
- * optional period from `visibleFrom` to `visibleUntil`. The backend applies
- * the same rule (utils/availability.ts) when the client fetches a map.
+ * Whether a map's, a layer's or a service's users get it: its `visible`
+ * option and the optional period from `visibleFrom` to `visibleUntil`. A
+ * layer also needs its service. The backend applies the same rule
+ * (utils/availability.ts) when the client fetches a map.
  */
 export interface Availability {
   visible: boolean;
@@ -41,6 +42,17 @@ export function availabilityState(
   if (until && now >= until) return { kind: "ended", until };
   return { kind: "shown", until };
 }
+
+/** Whether users get it now, from saved options. */
+export function isAvailableNow(
+  options: Record<string, unknown> | undefined,
+  now: Date = new Date(),
+): boolean {
+  return availabilityState(availabilityOf(options), now).kind === "shown";
+}
+
+/** A list's availability filter: all, the available or the unavailable. */
+export type AvailabilityFilter = "" | "available" | "unavailable";
 
 export function hasValidPeriod({ from, until }: Availability): boolean {
   return !from || !until || from < until;

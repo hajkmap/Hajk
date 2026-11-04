@@ -336,6 +336,8 @@ model Service {
   healthStatus    String?
   healthCheckedAt DateTime?      @db.Timestamptz(3)
   deletedAt       DateTime?      @db.Timestamptz(3)
+  /// visible, visibleFrom and visibleUntil decide, as on maps and layers, whether the client's users get the service's layers.
+  options         Json           @default("{}")
   displayLayers   DisplayLayer[]
   searchLayers    SearchLayer[]
   editingLayers   EditingLayer[]

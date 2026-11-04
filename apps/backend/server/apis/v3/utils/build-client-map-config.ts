@@ -7,8 +7,8 @@ import HttpStatusCodes from "../../../common/http-status-codes.ts";
 import HajkStatusCodes from "../../../common/hajk-status-codes.ts";
 import { isVisibleToUser } from "./group-visibility.ts";
 import {
-  isAvailable,
-  onlyAvailable,
+  isLayerAvailable,
+  onlyAvailableLayers,
   requireAvailableMap,
 } from "./availability.ts";
 import type {
@@ -333,7 +333,9 @@ export async function buildClientMapForMap(mapName: string) {
 async function buildClientBaselayersForMap(
   mapName: string
 ): Promise<ClientLayerSwitcherLayerRef[]> {
-  const availability = { select: { options: true } } as const;
+  const availability = {
+    select: { options: true, service: { select: { options: true } } },
+  } as const;
   const instances = await prisma.layerInstance.findMany({
     where: {
       AND: [
@@ -352,7 +354,7 @@ async function buildClientBaselayersForMap(
   const available = instances.filter((instance) => {
     const layer =
       instance.displayLayer ?? instance.searchLayer ?? instance.editingLayer;
-    return layer !== null && isAvailable(layer.options);
+    return layer !== null && isLayerAvailable(layer);
   });
   return available.map((instance) => ({
     id: instance.id,
@@ -370,9 +372,13 @@ async function buildClientBaselayersForMap(
 async function availableEditingLayerIds(): Promise<Set<string>> {
   const layers = await prisma.editingLayer.findMany({
     where: { deletedAt: null, service: { deletedAt: null } },
-    select: { id: true, options: true },
+    select: {
+      id: true,
+      options: true,
+      service: { select: { options: true } },
+    },
   });
-  return new Set(onlyAvailable(layers).map((layer) => layer.id));
+  return new Set(onlyAvailableLayers(layers).map((layer) => layer.id));
 }
 
 /**
