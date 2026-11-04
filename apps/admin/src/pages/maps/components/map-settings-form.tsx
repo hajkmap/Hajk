@@ -40,7 +40,7 @@ import FormColorPicker from "../../../components/form-components/form-color-pick
 import { useSettingsSearchLabels } from "../../../hooks/use-settings-search-labels";
 import ProjectionsDialog from "./projections";
 import MapScaleFields from "./map-scale-fields";
-import MapVisibilityStatus from "./map-visibility-status";
+import AvailabilityStatus from "../../../components/availability/availability-status";
 import {
   getMainProjectionChoices,
   groupProjectionCodes,
@@ -491,7 +491,7 @@ export default function MapSettingsForm({
                   searchValues={searchValues}
                 />
               </FormFieldGrid>
-              <MapVisibilityStatus control={control} />
+              <AvailabilityStatus control={control} />
             </FormPanel>
           </SearchablePanel>
 

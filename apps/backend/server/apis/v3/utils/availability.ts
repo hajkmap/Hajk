@@ -12,11 +12,12 @@ function timeOf(value: Prisma.JsonValue | undefined): number | null {
 }
 
 /**
- * Whether a map is shown to its users at `now`, from the map's options:
- * `visible` ("false" hides it) and the optional period from `visibleFrom` to
- * `visibleUntil` (ISO date-times, the map is hidden from `visibleUntil` on).
+ * Whether a map or a layer is available to the client's users at `now`, from
+ * its options: `visible` ("false" withholds it) and the optional period from
+ * `visibleFrom` to `visibleUntil` (ISO date-times; unavailable from
+ * `visibleUntil` on). Admin sees everything regardless.
  */
-export function isMapVisible(
+export function isAvailable(
   options: Prisma.JsonValue,
   now: Date = new Date()
 ): boolean {
@@ -31,8 +32,16 @@ export function isMapVisible(
   return (from === null || from <= at) && (until === null || at < until);
 }
 
-/** The map, when it exists and is shown to its users now. */
-export async function requireVisibleMap(mapName: string) {
+/** The rows available to the client's users now. */
+export function onlyAvailable<T extends { options: Prisma.JsonValue }>(
+  rows: T[],
+  now: Date = new Date()
+): T[] {
+  return rows.filter((row) => isAvailable(row.options, now));
+}
+
+/** The map, when it exists and is available to its users now. */
+export async function requireAvailableMap(mapName: string) {
   const map = await prisma.map.findFirst({
     where: { name: mapName, deletedAt: null },
     select: { name: true, options: true },
@@ -44,10 +53,10 @@ export async function requireVisibleMap(mapName: string) {
       HajkStatusCodes.UNKNOWN_MAP_NAME
     );
   }
-  if (!isMapVisible(map.options)) {
+  if (!isAvailable(map.options)) {
     throw new HajkError(
       HttpStatusCodes.NOT_FOUND,
-      `"${mapName}" is not shown to its users now`,
+      `"${mapName}" is not available to its users now`,
       HajkStatusCodes.MAP_NOT_VISIBLE
     );
   }

@@ -47,7 +47,7 @@ import {
 } from "./map-settings-form-values";
 import { SquareSpinnerComponent } from "../../components/progress/square-progress";
 import FormActionPanel from "../../components/form-action-panel";
-import { hasValidPeriod, mapVisibilityOf } from "./map-visibility";
+import { availabilityOf, hasValidPeriod } from "../../lib/availability";
 import { toast } from "react-toastify";
 import { HttpError } from "../../lib/http-error";
 import FormContainer from "../../components/form-components/form-container";
@@ -716,7 +716,7 @@ export default function MapSettings() {
     name: ["options.visible", "options.visibleFrom", "options.visibleUntil"],
   }) as [unknown, unknown, unknown];
   const visibilityPeriodValid = hasValidPeriod(
-    mapVisibilityOf({ visible, visibleFrom, visibleUntil }),
+    availabilityOf({ visible, visibleFrom, visibleUntil }),
   );
 
   // Told to the other tabs on this map from every tab of the page, and shown

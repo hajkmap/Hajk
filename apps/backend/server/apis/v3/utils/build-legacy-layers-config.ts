@@ -2,6 +2,7 @@ import log4js from "log4js";
 import { UseType, type Prisma } from "@prisma/client";
 
 import prisma from "../../../common/prisma.ts";
+import { isAvailable, onlyAvailable } from "./availability.ts";
 import {
   toClientLayerBucket,
   toClientServiceFields,
@@ -299,7 +300,7 @@ export async function buildLegacyLayersConfigForMap(
   mapName: string,
   treePlacements: DisplayLayerPlacement[]
 ): Promise<HajkLegacyLayersConfigDocument> {
-  const instances = await prisma.layerInstance.findMany({
+  const allInstances = await prisma.layerInstance.findMany({
     where: {
       AND: [
         mapPlacementFilter(mapName),
@@ -347,6 +348,11 @@ export async function buildLegacyLayersConfigForMap(
       },
     },
   });
+  // Layers not available to users now are left out, as deleted ones are.
+  const instances = allInstances.filter((inst) => {
+    const layer = inst.displayLayer ?? inst.searchLayer ?? inst.editingLayer;
+    return layer !== null && isAvailable(layer.options);
+  });
 
   const searchLayerIdsOnMap = instances
     .map((inst) => inst.searchLayerId)
@@ -356,30 +362,34 @@ export async function buildLegacyLayersConfigForMap(
     .map((inst) => inst.editingLayerId)
     .filter((id): id is string => Boolean(id));
 
-  const searchLayers = await prisma.searchLayer.findMany({
-    where: {
-      deletedAt: null,
-      service: { deletedAt: null },
-      ...(searchLayerIdsOnMap.length > 0
-        ? { id: { notIn: searchLayerIdsOnMap } }
-        : {}),
-    },
-    include: {
-      service: { include: { projection: true } },
-      metadata: true,
-    },
-  });
+  const searchLayers = onlyAvailable(
+    await prisma.searchLayer.findMany({
+      where: {
+        deletedAt: null,
+        service: { deletedAt: null },
+        ...(searchLayerIdsOnMap.length > 0
+          ? { id: { notIn: searchLayerIdsOnMap } }
+          : {}),
+      },
+      include: {
+        service: { include: { projection: true } },
+        metadata: true,
+      },
+    })
+  );
 
-  const editingLayers = await prisma.editingLayer.findMany({
-    where: {
-      deletedAt: null,
-      service: { deletedAt: null },
-      ...(editingLayerIdsOnMap.length > 0
-        ? { id: { notIn: editingLayerIdsOnMap } }
-        : {}),
-    },
-    include: { service: { include: { projection: true } } },
-  });
+  const editingLayers = onlyAvailable(
+    await prisma.editingLayer.findMany({
+      where: {
+        deletedAt: null,
+        service: { deletedAt: null },
+        ...(editingLayerIdsOnMap.length > 0
+          ? { id: { notIn: editingLayerIdsOnMap } }
+          : {}),
+      },
+      include: { service: { include: { projection: true } } },
+    })
+  );
 
   if (
     instances.length === 0 &&

@@ -98,6 +98,12 @@ import { useSettingsSearchLabels } from "../../hooks/use-settings-search-labels"
 import { useLayerFieldLabels } from "./use-layer-field-labels";
 import { SettingsPageTabs } from "../../components/settings-page-tabs";
 import UnsavedChangesGuard from "../../components/unsaved-changes-guard";
+import AvailabilityStatus from "../../components/availability/availability-status";
+import {
+  availabilityOf,
+  fromDateTimeLocal,
+  hasValidPeriod,
+} from "../../lib/availability";
 
 const ALL_SETTINGS_TABS: {
   key: LayerSettingsTab;
@@ -391,6 +397,18 @@ export default function LayerSettings() {
   const watchSingleTile = useWatch({ control, name: "singleTile" }) as
     | boolean
     | undefined;
+  // Saving waits until "Tillgänglig till" lies after "Tillgänglig från".
+  const [watchVisible, watchVisibleFrom, watchVisibleUntil] = useWatch({
+    control,
+    name: ["options.visible", "options.visibleFrom", "options.visibleUntil"],
+  }) as [unknown, unknown, unknown];
+  const availabilityPeriodValid = hasValidPeriod(
+    availabilityOf({
+      visible: watchVisible,
+      visibleFrom: watchVisibleFrom,
+      visibleUntil: watchVisibleUntil,
+    }),
+  );
 
   const normalizedSelection = useMemo(
     () => normalizeRowSelectionModel(selectGridId),
@@ -720,6 +738,7 @@ export default function LayerSettings() {
   };
 
   const handleUpdateLayer = async (layerData: LayerUpdateInput) => {
+    if (!availabilityPeriodValid) return;
     try {
       // Preserve existing options (including layersInfo) and merge with new options
       const existingOptions =
@@ -975,7 +994,7 @@ export default function LayerSettings() {
         createdDate={layer?.createdDate}
         lastSavedBy={layer?.lastSavedBy}
         lastSavedDate={layer?.lastSavedDate}
-        isDirty={isDirty || selectedLayersDirty}
+        isDirty={(isDirty || selectedLayersDirty) && availabilityPeriodValid}
         warning={
           <Box sx={{ mt: 1 }}>
             <Button
@@ -1100,6 +1119,17 @@ export default function LayerSettings() {
                   showAttributeTableButton: (
                     data.options as { showAttributeTableButton?: boolean }
                   )?.showAttributeTableButton,
+                  // Only an unticked box makes the layer unavailable.
+                  visible:
+                    (data.options as { visible?: boolean })?.visible === false
+                      ? "false"
+                      : "true",
+                  visibleFrom: fromDateTimeLocal(
+                    (data.options as { visibleFrom?: string })?.visibleFrom,
+                  ),
+                  visibleUntil: fromDateTimeLocal(
+                    (data.options as { visibleUntil?: string })?.visibleUntil,
+                  ),
                   ...(settingsVisibility.showEditingSettingsPanel && {
                     ...editingOptions,
                     editableFields: editingEditableFields,
@@ -1318,6 +1348,99 @@ export default function LayerSettings() {
                       />
                     </FormFieldRow>
                   </SettingsSearchField>
+                </FormFieldGrid>
+              </FormPanel>
+            </SearchablePanel>
+
+            <SearchablePanel
+              panelTitleKeywords={settingsSearchLabels("layers.availability")}
+              keywords={[
+                ...settingsSearchLabels(
+                  "layers.available",
+                  "layers.availableFrom",
+                  "layers.availableUntil",
+                ),
+                "tillgänglig",
+                "available",
+                "publicera",
+                "publish",
+              ]}
+              fields={[
+                "options.visible",
+                "options.visibleFrom",
+                "options.visibleUntil",
+              ]}
+              allValues={showSettingsSearchUi ? getValues() : undefined}
+              searchTerm={settingsSearchTerm}
+            >
+              <FormPanel title={t("layers.availability")}>
+                <FormFieldGrid columns={2}>
+                  <SettingsSearchField
+                    labelKeys={["layers.available"]}
+                    fields={["options.visible"]}
+                    searchTerm={settingsSearchTerm}
+                    allValues={showSettingsSearchUi ? getValues() : undefined}
+                  >
+                    <FormFieldRow fullWidth>
+                      <FormGroup>
+                        <Controller
+                          name="options.visible"
+                          control={control}
+                          render={({ field }) => (
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={Boolean(field.value as boolean)}
+                                  onChange={(e) =>
+                                    field.onChange(e.target.checked)
+                                  }
+                                />
+                              }
+                              label={fieldLabel(
+                                "layers.available",
+                                "layers.help.available",
+                              )}
+                            />
+                          )}
+                        />
+                      </FormGroup>
+                    </FormFieldRow>
+                  </SettingsSearchField>
+                  <SettingsSearchField
+                    labelKeys={["layers.availableFrom"]}
+                    fields={["options.visibleFrom"]}
+                    searchTerm={settingsSearchTerm}
+                    allValues={showSettingsSearchUi ? getValues() : undefined}
+                  >
+                    <FormFieldRow>
+                      <TextFieldWithHelp
+                        labelKey="layers.availableFrom"
+                        helpKey="layers.help.availableFrom"
+                        type="datetime-local"
+                        fullWidth
+                        {...register("options.visibleFrom")}
+                      />
+                    </FormFieldRow>
+                  </SettingsSearchField>
+                  <SettingsSearchField
+                    labelKeys={["layers.availableUntil"]}
+                    fields={["options.visibleUntil"]}
+                    searchTerm={settingsSearchTerm}
+                    allValues={showSettingsSearchUi ? getValues() : undefined}
+                  >
+                    <FormFieldRow>
+                      <TextFieldWithHelp
+                        labelKey="layers.availableUntil"
+                        helpKey="layers.help.availableUntil"
+                        type="datetime-local"
+                        fullWidth
+                        {...register("options.visibleUntil")}
+                      />
+                    </FormFieldRow>
+                  </SettingsSearchField>
+                  <FormFieldRow fullWidth>
+                    <AvailabilityStatus control={control} />
+                  </FormFieldRow>
                 </FormFieldGrid>
               </FormPanel>
             </SearchablePanel>

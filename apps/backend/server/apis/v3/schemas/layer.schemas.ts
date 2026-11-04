@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { AvailabilityOptionsSchema } from "./availability.schemas.ts";
+
 const ServiceTypeSchema = z.enum([
   "ARCGIS",
   "VECTOR",
@@ -86,7 +88,7 @@ export const LayerCreateSchema = z.object({
   timeSliderEnd: z.string().optional(),
   hideExpandArrow: z.boolean().default(false),
   zIndex: z.number().default(0),
-  options: z.record(z.string(), z.unknown()).default({}),
+  options: AvailabilityOptionsSchema.default({}),
   service: ServiceSchema.optional(),
   metadata: MetadataSchema.optional(),
   infoClickSettings: InfoClickSettingsSchema.optional(),
@@ -191,7 +193,7 @@ export const LayerUpdateSchema = z.object({
   timeSliderEnd: z.string().optional(),
   hideExpandArrow: z.boolean().optional(),
   zIndex: z.number().optional(),
-  options: z.record(z.string(), z.unknown()).optional(),
+  options: AvailabilityOptionsSchema.optional(),
   service: ServiceSchema.optional(),
   metadata: MetadataSchema.optional(),
   infoClickSettings: InfoClickSettingsSchema.optional(),

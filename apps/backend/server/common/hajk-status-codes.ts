@@ -146,6 +146,13 @@ enum HajkStatusCodes {
   MAP_NOT_VISIBLE = "DB020",
 
   /**
+   * The layer exists but is not available to the client's users now: its
+   * `visible` option is "false", or the time is outside its `visibleFrom` to
+   * `visibleUntil` period.
+   */
+  LAYER_NOT_AVAILABLE = "DB021",
+
+  /**
    * The request body is invalid, e.g. lacks some required fields.
    */
   INVALID_REQUEST_BODY = "RQ001",

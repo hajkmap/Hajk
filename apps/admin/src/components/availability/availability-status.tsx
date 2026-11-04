@@ -3,14 +3,17 @@ import { useWatch, type Control, type FieldValues } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import {
+  availabilityOf,
+  availabilityState,
   formatWhen,
   hasValidPeriod,
-  mapVisibilityOf,
-  mapVisibilityState,
-} from "../map-visibility";
+} from "../../lib/availability";
 
-/** Whether the map's users see it now, as the visibility fields are filled in. */
-export default function MapVisibilityStatus({
+/**
+ * Whether users get the map or the layer now, as the availability fields
+ * (options.visible, options.visibleFrom, options.visibleUntil) are filled in.
+ */
+export default function AvailabilityStatus({
   control,
 }: {
   control: Control<FieldValues>;
@@ -20,28 +23,28 @@ export default function MapVisibilityStatus({
     control,
     name: ["options.visible", "options.visibleFrom", "options.visibleUntil"],
   }) as [unknown, unknown, unknown];
-  const visibility = mapVisibilityOf({ visible, visibleFrom, visibleUntil });
+  const availability = availabilityOf({ visible, visibleFrom, visibleUntil });
 
-  if (!hasValidPeriod(visibility)) {
+  if (!hasValidPeriod(availability)) {
     return (
       <Alert severity="error" sx={{ mt: 2 }}>
-        {t("map.visibilityStatus.invalidPeriod")}
+        {t("availability.status.invalidPeriod")}
       </Alert>
     );
   }
 
-  const state = mapVisibilityState(visibility);
+  const state = availabilityState(availability);
   const when = (date: Date) => formatWhen(date, i18n.language);
   const text =
     state.kind === "hidden"
-      ? t("map.visibilityStatus.hidden")
+      ? t("availability.status.hidden")
       : state.kind === "notYet"
-        ? t("map.visibilityStatus.notYet", { from: when(state.from) })
+        ? t("availability.status.notYet", { from: when(state.from) })
         : state.kind === "ended"
-          ? t("map.visibilityStatus.ended", { until: when(state.until) })
+          ? t("availability.status.ended", { until: when(state.until) })
           : state.until
-            ? t("map.visibilityStatus.shownUntil", { until: when(state.until) })
-            : t("map.visibilityStatus.shown");
+            ? t("availability.status.shownUntil", { until: when(state.until) })
+            : t("availability.status.shown");
 
   return (
     <Alert

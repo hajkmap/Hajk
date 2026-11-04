@@ -6,7 +6,7 @@ import { HajkError } from "../../../common/classes.ts";
 import HttpStatusCodes from "../../../common/http-status-codes.ts";
 import HajkStatusCodes from "../../../common/hajk-status-codes.ts";
 import { isVisibleToUser } from "./group-visibility.ts";
-import { requireVisibleMap } from "./map-visibility.ts";
+import { requireAvailableMap } from "./availability.ts";
 import type {
   ClientLayerSwitcherLayerRef,
   ClientLayerTree,
@@ -240,7 +240,7 @@ export async function resolveClientDocumentHandler(
   mapName: string,
   adUser: string | undefined
 ): Promise<{ toolInstanceId: number; options: Prisma.JsonObject }> {
-  await requireVisibleMap(mapName);
+  await requireAvailableMap(mapName);
   const entry = await prisma.toolsOnMaps.findFirst({
     where: {
       mapName,

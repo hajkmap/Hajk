@@ -16,7 +16,7 @@ import {
   buildClientToolsForMap,
 } from "../utils/build-client-map-config.ts";
 import { washClientTools } from "../utils/group-visibility.ts";
-import { isMapVisible, requireVisibleMap } from "../utils/map-visibility.ts";
+import { isAvailable, requireAvailableMap } from "../utils/availability.ts";
 
 const logger = log4js.getLogger("service.v3.public");
 
@@ -43,7 +43,7 @@ class PublicService {
     // legacy mode, we must follow the old key names.
     const now = new Date();
     const formattedMaps = maps
-      .filter((map) => isMapVisible(map.options, now))
+      .filter((map) => isAvailable(map.options, now))
       .map((map) => ({
         [this.#useLegacyConfig ? "mapConfigurationName" : "name"]: map.name,
         [this.#useLegacyConfig ? "mapConfigurationTitle" : "title"]:
@@ -66,7 +66,7 @@ class PublicService {
 
     logger.debug(`USE_LEGACY_MAP_CONFIG is set to ${this.#useLegacyConfig}`);
 
-    await requireVisibleMap(mapName);
+    await requireAvailableMap(mapName);
 
     // For the legacy config, we want 3 top-level properties:
     // - layersConfig

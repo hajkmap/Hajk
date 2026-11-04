@@ -2,6 +2,7 @@ import type { FieldValues } from "react-hook-form";
 import type { Layer } from "../../api/layers";
 import type { EditableFieldConfig } from "./types/editing-layer";
 import { editingOptionsFrom } from "./types/editing-layer";
+import { toDateTimeLocal } from "../../lib/availability";
 
 /** Geometry field from searchSettings (search) or top-level scalar (editing). */
 export function getLayerGeometryField(layer: Layer): string {
@@ -104,6 +105,9 @@ export function buildLayerSettingsFormValues(
       geoWebCache: layer.options?.geoWebCache ?? false,
       showAttributeTableButton:
         layer.options?.showAttributeTableButton ?? false,
+      visible: layer.options?.visible !== "false",
+      visibleFrom: toDateTimeLocal(layer.options?.visibleFrom),
+      visibleUntil: toDateTimeLocal(layer.options?.visibleUntil),
       ...editingOptionsFrom(layerOptions),
       editableFields: savedEditableFields,
       nonEditableFields: savedNonEditableFields,

@@ -12,6 +12,7 @@ import {
   type MapGroupSettings,
   type MapLayerSettings,
 } from "../services/map-layer-tree-settings.ts";
+import { onlyAvailable } from "./availability.ts";
 import type { DisplayLayerPlacement } from "./build-legacy-layers-config.ts";
 
 const logger = log4js.getLogger("util.build-client-layer-tree");
@@ -114,7 +115,8 @@ export async function buildClientLayerTreeForMap(
     _max: { zIndex: true },
   });
 
-  // Layer definitions for every layer in the tree (deleted ones are left out).
+  // Layer definitions for every layer in the tree (deleted ones, and those not
+  // available to users now, are left out).
   const layerIds = new Set<string>();
   const collectLayerIds = (nodes: LayerTreeNode[]) => {
     for (const node of nodes) {
@@ -125,7 +127,7 @@ export async function buildClientLayerTreeForMap(
   };
   collectLayerIds(items);
   const displayLayers = new Map(
-    (
+    onlyAvailable(
       await prisma.displayLayer.findMany({
         where: {
           id: { in: [...layerIds] },

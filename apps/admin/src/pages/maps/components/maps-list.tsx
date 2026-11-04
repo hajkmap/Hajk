@@ -43,7 +43,7 @@ import {
 } from "../../../components/form-components/list-filter-row";
 import CreateMapDialog from "./create-map-dialog";
 import DuplicateMapDialog from "./duplicate-map-dialog";
-import MapVisibilityChip from "./map-visibility-chip";
+import AvailabilityChip from "../../../components/availability/availability-chip";
 
 interface MapsListProps {
   filterMaps: (maps: MapRecord[]) => MapRecord[];
@@ -364,7 +364,7 @@ export default function MapsList({
                           }}
                           sx={{ minWidth: 0 }}
                         />
-                        <MapVisibilityChip options={params.row.options} />
+                        <AvailabilityChip options={params.row.options} />
                       </Box>
                     );
                   },

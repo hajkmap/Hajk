@@ -2,7 +2,7 @@ import type { FieldValues } from "react-hook-form";
 import type { Map as MapRecord, MapMutation } from "../../api/maps/types";
 import { getDefaultMapProjectionCode } from "../../lib/map-defaults";
 import { deriveScalesFromOptions } from "./map-scales";
-import { fromDateTimeLocal, toDateTimeLocal } from "./map-visibility";
+import { fromDateTimeLocal, toDateTimeLocal } from "../../lib/availability";
 
 interface MapProjectionSource {
   projection?: { code: string } | null;

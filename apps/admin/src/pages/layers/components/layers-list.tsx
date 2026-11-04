@@ -56,6 +56,8 @@ import {
   ListFilterSearch,
 } from "../../../components/form-components/list-filter-row";
 import { CapabilityRow, CreateLayerGrid } from "./create-layer-grid";
+import AvailabilityChip from "../../../components/availability/availability-chip";
+import { availabilityOf, availabilityState } from "../../../lib/availability";
 
 interface LayersListProps {
   layerKind: LayerCategory;
@@ -74,6 +76,8 @@ type LayersGridRow = Omit<Layer, "status"> & {
 };
 
 type CreateLayerStep = "details" | "capabilities";
+
+type AvailabilityFilter = "" | "available" | "unavailable";
 
 function LayerUsedInMapsCell({
   count,
@@ -189,6 +193,8 @@ export default function LayersList({
   const { palette } = useTheme();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedServiceUrl, setSelectedServiceUrl] = useState("");
+  const [availabilityFilter, setAvailabilityFilter] =
+    useState<AvailabilityFilter>("");
   const [createStep, setCreateStep] = useState<CreateLayerStep>("details");
 
   const [capabilitiesSearchTerm, setCapabilitiesSearchTerm] = useState("");
@@ -291,6 +297,11 @@ export default function LayersList({
       );
       if (selectedServiceUrl && service?.url !== selectedServiceUrl)
         return false;
+      if (availabilityFilter) {
+        const available =
+          availabilityState(availabilityOf(layer.options)).kind === "shown";
+        if (available !== (availabilityFilter === "available")) return false;
+      }
       const combinedText = `${layer.name} ${service?.url ?? ""}`.toLowerCase();
       return combinedText.includes(searchTerm.toLowerCase());
     };
@@ -315,6 +326,7 @@ export default function LayersList({
     services,
     searchTerm,
     selectedServiceUrl,
+    availabilityFilter,
     layerKind,
     usageSummary,
   ]);
@@ -699,6 +711,27 @@ export default function LayersList({
                 </Select>
               </FormControl>
             </ListFilterField>
+            <ListFilterField>
+              <FormControl fullWidth variant="outlined">
+                <InputLabel id="layers-availability-filter-label">
+                  {t("layers.availability")}
+                </InputLabel>
+                <Select
+                  labelId="layers-availability-filter-label"
+                  label={t("layers.availability")}
+                  value={availabilityFilter}
+                  onChange={(e) => setAvailabilityFilter(e.target.value)}
+                >
+                  <MenuItem value="">{t("common.all")}</MenuItem>
+                  <MenuItem value="available">
+                    {t("availability.filter.available")}
+                  </MenuItem>
+                  <MenuItem value="unavailable">
+                    {t("availability.filter.unavailable")}
+                  </MenuItem>
+                </Select>
+              </FormControl>
+            </ListFilterField>
           </ListFilterRow>
 
           <Grid size={12}>
@@ -723,10 +756,21 @@ export default function LayersList({
                     renderCell: (
                       params: GridRenderCellParams<LayersGridRow>,
                     ) => (
-                      <ListItemText
-                        primary={params.row.name}
-                        secondary={params.row.url}
-                      />
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1,
+                          height: "100%",
+                        }}
+                      >
+                        <ListItemText
+                          primary={params.row.name}
+                          secondary={params.row.url}
+                          sx={{ minWidth: 0 }}
+                        />
+                        <AvailabilityChip options={params.row.options} />
+                      </Box>
                     ),
                   },
                   {

@@ -1,15 +1,15 @@
 /**
- * Whether a map's users see it: its `visible` option and the optional period
- * from `visibleFrom` to `visibleUntil`. The backend applies the same rule
- * (utils/map-visibility.ts) when the client fetches the map.
+ * Whether a map's or a layer's users get it: its `visible` option and the
+ * optional period from `visibleFrom` to `visibleUntil`. The backend applies
+ * the same rule (utils/availability.ts) when the client fetches a map.
  */
-export interface MapVisibility {
+export interface Availability {
   visible: boolean;
   from: Date | null;
   until: Date | null;
 }
 
-export type MapVisibilityState =
+export type AvailabilityState =
   | { kind: "shown"; until: Date | null }
   | { kind: "hidden" }
   | { kind: "notYet"; from: Date }
@@ -21,10 +21,10 @@ function dateOf(value: unknown): Date | null {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-/** From saved options ("false", ISO date-times) or the form's values (a boolean, datetime-local values). */
-export function mapVisibilityOf(
+/** From saved options ("false", ISO date-times) or a form's values (a boolean, datetime-local values). */
+export function availabilityOf(
   options: Record<string, unknown> | undefined,
-): MapVisibility {
+): Availability {
   return {
     visible: options?.visible !== false && options?.visible !== "false",
     from: dateOf(options?.visibleFrom),
@@ -32,17 +32,17 @@ export function mapVisibilityOf(
   };
 }
 
-export function mapVisibilityState(
-  { visible, from, until }: MapVisibility,
+export function availabilityState(
+  { visible, from, until }: Availability,
   now: Date = new Date(),
-): MapVisibilityState {
+): AvailabilityState {
   if (!visible) return { kind: "hidden" };
   if (from && now < from) return { kind: "notYet", from };
   if (until && now >= until) return { kind: "ended", until };
   return { kind: "shown", until };
 }
 
-export function hasValidPeriod({ from, until }: MapVisibility): boolean {
+export function hasValidPeriod({ from, until }: Availability): boolean {
   return !from || !until || from < until;
 }
 

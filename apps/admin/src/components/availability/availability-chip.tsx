@@ -2,19 +2,19 @@ import { Chip } from "@mui/material";
 import { useTranslation } from "react-i18next";
 
 import {
+  availabilityOf,
+  availabilityState,
   formatWhen,
-  mapVisibilityOf,
-  mapVisibilityState,
-} from "../map-visibility";
+} from "../../lib/availability";
 
-/** Marks a map in the list that its users don't see now, or will stop seeing. */
-export default function MapVisibilityChip({
+/** Marks a map or a layer its users don't get now, or will stop getting. */
+export default function AvailabilityChip({
   options,
 }: {
   options: Record<string, unknown> | undefined;
 }) {
   const { t, i18n } = useTranslation();
-  const state = mapVisibilityState(mapVisibilityOf(options));
+  const state = availabilityState(availabilityOf(options));
   const when = (date: Date) => formatWhen(date, i18n.language, "short");
 
   switch (state.kind) {
@@ -23,7 +23,7 @@ export default function MapVisibilityChip({
         <Chip
           size="small"
           color="warning"
-          label={t("maps.visibility.hidden")}
+          label={t("availability.chip.hidden")}
         />
       );
     case "notYet":
@@ -32,7 +32,7 @@ export default function MapVisibilityChip({
           size="small"
           color="warning"
           variant="outlined"
-          label={t("maps.visibility.notYet", { from: when(state.from) })}
+          label={t("availability.chip.notYet", { from: when(state.from) })}
         />
       );
     case "ended":
@@ -40,7 +40,7 @@ export default function MapVisibilityChip({
         <Chip
           size="small"
           color="warning"
-          label={t("maps.visibility.ended", { until: when(state.until) })}
+          label={t("availability.chip.ended", { until: when(state.until) })}
         />
       );
     case "shown":
@@ -48,7 +48,7 @@ export default function MapVisibilityChip({
         <Chip
           size="small"
           variant="outlined"
-          label={t("maps.visibility.until", { until: when(state.until) })}
+          label={t("availability.chip.until", { until: when(state.until) })}
         />
       ) : null;
   }

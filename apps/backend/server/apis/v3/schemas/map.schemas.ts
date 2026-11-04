@@ -8,42 +8,17 @@ const ProjectionSchema = z.object({
   units: z.string().optional(),
 });
 
+import { AvailabilityOptionsSchema } from "./availability.schemas.ts";
 import { ToolCreateSchema, ToolUpdateSchema } from "./tool.schemas.ts";
 
 const MapProjectionSchema = z.object({
   code: z.string().min(1, "Projection code is required"),
 });
 
-const dateTimeOrEmpty = z.union([
-  z.literal(""),
-  z.iso.datetime({ offset: true }),
-]);
-
-/**
- * A map's options. They are free-form, but the ones that decide whether its
- * users see the map are checked, see utils/map-visibility.ts.
- */
-const MapOptionsSchema = z
-  .looseObject({
-    visible: z.enum(["true", "false"]).optional(),
-    visibleFrom: dateTimeOrEmpty.optional(),
-    visibleUntil: dateTimeOrEmpty.optional(),
-  })
-  .refine(
-    ({ visibleFrom, visibleUntil }) =>
-      !visibleFrom ||
-      !visibleUntil ||
-      Date.parse(visibleFrom) < Date.parse(visibleUntil),
-    {
-      message: "visibleUntil must be after visibleFrom",
-      path: ["visibleUntil"],
-    }
-  );
-
 export const MapCreateSchema = z.object({
   name: z.string().min(1, "Map name is required"),
   locked: z.boolean().default(false),
-  options: MapOptionsSchema.default({}),
+  options: AvailabilityOptionsSchema.default({}),
   projection: MapProjectionSchema.optional(),
   projections: z.array(ProjectionSchema).optional(),
   tools: z.array(ToolCreateSchema).optional(),
@@ -67,7 +42,7 @@ export const MapDuplicateSchema = z.object({
 export const MapUpdateSchema = z.object({
   name: z.string().min(1, "Map name is required").optional(),
   locked: z.boolean().optional(),
-  options: MapOptionsSchema.optional(),
+  options: AvailabilityOptionsSchema.optional(),
   projection: MapProjectionSchema.optional(),
   projections: z.array(ProjectionSchema).optional(),
   tools: z.array(ToolUpdateSchema).optional(),

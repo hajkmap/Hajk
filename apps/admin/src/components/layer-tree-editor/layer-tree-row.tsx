@@ -15,6 +15,8 @@ import { Box, Chip, IconButton, Tooltip, Typography } from "@mui/material";
 import { memo, type MouseEvent as ReactMouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 
+import AvailabilityChip from "../availability/availability-chip";
+import { availabilityOf, availabilityState } from "../../lib/availability";
 import LayerTreeItemTooltip from "./layer-tree-item-tooltip";
 import type { LayerTreeClickPart, LayerTreeFlatNode } from "./layer-tree-model";
 import { LayerTreePlaceLine } from "./layer-tree-place-line";
@@ -76,6 +78,8 @@ interface LayerTreeRowProps {
   onEditSettings?: () => void;
   /** In the move zone: it stays here until it is dropped from the zone. */
   inMoveZone?: boolean;
+  /** A layer's own options, for marking it when users don't get it now. */
+  availability?: Record<string, unknown>;
   /**
    * Click and place: a click on the row picks it or places what is held,
    * before, in or after the row by where it lands.
@@ -114,6 +118,7 @@ function LayerTreeRow({
   displayName,
   onEditSettings,
   inMoveZone = false,
+  availability,
   onRowClick,
   onRowHover,
   picked = false,
@@ -122,6 +127,9 @@ function LayerTreeRow({
   const isGroup = node.data.kind === "group";
   const toggleOpen = () => onToggle(node.id, isOpen);
   const isHidden = node.data.hidden === true || hiddenWith !== undefined;
+  const unavailable =
+    availability !== undefined &&
+    availabilityState(availabilityOf(availability)).kind !== "shown";
   /** Upper edge: before the row; middle: in a group; lower edge: after it. */
   const partAt = (event: ReactMouseEvent<HTMLElement>): LayerTreeClickPart => {
     const box = event.currentTarget.getBoundingClientRect();
@@ -259,7 +267,7 @@ function LayerTreeRow({
             color: from ? "text.secondary" : "text.primary",
             // As in Lagerordning, what is on at start stands out.
             fontWeight: active ? 700 : isGroup ? 500 : 400,
-            opacity: isHidden ? 0.5 : 1,
+            opacity: isHidden || unavailable ? 0.5 : 1,
             textDecoration: isHidden ? "line-through" : "none",
             cursor: canToggle || onRowClick ? "pointer" : "inherit",
           }}
@@ -283,6 +291,7 @@ function LayerTreeRow({
           variant="outlined"
         />
       ) : null}
+      {availability ? <AvailabilityChip options={availability} /> : null}
       {exceptionIn ? (
         // Purple as the map's own changes: here only, the group is left as is.
         <Tooltip
