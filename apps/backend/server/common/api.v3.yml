@@ -1979,18 +1979,6 @@ components:
               items:
                 type: number
               description: "Map center coordinates [longitude, latitude]"
-        visible:
-          type: string
-          enum: ["true", "false"]
-          description: '"false" hides the map from its users without deleting it'
-        visibleFrom:
-          type: string
-          description: "When the map is shown from, as an ISO date-time, or empty. The map is hidden before it."
-          example: "2026-11-18T07:00:00.000Z"
-        visibleUntil:
-          type: string
-          description: "When the map is hidden from, as an ISO date-time, or empty. Must be after visibleFrom."
-          example: "2026-12-02T07:00:00.000Z"
               example: [18.0686, 59.3293]
             zoom:
               type: number
@@ -2001,5 +1989,17 @@ components:
               type: string
               description: "Map projection"
               example: "EPSG:3857"
+        visible:
+          type: string
+          enum: ["true", "false"]
+          description: '"false" makes the map unavailable to its users without deleting it'
+        visibleFrom:
+          type: string
+          description: "When the map is available from, as an ISO date-time, or empty. The map is unavailable before it."
+          example: "2026-11-18T07:00:00.000Z"
+        visibleUntil:
+          type: string
+          description: "When the map is unavailable from, as an ISO date-time, or empty. Must be after visibleFrom."
+          example: "2026-12-02T07:00:00.000Z"
       required:
         - name
