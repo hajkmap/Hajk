@@ -6,7 +6,11 @@ import { HajkError } from "../../../common/classes.ts";
 import HttpStatusCodes from "../../../common/http-status-codes.ts";
 import HajkStatusCodes from "../../../common/hajk-status-codes.ts";
 import { isVisibleToUser } from "./group-visibility.ts";
-import { requireAvailableMap } from "./availability.ts";
+import {
+  isAvailable,
+  onlyAvailable,
+  requireAvailableMap,
+} from "./availability.ts";
 import type {
   ClientLayerSwitcherLayerRef,
   ClientLayerTree,
@@ -322,10 +326,14 @@ export async function buildClientMapForMap(mapName: string) {
   return deepMerge(DEFAULT_MAP_OPTIONS, translated);
 }
 
-/** The map's background layers for the layerswitcher; ids are instance ids. */
+/**
+ * The map's background layers for the layerswitcher, those available to its
+ * users now; ids are instance ids.
+ */
 async function buildClientBaselayersForMap(
   mapName: string
 ): Promise<ClientLayerSwitcherLayerRef[]> {
+  const availability = { select: { options: true } } as const;
   const instances = await prisma.layerInstance.findMany({
     where: {
       AND: [
@@ -334,9 +342,19 @@ async function buildClientBaselayersForMap(
         activeLayerInstanceWhere,
       ],
     },
+    include: {
+      displayLayer: availability,
+      searchLayer: availability,
+      editingLayer: availability,
+    },
     orderBy: { zIndex: "asc" },
   });
-  return instances.map((instance) => ({
+  const available = instances.filter((instance) => {
+    const layer =
+      instance.displayLayer ?? instance.searchLayer ?? instance.editingLayer;
+    return layer !== null && isAvailable(layer.options);
+  });
+  return available.map((instance) => ({
     id: instance.id,
     drawOrder: instance.zIndex,
     visibleAtStart: instance.visibleAtStart,
@@ -348,6 +366,36 @@ async function buildClientBaselayersForMap(
   }));
 }
 
+/** The ids of the editing layers available to the client's users now. */
+async function availableEditingLayerIds(): Promise<Set<string>> {
+  const layers = await prisma.editingLayer.findMany({
+    where: { deletedAt: null, service: { deletedAt: null } },
+    select: { id: true, options: true },
+  });
+  return new Set(onlyAvailable(layers).map((layer) => layer.id));
+}
+
+/**
+ * The tool's options with only the activeServices (editing layers) its users
+ * can have now, since the client fetches each of them.
+ */
+function withAvailableActiveServices(
+  options: Prisma.JsonObject,
+  editingLayerIds: ReadonlySet<string>
+): Prisma.JsonObject {
+  const { activeServices } = options;
+  if (!Array.isArray(activeServices)) return options;
+  return {
+    ...options,
+    activeServices: activeServices.filter(
+      (service) =>
+        isPlainObject(service) &&
+        typeof service.id === "string" &&
+        editingLayerIds.has(service.id)
+    ),
+  };
+}
+
 /**
  * @param layerTree the map's layer tree in the client's layerswitcher format,
  * in place of the groups stored in the layerswitcher tool's options.
@@ -357,7 +405,7 @@ export async function buildClientToolsForMap(
   layerTree: ClientLayerTree
 ) {
   const groups = layerTree.groups;
-  const [toolsOnMap, baselayers, themes] = await Promise.all([
+  const [toolsOnMap, baselayers, themes, editingLayerIds] = await Promise.all([
     prisma.toolsOnMaps.findMany({
       where: { mapName, active: true, map: { deletedAt: null } },
       include: { tool: true },
@@ -368,6 +416,7 @@ export async function buildClientToolsForMap(
       where: { mapName, deletedAt: null },
       orderBy: { title: "asc" },
     }),
+    availableEditingLayerIds(),
   ]);
 
   const quickAccessPresets = themes.map((theme) => {
@@ -396,7 +445,10 @@ export async function buildClientToolsForMap(
 
   const tools: { type: string; index: number; options: unknown }[] =
     toolsOnMap.map((entry) => {
-      const options = mergeJsonObjects(entry.tool.options, entry.options);
+      const options = withAvailableActiveServices(
+        mergeJsonObjects(entry.tool.options, entry.options),
+        editingLayerIds
+      );
 
       if (entry.tool.type === "layerswitcher") {
         return {

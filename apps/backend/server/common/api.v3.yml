@@ -1283,7 +1283,7 @@ paths:
       tags:
         - Client-accessible
       summary: The map's client config
-      description: The map, its layers, projections and tools as the client reads them, and the other maps for its map selector. What is not available to users now, by its visible, visibleFrom and visibleUntil options, is left out, so unavailable maps are missing from the map selector and unavailable layers from the layer tree, the backgrounds, the search layers and the editing layers.
+      description: The map, its layers, projections and tools as the client reads them, and the other maps for its map selector. What is not available to users now, by its visible, visibleFrom and visibleUntil options, is left out, so unavailable maps are missing from the map selector and unavailable layers from the layer tree, the backgrounds, the search layers and the editing layers. A tool's activeServices names only the editing layers users can have now.
       parameters:
         - in: path
           name: mapName
