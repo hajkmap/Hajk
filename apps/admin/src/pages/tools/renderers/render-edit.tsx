@@ -4,7 +4,10 @@ import { useTranslation } from "react-i18next";
 import FormAccordion from "../../../components/form-components/form-accordion";
 import FormFieldGrid from "../../../components/form-components/form-field-grid";
 import { useLayers } from "../../../api/layers";
+import { useServices } from "../../../api/services";
 import { Tool } from "../../../api/tools";
+import AvailabilityChip from "../../../components/availability/availability-chip";
+import ServiceAvailabilityChip from "../../../components/availability/service-availability-chip";
 import LayerPicker from "../components/layer-picker";
 import { editDefaults } from "./tool-option-defaults";
 import {
@@ -97,6 +100,10 @@ function EditingServices({
 }) {
   const { t } = useTranslation();
   const { data: layers = [], isLoading, isError } = useLayers();
+  const { data: services = [] } = useServices();
+  const serviceOptions = new Map(
+    services.map((service) => [service.id, service.options]),
+  );
 
   const options = layers
     .filter((layer) => layer.layerKind === "editing")
@@ -105,6 +112,14 @@ function EditingServices({
       id: layer.id,
       name: layer.name,
       secondary: layer.internalName,
+      adornment: (
+        <>
+          <AvailabilityChip options={layer.options} />
+          <ServiceAvailabilityChip
+            options={serviceOptions.get(layer.serviceId)}
+          />
+        </>
+      ),
     }));
   const byId = new Map(value.map((service) => [service.id, service]));
 

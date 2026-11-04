@@ -25,6 +25,8 @@ export interface LayerPickerOption {
   id: string;
   name: string;
   secondary?: string;
+  /** Shown after the name in the list, e.g. availability chips. */
+  adornment?: ReactNode;
 }
 
 interface LayerPickerProps {
@@ -192,6 +194,11 @@ export default function LayerPicker({
                     secondary: { noWrap: true },
                   }}
                 />
+                {option.adornment ? (
+                  <Box sx={{ display: "flex", gap: 0.5, ml: 1, flexShrink: 0 }}>
+                    {option.adornment}
+                  </Box>
+                ) : null}
               </ListItemButton>
             ))}
           </List>

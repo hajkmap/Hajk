@@ -14,7 +14,10 @@ import FormFieldGrid, {
   FormFieldRow,
 } from "../../../components/form-components/form-field-grid";
 import { useLayers } from "../../../api/layers";
+import { useServices } from "../../../api/services";
 import { Tool } from "../../../api/tools";
+import AvailabilityChip from "../../../components/availability/availability-chip";
+import ServiceAvailabilityChip from "../../../components/availability/service-availability-chip";
 import { attributeeditorDefaults } from "./tool-option-defaults";
 import {
   CheckboxOption,
@@ -104,6 +107,10 @@ function EditingServices({
 }) {
   const { t } = useTranslation();
   const { data: layers = [], isLoading, isError } = useLayers();
+  const { data: services = [] } = useServices();
+  const serviceOptions = new Map(
+    services.map((service) => [service.id, service.options]),
+  );
 
   if (isLoading) return <CircularProgress size={24} />;
   if (isError) {
@@ -160,7 +167,18 @@ function EditingServices({
                   onChange={(_, checked) => toggle(layer.id, checked)}
                 />
               }
-              label={layer.name}
+              label={
+                <Box
+                  component="span"
+                  sx={{ display: "inline-flex", alignItems: "center", gap: 1 }}
+                >
+                  {layer.name}
+                  <AvailabilityChip options={layer.options} />
+                  <ServiceAvailabilityChip
+                    options={serviceOptions.get(layer.serviceId)}
+                  />
+                </Box>
+              }
             />
             {service ? (
               <Box sx={{ pl: 4 }}>
