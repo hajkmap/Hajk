@@ -1,0 +1,27 @@
+{
+  "layerComparer": {
+    "backgroundLayer": "Bakgrundslager",
+    "backgroundLayers": "Bakgrundslager",
+    "changeSelection": "Ändra val",
+    "compare": "Jämför",
+    "decreaseLens": "Gör titthålet mindre",
+    "description": "Jämför lager sida vid sida eller med titthål",
+    "headerText": "Jämför lager",
+    "helpSideBySide": "Välj två lager att jämföra och tryck på <i>Jämför</i>.",
+    "helpSpyGlass": "Välj vilket lager som ska vara <i>bakgrund</i> och vilket som ska visas inuti <i>titthålet</i>.",
+    "increaseLens": "Gör titthålet större",
+    "keyHintOpacity": "Pil vänster/höger: Ändra transparens",
+    "keyHintSize": "Pil upp/ner: Ändra storlek",
+    "layers": "Lager",
+    "leftSide": "Vänster sida",
+    "mode": "Jämförelseläge",
+    "noLayerSelected": "Inget lager valt",
+    "resetAndClose": "Nollställ & stäng",
+    "rightSide": "Höger sida",
+    "sideBySide": "Sida vid sida",
+    "spyGlass": "Titthål",
+    "spyGlassLayer": "Titthålslager",
+    "stopComparing": "Sluta jämföra",
+    "title": "Lagerjämförare"
+  }
+}

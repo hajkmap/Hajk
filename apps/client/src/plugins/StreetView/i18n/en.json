@@ -1,0 +1,10 @@
+{
+  "streetView": {
+    "description": "See what the area looks like from the street",
+    "imageDate": "Image taken: {{date}}",
+    "instructions": "Click in the map to activate Street View. <br/>Enlarge the window by clicking the icon in the top right corner.",
+    "loadFailed": "Couldn't load Google Maps. Contact the system administrator and ask them to check the API key.",
+    "noImage": "No image for the selected position.",
+    "title": "Street View"
+  }
+}

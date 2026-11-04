@@ -1,0 +1,18 @@
+{
+  "coordinates": {
+    "clearFields": "Rensa fält",
+    "clickInMap": "Klicka i kartan för att välja position.",
+    "copied": "Koordinaten kopierades till urklipp",
+    "copyFailed": "Kopiering misslyckades, båda fälten måste vara ifyllda",
+    "copyFailedShort": "Kopiering misslyckades",
+    "copyToClipboard": "Kopiera till urklipp",
+    "description": "Visa koordinater för given plats",
+    "enterDecimal": "Ange ett decimaltal",
+    "myPosition": "Min position",
+    "panToMarker": "Panorera",
+    "panToMarkerTooltip": "Panorera till markering",
+    "title": "Visa koordinat",
+    "zoomToMarker": "Zooma",
+    "zoomToMarkerTooltip": "Zooma in till markering"
+  }
+}

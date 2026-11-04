@@ -7,8 +7,10 @@ import {
 } from "@mui/material";
 
 import ArrowBack from "@mui/icons-material/ArrowBack";
+import { useTranslation } from "react-i18next";
 
 const Breadcrumbs = (props) => {
+  const { t } = useTranslation();
   const {
     feature,
     featureCollection,
@@ -32,10 +34,10 @@ const Breadcrumbs = (props) => {
             : setSelectedFeatureCollection(null);
         }}
       >
-        Gå till föregående vy
+        {t("common.backToPreviousView")}
       </Button>
       <Divider />
-      <MUIBreadcrumbs separator="/" aria-label="breadcrumb">
+      <MUIBreadcrumbs separator="/" aria-label={t("common.breadcrumb")}>
         {setSelectedFeatureCollection && (
           <Link
             onClick={() => setSelectedFeatureCollection(null)}
@@ -46,7 +48,7 @@ const Breadcrumbs = (props) => {
               cursor: "pointer",
             }}
           >
-            Översikt
+            {t("mapClickViewer.overview")}
           </Link>
         )}
         {setSelectedFeatureCollection && !setSelectedFeatureId && (

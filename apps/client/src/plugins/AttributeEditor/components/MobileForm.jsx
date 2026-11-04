@@ -20,6 +20,7 @@ import {
   renderTableCellDisplay,
 } from "../helpers/helpers";
 import { editBus } from "../../../buses/editBus";
+import i18n from "src/i18n";
 
 export default function MobileForm({
   s,
@@ -125,13 +126,17 @@ export default function MobileForm({
           style={s.mobileTab(mobileActiveTab === "list")}
           onClick={() => setMobileActiveTab("list")}
         >
-          Objekt ({visibleFormList.length})
+          {i18n.t("attributeEditor.form.featuresTab", {
+            number: visibleFormList.length,
+          })}
         </button>
         <button
           style={s.mobileTab(mobileActiveTab === "form")}
           onClick={() => setMobileActiveTab("form")}
         >
-          Redigera {focusedId ? `(#${focusedId})` : ""}
+          {focusedId
+            ? i18n.t("attributeEditor.form.editTabWithId", { id: focusedId })
+            : i18n.t("attributeEditor.form.editTab")}
         </button>
       </div>
 
@@ -150,10 +155,12 @@ export default function MobileForm({
               <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
             </svg>
             <span style={s.spacer}>
-              Kolumnfilter aktiva ({activeFilterCount})
+              {i18n.t("attributeEditor.form.columnFiltersActiveShort", {
+                number: activeFilterCount,
+              })}
             </span>
             <button style={s.btnSmall} onClick={clearColumnFilters}>
-              Rensa
+              {i18n.t("common.clear")}
             </button>
           </div>
         )}
@@ -175,7 +182,9 @@ export default function MobileForm({
                                 e.stopPropagation();
                                 alert(`${meta.label}\n\n${meta.description}`);
                               }}
-                              aria-label={`Information om ${meta.label}`}
+                              aria-label={i18n.t("attributeEditor.fieldInfo", {
+                                field: meta.label,
+                              })}
                             >
                               <InfoOutlinedIcon style={{ fontSize: "14px" }} />
                             </button>
@@ -242,11 +251,11 @@ export default function MobileForm({
                       >
                         {isLoading ? (
                           <span style={s.inlineFlexCenter}>
-                            Laddning pågår...
+                            {i18n.t("attributeEditor.loading")}
                             <CircularProgress size={16} />
                           </span>
                         ) : (
-                          "Inga objekt i tjänsten"
+                          i18n.t("attributeEditor.noFeatures")
                         )}
                       </td>
                     </tr>
@@ -266,12 +275,12 @@ export default function MobileForm({
                 onClick={addFeatureFromGps}
                 title={
                   !supportsPointGeometry
-                    ? "GPS-punkt kräver ett lager med punktgeometri"
+                    ? i18n.t("attributeEditor.actions.gpsNoPointLayer")
                     : gpsLoading
-                      ? "Hämtar GPS-position..."
-                      : "Skapa punkt från GPS-position"
+                      ? i18n.t("attributeEditor.actions.gpsLoading")
+                      : i18n.t("attributeEditor.actions.gpsCreate")
                 }
-                aria-label="GPS-punkt"
+                aria-label={i18n.t("attributeEditor.actions.gpsPoint")}
               >
                 {gpsLoading ? (
                   <CircularProgress size={18} />
@@ -288,10 +297,12 @@ export default function MobileForm({
                 onClick={() => exportToExcel(visibleFormList)}
                 title={
                   visibleFormList.length
-                    ? `Exportera till Excel (${visibleFormList.length} rader)`
-                    : "Inga rader att exportera"
+                    ? i18n.t("attributeEditor.actions.exportExcelRows", {
+                        count: visibleFormList.length,
+                      })
+                    : i18n.t("attributeEditor.actions.noRowsToExport")
                 }
-                aria-label="Exportera till Excel"
+                aria-label={i18n.t("attributeEditor.actions.exportExcel")}
               >
                 <DescriptionIcon fontSize="small" />
               </button>
@@ -307,10 +318,12 @@ export default function MobileForm({
                 }}
                 title={
                   selectedIds.size
-                    ? `Zooma till ${selectedIds.size} objekt i kartan`
-                    : "Markera rader först"
+                    ? i18n.t("attributeEditor.actions.zoomToCount", {
+                        count: selectedIds.size,
+                      })
+                    : i18n.t("attributeEditor.actions.selectRowsFirst")
                 }
-                aria-label="Zooma till valda"
+                aria-label={i18n.t("attributeEditor.actions.zoomToSelected")}
               >
                 <CenterFocusStrongIcon fontSize="small" />
               </button>
@@ -334,9 +347,11 @@ export default function MobileForm({
                   }
                 }}
                 title={
-                  selectedIds.size ? "Visa markerad rad" : "Markera rader först"
+                  selectedIds.size
+                    ? i18n.t("attributeEditor.actions.showSelectedRow")
+                    : i18n.t("attributeEditor.actions.selectRowsFirst")
                 }
-                aria-label="Visa markerad"
+                aria-label={i18n.t("attributeEditor.actions.showSelected")}
               >
                 <VisibilityIcon fontSize="small" />
               </button>
@@ -349,13 +364,15 @@ export default function MobileForm({
                 }
                 disabled={selectedIds.size === 0 && focusedId == null}
                 onClick={handleDuplicateClick}
-                aria-label="Duplicera"
+                aria-label={i18n.t("attributeEditor.actions.duplicateAria")}
                 title={
                   selectedIds.size
-                    ? `Duplicera ${selectedIds.size} objekt`
+                    ? i18n.t("attributeEditor.actions.duplicateCount", {
+                        count: selectedIds.size,
+                      })
                     : focusedId != null
-                      ? "Duplicera valt objekt"
-                      : "Välj objekt först"
+                      ? i18n.t("attributeEditor.actions.duplicateOne")
+                      : i18n.t("attributeEditor.actions.chooseFeaturesFirst")
                 }
               >
                 <ContentCopyIcon fontSize="small" />
@@ -369,13 +386,13 @@ export default function MobileForm({
                 }
                 disabled={selectedIds.size !== 1 || !canSplitGeometry}
                 onClick={splitFeature}
-                aria-label="Dela objekt"
+                aria-label={i18n.t("attributeEditor.actions.split")}
                 title={
                   selectedIds.size !== 1
-                    ? "Markera exakt ett objekt för att dela"
+                    ? i18n.t("attributeEditor.actions.splitSelectOneFeature")
                     : !canSplitGeometry
-                      ? "Endast Polygon och LineString kan delas"
-                      : "Dela valt objekt med en klipplinje"
+                      ? i18n.t("attributeEditor.actions.splitOnlyPolygonLine")
+                      : i18n.t("attributeEditor.actions.splitWithLine")
                 }
               >
                 <CallSplitIcon fontSize="small" />
@@ -393,19 +410,19 @@ export default function MobileForm({
                 }
                 aria-label={
                   canSplitMultiFeature
-                    ? "Dela upp multi-objekt"
-                    : "Slå ihop objekt"
+                    ? i18n.t("attributeEditor.actions.splitMulti")
+                    : i18n.t("attributeEditor.actions.merge")
                 }
                 title={
                   canSplitMultiFeature
-                    ? "Dela upp multi-objekt till enskilda objekt"
+                    ? i18n.t("attributeEditor.actions.splitMultiTooltip")
                     : canMergeFeatures
-                      ? "Slå ihop markerade objekt till ett multi-objekt. Attribut kopieras från objektet som markerades först."
+                      ? i18n.t("attributeEditor.actions.mergeTooltip")
                       : selectedIds.size === 1
-                        ? "Markera ett multi-objekt för att dela upp, eller flera objekt för att slå ihop"
+                        ? i18n.t("attributeEditor.actions.splitOrMergeFeatures")
                         : selectedIds.size < 2
-                          ? "Markera objekt för att dela upp eller slå ihop"
-                          : "Objekten måste ha samma geometrityp för att slås ihop"
+                          ? i18n.t("attributeEditor.actions.splitOrMergeSelect")
+                          : i18n.t("attributeEditor.actions.mergeSameType")
                 }
               >
                 {canSplitMultiFeature ? (
@@ -423,13 +440,15 @@ export default function MobileForm({
                 }
                 disabled={selectedIds.size === 0 && focusedId == null}
                 onClick={handleDeleteClick}
-                aria-label="Markera för radering"
+                aria-label={i18n.t("attributeEditor.actions.markForDelete")}
                 title={
                   selectedIds.size
-                    ? `Markera ${selectedIds.size} objekt för radering`
+                    ? i18n.t("attributeEditor.actions.markCountForDelete", {
+                        count: selectedIds.size,
+                      })
                     : focusedId != null
-                      ? "Markera valt objekt för radering"
-                      : "Markera objekt först"
+                      ? i18n.t("attributeEditor.actions.markOneForDelete")
+                      : i18n.t("attributeEditor.actions.selectFeaturesFirst")
                 }
               >
                 <DeleteOutlineIcon fontSize="small" />
@@ -456,8 +475,8 @@ export default function MobileForm({
                     return;
                   }
                 }}
-                aria-label="Ångra"
-                title="Ångra"
+                aria-label={i18n.t("common.undo")}
+                title={i18n.t("common.undo")}
               >
                 <UndoIcon fontSize="small" />
               </button>
@@ -468,8 +487,8 @@ export default function MobileForm({
                 }
                 onClick={() => setSaveDialogOpen(true)}
                 disabled={!(dirty || tableHasPending)}
-                aria-label="Spara"
-                title="Spara"
+                aria-label={i18n.t("common.save")}
+                title={i18n.t("common.save")}
               >
                 <SaveIcon fontSize="small" />
               </button>
@@ -479,7 +498,7 @@ export default function MobileForm({
           <>
             {!focusedFeature ? (
               <div style={s.formEmpty}>
-                Markera ett objekt i listan för att börja redigera.
+                {i18n.t("attributeEditor.form.selectToEdit")}
               </div>
             ) : (
               <>
@@ -499,7 +518,9 @@ export default function MobileForm({
                       <line x1="12" y1="17" x2="12.01" y2="17" />
                     </svg>
                     <span>
-                      OBS! Nu redigerar du {selectedIds.size} objekt samtidigt
+                      {i18n.t("attributeEditor.form.bulkEditWarning", {
+                        count: selectedIds.size,
+                      })}
                     </span>
                   </div>
                 )}
@@ -523,19 +544,23 @@ export default function MobileForm({
                                 e.stopPropagation();
                                 alert(`${meta.label}\n\n${meta.description}`);
                               }}
-                              aria-label={`Information om ${meta.label}`}
+                              aria-label={i18n.t("attributeEditor.fieldInfo", {
+                                field: meta.label,
+                              })}
                             >
                               <InfoOutlinedIcon style={{ fontSize: "16px" }} />
                             </button>
                           )}
                           {changed && (
-                            <span style={s.labelChanged}>(ändrad)</span>
+                            <span style={s.labelChanged}>
+                              {i18n.t("attributeEditor.form.changedParens")}
+                            </span>
                           )}
                         </label>
                         {renderInput(
                           meta,
                           meta.readOnly && isMissingValue(val)
-                            ? "#saknas"
+                            ? i18n.t("attributeEditor.missingValue")
                             : val,
                           (v) => handleFieldChange(meta.key, v),
                           changed,
@@ -574,8 +599,8 @@ export default function MobileForm({
                         return;
                       }
                     }}
-                    aria-label="Ångra"
-                    title="Ångra"
+                    aria-label={i18n.t("common.undo")}
+                    title={i18n.t("common.undo")}
                   >
                     <UndoIcon fontSize="small" />
                   </button>
@@ -587,8 +612,8 @@ export default function MobileForm({
                     }
                     onClick={() => setSaveDialogOpen(true)}
                     disabled={!(dirty || tableHasPending)}
-                    aria-label="Spara"
-                    title="Spara"
+                    aria-label={i18n.t("common.save")}
+                    title={i18n.t("common.save")}
                   >
                     <SaveIcon fontSize="small" />
                   </button>
@@ -600,10 +625,12 @@ export default function MobileForm({
                   }
                 >
                   {dirty
-                    ? `Osparade ändringar (${changedFields.size} fält)`
+                    ? i18n.t("attributeEditor.form.unsavedFields", {
+                        count: changedFields.size,
+                      })
                     : tableHasPending
-                      ? "Ändringar buffrade (ej sparade)"
-                      : "Allt sparat"}
+                      ? i18n.t("attributeEditor.form.buffered")
+                      : i18n.t("attributeEditor.form.allSaved")}
                 </div>
               </>
             )}

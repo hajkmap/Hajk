@@ -1,0 +1,20 @@
+{
+  "dummy": {
+    "activateDraw": "Activate draw interaction",
+    "alert": "Alert",
+    "clicked_one": "Clicked {{count}} time",
+    "clicked_other": "Clicked {{count}} times",
+    "defaultSnackbarMessage": "Yay, a nice message with default styling.",
+    "description": "A short description shown in the widget",
+    "disableDraw": "Disable draw interaction",
+    "drawerText": "Dummy has called globalObserver and asked to add a button to the header. When you click the button, this content is shown in the side panel.",
+    "drawerTitle": "Dummy tool",
+    "errorSnackbarMessage": "Oops, a message with error styling!",
+    "randomBorderColor": "Set random border color",
+    "randomTitleAndColor": "Set random title and color",
+    "showDefaultSnackbar": "Show default snackbar",
+    "showErrorSnackbar": "Show error snackbar",
+    "snackbarKey": "I belong to snackbar with key {{key}}",
+    "title": "Dummy"
+  }
+}

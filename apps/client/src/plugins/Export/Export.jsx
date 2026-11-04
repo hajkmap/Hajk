@@ -44,8 +44,6 @@ class Export extends React.PureComponent {
         type="Export"
         custom={{
           icon: <PrintIcon />,
-          title: "Exportera",
-          description: "Exportera kartan till andra format",
           height: "dynamic",
           width: 315,
           onWindowShow: this.onWindowShow,

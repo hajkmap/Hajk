@@ -1,0 +1,21 @@
+{
+  "feedback": {
+    "description": "Senden Sie uns Ihr Feedback",
+    "errors": {
+      "captcha": "Die Überprüfung ist fehlgeschlagen. Überprüfen Sie erneut und senden Sie noch einmal.",
+      "generic": "Senden fehlgeschlagen. Bitte versuchen Sie es später erneut.",
+      "invalid": "Die Nachricht konnte nicht empfangen werden. Prüfen Sie den Text und versuchen Sie es erneut.",
+      "network": "Der Server ist nicht erreichbar. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+      "notEnabled": "Diese Funktion ist nicht aktiviert.",
+      "tooMany": "Sie haben zu viele Nachrichten gesendet. Bitte warten Sie eine Weile und versuchen Sie es erneut."
+    },
+    "instructionText": "Haben Sie Anmerkungen zur Karte oder ihrem Inhalt? Schreiben Sie sie hier.",
+    "messageLabel": "Nachricht",
+    "privacyNotice": "Geben Sie keine personenbezogenen Daten an. Ein Link zur Karte, wie Sie sie gerade sehen, wird mitgesendet.",
+    "send": "Senden",
+    "sendAgain": "Weitere senden",
+    "sending": "Wird gesendet…",
+    "thankYouText": "Vielen Dank für Ihr Feedback!",
+    "title": "Feedback"
+  }
+}

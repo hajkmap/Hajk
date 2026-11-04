@@ -1,0 +1,43 @@
+{
+  "fmeServer": {
+    "areaTooLarge": "Den ritade ytan är för stor. Ta bort den och försök igen för att kunna gå vidare med beställningen! Den ritade ytan är {{drawnArea}} m², och den högst tillåtna arean är {{allowedArea}} m²",
+    "description": "Beställ jobb från FME-server.",
+    "draw": {
+      "circle": "Rita en cirkel i kartan.",
+      "polygon": "Rita en yta i kartan genom att klicka en gång per nod, avsluta med ett dubbelklick.",
+      "rectangle": "Rita en rektangel i kartan.",
+      "reset": "Blev du inte nöjd? Ta bort alla objekt från kartan.",
+      "select": "Välj från befintliga objekt i kartan. Håll ner Ctrl på Windows eller Cmd (⌘) på Mac för att välja flera objekt."
+    },
+    "drawInstructions": "Välj ritverktyg nedan för att rita beställningens omfattning.",
+    "groupDisplayName": "Grupp",
+    "maxFeaturesExceeded": "Denna arbetsytan tillåter enbart en geometri. Den tidigare ritade geometrin togs bort.",
+    "noGeometryNeeded": "Denna produkt kräver ingen geometri! Du kan fortsätta till nästa steg.",
+    "noParameters": "Det finns inga publicerade parametrar att rendera! Du kan fortsätta direkt till nästa steg!",
+    "notConfigured": "Verktyget är felkonfigurerat, kontakta systemadministratören.",
+    "openProductInfo": "Öppna länk till produktinformation.",
+    "order": {
+      "email": "Epost",
+      "failed": "Din beställning är klar! Tyvärr så kunde FME inte slutföra beställningen. Kontakta systemadministratören.",
+      "processing": "Din beställning bearbetas...",
+      "ready": "Beställningen är redo att skickas! Klicka nedan för att skicka iväg den.",
+      "readyWithEmail": "Beställningen är redo att skickas! Fyll i din epost och klicka sedan på beställ-knappen.",
+      "succeeded": "Din beställning är klar! Resultatet har skickats till din epost!"
+    },
+    "orderButton": "Beställ!",
+    "parametersFailed": "Produktens parametrar kunde inte hämtas. Kontakta systemadministratören.",
+    "parametersLoading": "Försöker hämta parametrar...",
+    "parametersNotRendered": "Observera att vissa publicerade parametrar inte kunde renderas! Det är inte säkert att beställningen går att genomföra.",
+    "product": "Produkt",
+    "productHelp": "Oklart hur produkten fungerar? Tryck på frågetecknet för mer information.",
+    "startOver": "Börja om!",
+    "steps": {
+      "order": "Beställ",
+      "parameters": "Fyll i parametrar",
+      "selectExtent": "Välj omfattning",
+      "selectGroup": "Välj {{group}}",
+      "selectProduct": "Välj produkt"
+    },
+    "title": "FME-server"
+  }
+}

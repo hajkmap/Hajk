@@ -1,0 +1,52 @@
+{
+  "print": {
+    "advancedSettings": "Erweiterte Einstellungen",
+    "canBeEmpty": "Kann leer bleiben",
+    "cancelled": "Sie haben den Druck abgebrochen – es wurden keine Daten gespeichert",
+    "cannotPrint": "Das Bild wird nicht korrekt gedruckt. Versuchen Sie eine niedrigere Auflösung oder einen kleineren Maßstab.",
+    "customScale": "Anderen Maßstab eingeben",
+    "description": "Ein PDF der Karte erstellen",
+    "dialog": {
+      "text": "Das kann eine Weile dauern, besonders wenn Sie ein großes Format (A2–A3) und eine hohe Auflösung (>72 dpi) gewählt haben. Wenn es fertig ist, wird die {{type}}-Datei auf Ihren Computer heruntergeladen.<br/><br/>Wenn Sie nicht länger warten möchten, können Sie den Druck über die Schaltfläche unten abbrechen.",
+      "title": "Ihr {{type}} wird erstellt"
+    },
+    "disclaimer": "Bitte beachten Sie, dass die Grenzen in der Karte nicht immer der Wirklichkeit entsprechen und nicht rechtsverbindlich sind.",
+    "done": "Ihr Druck ist fertig!",
+    "fileName": "Kartenexport",
+    "format": "Format",
+    "imageLoadFailed": "{{image}} konnte nicht geladen werden.",
+    "includeLegend": "Legende im PDF einfügen",
+    "includeLogo": "Logo einfügen",
+    "includeNorthArrow": "Nordpfeil einfügen",
+    "includeQrCode": "QR-Code einfügen",
+    "includeScaleBar": "Maßstabsleiste einfügen",
+    "inProgress": "Druck läuft – bitte warten…",
+    "landscape": "Querformat",
+    "landscapeLower": "Querformat",
+    "logoImage": "Das Logo",
+    "northArrowImage": "Der Nordpfeil",
+    "optionalComment": "Optionaler Kommentar",
+    "optionalTitle": "Optionaler Titel",
+    "orientation": "Ausrichtung",
+    "placement": {
+      "bottomLeft": "Unten links",
+      "bottomRight": "Unten rechts",
+      "label": "Platzierung",
+      "topLeft": "Oben links",
+      "topRight": "Oben rechts"
+    },
+    "placementsOverlap": "Das Bild wird nicht korrekt gedruckt. Die Platzierungen überlappen sich.",
+    "portrait": "Hochformat",
+    "portraitLower": "Hochformat",
+    "resolution": "Auflösung (DPI)",
+    "saveAs": "Speichern als",
+    "saveFailed": "Der Druck konnte nicht gespeichert werden, bitte wenden Sie sich an den Systemadministrator.",
+    "scale": "Maßstab",
+    "scaleText": "Maßstab: {{scale}} (bei {{format}} {{orientation}})",
+    "showPredefinedScales": "Vordefinierte Optionen anzeigen",
+    "textColorHint": "Die Titelfarbe wirkt sich nicht auf die Beschriftungen der Karte aus, nur auf die Farbe umgebender Texte wie Titel, Urheberrechtstext usw.",
+    "textInMargins": "Titeltext usw. in den Rändern",
+    "title": "Drucken",
+    "useMargin": "Ränder um das Kartenbild"
+  }
+}

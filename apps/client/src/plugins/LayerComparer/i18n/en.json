@@ -1,0 +1,27 @@
+{
+  "layerComparer": {
+    "backgroundLayer": "Background layer",
+    "backgroundLayers": "Background layers",
+    "changeSelection": "Change selection",
+    "compare": "Compare",
+    "decreaseLens": "Make the spyglass smaller",
+    "description": "Compare layers side by side or with a spyglass",
+    "headerText": "Compare layers",
+    "helpSideBySide": "Select two layers to compare and click <i>Compare</i>.",
+    "helpSpyGlass": "Select which layer should be the <i>background</i> and which should be shown inside the <i>spyglass</i>.",
+    "increaseLens": "Make the spyglass larger",
+    "keyHintOpacity": "Arrow left/right: Change opacity",
+    "keyHintSize": "Arrow up/down: Change size",
+    "layers": "Layers",
+    "leftSide": "Left side",
+    "mode": "Comparison mode",
+    "noLayerSelected": "No layer selected",
+    "resetAndClose": "Reset & close",
+    "rightSide": "Right side",
+    "sideBySide": "Side by side",
+    "spyGlass": "Spyglass",
+    "spyGlassLayer": "Spyglass layer",
+    "stopComparing": "Stop comparing",
+    "title": "Layer comparer"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "fmeServer": {
+    "areaTooLarge": "Die gezeichnete Fläche ist zu groß. Entfernen Sie sie und versuchen Sie es erneut, um mit der Bestellung fortzufahren! Die gezeichnete Fläche beträgt {{drawnArea}} m², die maximal zulässige Fläche {{allowedArea}} m²",
+    "description": "Aufträge beim FME Server bestellen.",
+    "draw": {
+      "circle": "Einen Kreis in der Karte zeichnen.",
+      "polygon": "Eine Fläche in der Karte zeichnen, indem Sie für jeden Eckpunkt einmal klicken; mit einem Doppelklick abschließen.",
+      "rectangle": "Ein Rechteck in der Karte zeichnen.",
+      "reset": "Nicht zufrieden? Alle Objekte aus der Karte entfernen.",
+      "select": "Aus vorhandenen Objekten in der Karte auswählen. Halten Sie unter Windows Strg oder auf dem Mac Cmd (⌘) gedrückt, um mehrere Objekte auszuwählen."
+    },
+    "drawInstructions": "Wählen Sie unten ein Zeichenwerkzeug, um den Umfang der Bestellung zu zeichnen.",
+    "groupDisplayName": "Gruppe",
+    "maxFeaturesExceeded": "Dieser Workspace erlaubt nur eine Geometrie. Die zuvor gezeichnete Geometrie wurde entfernt.",
+    "noGeometryNeeded": "Dieses Produkt benötigt keine Geometrie! Sie können mit dem nächsten Schritt fortfahren.",
+    "noParameters": "Es gibt keine veröffentlichten Parameter zum Anzeigen! Sie können direkt mit dem nächsten Schritt fortfahren!",
+    "notConfigured": "Das Werkzeug ist falsch konfiguriert, wenden Sie sich an den Systemadministrator.",
+    "openProductInfo": "Link zu den Produktinformationen öffnen.",
+    "order": {
+      "email": "E-Mail",
+      "failed": "Ihre Bestellung ist abgeschlossen! Leider konnte FME die Bestellung nicht ausführen. Wenden Sie sich an den Systemadministrator.",
+      "processing": "Ihre Bestellung wird bearbeitet...",
+      "ready": "Die Bestellung kann gesendet werden! Klicken Sie unten, um sie zu senden.",
+      "readyWithEmail": "Die Bestellung kann gesendet werden! Geben Sie Ihre E-Mail-Adresse ein und klicken Sie dann auf die Schaltfläche Bestellen.",
+      "succeeded": "Ihre Bestellung ist abgeschlossen! Das Ergebnis wurde an Ihre E-Mail-Adresse gesendet!"
+    },
+    "orderButton": "Bestellen!",
+    "parametersFailed": "Die Parameter des Produkts konnten nicht abgerufen werden. Wenden Sie sich an den Systemadministrator.",
+    "parametersLoading": "Parameter werden abgerufen...",
+    "parametersNotRendered": "Beachten Sie, dass einige veröffentlichte Parameter nicht angezeigt werden konnten! Die Bestellung kann möglicherweise nicht abgeschlossen werden.",
+    "product": "Produkt",
+    "productHelp": "Sie wissen nicht genau, wie das Produkt funktioniert? Klicken Sie auf das Fragezeichen für weitere Informationen.",
+    "startOver": "Neu beginnen!",
+    "steps": {
+      "order": "Bestellen",
+      "parameters": "Parameter eingeben",
+      "selectExtent": "Umfang auswählen",
+      "selectGroup": "{{group}} auswählen",
+      "selectProduct": "Produkt auswählen"
+    },
+    "title": "FME Server"
+  }
+}

@@ -15,6 +15,7 @@ import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 export default function FavoritePackageOptions({
   infoCallback,
@@ -94,7 +95,7 @@ export default function FavoritePackageOptions({
         aria-expanded={optionsMenuIsOpen ? "true" : undefined}
         onClick={handleShowMoreOptionsClick}
       >
-        <HajkToolTip title="Hantera">
+        <HajkToolTip title={i18n.t("layerSwitcher.manage")}>
           <MoreVertOutlinedIcon />
         </HajkToolTip>
       </IconButton>
@@ -112,27 +113,27 @@ export default function FavoritePackageOptions({
           <ListItemIcon>
             <InfoOutlinedIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Info</ListItemText>
+          <ListItemText>{i18n.t("common.info")}</ListItemText>
         </MenuItem>
         <Divider />
         <MenuItem onClick={handleEdit}>
           <ListItemIcon>
             <EditOutlinedIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Redigera</ListItemText>
+          <ListItemText>{i18n.t("common.edit")}</ListItemText>
         </MenuItem>
         <MenuItem onClick={handleDelete}>
           <ListItemIcon>
             <DeleteOutlinedIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Ta bort</ListItemText>
+          <ListItemText>{i18n.t("common.delete")}</ListItemText>
         </MenuItem>
         <Divider />
         <MenuItem onClick={handleDownload}>
           <ListItemIcon>
             <FileDownloadOutlinedIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Exportera</ListItemText>
+          <ListItemText>{i18n.t("layerSwitcher.export")}</ListItemText>
         </MenuItem>
       </Menu>
     </>

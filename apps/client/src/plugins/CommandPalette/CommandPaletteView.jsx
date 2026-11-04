@@ -32,6 +32,7 @@ import WallpaperIcon from "@mui/icons-material/Wallpaper";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import FolderSpecialIcon from "@mui/icons-material/FolderSpecial";
 import { isValidLayerId } from "../../utils/Validator";
+import i18n, { configText, SOURCE_LANGUAGE } from "src/i18n";
 
 const MAX_RECENT = 5;
 const TOP_LEVEL_LAYER_MATCH_LIMIT = 5;
@@ -83,22 +84,22 @@ function getCommands(appModel) {
   return [
     {
       type: "__openTools",
-      title: "Öppna verktyg",
-      description: "Visa alla tillgängliga verktyg",
+      title: i18n.t("commandPalette.openTools.title"),
+      description: i18n.t("commandPalette.openTools.description"),
       icon: <LaunchIcon />,
       kind: "command",
     },
     {
       type: "__showLayers",
-      title: "Lager",
-      description: "Visa och hantera kartlager",
+      title: i18n.t("commandPalette.layers.title"),
+      description: i18n.t("commandPalette.layers.description"),
       icon: <LayersIcon />,
       kind: "command",
     },
     {
       type: "__showBackgrounds",
-      title: "Byt bakgrundslager",
-      description: "Välj kartans bakgrundslager",
+      title: i18n.t("commandPalette.backgrounds.title"),
+      description: i18n.t("commandPalette.backgrounds.description"),
       icon: <WallpaperIcon />,
       kind: "command",
     },
@@ -106,8 +107,8 @@ function getCommands(appModel) {
       ? [
           {
             type: "__showPresets",
-            title: "Snabbval",
-            description: "Snabbval till fördefinierade platser och lager",
+            title: i18n.t("commandPalette.presets.title"),
+            description: i18n.t("commandPalette.presets.description"),
             icon: <FolderSpecialIcon />,
             kind: "command",
           },
@@ -117,8 +118,8 @@ function getCommands(appModel) {
       ? [
           {
             type: "__showSearchCommands",
-            title: "Sök...",
-            description: "Visa sökalternativ",
+            title: i18n.t("commandPalette.searchCommands.title"),
+            description: i18n.t("commandPalette.searchCommands.description"),
             icon: <SearchIcon />,
             kind: "command",
           },
@@ -126,22 +127,24 @@ function getCommands(appModel) {
       : []),
     {
       type: "__toggleTheme",
-      title: isDark ? "Växla till ljust tema" : "Växla till mörkt tema",
+      title: isDark
+        ? i18n.t("commandPalette.lightTheme")
+        : i18n.t("commandPalette.darkTheme"),
       description: "",
       icon: <Brightness4Icon />,
       kind: "command",
     },
     {
       type: "__closeAllWindows",
-      title: "Stäng alla fönster",
-      description: "Stäng alla öppna plugin-fönster",
+      title: i18n.t("commandPalette.closeAllWindows.title"),
+      description: i18n.t("commandPalette.closeAllWindows.description"),
       icon: <CloseIcon />,
       kind: "command",
     },
     {
       type: "__hideAllLayers",
-      title: "Dölj alla aktiva lager",
-      description: "Gör alla synliga lager osynliga",
+      title: i18n.t("commandPalette.hideAllLayers.title"),
+      description: i18n.t("commandPalette.hideAllLayers.description"),
       icon: <VisibilityOffIcon />,
       kind: "command",
     },
@@ -159,8 +162,8 @@ function getSearchCommands(appModel) {
   if (searchConfig.enablePolygonSearch !== false) {
     commands.push({
       type: "__searchPolygon",
-      title: "Sök med polygon",
-      description: "Rita en polygon för att söka inom området",
+      title: i18n.t("commandPalette.searchPolygon.title"),
+      description: i18n.t("commandPalette.searchPolygon.description"),
       icon: <EditIcon />,
       kind: "command",
     });
@@ -168,8 +171,8 @@ function getSearchCommands(appModel) {
   if (searchConfig.enableRadiusSearch !== false) {
     commands.push({
       type: "__searchRadius",
-      title: "Sök med radie",
-      description: "Rita en cirkel för att söka inom radien",
+      title: i18n.t("commandPalette.searchRadius.title"),
+      description: i18n.t("commandPalette.searchRadius.description"),
       icon: <RadioButtonUncheckedIcon />,
       kind: "command",
     });
@@ -177,8 +180,8 @@ function getSearchCommands(appModel) {
   if (searchConfig.enableSelectSearch !== false) {
     commands.push({
       type: "__searchSelect",
-      title: "Sök med objekt",
-      description: "Välj objekt i kartan för att söka",
+      title: i18n.t("commandPalette.searchSelect.title"),
+      description: i18n.t("commandPalette.searchSelect.description"),
       icon: <TouchAppIcon />,
       kind: "command",
     });
@@ -186,16 +189,16 @@ function getSearchCommands(appModel) {
   if (searchConfig.enableExtentSearch !== false) {
     commands.push({
       type: "__searchExtent",
-      title: "Sök inom vyn",
-      description: "Sök i den aktuella kartan",
+      title: i18n.t("commandPalette.searchExtent.title"),
+      description: i18n.t("commandPalette.searchExtent.description"),
       icon: <Crop54Icon />,
       kind: "command",
     });
   }
   commands.push({
     type: "__clearSearch",
-    title: "Rensa sökning",
-    description: "Rensa sökning och fokusera sökfältet",
+    title: i18n.t("commandPalette.clearSearch.title"),
+    description: i18n.t("commandPalette.clearSearch.description"),
     icon: <SearchOffIcon />,
     kind: "command",
   });
@@ -204,36 +207,29 @@ function getSearchCommands(appModel) {
 
 const BACK_COMMAND = {
   type: "__back",
-  title: "Tillbaka",
-  description: "Tillbaka till kommandon",
+  get title() {
+    return i18n.t("common.back");
+  },
+  get description() {
+    return i18n.t("commandPalette.backDescription");
+  },
   icon: <ArrowBackIcon />,
   kind: "command",
 };
 
-// Translated plugin name to swedish menu texts
-const PLUGIN_TITLES = {
-  layerswitcher: "Visa",
-  measurer: "Mät",
-  print: "Skriv ut",
-  routing: "Navigation",
-  sketch: "Rita",
-  location: "Positionera",
-  bookmarks: "Bokmärken",
-  coordinates: "Visa koordinat",
-  anchor: "Dela",
-  buffer: "Buffra",
-  layercomparer: "Lagerjämförare",
-  infodialog: "Informationsdialog",
-  fir: "FIR",
-  kir: "KIR",
-  timeslider: "Tidslinje",
-  collector: "Tyck till",
-  streetview: "Gatuvy",
-  fmeserver: "FME-server",
-  propertychecker: "Fastighetskontroll",
-  edit: "Redigera",
-  search: "Sök",
-};
+// Plugin types are lower-case ("layerswitcher"), while i18n areas are
+// camelCase ("layerSwitcher"). Look up the area among the loaded texts.
+function getPluginArea(type) {
+  const texts = i18n.getResourceBundle(SOURCE_LANGUAGE, "translation") || {};
+  return Object.keys(texts).find((area) => area.toLowerCase() === type);
+}
+
+// Same title and description as the plugin's own window, see BaseWindowPlugin.
+function getPluginText(plugin, field) {
+  const area = getPluginArea(plugin.type);
+  const adminValue = plugin.options?.[field];
+  return area ? configText(`${area}.${field}`, adminValue) : adminValue;
+}
 
 function buildToolList(appModel) {
   if (!appModel) return [];
@@ -243,10 +239,11 @@ function buildToolList(appModel) {
     .map((plugin) => ({
       type: plugin.type,
       title:
-        plugin.options?.title ||
-        PLUGIN_TITLES[plugin.type] ||
-        plugin.type.charAt(0).toUpperCase() + plugin.type.slice(1),
-      description: plugin.options?.description || "",
+        getPluginText(plugin, "title") ||
+        (plugin.type === "search"
+          ? i18n.t("commandPalette.searchTool")
+          : plugin.type.charAt(0).toUpperCase() + plugin.type.slice(1)),
+      description: getPluginText(plugin, "description") || "",
       icon: plugin.options?.icon || null,
       kind: "plugin",
     }));
@@ -574,12 +571,12 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
     () => [
       {
         key: "plugins",
-        header: "Verktyg",
+        header: i18n.t("commandPalette.tools"),
         list: filteredTools,
         limit: TOP_LEVEL_PLUGIN_MATCH_LIMIT,
         moreType: "__morePlugins",
         moreIcon: <LaunchIcon fontSize="small" />,
-        moreTitle: (n) => `Visa alla ${n} verktyg`,
+        moreTitle: (n) => i18n.t("commandPalette.moreTools", { count: n }),
         toDisplayItem: (tool) => ({ ...tool, section: "plugins" }),
         renderRow: (tool, isSelected) => (
           <ListItemButton
@@ -601,12 +598,12 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
       },
       {
         key: "layers",
-        header: "Lager",
+        header: i18n.t("commandPalette.layers.title"),
         list: filteredLayers,
         limit: TOP_LEVEL_LAYER_MATCH_LIMIT,
         moreType: "__moreLayers",
         moreIcon: <LayersIcon fontSize="small" />,
-        moreTitle: (n) => `Visa alla ${n} lager`,
+        moreTitle: (n) => i18n.t("commandPalette.moreLayers", { count: n }),
         toDisplayItem: (layer) => ({
           type: `__layer:${layer.id}`,
           title: layer.caption,
@@ -640,12 +637,13 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
       },
       {
         key: "backgrounds",
-        header: "Bakgrundslager",
+        header: i18n.t("commandPalette.backgroundLayers"),
         list: filteredBackgrounds,
         limit: TOP_LEVEL_BACKGROUND_MATCH_LIMIT,
         moreType: "__moreBackgrounds",
         moreIcon: <WallpaperIcon fontSize="small" />,
-        moreTitle: (n) => `Visa alla ${n} bakgrundslager`,
+        moreTitle: (n) =>
+          i18n.t("commandPalette.moreBackgrounds", { count: n }),
         toDisplayItem: (layer) => ({
           type: `__background:${layer.id}`,
           title: layer.caption,
@@ -688,12 +686,12 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
       },
       {
         key: "presets",
-        header: "Snabbval",
+        header: i18n.t("commandPalette.presets.title"),
         list: filteredPresets,
         limit: TOP_LEVEL_PRESET_MATCH_LIMIT,
         moreType: "__morePresets",
         moreIcon: <FolderSpecialIcon fontSize="small" />,
-        moreTitle: (n) => `Visa alla ${n} snabbval`,
+        moreTitle: (n) => i18n.t("commandPalette.morePresets", { count: n }),
         toDisplayItem: (preset) => ({
           type: `__preset:${presetList.indexOf(preset)}`,
           title: preset.name,
@@ -766,7 +764,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
       if (query.trim() && isSearchConfigured(appModel)) {
         items.push({
           type: "__searchInSearchTool",
-          title: `Sök efter "${query.trim()}" i sökverktyget`,
+          title: i18n.t("commandPalette.searchFor", { query: query.trim() }),
           description: "",
           icon: <SearchIcon />,
           kind: "search",
@@ -1089,7 +1087,9 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
             <SearchIcon fontSize="small" />
           </ListItemIcon>
           <ListItemText
-            primary={`Sök efter "${searchFallbackQuery}" i sökverktyget`}
+            primary={i18n.t("commandPalette.searchFor", {
+              query: searchFallbackQuery,
+            })}
             slotProps={{ primary: { variant: "body2", noWrap: true } }}
           />
         </ListItemButton>
@@ -1161,7 +1161,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
       listContent.push(
         <Box key="empty" sx={{ px: 2, py: 3, textAlign: "center" }}>
           <Typography variant="body2" sx={{ opacity: 0.5 }}>
-            Inga lager hittades
+            {i18n.t("commandPalette.noLayers")}
           </Typography>
         </Box>
       );
@@ -1234,7 +1234,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
       listContent.push(
         <Box key="empty" sx={{ px: 2, py: 3, textAlign: "center" }}>
           <Typography variant="body2" sx={{ opacity: 0.5 }}>
-            Inga bakgrundslager hittades
+            {i18n.t("commandPalette.noBackgrounds")}
           </Typography>
         </Box>
       );
@@ -1292,7 +1292,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
       listContent.push(
         <Box key="empty" sx={{ px: 2, py: 3, textAlign: "center" }}>
           <Typography variant="body2" sx={{ opacity: 0.5 }}>
-            Inga snabbval hittades
+            {i18n.t("commandPalette.noPresets")}
           </Typography>
         </Box>
       );
@@ -1352,7 +1352,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
       listContent.push(
         <Box key="empty" sx={{ px: 2, py: 3, textAlign: "center" }}>
           <Typography variant="body2" sx={{ opacity: 0.5 }}>
-            Inga sökkommandon hittades
+            {i18n.t("commandPalette.noSearchCommands")}
           </Typography>
         </Box>
       );
@@ -1392,7 +1392,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
               variant="caption"
               sx={{ opacity: 0.6, fontWeight: 500 }}
             >
-              Senast använda
+              {i18n.t("commandPalette.recentlyUsed")}
             </Typography>
           </Box>
         );
@@ -1437,7 +1437,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
               variant="caption"
               sx={{ opacity: 0.6, fontWeight: 500 }}
             >
-              Verktyg
+              {i18n.t("commandPalette.tools")}
             </Typography>
           </Box>
         );
@@ -1472,7 +1472,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
       listContent.push(
         <Box key="empty" sx={{ px: 2, py: 3, textAlign: "center" }}>
           <Typography variant="body2" sx={{ opacity: 0.5 }}>
-            Inga verktyg hittades
+            {i18n.t("commandPalette.noTools")}
           </Typography>
         </Box>
       );

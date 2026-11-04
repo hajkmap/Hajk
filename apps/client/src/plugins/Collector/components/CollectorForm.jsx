@@ -2,6 +2,7 @@ import { Component } from "react";
 import { styled } from "@mui/material/styles";
 import Page from "./Page";
 import Typography from "@mui/material/Typography";
+import i18n from "src/i18n";
 
 const SaveErrorTextWrapper = styled("div")(({ theme }) => ({
   color: theme.palette.error.contrastText,
@@ -15,7 +16,6 @@ const ErrorTypography = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.primary,
 }));
 
-const saveErrorText = "Fel - din kommentar gick inte att spara.";
 //const validationErrorText = " - detta fält krävs";
 class CollectorForm extends Component {
   state = {
@@ -67,7 +67,7 @@ class CollectorForm extends Component {
 
   saveError = (text) => {
     this.setState({
-      saveError: text || saveErrorText,
+      saveError: text || i18n.t("collector.saveErrorText"),
     });
   };
 
@@ -87,8 +87,7 @@ class CollectorForm extends Component {
     if (this.state.configurationError) {
       return (
         <ErrorTypography>
-          Nödvändig konfiguration saknas. Verktyget kan inte användas för
-          tillfället.
+          {i18n.t("collector.configurationMissing")}
         </ErrorTypography>
       );
     } else {

@@ -1,0 +1,27 @@
+{
+  "layerComparer": {
+    "backgroundLayer": "Hintergrundebene",
+    "backgroundLayers": "Hintergrundebenen",
+    "changeSelection": "Auswahl ändern",
+    "compare": "Vergleichen",
+    "decreaseLens": "Lupe verkleinern",
+    "description": "Ebenen nebeneinander oder mit einer Lupe vergleichen",
+    "headerText": "Ebenen vergleichen",
+    "helpSideBySide": "Wählen Sie zwei Ebenen zum Vergleichen aus und klicken Sie auf <i>Vergleichen</i>.",
+    "helpSpyGlass": "Wählen Sie aus, welche Ebene der <i>Hintergrund</i> sein soll und welche in der <i>Lupe</i> angezeigt werden soll.",
+    "increaseLens": "Lupe vergrößern",
+    "keyHintOpacity": "Pfeil links/rechts: Deckkraft ändern",
+    "keyHintSize": "Pfeil oben/unten: Größe ändern",
+    "layers": "Ebenen",
+    "leftSide": "Linke Seite",
+    "mode": "Vergleichsmodus",
+    "noLayerSelected": "Keine Ebene ausgewählt",
+    "resetAndClose": "Zurücksetzen & schließen",
+    "rightSide": "Rechte Seite",
+    "sideBySide": "Nebeneinander",
+    "spyGlass": "Lupe",
+    "spyGlassLayer": "Lupenebene",
+    "stopComparing": "Vergleich beenden",
+    "title": "Ebenenvergleich"
+  }
+}

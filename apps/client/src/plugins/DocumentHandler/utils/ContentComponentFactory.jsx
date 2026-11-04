@@ -21,6 +21,7 @@ import {
   Grid,
 } from "@mui/material";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 const StyledAccordion = styled(Accordion)(
   ({ backgroundcolor, dividercolor }) => ({
@@ -824,7 +825,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
       <Button
         startIcon={
           <OpenInNewIcon
-            titleAccess="Länk som öppnas i ett annat fönster"
+            titleAccess={i18n.t("documentHandler.externalLink")}
             sx={{
               verticalAlign: "middle",
             }}
@@ -870,7 +871,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
       <Button
         startIcon={
           <MapIcon
-            titleAccess="Länk som applicerar ändringar på kartan"
+            titleAccess={i18n.t("documentHandler.mapLink")}
             sx={{
               verticalAlign: "middle",
             }}
@@ -906,8 +907,8 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
     // Grab the theme to determine current light/dark mode
 
     const titleAccess = headerIdentifier
-      ? "Länk till ett visst kapitel i ett dokument"
-      : "Länk till ett dokument";
+      ? i18n.t("documentHandler.chapterLink")
+      : i18n.t("documentHandler.documentLink");
 
     return (
       <Button

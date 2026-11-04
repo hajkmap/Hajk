@@ -1,0 +1,15 @@
+{
+  "export": {
+    "createPdf": "Create PDF",
+    "description": "Export the map to other formats",
+    "landscape": "landscape",
+    "orientation": "Orientation",
+    "otherScale": "Other scale",
+    "paperSize": "Paper size",
+    "pdfFailed": "The PDF couldn't be created. Try a lower resolution, a smaller area or fewer layers in the map.",
+    "portrait": "portrait",
+    "resolution": "Resolution",
+    "scale": "Scale",
+    "title": "Export"
+  }
+}

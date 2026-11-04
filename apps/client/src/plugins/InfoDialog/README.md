@@ -41,6 +41,28 @@ Every object in `options` supports the following properties. All are optional un
 | `lastModified`                 | string (ISO 8601) | –                                 | With `visibleAtStart`: auto-open again whenever this timestamp is newer than when the user last saw the dialog. **Takes precedence over `showOnlyOnce`.**                                      |
 | `visibleForGroups`             | string[]          | `[]`                              | Restrict to these Active Directory groups. Empty = everyone.                                                                                                                                   |
 
+### Translations
+
+The texts `title`, `description`, `headerText`, `text`, `buttonText` and `abortText` can be
+translated per dialog, using the dialog's `name`. Add the keys to
+`src/plugins/InfoDialog/i18n/<lng>.json` under `infoDialog.dialogs.<name>`:
+
+```json
+{
+  "infoDialog": {
+    "dialogs": {
+      "help": { "title": "Show help", "buttonText": "Close" }
+    }
+  }
+}
+```
+
+The texts in the map config are assumed to be Swedish. Under `sv` they're always shown. Under other
+languages the translation is shown if there is one, otherwise the text from the map config. Dialogs
+without a `name` are never translated. Names are chosen per installation, so these keys belong in
+your installation's translation files (the ones shipped match the demo config,
+`simpleMapAndLayersConfig.json`).
+
 ### Choosing how often a dialog shows at start
 
 | Goal                          | Settings                                                                                 |

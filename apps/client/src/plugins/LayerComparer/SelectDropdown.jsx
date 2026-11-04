@@ -6,6 +6,7 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
+import i18n from "src/i18n";
 
 const SelectDropdown = (props) => {
   const {
@@ -38,11 +39,13 @@ const SelectDropdown = (props) => {
           value={value}
           onChange={(e) => handleChange(setter, e.target.value)}
         >
-          <MenuItem value="">Inget lager valt</MenuItem>
+          <MenuItem value="">
+            {i18n.t("layerComparer.noLayerSelected")}
+          </MenuItem>
 
           {chosenBaseLayers.length > 0 && [
             <ListSubheader key="chosen-base-header">
-              Bakgrundslager
+              {i18n.t("layerComparer.backgroundLayers")}
             </ListSubheader>,
             ...chosenBaseLayers.map((l, i) => (
               <MenuItem
@@ -56,7 +59,9 @@ const SelectDropdown = (props) => {
           ]}
 
           {chosenRegularLayers.length > 0 && [
-            <ListSubheader key="chosen-layer-header">Lager</ListSubheader>,
+            <ListSubheader key="chosen-layer-header">
+              {i18n.t("layerComparer.layers")}
+            </ListSubheader>,
             ...chosenRegularLayers.map((l, i) => (
               <MenuItem
                 key={`chosen-layer-${i}`}
@@ -69,7 +74,9 @@ const SelectDropdown = (props) => {
           ]}
 
           {baseLayers.length > 0 && [
-            <ListSubheader key="base-header">Bakgrundslager</ListSubheader>,
+            <ListSubheader key="base-header">
+              {i18n.t("layerComparer.backgroundLayers")}
+            </ListSubheader>,
             ...baseLayers.map((l, i) => (
               <MenuItem
                 key={`base-${i}`}
@@ -82,7 +89,9 @@ const SelectDropdown = (props) => {
           ]}
 
           {layers.length > 0 && [
-            <ListSubheader key="layer-header">Lager</ListSubheader>,
+            <ListSubheader key="layer-header">
+              {i18n.t("layerComparer.layers")}
+            </ListSubheader>,
             ...layers.map((l, i) => (
               <MenuItem
                 key={`layer-${i}`}

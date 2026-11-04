@@ -100,7 +100,6 @@ function Fir(props) {
       custom={{
         disablePadding: true,
         icon: <PluginIcon />,
-        title: "FIR",
         color: null,
         description: "",
         height: "auto",

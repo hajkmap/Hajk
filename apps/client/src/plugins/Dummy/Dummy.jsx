@@ -145,9 +145,10 @@ function Dummy(props) {
       type="Dummy" // Unique name - each plugin needs one. Upper-case first letter, must be valid JS variable name.
       custom={{
         icon: <BugReportIcon />, // Custom icon for this plugin
+        // The default title and description come from i18n/<lng>.json ("dummy.title"
+        // and "dummy.description"), BaseWindowPlugin looks them up for us.
         title: state.title, // By keeping title and color in Dummy's state we can pass on
         color: state.color, // the changes to BaseWindowPlugin which will update internal state too.
-        description: "En kort beskrivning som visas i widgeten", // Shown on Widget button
         // Do you want to add buttons to the plugin-header? That can be done as follows:
         customPanelHeaderButtons: [
           {

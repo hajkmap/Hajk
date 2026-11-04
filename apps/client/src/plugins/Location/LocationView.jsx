@@ -13,10 +13,8 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import LinearProgress from "@mui/material/LinearProgress";
 
-import {
-  LOCATION_DENIED_SNACK_MESSAGE,
-  LOCATION_DENIED_SNACK_OPTIONS,
-} from "./constants";
+import { LOCATION_DENIED_SNACK_OPTIONS } from "./constants";
+import i18n from "src/i18n";
 
 class LocationView extends React.PureComponent {
   state = {
@@ -30,11 +28,14 @@ class LocationView extends React.PureComponent {
   };
 
   locationDetails = {
-    accuracy: { id: 0, label: "Precision (m)" },
-    altitude: { id: 1, label: "Höjd (m. ö. h.)" },
-    altitudeAccuracy: { id: 2, label: "Höjdprecision (m)" },
-    heading: { id: 3, label: "Riktning (rad)" },
-    speed: { id: 4, label: "Hastighet (m/s)" },
+    accuracy: { id: 0, label: i18n.t("location.details.accuracy") },
+    altitude: { id: 1, label: i18n.t("location.details.altitude") },
+    altitudeAccuracy: {
+      id: 2,
+      label: i18n.t("location.details.altitudeAccuracy"),
+    },
+    heading: { id: 3, label: i18n.t("location.details.heading") },
+    speed: { id: 4, label: i18n.t("location.details.speed") },
   };
 
   componentDidMount() {
@@ -77,12 +78,15 @@ class LocationView extends React.PureComponent {
       // If error code is 1 (User denied Geolocation), show Snackbar with instructions to enable it again
       if (error.code === 1) {
         this.props.enqueueSnackbar(
-          LOCATION_DENIED_SNACK_MESSAGE,
+          i18n.t("common.geolocationPermissionDenied"),
           LOCATION_DENIED_SNACK_OPTIONS
         );
       } else {
         this.props.enqueueSnackbar(
-          `Kunde inte fastställa din plats. Felkod: ${error.code}. Detaljer: "${error.message}".`,
+          i18n.t("location.error", {
+            code: error.code,
+            message: error.message,
+          }),
           {
             variant: "error",
           }
@@ -116,8 +120,8 @@ class LocationView extends React.PureComponent {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Egenskap</TableCell>
-                <TableCell align="right">Värde</TableCell>
+                <TableCell>{i18n.t("location.property")}</TableCell>
+                <TableCell align="right">{i18n.t("common.value")}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -153,7 +157,7 @@ class LocationView extends React.PureComponent {
                 value="track"
               />
             }
-            label="Visa min position"
+            label={i18n.t("location.showMyPosition")}
           />
         </FormGroup>
         {this.state.loading && <LinearProgress />}

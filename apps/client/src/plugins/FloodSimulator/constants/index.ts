@@ -1,4 +1,5 @@
 import type { FloodSimulatorResolvedOptions } from "../types";
+import i18n from "src/i18n";
 
 export const DEMO_TERRARIUM_URL =
   "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png";
@@ -11,9 +12,6 @@ export const LAYER_NAME = "pluginFloodSimulator";
  * on top of the map without covering draw / infoclick graphics.
  */
 export const LAYER_Z_INDEX = 1000;
-
-export const DEFAULT_TITLE = "Översvämning";
-export const DEFAULT_DESCRIPTION = "Simulera en stigande vattennivå";
 
 export type FloodSimulatorDefaultOptions = Omit<
   FloodSimulatorResolvedOptions,
@@ -79,45 +77,120 @@ export const FALLBACK_WATER_COLOR: [number, number, number, number] = [
   134, 203, 249, 1,
 ];
 
+// Translated when read (i18n.t() in getters), see AGENTS.md.
 export const UI_STRINGS = {
-  levelLabel: "Vattennivå (m)",
-  levelAriaLabel: "Vattennivå i meter",
-  animate: "Animera",
-  pause: "Pausa",
-  animateTooltip: "Animera nivån från lägsta till högsta",
-  pauseTooltip: "Pausa animeringen",
-  reset: "Återställ",
-  resetTooltip: "Återställ till startnivån",
-  animationDurationLabel: "Animationstid (s)",
-  durationAriaLabel: "Animationstid i sekunder",
-  moreSettings: "Fler inställningar",
-  moreSettingsTitle: "Maxvärden",
-  maxLevelLabel: "Max vattennivå (m)",
-  maxLevelAriaLabel: "Maximal vattennivå i meter",
-  maxAnimationDurationLabel: "Maximal animationstid (s)",
-  maxAnimationDurationAriaLabel: "Maximal animationstid i sekunder",
-  close: "Stäng",
-  opacityLabel: "Opacitet",
-  opacityAriaLabel: "Opacitet från 0 till 1",
-  interpolateLabel: "Interpolera",
-  depthShadingLabel: "Visa vattendjup",
-  waterColorLabel: "Vattenfärg",
-  deepWaterColorLabel: "Djupvattenfärg",
-  maxShadingDepthLabel: "Max djup (m)",
-  maxShadingDepthAriaLabel: "Maximalt djup för färgskalan i meter",
-  depthColorsLegend: "Djupklasser",
-  depthColorModeLabel: "Färgläge för vattendjup",
-  depthColorModeClasses: "Djupklasser",
-  depthColorModeRamp: "Färgskala",
-  smoothDepthColorsLabel: "Mjuk övergång",
-  isobathsLabel: "Djupkurvor",
-  depthClassRange: (from: string, to: string) => `${from}–${to} m`,
-  depthClassFrom: (from: string) => `> ${from} m`,
-  readoutElevationLabel: "Markhöjd",
-  readoutDepthLabel: "Vattendjup",
-  zoomInToSeeSimulation: "Zooma in för att se simuleringen",
-  projectionAlert:
-    "Höjdkällans projektion matchar inte kartans projektion. Översvämningslagret kan visas felaktigt.",
+  get levelLabel() {
+    return i18n.t("floodSimulator.levelLabel");
+  },
+  get levelAriaLabel() {
+    return i18n.t("floodSimulator.levelAriaLabel");
+  },
+  get animate() {
+    return i18n.t("floodSimulator.animate");
+  },
+  get pause() {
+    return i18n.t("floodSimulator.pause");
+  },
+  get animateTooltip() {
+    return i18n.t("floodSimulator.animateTooltip");
+  },
+  get pauseTooltip() {
+    return i18n.t("floodSimulator.pauseTooltip");
+  },
+  get reset() {
+    return i18n.t("floodSimulator.reset");
+  },
+  get resetTooltip() {
+    return i18n.t("floodSimulator.resetTooltip");
+  },
+  get animationDurationLabel() {
+    return i18n.t("floodSimulator.animationDurationLabel");
+  },
+  get durationAriaLabel() {
+    return i18n.t("floodSimulator.durationAriaLabel");
+  },
+  get moreSettings() {
+    return i18n.t("floodSimulator.moreSettings");
+  },
+  get moreSettingsTitle() {
+    return i18n.t("floodSimulator.moreSettingsTitle");
+  },
+  get maxLevelLabel() {
+    return i18n.t("floodSimulator.maxLevelLabel");
+  },
+  get maxLevelAriaLabel() {
+    return i18n.t("floodSimulator.maxLevelAriaLabel");
+  },
+  get maxAnimationDurationLabel() {
+    return i18n.t("floodSimulator.maxAnimationDurationLabel");
+  },
+  get maxAnimationDurationAriaLabel() {
+    return i18n.t("floodSimulator.maxAnimationDurationAriaLabel");
+  },
+  get close() {
+    return i18n.t("common.close");
+  },
+  get opacityLabel() {
+    return i18n.t("floodSimulator.opacityLabel");
+  },
+  get opacityAriaLabel() {
+    return i18n.t("floodSimulator.opacityAriaLabel");
+  },
+  get interpolateLabel() {
+    return i18n.t("floodSimulator.interpolateLabel");
+  },
+  get depthShadingLabel() {
+    return i18n.t("floodSimulator.depthShadingLabel");
+  },
+  get waterColorLabel() {
+    return i18n.t("floodSimulator.waterColorLabel");
+  },
+  get deepWaterColorLabel() {
+    return i18n.t("floodSimulator.deepWaterColorLabel");
+  },
+  get maxShadingDepthLabel() {
+    return i18n.t("floodSimulator.maxShadingDepthLabel");
+  },
+  get maxShadingDepthAriaLabel() {
+    return i18n.t("floodSimulator.maxShadingDepthAriaLabel");
+  },
+  get depthColorsLegend() {
+    return i18n.t("floodSimulator.depthColorsLegend");
+  },
+  get depthColorModeLabel() {
+    return i18n.t("floodSimulator.depthColorModeLabel");
+  },
+  get depthColorModeClasses() {
+    return i18n.t("floodSimulator.depthColorModeClasses");
+  },
+  get depthColorModeRamp() {
+    return i18n.t("floodSimulator.depthColorModeRamp");
+  },
+  get smoothDepthColorsLabel() {
+    return i18n.t("floodSimulator.smoothDepthColorsLabel");
+  },
+  get isobathsLabel() {
+    return i18n.t("floodSimulator.isobathsLabel");
+  },
+  get readoutElevationLabel() {
+    return i18n.t("floodSimulator.readoutElevationLabel");
+  },
+  get readoutDepthLabel() {
+    return i18n.t("floodSimulator.readoutDepthLabel");
+  },
+  get zoomInToSeeSimulation() {
+    return i18n.t("floodSimulator.zoomInToSeeSimulation");
+  },
+  get projectionAlert() {
+    return i18n.t("floodSimulator.projectionAlert");
+  },
+  depthClassRange: (from: string, to: string) =>
+    i18n.t("floodSimulator.depthClassRange", { from, to }),
+  depthClassFrom: (from: string) =>
+    i18n.t("floodSimulator.depthClassFrom", { from }),
+  readoutAriaLabel: (elevation: string, depth: string) =>
+    i18n.t("floodSimulator.readoutAriaLabel", { elevation, depth }),
+  // Console messages for developers, not translated.
   noElevationUrl:
     "FloodSimulator: no elevation source configured. Set options.elevationUrl to a Terrain-RGB or Terrarium XYZ template. The overlay will not be created.",
   tileGridMissing:

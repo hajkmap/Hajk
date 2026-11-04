@@ -16,6 +16,7 @@ import RotateLeftIcon from "@mui/icons-material/RotateLeft";
 import Information from "../components/Information";
 import { ROTATABLE_DRAW_TYPES } from "plugins/Sketch/constants";
 import { editBus } from "../../../buses/editBus";
+import i18n from "src/i18n";
 
 const TranslateToggler = ({ translateEnabled, setTranslateEnabled }) => {
   return (
@@ -27,12 +28,14 @@ const TranslateToggler = ({ translateEnabled, setTranslateEnabled }) => {
           alignItems: "center",
         }}
       >
-        <Typography variant="body2">Tillåt fri förflyttning</Typography>
+        <Typography variant="body2">
+          {i18n.t("sketch.move.allowFreeMove")}
+        </Typography>
         <HajkToolTip
           title={
             translateEnabled
-              ? "Avaktivera för att inte tillåta förflyttning av objekten i kartan."
-              : "Aktivera för att tillåta förflyttning av objekten i kartan."
+              ? i18n.t("sketch.move.disableFreeMoveHint")
+              : i18n.t("sketch.move.enableFreeMoveHint")
           }
         >
           <Switch
@@ -106,13 +109,13 @@ const FeatureMoveSelector = (props) => {
       >
         <Grid sx={{ mb: 2 }} size={12}>
           <Typography variant="body2" align="center">
-            Fast förflyttning
+            {i18n.t("sketch.move.fixedMove")}
           </Typography>
         </Grid>
         <Grid sx={{ mb: 2 }} size={12}>
-          <HajkToolTip title="Ange hur många meter du vill flytta objekten.">
+          <HajkToolTip title={i18n.t("sketch.move.distanceHint")}>
             <TextField
-              label="Förflyttningsavstånd (meter)"
+              label={i18n.t("sketch.move.distance")}
               variant="outlined"
               fullWidth
               type="number"
@@ -123,9 +126,9 @@ const FeatureMoveSelector = (props) => {
           </HajkToolTip>
         </Grid>
         <Grid size={12}>
-          <HajkToolTip title="Ange i vilken riktning du vill flytta objekten. 0 grader är rakt norrut, 90 grader är rakt åt öster, osv.">
+          <HajkToolTip title={i18n.t("sketch.move.directionHint")}>
             <TextField
-              label="Förflyttningsriktning (grader)"
+              label={i18n.t("sketch.move.direction")}
               variant="outlined"
               fullWidth
               type="number"
@@ -142,12 +145,12 @@ const FeatureMoveSelector = (props) => {
               fullWidth
               size="small"
               onClick={handleUndoClick}
-              // Symmetric with "Flytta" (which is never uiDisabled): in AE
+              // Symmetric with i18n.t("sketch.move.move") (which is never uiDisabled): in AE
               // mode uiDisabled is always true, which left the user able to
               // move features but never undo the move.
               disabled={props.lastMoves.length === 0}
             >
-              Ångra
+              {i18n.t("common.undo")}
             </Button>
           </Grid>
           <Grid size={6}>
@@ -157,7 +160,7 @@ const FeatureMoveSelector = (props) => {
               size="small"
               onClick={handleMoveClick}
             >
-              Flytta
+              {i18n.t("sketch.move.move")}
             </Button>
           </Grid>
         </Grid>
@@ -238,12 +241,12 @@ const FeatureRotateSelector = (props) => {
       >
         <Grid sx={{ mb: 1 }} size={12}>
           <Typography variant="body2" align="center">
-            Rotera
+            {i18n.t("sketch.move.rotate")}
           </Typography>
         </Grid>
 
         <Grid sx={{ pr: 1 }} size={6}>
-          <HajkToolTip title="Ange hur många grader du ska rotera objekten.">
+          <HajkToolTip title={i18n.t("sketch.move.rotateHint")}>
             <OutlinedInput
               variant="outlined"
               fullWidth

@@ -1,0 +1,21 @@
+{
+  "feedback": {
+    "description": "Skicka synpunkter till oss",
+    "errors": {
+      "captcha": "Verifieringen gick inte igenom. Verifiera igen och skicka på nytt.",
+      "generic": "Det gick inte att skicka. Försök igen senare.",
+      "invalid": "Meddelandet kunde inte tas emot. Kontrollera texten och försök igen.",
+      "network": "Kunde inte nå servern. Kontrollera din anslutning och försök igen.",
+      "notEnabled": "Funktionen är inte aktiverad.",
+      "tooMany": "Du har skickat för många meddelanden. Vänta en stund och försök igen."
+    },
+    "instructionText": "Har du synpunkter på kartan eller dess innehåll? Skriv dem här.",
+    "messageLabel": "Meddelande",
+    "privacyNotice": "Skriv inga personuppgifter. En länk till kartan som du ser den just nu skickas med.",
+    "send": "Skicka",
+    "sendAgain": "Skicka en till",
+    "sending": "Skickar…",
+    "thankYouText": "Tack för din återkoppling!",
+    "title": "Tyck till"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "anchor": {
+    "copyFailed": "Copying to clipboard failed.",
+    "copyLink": "Copy link",
+    "copyLinkTooltip": "Copy link to clipboard",
+    "copySucceeded": "Copied to clipboard!",
+    "description": "Create a link with the map's visible layers, current zoom level and extent",
+    "intro": "Create a link with the map's visible layers, current zoom level and extent.",
+    "linkToCleanMap": "Create link to map without tools etc.",
+    "linkToMap": "Create link to map",
+    "linkType": "Link type",
+    "openLink": "Open link",
+    "openLinkTooltip": "Open link in new window",
+    "qrCode": "QR code",
+    "title": "Share"
+  }
+}

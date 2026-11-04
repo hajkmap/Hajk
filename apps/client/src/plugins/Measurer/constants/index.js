@@ -1,3 +1,5 @@
+import i18n from "src/i18n";
+
 export const DEFAULT_MEASUREMENT_SETTINGS = Object.freeze({
   showText: true,
   showArea: true,
@@ -10,10 +12,34 @@ export const DEFAULT_MEASUREMENT_SETTINGS = Object.freeze({
 });
 
 export const MEASUREMENT_PRECISIONS = [
-  { value: 0, name: "0 decimaler" },
-  { value: 1, name: "1 decimal" },
-  { value: 2, name: "2 decimaler" },
-  { value: 3, name: "3 decimaler" },
+  {
+    value: 0,
+    // Getter, so the text is translated when read
+    get name() {
+      return i18n.t("common.decimals", { count: 0 });
+    },
+  },
+  {
+    value: 1,
+    // Getter, so the text is translated when read
+    get name() {
+      return i18n.t("common.decimals", { count: 1 });
+    },
+  },
+  {
+    value: 2,
+    // Getter, so the text is translated when read
+    get name() {
+      return i18n.t("common.decimals", { count: 2 });
+    },
+  },
+  {
+    value: 3,
+    // Getter, so the text is translated when read
+    get name() {
+      return i18n.t("common.decimals", { count: 3 });
+    },
+  },
 ];
 
 export const STORAGE_KEY = "measurer";

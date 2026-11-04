@@ -1,3 +1,5 @@
+import i18n from "src/i18n";
+
 export default class XLSXExport {
   constructor(settings) {
     this.excelColumnFilter = settings.options.excelColumnFilter || "";
@@ -46,7 +48,7 @@ export default class XLSXExport {
       ? `${this.#getSheetName(
           featureCollections[0]
         )}-${new Date().toLocaleString()}.xlsx`
-      : `Sökexport-${new Date().toLocaleString()}.xlsx`;
+      : `${i18n.t("search.exportName")}-${new Date().toLocaleString()}.xlsx`;
   };
 
   #createUserSelectedExport = async (featureCollection, fileName) => {
@@ -156,7 +158,8 @@ export default class XLSXExport {
   };
 
   #getSheetName = (featureCollection) => {
-    const sheetName = featureCollection?.source?.caption ?? "Namn saknas";
+    const sheetName =
+      featureCollection?.source?.caption ?? i18n.t("search.missingName");
     // XLSX does not support names longer than 30 chars.
     return sheetName.slice(0, 30);
   };

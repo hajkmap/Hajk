@@ -11,6 +11,7 @@ import MapViewModel from "./MapViewModel";
 import { createTheme } from "@mui/material/styles";
 import { withTheme } from "@emotion/react";
 import { deepMerge } from "../../utils/DeepMerge";
+import i18n, { configText } from "src/i18n";
 
 const StyledIconContainer = styled("div")(({ theme }) => ({
   display: "inline-flex",
@@ -160,15 +161,24 @@ class DocumentHandler extends React.PureComponent {
   addDrawerToggleButton = () => {
     const { app, options } = this.props;
     app.globalObserver.publish("core.addSrShortcuts", [
-      { title: "Till huvudmeny för webbplatsen", link: "#documenthandler" },
+      {
+        title: i18n.t("documentHandler.skipToMainMenu"),
+        link: "#documenthandler",
+      },
     ]);
     app.globalObserver.publish("core.addDrawerToggleButton", {
       value: "documenthandler",
       ButtonIcon: options.drawerButtonIcon
         ? this.getIcon(options.drawerButtonIcon)
         : MenuIcon,
-      caption: options.drawerButtonTitle || "Meny",
-      drawerTitle: options.drawerTitle || "Översiktsplan",
+      caption: configText(
+        "documentHandler.drawerButtonTitle",
+        options.drawerButtonTitle
+      ),
+      drawerTitle: configText(
+        "documentHandler.drawerTitle",
+        options.drawerTitle
+      ),
       order: 100,
       renderDrawerContent: this.renderDrawerContent,
     });

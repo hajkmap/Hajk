@@ -9,6 +9,7 @@ import ListBoxSelector from "./ListBoxSelector";
 // All parameters will be checked against an array of allowed
 // parameter types to make sure that the parameter type is supported in the renderer.
 import { ALLOWED_FME_PARAMETERS } from "../constants";
+import i18n from "src/i18n";
 
 const ProductParameters = (props) => {
   // We're gonna need the model for some shared methods
@@ -47,10 +48,7 @@ const ProductParameters = (props) => {
     return (
       <Grid sx={{ padding: 1 }} size={12}>
         <InformationWrapper type="error">
-          <Typography>
-            Observera att vissa publicerade parametrar inte kunde renderas! Det
-            är inte säkert att beställningen går att genomföra.
-          </Typography>
+          <Typography>{i18n.t("fmeServer.parametersNotRendered")}</Typography>
         </InformationWrapper>
       </Grid>
     );
@@ -67,11 +65,10 @@ const ProductParameters = (props) => {
         }}
       >
         <Typography sx={{ alignSelf: "center", marginLeft: 1 }}>
-          Oklart hur produkten fungerar? Tryck på frågetecknet för mer
-          information.
+          {i18n.t("fmeServer.productHelp")}
         </Typography>
         <IconButton
-          aria-label="Hjälp"
+          aria-label={i18n.t("common.help")}
           onClick={() => window.open(props.infoUrl, "_blank")}
         >
           <HelpIcon />
@@ -84,10 +81,7 @@ const ProductParameters = (props) => {
     return (
       <Grid sx={{ padding: 1 }} size={12}>
         <InformationWrapper type="info">
-          <Typography>
-            Det finns inga publicerade parametrar att rendera! Du kan fortsätta
-            direkt till nästa steg!
-          </Typography>
+          <Typography>{i18n.t("fmeServer.noParameters")}</Typography>
         </InformationWrapper>
       </Grid>
     );

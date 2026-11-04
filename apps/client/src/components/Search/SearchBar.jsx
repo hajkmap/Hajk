@@ -27,6 +27,7 @@ import { visuallyHidden } from "@mui/utils";
 import { styled } from "@mui/material/styles";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import HajkToolTip from "components/HajkToolTip";
+import i18n, { configText } from "src/i18n";
 
 // A HOC that pipes isMobile to the children. See this as a proposed
 // solution. It is not pretty, but if we move this to a separate file
@@ -249,17 +250,16 @@ class SearchBar extends React.PureComponent {
       searchOptions: { searchInVisibleLayers },
     } = this.props;
 
-    const labelPostfix = searchInVisibleLayers
-      ? " (endast i synliga lager)"
-      : "";
+    const placeholder =
+      searchActive === "selectSearch" || searchActive === "draw"
+        ? i18n.t("search.searchingWithObject")
+        : searchActive === "extentSearch"
+          ? i18n.t("search.searchingInArea")
+          : configText("search.placeholder", options.searchBarPlaceholder);
 
-    return searchActive === "selectSearch" || searchActive === "draw"
-      ? `Söker med objekt${labelPostfix}`
-      : searchActive === "extentSearch"
-        ? `Söker i området${labelPostfix}`
-        : options.searchBarPlaceholder
-          ? `${options.searchBarPlaceholder}${labelPostfix}`
-          : `Sök${labelPostfix}`;
+    return searchInVisibleLayers
+      ? i18n.t("search.visibleLayersOnly", { placeholder })
+      : placeholder;
   };
 
   renderSearchResultList = () => {
@@ -425,12 +425,12 @@ class SearchBar extends React.PureComponent {
       failedWFSFetchMessage.length > 0 && showSearchResults;
 
     const expandMessage = resultPanelCollapsed
-      ? "Visa lista med sökresultat"
-      : "Dölj lista med sökresultat";
+      ? i18n.t("search.showResultList")
+      : i18n.t("search.hideResultList");
 
     const toggleResultsLayerVisibilityMessage = this.state.resultsLayerVisible
-      ? "Dölj sökresultat i kartan"
-      : "Visa sökresultat i kartan";
+      ? i18n.t("search.hideResultsInMap")
+      : i18n.t("search.showResultsInMap");
 
     const placeholder = this.getPlaceholder();
     // Autocomplete renderInput still passes InputProps (not slotProps) in MUI v9.
@@ -449,7 +449,7 @@ class SearchBar extends React.PureComponent {
             ...disableUnderline,
             style: { margin: 0, ...(isMobile && { height: "46px" }) }, // TODO: Prevent hardcoding of height, really not urgent.
             notched: isMobile ? null : false,
-            "aria-label": "Sök i webbplatsens innehåll",
+            "aria-label": i18n.t("search.inputLabel"),
             endAdornment: (
               <>
                 {loading ? (
@@ -459,12 +459,14 @@ class SearchBar extends React.PureComponent {
                 {showFailedWFSMessage &&
                   this.renderFailedWFSFetchWarning(failedWFSFetchMessage)}
                 {!showSearchResults ? (
-                  <HajkToolTip title="Utför sökning">
+                  <HajkToolTip title={i18n.t("search.doSearch")}>
                     <IconButton
                       size="small"
                       onClick={handleOnClickOrKeyboardSearch}
                     >
-                      <span style={visuallyHidden}>Utför sökning</span>
+                      <span style={visuallyHidden}>
+                        {i18n.t("search.doSearch")}
+                      </span>
                       <SearchIcon />
                     </IconButton>
                   </HajkToolTip>
@@ -507,9 +509,11 @@ class SearchBar extends React.PureComponent {
                 {searchString.length > 0 ||
                 showSearchResults ||
                 searchActive !== "" ? (
-                  <HajkToolTip title="Rensa sökning">
+                  <HajkToolTip title={i18n.t("search.clearSearch")}>
                     <IconButton onClick={handleOnClear} size="small">
-                      <span style={visuallyHidden}>Rensa sökning</span>
+                      <span style={visuallyHidden}>
+                        {i18n.t("search.clearSearch")}
+                      </span>
                       <ClearIcon />
                     </IconButton>
                   </HajkToolTip>

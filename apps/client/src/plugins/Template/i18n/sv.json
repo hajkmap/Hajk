@@ -1,0 +1,7 @@
+{
+  "template": {
+    "description": "Kort beskrivning som ska ändras",
+    "hello": "Hej från template-vyn",
+    "title": "Ändra mig"
+  }
+}

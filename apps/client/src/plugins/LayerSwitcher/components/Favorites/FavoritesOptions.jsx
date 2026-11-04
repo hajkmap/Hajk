@@ -14,6 +14,7 @@ import LibraryAddOutlinedIcon from "@mui/icons-material/LibraryAddOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import LayersOutlinedIcon from "@mui/icons-material/LayersOutlined";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 export default function FavoritesOptions({
   handleFavoritesViewToggle,
@@ -88,7 +89,7 @@ export default function FavoritesOptions({
           functionalCookiesOk ? handleShowMoreOptionsClick : handleEditFavorites
         }
       >
-        <HajkToolTip title="Mina favoriter">
+        <HajkToolTip title={i18n.t("layerSwitcher.myFavorites")}>
           <PersonOutlinedIcon />
         </HajkToolTip>
       </IconButton>
@@ -110,13 +111,13 @@ export default function FavoritesOptions({
           <ListItemIcon>
             <LibraryAddOutlinedIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Spara till favoriter</ListItemText>
+          <ListItemText>{i18n.t("layerSwitcher.saveToFavorites")}</ListItemText>
         </MenuItem>
         <MenuItem id="edit-favorites" onClick={handleEditFavorites}>
           <ListItemIcon>
             <EditOutlinedIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Redigera favoriter</ListItemText>
+          <ListItemText>{i18n.t("layerSwitcher.editFavorites")}</ListItemText>
         </MenuItem>
         {favorites.length > 0 && <Divider />}
         {favorites.map((favorite) => {

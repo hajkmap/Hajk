@@ -1,0 +1,29 @@
+{
+  "measurer": {
+    "area": "Areal",
+    "circle": "Cirkel",
+    "clearAll": "Rensa bort alla mätningar",
+    "clearAllConfirm": "Är du säker på att du vill rensa bort alla mätningar?",
+    "clearAllConfirmButton": "Ja rensa",
+    "deleteOne": "Ta bort enskild mätning",
+    "description": "Mät längder och ytor",
+    "help": {
+      "text": "<strong>Avsluta mätning</strong><br/>Tryck på Esc/Enter-tangenten eller klicka igen på sista punkten för att avsluta mätning.<br/><br/><strong>Rita på fri hand</strong><br/>Håll ner Shift-tangenten för att rita på fri hand. Det här är möjligt när du ritar sträckor eller arealer.<br/><br/><strong>Stäng av snäppning</strong><br/>Håll ner Mellanslags-tangenten för att temporärt stänga av snäppningsfunktionen.<br/><br/><strong>Vinkelrät mätning</strong><br/>Håll ner Ctrl på Windows eller Cmd (⌘) på Mac och klicka på en linje så kan du göra vinkelräta mätningar från den linjen. Observera: Linjen du klickar på måste vara en vektorlinje som du snäpper mot."
+    },
+    "line": "Sträcka",
+    "measureType": "Typ av mätning",
+    "point": "Punkt (Visar koordinat)",
+    "segments": "Rita del-längder av mätningar",
+    "select": "Välj på kartan",
+    "selectFeaturesTitle": "Välj de objekt du vill mäta",
+    "settings": {
+      "pointPrecision": "Mätprecision, punkter",
+      "pointPrecisionHelp": "Välj med vilken precision koordinaterna på punktmätningar ska visas.",
+      "precision": "Mätprecision, längd/area",
+      "precisionHelp": "Välj med vilken precision längd- och areamätningar ska visas.",
+      "title": "Inställningar"
+    },
+    "settingsTooltip": "Inställningar — välj antal decimaler",
+    "title": "Mät"
+  }
+}

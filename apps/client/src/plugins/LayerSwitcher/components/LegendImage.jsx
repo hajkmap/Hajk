@@ -6,6 +6,7 @@ import {
   getThemedLegendGraphicUrl,
   getLegendBackgroundColor,
 } from "../LayerSwitcherUtils";
+import i18n from "src/i18n";
 
 const ColumnContainer = styled("div")(({ theme }) => ({
   display: "inline-flex",
@@ -53,10 +54,10 @@ const ImageWithLoading = ({ src }) => {
         }}
       >
         {/* Maybe add a spinner here instead of Loading text.. */}
-        {loading && !error && <span>Laddar...</span>}
+        {loading && !error && <span>{i18n.t("common.loading")}</span>}
         {error && (
           <span title={src} style={{ color: theme.palette.warning.main }}>
-            Kunde inte ladda teckenförklaring
+            {i18n.t("layerSwitcher.legendLoadError")}
           </span>
         )}
       </div>
@@ -77,7 +78,7 @@ const ImageWithLoading = ({ src }) => {
                 width: "auto",
               },
         ]}
-        alt="Teckenförklaring"
+        alt={i18n.t("common.legend")}
       />
     </div>
   );

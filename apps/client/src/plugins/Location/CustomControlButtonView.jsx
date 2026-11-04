@@ -9,10 +9,8 @@ import LocationSearchingIcon from "@mui/icons-material/LocationSearching";
 import LocationDisabledIcon from "@mui/icons-material/LocationDisabled";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
 
-import {
-  LOCATION_DENIED_SNACK_MESSAGE,
-  LOCATION_DENIED_SNACK_OPTIONS,
-} from "./constants";
+import { LOCATION_DENIED_SNACK_OPTIONS } from "./constants";
+import i18n from "src/i18n";
 import HajkToolTip from "components/HajkToolTip";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
@@ -58,18 +56,16 @@ const CustomControlButtonView = React.memo(
       // Prepare an output array that contains end-user text
       const output = [
         ...(formattedData.accuracy
-          ? [`Noggranhet: ${formattedData.accuracy} m\n`]
+          ? [i18n.t("location.tooltip.accuracy", formattedData)]
           : []),
         ...(formattedData.altitude && formattedData.altitudeAccuracy
-          ? [
-              `Höjd: ${formattedData.altitude} (+/- ${formattedData.altitudeAccuracy}) m\n`,
-            ]
+          ? [i18n.t("location.tooltip.altitude", formattedData)]
           : []),
         ...(formattedData.speed
-          ? [`Hastighet: ${formattedData.speed} km/h\n`]
+          ? [i18n.t("location.tooltip.speed", formattedData)]
           : []),
         ...(formattedData.heading
-          ? [`Riktning: ${formattedData.heading} rad\n`]
+          ? [i18n.t("location.tooltip.heading", formattedData)]
           : []),
       ];
 
@@ -103,7 +99,7 @@ const CustomControlButtonView = React.memo(
             break;
           case "error":
             setCurrentIcon(<LocationDisabledIcon />);
-            setTooltip("Positionera: position ej tillgänglig");
+            setTooltip(i18n.t("location.unavailable"));
             break;
           case "off":
           default:
@@ -122,12 +118,15 @@ const CustomControlButtonView = React.memo(
         // If error code is 1 (User denied Geolocation), show Snackbar with instructions to enable it again
         if (error.code === 1) {
           enqueueSnackbar(
-            LOCATION_DENIED_SNACK_MESSAGE,
+            i18n.t("common.geolocationPermissionDenied"),
             LOCATION_DENIED_SNACK_OPTIONS
           );
         } else {
           enqueueSnackbar(
-            `Kunde inte fastställa din plats. Felkod: ${error.code}. Detaljer: "${error.message}".`,
+            i18n.t("location.error", {
+              code: error.code,
+              message: error.message,
+            }),
             {
               variant: "error",
             }

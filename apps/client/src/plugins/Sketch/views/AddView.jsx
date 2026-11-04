@@ -8,6 +8,8 @@ import FeatureTextSetter from "../components/FeatureTextSetter";
 import SelectFeaturesDialog from "utils/SelectFeaturesDialog";
 import FixedLengthDrawSelector from "../components/FixedLengthDrawSelector";
 import MultiDrawSelector from "../components/MultiDrawSelector";
+import { NO_SERVICE_LABEL } from "../../../buses/editBus";
+import i18n from "src/i18n";
 
 const AddView = (props) => {
   // Let's destruct some properties from the props
@@ -85,7 +87,7 @@ const AddView = (props) => {
   const showFixedLengthSelector =
     ["LineString", "Polygon"].includes(activeDrawType) &&
     ogcSource &&
-    ogcSource !== "Ingen";
+    ogcSource !== NO_SERVICE_LABEL;
 
   // Determine if multi-draw selector should be shown
   // Only show when AttributeEditor layer is selected AND draw type is Point, LineString, or Polygon
@@ -94,7 +96,7 @@ const AddView = (props) => {
       activeDrawType
     ) &&
     ogcSource &&
-    ogcSource !== "Ingen";
+    ogcSource !== NO_SERVICE_LABEL;
 
   // Handler to add a segment programmatically
   const handleAddSegment = React.useCallback(() => {
@@ -139,7 +141,7 @@ const AddView = (props) => {
       </Grid>
       <Grid style={{ marginTop: 16 }} size={12}>
         <Grid style={{ marginBottom: 4 }} size={12}>
-          <Typography align="center">Typ</Typography>
+          <Typography align="center">{i18n.t("sketch.type")}</Typography>
         </Grid>
         <Grid size={12}>
           <DrawTypeSelector
@@ -206,7 +208,7 @@ const AddView = (props) => {
       <SelectFeaturesDialog
         localObserver={localObserver}
         drawModel={drawModel}
-        dialogTitle="Välj de objekt du vill kopiera"
+        dialogTitle={i18n.t("sketch.selectFeaturesToCopy")}
       />
     </Grid>
   );

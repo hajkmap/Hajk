@@ -10,6 +10,7 @@ import {
   Alert,
 } from "@mui/material";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import { Trans, useTranslation } from "react-i18next";
 
 export default function ConfirmServiceSwitchWithDrawings({
   open,
@@ -19,6 +20,8 @@ export default function ConfirmServiceSwitchWithDrawings({
   drawingCount,
   targetServiceName,
 }) {
+  const { t } = useTranslation();
+
   return (
     <Dialog
       open={open}
@@ -35,33 +38,38 @@ export default function ConfirmServiceSwitchWithDrawings({
     >
       <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1 }}>
         <WarningAmberIcon color="warning" />
-        Ritade objekt i kartan
+        {t("confirmServiceSwitch.title")}
       </DialogTitle>
       <DialogContent>
         <Alert severity="warning" sx={{ mb: 2 }}>
-          Du har {drawingCount} ritade objekt i kartan som inte är kopplade till
-          någon redigerbart lager.
+          {t("confirmServiceSwitch.drawingCount", { count: drawingCount })}
         </Alert>
         <DialogContentText>
-          Du är på väg att välja redigerbart lager{" "}
-          <strong>{targetServiceName}</strong>.
+          <Trans
+            i18nKey="confirmServiceSwitch.selectingService"
+            values={{ name: targetServiceName }}
+            components={{ strong: <strong /> }}
+          />
         </DialogContentText>
         <DialogContentText sx={{ mt: 2 }}>
-          <strong>OBS:</strong> Ritade objekt och redigerbara lager är separata
-          system. Om du behåller de ritade objekten kommer de finnas kvar i
-          kartan men kan inte sparas tillsammans med redigerbart lager.
+          <Trans
+            i18nKey="confirmServiceSwitch.note"
+            components={{ strong: <strong /> }}
+          />
         </DialogContentText>
-        <DialogContentText sx={{ mt: 2 }}>Vad vill du göra?</DialogContentText>
+        <DialogContentText sx={{ mt: 2 }}>
+          {t("confirmServiceSwitch.question")}
+        </DialogContentText>
       </DialogContent>
       <DialogActions sx={{ px: 1.5, pb: 1 }}>
         <Button onClick={onClose} color="inherit">
-          Avbryt
+          {t("common.cancel")}
         </Button>
         <Button onClick={onClearDrawings} color="error" variant="outlined">
-          Ta bort ritade objekt
+          {t("confirmServiceSwitch.clearDrawings")}
         </Button>
         <Button onClick={onConfirm} color="primary" variant="contained">
-          Behåll ritade objekt (endast för referens)
+          {t("confirmServiceSwitch.keepDrawings")}
         </Button>
       </DialogActions>
     </Dialog>

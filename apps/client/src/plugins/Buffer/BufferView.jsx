@@ -10,6 +10,7 @@ import ToggleButton from "@mui/material/ToggleButton";
 import { Step, StepContent, StepLabel, Stepper } from "@mui/material";
 import withSnackbar from "components/WithSnackbar";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({
   width: "100%",
@@ -59,12 +60,9 @@ class BufferView extends React.PureComponent {
     let isSelecting = null;
     if (this.state.activeStep === 0) {
       if (this.props.model.highlightSource.getFeatures().length === 0) {
-        this.props.enqueueSnackbar(
-          "Du måste markera minst ett objekt i kartan för att kunna buffra",
-          {
-            variant: "error",
-          }
-        );
+        this.props.enqueueSnackbar(i18n.t("buffer.selectAtLeastOne"), {
+          variant: "error",
+        });
         return;
       }
       this.props.model.activateSelecting(false);
@@ -87,13 +85,13 @@ class BufferView extends React.PureComponent {
     let l = null;
     switch (this.state.activeStep) {
       case 1:
-        l = "Buffra";
+        l = i18n.t("buffer.buffer");
         break;
       case 2:
-        l = "Börja om";
+        l = i18n.t("buffer.startOver");
         break;
       default:
-        l = "Nästa";
+        l = i18n.t("common.next");
         break;
     }
     return l;
@@ -107,7 +105,7 @@ class BufferView extends React.PureComponent {
           disabled={this.state.activeStep === 0}
           onClick={this.handlePrev}
         >
-          Föregående
+          {i18n.t("common.previous")}
         </Button>
       </Grid>
     );
@@ -127,7 +125,7 @@ class BufferView extends React.PureComponent {
               this.forceUpdate();
             }}
           >
-            <ClearIcon /> Rensa
+            <ClearIcon /> {i18n.t("common.clear")}
           </Button>
         </Grid>
       )
@@ -139,19 +137,19 @@ class BufferView extends React.PureComponent {
       <>
         <Stepper activeStep={this.state.activeStep} orientation="vertical">
           <Step key="1">
-            <StepLabel>Välj objekt att buffra</StepLabel>
+            <StepLabel>{i18n.t("buffer.steps.select")}</StepLabel>
             <StepContent>
               <Grid container spacing={2} direction="row">
                 {this.renderClearButton()}
                 <Grid size={12}>
-                  <HajkToolTip title="Markera flera objekt">
+                  <HajkToolTip title={i18n.t("buffer.selectMultiple")}>
                     <StyledToggleButton
                       onChange={this.setSelecting}
                       selected={this.state.isSelecting}
                       value="isSelecting"
                     >
                       <AddIcon />
-                      Välj objekt
+                      {i18n.t("buffer.selectFeatures")}
                     </StyledToggleButton>
                   </HajkToolTip>
                 </Grid>
@@ -163,14 +161,14 @@ class BufferView extends React.PureComponent {
                     color="primary"
                     onClick={this.handleNext}
                   >
-                    Nästa
+                    {i18n.t("common.next")}
                   </Button>
                 </Grid>
               </Grid>
             </StepContent>
           </Step>
           <Step key="2">
-            <StepLabel>Ange bufferavstånd</StepLabel>
+            <StepLabel>{i18n.t("buffer.steps.distance")}</StepLabel>
             <StepContent>
               <Grid container spacing={2} direction="row">
                 <Grid size={12}>
@@ -179,7 +177,7 @@ class BufferView extends React.PureComponent {
                     fullWidth
                     value={this.state.distance}
                     onChange={this.setDistance}
-                    label="Bufferavstånd (i meter)"
+                    label={i18n.t("buffer.distanceLabel")}
                   />
                 </Grid>
                 {this.renderPrevButton()}
@@ -193,14 +191,14 @@ class BufferView extends React.PureComponent {
                       this.props.model.bufferFeatures(this.state.distance);
                     }}
                   >
-                    Buffra
+                    {i18n.t("buffer.buffer")}
                   </Button>
                 </Grid>
               </Grid>
             </StepContent>
           </Step>
           <Step key="3">
-            <StepLabel>Klart</StepLabel>
+            <StepLabel>{i18n.t("buffer.steps.done")}</StepLabel>
             <StepContent>
               <Grid container spacing={2} direction="row">
                 {this.renderPrevButton()}
@@ -214,7 +212,7 @@ class BufferView extends React.PureComponent {
                       this.setState({ activeStep: 0 });
                     }}
                   >
-                    Rensa
+                    {i18n.t("common.clear")}
                   </Button>
                 </Grid>
               </Grid>

@@ -1,0 +1,17 @@
+{
+  "anchor": {
+    "copyFailed": "Kopiering till urklipp misslyckades.",
+    "copyLink": "Kopiera länk",
+    "copyLinkTooltip": "Kopiera länk till urklipp",
+    "copySucceeded": "Kopiering till urklipp lyckades!",
+    "description": "Skapa en länk med kartans synliga lager, aktuella zoomnivå och utbredning",
+    "intro": "Skapa en länk med kartans synliga lager, aktuella zoomnivå och utbredning.",
+    "linkToCleanMap": "Skapa länk till karta utan verktyg etc.",
+    "linkToMap": "Skapa länk till karta",
+    "linkType": "Typ av länk",
+    "openLink": "Öppna länk",
+    "openLinkTooltip": "Öppna länk i nytt fönster",
+    "qrCode": "QR-kod",
+    "title": "Dela"
+  }
+}

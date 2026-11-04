@@ -6,6 +6,7 @@ import { Feature } from "ol";
 import { transform } from "ol/proj";
 import { Polyline } from "ol/format";
 import loadGoogleMapsApi from "../../utils/googleMapsLoader";
+import i18n from "src/i18n";
 
 class RouteModel {
   constructor(settings) {
@@ -14,10 +15,10 @@ class RouteModel {
     this.apiKey = settings.options.apiKey;
     this.travelMode = "WALKING";
     this.travelModeLabels = {
-      WALKING: "Gå",
-      DRIVING: "Kör",
-      TRANSIT: "Kollektivtrafik",
-      BICYCLING: "Cykla",
+      WALKING: i18n.t("routing.travelModes.walking"),
+      DRIVING: i18n.t("routing.travelModes.driving"),
+      TRANSIT: i18n.t("routing.travelModes.transit"),
+      BICYCLING: i18n.t("routing.travelModes.bicycling"),
     };
 
     this.position = {
@@ -103,9 +104,7 @@ class RouteModel {
         this.getCurrentPositionError
       );
     } else {
-      window.alert(
-        "Kan inte få position. Skriv startposition i rutan eller tryck position på kartan."
-      );
+      window.alert(i18n.t("routing.positionUnavailable"));
     }
   };
 
@@ -334,11 +333,11 @@ class RouteModel {
     p.innerHTML = `
                     <table class="table table-condensed">
                       <tbody>
-                        <tr><td><b>Färdsätt</b></td><td>${this.travelModeLabel}</td></tr>
-                        <tr><td><b>Avstånd</b></td><td>${res.routes[0].legs[0].distance.text} (${res.routes[0].legs[0].distance.value} m)</td></tr>
-                        <tr><td><b>Tid</b></td><td>${res.routes[0].legs[0].duration.text}</td></tr>
-                        <tr><td><b>Startadress</b></td><td>${res.routes[0].legs[0].start_address}</td></tr>
-                        <tr><td><b>Slutadress</b></td><td>${res.routes[0].legs[0].end_address}</td></tr>
+                        <tr><td><b>${i18n.t("routing.result.travelMode")}</b></td><td>${this.travelModeLabel}</td></tr>
+                        <tr><td><b>${i18n.t("routing.result.distance")}</b></td><td>${res.routes[0].legs[0].distance.text} (${res.routes[0].legs[0].distance.value} m)</td></tr>
+                        <tr><td><b>${i18n.t("routing.result.duration")}</b></td><td>${res.routes[0].legs[0].duration.text}</td></tr>
+                        <tr><td><b>${i18n.t("routing.result.startAddress")}</b></td><td>${res.routes[0].legs[0].start_address}</td></tr>
+                        <tr><td><b>${i18n.t("routing.result.endAddress")}</b></td><td>${res.routes[0].legs[0].end_address}</td></tr>
                       </tbody>
                     </table>
                     `;

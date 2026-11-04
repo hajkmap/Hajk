@@ -31,6 +31,7 @@ import {
 import Link from "@mui/material/Link";
 import ProductList from "./components/ProductList";
 import { Checkbox } from "@mui/material";
+import i18n, { configText } from "src/i18n";
 
 const StyledStepper = styled(Stepper)(({ theme }) => ({
   //specific request from SBK to reduce the default MUI stepper padding.
@@ -456,9 +457,10 @@ class GeosuiteExportView extends React.PureComponent {
   renderOrderStepDocument() {
     const { options } = this.props;
     const termsAndConditionsLink = this.#getTermsAndConditionsLink();
-    const documentDescription =
-      options.view?.projects?.order?.description ??
-      "Välj geoteknisk utredning nedan för att hämta motsvarande handlingar.";
+    const documentDescription = this.#configText(
+      "geosuiteExport.documents.description",
+      options.view?.projects?.order?.description
+    );
     return (
       <>
         <Grid
@@ -470,7 +472,7 @@ class GeosuiteExportView extends React.PureComponent {
         >
           <DescriptionOutlinedIcon />
           <TypographySubheading variant="subtitle1">
-            {"Geotekniska utredningar"}
+            {i18n.t("geosuiteExport.documents.title")}
           </TypographySubheading>
         </Grid>
         <Typography style={{ marginBottom: "8px" }}>
@@ -492,21 +494,21 @@ class GeosuiteExportView extends React.PureComponent {
           <Grid>
             <Button
               variant="text"
-              aria-label="Rensa"
+              aria-label={i18n.t("common.clear")}
               color="primary"
               onClick={this.handleDocumentSelectAllClear}
             >
-              {"Rensa"}
+              {i18n.t("common.clear")}
             </Button>
           </Grid>
           <Grid>
             <Button
               variant="text"
-              aria-label="Välj Alla"
+              aria-label={i18n.t("geosuiteExport.selectAll")}
               color="primary"
               onClick={this.handleDocumentSelectAllClear}
             >
-              {"Välj Alla"}
+              {i18n.t("geosuiteExport.selectAll")}
             </Button>
           </Grid>
         </Grid>
@@ -527,12 +529,12 @@ class GeosuiteExportView extends React.PureComponent {
                 alignItems: "center",
               }}
             >
-              {"Villkor för nyttjande"}
+              {i18n.t("geosuiteExport.termsOfUse")}
               <LaunchIcon fontSize="small" />
             </Box>
           </Link>
         </Grid>
-        {this.renderNextAndBackButtons("Ladda Ner", null)}
+        {this.renderNextAndBackButtons(i18n.t("common.download"), null)}
       </>
     );
   }
@@ -571,7 +573,7 @@ class GeosuiteExportView extends React.PureComponent {
     const { responsePending, responseFailed, projects } = this.state;
 
     if (responsePending) {
-      return this.renderPending("Hämtar resultat...");
+      return this.renderPending(i18n.t("geosuiteExport.fetchingResults"));
     }
 
     if (responseFailed) {
@@ -597,7 +599,7 @@ class GeosuiteExportView extends React.PureComponent {
     const { responsePending, responseFailed, documents } = this.state;
 
     if (responsePending) {
-      return this.renderPending("Hämtar resultat...");
+      return this.renderPending(i18n.t("geosuiteExport.fetchingResults"));
     }
 
     if (responseFailed) {
@@ -630,7 +632,9 @@ class GeosuiteExportView extends React.PureComponent {
       </Grid>
     ) : (
       <DivNoResultMessage>
-        <TypographyNoResultMessage>Inga resultat</TypographyNoResultMessage>
+        <TypographyNoResultMessage>
+          {i18n.t("common.noResults")}
+        </TypographyNoResultMessage>
       </DivNoResultMessage>
     );
   }
@@ -639,18 +643,22 @@ class GeosuiteExportView extends React.PureComponent {
   renderOrderStepGeoSuite() {
     const { options } = this.props;
     const termsAndConditionsLink = this.#getTermsAndConditionsLink();
-    const boreholeIntro =
-      options.view?.boreholes?.order?.intro ??
-      "Nedan visas alla borrhålsprojekt med undersökningspunkter inom det markerade området.";
-    const boreholeDescription =
-      options.view?.boreholes?.order?.description ??
-      "Välj om du vill ladda ner hela borrhålsprojektet eller endast punkter inom markering. Du kan välja generellt för alla eller ställa in för varje projekt.";
-    const referenceSystemText =
-      options.view?.boreholes?.order?.referenceSystemText ??
-      "Geotekniska undersökningspunkter är i koordinatsystemet SWEREF 99 12 00 samt höjdsystemet RH2000";
-    const deliveryInformationText =
-      options.view?.boreholes?.order?.informationText ??
-      "Informationen levereras i GeoSuite Toolbox-format via en länk som du får skickad till din e-postadress. För att kunna genomföra beställningen krävs att e-postadressen är registrerad i Geoarkivets molntjänst.";
+    const boreholeIntro = this.#configText(
+      "geosuiteExport.boreholes.intro",
+      options.view?.boreholes?.order?.intro
+    );
+    const boreholeDescription = this.#configText(
+      "geosuiteExport.boreholes.description",
+      options.view?.boreholes?.order?.description
+    );
+    const referenceSystemText = this.#configText(
+      "geosuiteExport.boreholes.referenceSystemText",
+      options.view?.boreholes?.order?.referenceSystemText
+    );
+    const deliveryInformationText = this.#configText(
+      "geosuiteExport.boreholes.informationText",
+      options.view?.boreholes?.order?.informationText
+    );
     const deliveryInformationLink = options.view?.boreholes?.order
       ?.informationLink || {
       linkText: "",
@@ -668,7 +676,7 @@ class GeosuiteExportView extends React.PureComponent {
           >
             <EmailOutlinedIcon />
             <TypographySubheading variant="subtitle1">
-              {"Borrhålsdata i GeoSuite-format"}
+              {i18n.t("geosuiteExport.boreholes.title")}
             </TypographySubheading>
           </Grid>
           <Typography
@@ -696,7 +704,9 @@ class GeosuiteExportView extends React.PureComponent {
                 style={{ padding: "0px" }}
                 expandIcon={<ExpandMoreIcon />}
               >
-                <TypographyBold>Referenssystem</TypographyBold>
+                <TypographyBold>
+                  {i18n.t("geosuiteExport.boreholes.referenceSystem")}
+                </TypographyBold>
               </AccordionSummary>
               <AccordionDetails style={{ padding: "0px" }}>
                 <Typography>{referenceSystemText}</Typography>
@@ -707,7 +717,9 @@ class GeosuiteExportView extends React.PureComponent {
                 style={{ padding: "0px" }}
                 expandIcon={<ExpandMoreIcon />}
               >
-                <TypographyBold>Leveransinformation</TypographyBold>
+                <TypographyBold>
+                  {i18n.t("geosuiteExport.boreholes.deliveryInformation")}
+                </TypographyBold>
               </AccordionSummary>
               <AccordionDetails style={{ padding: "0px" }}>
                 <Grid container>
@@ -734,14 +746,14 @@ class GeosuiteExportView extends React.PureComponent {
           <Grid style={{ marginTop: "16px" }} size={12}>
             <FormControl fullWidth>
               <FormLabel style={{ padding: "4px 0px" }}>
-                Din e-postadress
+                {i18n.t("geosuiteExport.yourEmail")}
               </FormLabel>
               <OutlinedInput
                 id="emailInput"
                 required
                 value={this.state.email}
                 margin="dense"
-                placeholder="E-postadress"
+                placeholder={i18n.t("geosuiteExport.email")}
                 error={
                   this.state.email.length === 0 ? false : !this.state.emailValid
                 }
@@ -768,13 +780,13 @@ class GeosuiteExportView extends React.PureComponent {
                   alignItems: "center",
                 }}
               >
-                {"Villkor för nyttjande"}
+                {i18n.t("geosuiteExport.termsOfUse")}
                 <LaunchIcon fontSize="small" />
               </Box>
             </Link>
           </Grid>
 
-          {this.renderNextAndBackButtons("Beställ", null)}
+          {this.renderNextAndBackButtons(i18n.t("geosuiteExport.order"), null)}
         </Grid>
       </div>
     );
@@ -782,15 +794,18 @@ class GeosuiteExportView extends React.PureComponent {
 
   renderConfirmationStep = () => {
     const { options } = this.props;
-    const deliveryConfirmationHeader =
-      options.view?.boreholes?.confirmation?.header ??
-      "Tack för din beställning!";
-    const confirmDeliveryInformationText =
-      options.view?.boreholes?.confirmation?.informationText ??
-      "Ett e-postmeddelande med vidare instruktioner kommer att skickas till dig.";
-    const whereNextText =
-      options.view?.boreholes?.confirmation?.whereNextText ??
-      "Klicka på VÄLJ MER för att hämta mer data för ditt markerade område eller gå vidare med KLAR.";
+    const deliveryConfirmationHeader = this.#configText(
+      "geosuiteExport.confirmation.header",
+      options.view?.boreholes?.confirmation?.header
+    );
+    const confirmDeliveryInformationText = this.#configText(
+      "geosuiteExport.confirmation.informationText",
+      options.view?.boreholes?.confirmation?.informationText
+    );
+    const whereNextText = this.#configText(
+      "geosuiteExport.confirmation.whereNextText",
+      options.view?.boreholes?.confirmation?.whereNextText
+    );
     const step = this.state.activeStep;
     return (
       <>
@@ -810,19 +825,19 @@ class GeosuiteExportView extends React.PureComponent {
             }}
             variant="contained"
             color="primary"
-            aria-label="Klar"
+            aria-label={i18n.t("geosuiteExport.done")}
           >
-            Klar
+            {i18n.t("geosuiteExport.done")}
           </Button>
           <Button
             onClick={() => {
               this.setState({ activeStep: 1 });
             }}
-            aria-label="Välj mer produkter"
+            aria-label={i18n.t("geosuiteExport.selectMoreProducts")}
             disabled={false}
             color="primary"
           >
-            Välj mer
+            {i18n.t("geosuiteExport.selectMore")}
           </Button>
         </div>
       </>
@@ -831,19 +846,21 @@ class GeosuiteExportView extends React.PureComponent {
 
   renderConfirmStepDocument = () => {
     const { options } = this.props;
-    const deliveryConfirmationHeader =
-      options.view?.projects?.confirmation?.header ??
-      "Tack för din beställning!";
+    const deliveryConfirmationHeader = this.#configText(
+      "geosuiteExport.confirmation.header",
+      options.view?.projects?.confirmation?.header
+    );
     const confirmDeliveryInformationText =
       options.view?.projects?.confirmation?.informationText ?? "";
-    const whereNextText =
-      options.view?.projects?.confirmation?.whereNextText ??
-      "Klicka på VÄLJ MER för att hämta mer data för ditt markerade område eller gå vidare med KLAR.";
+    const whereNextText = this.#configText(
+      "geosuiteExport.confirmation.whereNextText",
+      options.view?.projects?.confirmation?.whereNextText
+    );
 
     const { savingFile, step } = this.state;
 
     if (savingFile) {
-      return this.renderPending("Skapar ZIP-fil...");
+      return this.renderPending(i18n.t("geosuiteExport.creatingZip"));
     }
 
     let jsxConfirmDeliveryInformationText = null;
@@ -873,19 +890,19 @@ class GeosuiteExportView extends React.PureComponent {
             }}
             variant="contained"
             color="primary"
-            aria-label="Klar"
+            aria-label={i18n.t("geosuiteExport.done")}
           >
-            Klar
+            {i18n.t("geosuiteExport.done")}
           </Button>
           <Button
             onClick={() => {
               this.setState({ activeStep: 1 });
             }}
-            aria-label="Välj mer produkter"
+            aria-label={i18n.t("geosuiteExport.selectMoreProducts")}
             disabled={false}
             color="primary"
           >
-            Välj mer
+            {i18n.t("geosuiteExport.selectMore")}
           </Button>
         </div>
       </>
@@ -906,7 +923,7 @@ class GeosuiteExportView extends React.PureComponent {
           fullWidth
           style={{ marginBottom: "5px" }}
         >
-          Börja Om
+          {i18n.t("geosuiteExport.startOver")}
         </Button>
         <Button
           startIcon={<CancelOutlinedIcon />}
@@ -918,7 +935,7 @@ class GeosuiteExportView extends React.PureComponent {
           fullWidth
           style={{ marginTop: "5px" }}
         >
-          Avsluta
+          {i18n.t("geosuiteExport.finish")}
         </Button>
       </div>
     );
@@ -940,11 +957,11 @@ class GeosuiteExportView extends React.PureComponent {
             this.setState({ activeStep: step + 1 });
           }}
           variant="contained"
-          aria-label="Fortsätt till nästa steg"
+          aria-label={i18n.t("geosuiteExport.nextStep")}
           disabled={!this.state.steps?.[step + 1]?.["enterable"]}
           color="primary"
         >
-          {nextButtonName || "Fortsätt"}
+          {nextButtonName || i18n.t("common.continue")}
         </Button>
         <Button
           disabled={step === 0}
@@ -952,10 +969,10 @@ class GeosuiteExportView extends React.PureComponent {
             this.setState({ activeStep: step - 1 });
           }}
           variant="text"
-          aria-label="Gå tillbaka till föregående steg"
+          aria-label={i18n.t("geosuiteExport.previousStep")}
           color="primary"
         >
-          {backButtonName || "Tillbaka"}
+          {backButtonName || i18n.t("common.back")}
         </Button>
       </Box>
     );
@@ -979,11 +996,16 @@ class GeosuiteExportView extends React.PureComponent {
 
   #getErrorMessage = () => {
     const { options } = this.props;
-    return (
-      options.view?.errorMessage ??
-      "Kunde inte hämta resultat. Vänligen försök igen. Kontakta oss om felet kvarstår."
+    return this.#configText(
+      "geosuiteExport.errorMessage",
+      options.view?.errorMessage
     );
   };
+
+  // Admin texts are assumed to be Swedish, see configText(). Unlike
+  // configText(), an empty admin text is kept, as it was before i18n.
+  #configText = (defaultKey, adminValue) =>
+    adminValue === "" ? "" : configText(defaultKey, adminValue);
 
   componentDidMount() {
     //The standard way that we start the stepper is by changing the activeStep state
@@ -1045,9 +1067,10 @@ class GeosuiteExportView extends React.PureComponent {
 
   render() {
     const { options } = this.props;
-    const description =
-      options.view?.digitizeDescription ??
-      "Rita ditt område i kartan, avsluta genom att dubbelklicka.";
+    const description = this.#configText(
+      "geosuiteExport.digitizeDescription",
+      options.view?.digitizeDescription
+    );
     return (
       <>
         <div>
@@ -1056,7 +1079,7 @@ class GeosuiteExportView extends React.PureComponent {
             orientation="vertical"
           >
             <Step key="selectArea" completed={false}>
-              <StepLabel>Markera område</StepLabel>
+              <StepLabel>{i18n.t("geosuiteExport.steps.selectArea")}</StepLabel>
               <StepContent>
                 <div>
                   <Typography
@@ -1072,11 +1095,13 @@ class GeosuiteExportView extends React.PureComponent {
               </StepContent>
             </Step>
             <Step key="selectData" completed={false}>
-              <StepLabel>Välj produkt</StepLabel>
+              <StepLabel>
+                {i18n.t("geosuiteExport.steps.selectProduct")}
+              </StepLabel>
               <StepContent>
                 <FormControl component="fieldset" label="">
                   <RadioGroup
-                    aria-label="selektera produkt"
+                    aria-label={i18n.t("geosuiteExport.steps.selectProduct")}
                     name="select-product"
                     value={this.state.selectedProduct}
                     onChange={(e) =>
@@ -1087,13 +1112,13 @@ class GeosuiteExportView extends React.PureComponent {
                   >
                     <FormControlLabel
                       value="document"
-                      label="Geotekniska utredningar"
+                      label={i18n.t("geosuiteExport.documents.title")}
                       control={<Radio color="primary" />}
                       disabled={!this.isProjectsActive()}
                     ></FormControlLabel>
                     <FormControlLabel
                       value="borrhal"
-                      label="Borrhålsdata i GeoSuite format"
+                      label={i18n.t("geosuiteExport.boreholes.title")}
                       control={<Radio color="primary" />}
                       disabled={!this.isBoreholesActive()}
                     ></FormControlLabel>
@@ -1103,7 +1128,7 @@ class GeosuiteExportView extends React.PureComponent {
               </StepContent>
             </Step>
             <Step key="order" completed={false}>
-              <StepLabel>Leveransalternativ</StepLabel>
+              <StepLabel>{i18n.t("geosuiteExport.steps.delivery")}</StepLabel>
               <StepContent>
                 {this.state.selectedProduct === "document"
                   ? this.renderOrderStepDocument()
@@ -1111,7 +1136,9 @@ class GeosuiteExportView extends React.PureComponent {
               </StepContent>
             </Step>
             <Step key="confirmation" completed={false}>
-              <StepLabel>Bekräftelse</StepLabel>
+              <StepLabel>
+                {i18n.t("geosuiteExport.steps.confirmation")}
+              </StepLabel>
               <StepContent>
                 {this.state.selectedProduct === "document"
                   ? this.renderConfirmStepDocument()

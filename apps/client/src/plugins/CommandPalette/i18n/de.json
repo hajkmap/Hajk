@@ -1,0 +1,73 @@
+{
+  "commandPalette": {
+    "backDescription": "Zurück zu den Befehlen",
+    "backgroundLayers": "Hintergrundebenen",
+    "backgrounds": {
+      "description": "Hintergrundebene der Karte auswählen",
+      "title": "Hintergrundebene wechseln"
+    },
+    "clearSearch": {
+      "description": "Suche leeren und Suchfeld fokussieren",
+      "title": "Suche leeren"
+    },
+    "closeAllWindows": {
+      "description": "Alle geöffneten Werkzeugfenster schließen",
+      "title": "Alle Fenster schließen"
+    },
+    "darkTheme": "Zum dunklen Design wechseln",
+    "hideAllLayers": {
+      "description": "Alle sichtbaren Ebenen ausblenden",
+      "title": "Alle aktiven Ebenen ausblenden"
+    },
+    "layers": {
+      "description": "Kartenebenen anzeigen und verwalten",
+      "title": "Ebenen"
+    },
+    "lightTheme": "Zum hellen Design wechseln",
+    "moreBackgrounds_one": "{{count}} Hintergrundebene anzeigen",
+    "moreBackgrounds_other": "Alle {{count}} Hintergrundebenen anzeigen",
+    "moreLayers_one": "{{count}} Ebene anzeigen",
+    "moreLayers_other": "Alle {{count}} Ebenen anzeigen",
+    "morePresets_one": "{{count}} Schnellzugriff anzeigen",
+    "morePresets_other": "Alle {{count}} Schnellzugriffe anzeigen",
+    "moreTools_one": "{{count}} Werkzeug anzeigen",
+    "moreTools_other": "Alle {{count}} Werkzeuge anzeigen",
+    "noBackgrounds": "Keine Hintergrundebenen gefunden",
+    "noLayers": "Keine Ebenen gefunden",
+    "noPresets": "Keine Schnellzugriffe gefunden",
+    "noSearchCommands": "Keine Suchbefehle gefunden",
+    "noTools": "Keine Werkzeuge gefunden",
+    "openTools": {
+      "description": "Alle verfügbaren Werkzeuge anzeigen",
+      "title": "Werkzeuge öffnen"
+    },
+    "presets": {
+      "description": "Verknüpfungen zu vordefinierten Orten und Ebenen",
+      "title": "Schnellzugriffe"
+    },
+    "recentlyUsed": "Zuletzt verwendet",
+    "searchCommands": {
+      "description": "Suchoptionen anzeigen",
+      "title": "Suchen..."
+    },
+    "searchExtent": {
+      "description": "In der aktuellen Kartenansicht suchen",
+      "title": "Im Kartenausschnitt suchen"
+    },
+    "searchFor": "Im Suchwerkzeug nach \"{{query}}\" suchen",
+    "searchPolygon": {
+      "description": "Ein Polygon zeichnen, um innerhalb der Fläche zu suchen",
+      "title": "Mit Polygon suchen"
+    },
+    "searchRadius": {
+      "description": "Einen Kreis zeichnen, um innerhalb des Radius zu suchen",
+      "title": "Mit Radius suchen"
+    },
+    "searchSelect": {
+      "description": "Objekte in der Karte auswählen, um zu suchen",
+      "title": "Mit Objekt suchen"
+    },
+    "searchTool": "Suche",
+    "tools": "Werkzeuge"
+  }
+}

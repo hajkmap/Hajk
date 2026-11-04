@@ -12,6 +12,7 @@ import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import TableViewOutlinedIcon from "@mui/icons-material/TableViewOutlined";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 export default function LayerItemOptions({
   layer,
@@ -111,7 +112,7 @@ export default function LayerItemOptions({
       console.error(this);
       const caption = layer.get("caption");
       enqueueSnackbar(
-        `Serverfel: attributtabellen för lagret "${caption}" kunde inte visas`,
+        i18n.t("layerSwitcher.attributeTableError", { caption }),
         {
           variant: "error",
           anchorOrigin: { vertical: "bottom", horizontal: "center" },
@@ -129,7 +130,7 @@ export default function LayerItemOptions({
         aria-expanded={optionsMenuIsOpen ? "true" : undefined}
         onClick={handleShowMoreOptionsClick}
       >
-        <HajkToolTip title="Val för lager">
+        <HajkToolTip title={i18n.t("layerSwitcher.layerOptions")}>
           <MoreVertOutlinedIcon />
         </HajkToolTip>
       </IconButton>
@@ -144,7 +145,9 @@ export default function LayerItemOptions({
             <ListItemIcon>
               <TableViewOutlinedIcon fontSize="small" />
             </ListItemIcon>
-            <ListItemText>Visa attributtabell</ListItemText>
+            <ListItemText>
+              {i18n.t("layerSwitcher.showAttributeTable")}
+            </ListItemText>
           </MenuItem>
         )}
         {isDownloadable() && (
@@ -152,7 +155,7 @@ export default function LayerItemOptions({
             <ListItemIcon>
               <FileDownloadOutlinedIcon fontSize="small" />
             </ListItemIcon>
-            <ListItemText>Ladda ner</ListItemText>
+            <ListItemText>{i18n.t("search.results.download")}</ListItemText>
           </MenuItem>
         )}
       </Menu>

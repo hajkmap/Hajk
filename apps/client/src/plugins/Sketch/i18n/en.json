@@ -1,0 +1,311 @@
+{
+  "sketch": {
+    "activities": {
+      "ADD": {
+        "information": "Add objects by drawing in the map. Start by choosing the type of object you want to draw below. Note that export to GPX only supports points and lines.",
+        "tooltip": "Add new objects."
+      },
+      "DELETE": {
+        "information": "Click the drawn object you want to delete, or click the button below to delete all drawn objects.",
+        "tooltip": "Delete objects."
+      },
+      "EDIT": {
+        "information": "Edit nodes (delete a node with alt-click), change the draw order, or change the color of drawn objects.",
+        "tooltip": "Edit existing objects."
+      },
+      "MOVE": {
+        "information": "Click the object in the map that you want to move to activate \"move mode\". Then drag the object to the right place.",
+        "tooltip": "Move existing objects."
+      },
+      "OGC": {
+        "information": "Here you can choose an editable layer connected to a map server.",
+        "tooltip": "Choose an editable layer to save to."
+      },
+      "SAVE": {
+        "information": "Need a break? Save what you've drawn and continue later. Note that only the objects visible in the map are saved.",
+        "tooltip": "Save drawn objects."
+      },
+      "SETTINGS": {
+        "information": "Here you can change the tool's settings.",
+        "tooltip": "Change whether the objects' measurements are shown, etc."
+      },
+      "UPLOAD": {
+        "information": "Import or export drawn objects in .kml/.gpx/.geojson format. Use the buttons below, or drag a file straight into the map.",
+        "tooltip": "Download or upload drawn objects."
+      }
+    },
+    "buffer": {
+      "buffer": "Buffer",
+      "clickToDraw": "Click here to draw objects",
+      "clickToSelect": "Click here to select objects",
+      "distance": "Buffer distance (meters)",
+      "distanceStep": "Enter buffer distance",
+      "done": "Done",
+      "restart": "Start over",
+      "selectAtLeastOne": "You need to select at least one object in the map to buffer",
+      "selectObjects": "Select objects",
+      "selectStep": "Select objects to buffer",
+      "turnOff": "Turn off"
+    },
+    "delete": {
+      "cookiesRequired": "It looks like you've chosen not to allow functional cookies. Because of this, you can't see your recently deleted objects. Click below to change the settings.",
+      "deleteAll": "Delete all drawn objects",
+      "recentlyDeleted": "Recently deleted:",
+      "restoreHint": "Click to restore the drawn object."
+    },
+    "deleteButton": "Delete",
+    "description": "Create your own geometries!",
+    "drawingsRemovedServiceSelected": "Drawn objects removed. Editable layer selected.",
+    "drawTypes": {
+      "Arrow": {
+        "label": "Arrow",
+        "tooltip": "Draw an arrow in the map by clicking once per node, finish with a double click."
+      },
+      "Circle": {
+        "label": "Circle",
+        "tooltip": "Draw a circle in the map by clicking once where the circle should start, then drag to the size you want and release."
+      },
+      "LineString": {
+        "label": "Line",
+        "tooltip": "Draw a line in the map by clicking once per node, finish with a double click."
+      },
+      "Point": {
+        "label": "Point",
+        "tooltip": "Add a point to the map by clicking where you want it."
+      },
+      "Polygon": {
+        "label": "Polygon",
+        "tooltip": "Draw a polygon in the map by clicking once per node, finish with a double click."
+      },
+      "Rectangle": {
+        "label": "Rectangle",
+        "tooltip": "Draw a rectangle in the map by clicking once where the rectangle should start, then drag to the size you want and release."
+      },
+      "Select": {
+        "label": "Select in the map",
+        "tooltip": "Click an existing object in the map to copy it into the drawing layer."
+      },
+      "Text": {
+        "label": "Text",
+        "tooltip": "Add text to the map by clicking where you want it."
+      }
+    },
+    "edit": {
+      "allowNodeEditing": "Allow node editing",
+      "arrange": "Arrange",
+      "bringForward": "Bring forward",
+      "bringToFront": "Bring to front",
+      "clickObjectHint": "Click an object in the map to change its appearance or its draw order.",
+      "disableNodeEditingHint": "Turn off node editing to make it easier to select objects in the map for changing color etc.",
+      "duplicate": "Duplicate",
+      "duplicateHint": "Click to duplicate the selected object.",
+      "enableNodeEditingHint": "Turn on to edit the objects' shape in the map.",
+      "managedByService": "This object is managed by an editable layer.",
+      "sendBackward": "Send backward",
+      "sendToBack": "Send to back"
+    },
+    "enterText": "Enter text",
+    "explode": {
+      "failed": "Couldn't separate the object",
+      "notFound": "Couldn't find the object to separate",
+      "notMulti": "The object isn't a multi-feature"
+    },
+    "finishDrawing": "Finish drawing",
+    "fixed": {
+      "addSegment": "Add segment",
+      "addSegmentHint": "First click in the map to set the start point, then click here to add each segment",
+      "direction": "Direction (degrees)",
+      "directionHint": "Enter the direction in degrees. 0° is north, 90° is east, 180° is south, 270° is west",
+      "disableHint": "Click to turn off fixed length and direction",
+      "drawManually": "Draw manually",
+      "enableHint": "Click to draw segments with fixed length and direction",
+      "finishDrawingHint": "Finish the drawing",
+      "length": "Segment length (meters)",
+      "lengthHint": "Enter the length of each segment in meters (0.1 - 100000 m)"
+    },
+    "layerNotFound": "Couldn't find the Sketch layer",
+    "merge": {
+      "failed": "Couldn't merge the objects. Check that all objects have the same geometry type.",
+      "needTwo": "At least two objects are needed to merge",
+      "notEnough": "Couldn't find enough objects"
+    },
+    "move": {
+      "allowFreeMove": "Allow free movement",
+      "direction": "Direction (degrees)",
+      "directionHint": "Enter the direction to move the objects in. 0 degrees is due north, 90 degrees is due east, etc.",
+      "disableFreeMoveHint": "Turn off to prevent moving the objects in the map.",
+      "distance": "Distance (meters)",
+      "distanceHint": "Enter how many meters you want to move the objects.",
+      "enableFreeMoveHint": "Turn on to allow moving the objects in the map.",
+      "fixedMove": "Fixed move",
+      "move": "Move",
+      "rotate": "Rotate",
+      "rotateHint": "Enter how many degrees to rotate the objects."
+    },
+    "multi": {
+      "drawnParts": "Drawn parts:",
+      "finishAndSave": "Finish multi-drawing and save the object",
+      "finishHint": "Click to finish multi-drawing",
+      "startHint": "Click to draw several parts that become one object (e.g. MultiPolygon)",
+      "title": "Multi-drawing"
+    },
+    "ogc": {
+      "chooseLayer": "Choose an editable layer to save to",
+      "openAttributeEditor": "Open attribute editor"
+    },
+    "pixels_one": "{{count}} pixel",
+    "pixels_other": "{{count}} pixels",
+    "prompts": {
+      "ArrowHelp": "An arrow is created by clicking a position for each node, finish with a double click.",
+      "CircleHelp": "You can create a circle by clicking with a fixed radius, or drag to get the radius you want.",
+      "DELETEHelp": "Click an object to delete it from your sketch.",
+      "EDITHelp": "Click an object to change its appearance or draw order.",
+      "LineStringHelp": "Create lines by clicking a position for each node, finish with a double click.",
+      "MOVEHelp": "Click an object to move it.",
+      "MultiDrawHelp": "Draw several separate parts that become one object (MultiPolygon/MultiLineString/MultiPoint). Click 'Finish multi-drawing' when you're done.",
+      "OGCHelp": "Here you can activate an editable layer to save to.",
+      "PointHelp": "Click a position to add a point.",
+      "PolygonHelp": "Create a polygon by clicking a position for each node, finish with a double click.",
+      "RectangleHelp": "Create a rectangle by holding the left mouse button and dragging over an area to get the size you want.",
+      "SAVEHelp": "Here you can save a workspace to continue your work later. To overwrite an older workspace, enter the same name.",
+      "saveNoFeatures": "Couldn't create a workspace, no drawn objects were found.",
+      "saveOverflow": "The objects couldn't be saved. The workspace has too many objects.",
+      "saveSuccess": "The workspace was saved.",
+      "SelectHelp": "Click an existing object in the map to copy it into the drawing layer.",
+      "TextHelp": "Click a position to add text."
+    },
+    "save": {
+      "cookiesRequired": "It looks like you've chosen not to allow functional cookies. Because of this, you can't save your drawn objects. Click below to change the settings.",
+      "deleteConfirm": "Are you sure you want to delete the workspace? This can't be undone.",
+      "deleteHint": "Click to delete the workspace.",
+      "deleteTitle": "Delete workspace",
+      "lastUpdated": "The workspace was last updated {{date}}",
+      "loadHint": "Click to load the objects.",
+      "maxReached": "The maximum number of workspaces has been saved. Delete one, or overwrite one by entering one of the names in the list below.",
+      "minLength": "At least four characters are needed to create a workspace.",
+      "nameHint": "Enter a name so that the workspace can be identified later.",
+      "nameTaken": "The name is taken. Replace workspace \"{{name}}\"?",
+      "noneFound": "No saved workspaces were found.",
+      "saved": "Saved workspaces:",
+      "saveHint": "Click to save the drawn objects in the map."
+    },
+    "selectFeaturesToCopy": "Select the objects you want to copy",
+    "serviceSelectedDrawingsKept_one": "Editable layer selected. {{count}} drawn object remains in the map.",
+    "serviceSelectedDrawingsKept_other": "Editable layer selected. {{count}} drawn objects remain in the map.",
+    "settings": {
+      "areaUnit": "Unit, area",
+      "areaUnitHelp": "Choose the unit for area measurements.",
+      "enableTextForLength": "Enable text on the objects to show their length",
+      "enableTextForPerimeter": "Enable text on the objects to show their perimeter/radius.",
+      "helperTextsLabel": "Help texts enabled",
+      "helperTextsOff": "Turn off to hide help texts.",
+      "helperTextsOn": "Turn on to show help texts.",
+      "kinkMarkersLabel": "Show geometry errors",
+      "kinkMarkersOff": "Turn off to hide red markers where the geometry crosses itself. Warnings about self-intersections are always shown.",
+      "kinkMarkersOn": "Turn on to show red markers where the geometry crosses itself. Warnings about self-intersections are always shown.",
+      "lengthUnit": "Unit, length",
+      "lengthUnitHelp": "Choose the unit for length measurements.",
+      "measurement": "Measurement settings",
+      "pointPrecision": "Measuring precision, points",
+      "pointPrecisionHelp": "Choose the precision for the coordinates of points.",
+      "precision": "Measuring precision",
+      "precisionHelp": "Choose the precision of the measured values.",
+      "showAreaLabel": "Show area",
+      "showAreaOff": "Turn off to hide the area of the objects.",
+      "showAreaOn": "Turn on to show the area of the objects.",
+      "showLengthLabel": "Show length",
+      "showLengthOff": "Turn off to hide the length of the objects.",
+      "showLengthOn": "Turn on to show the length of the objects.",
+      "showPerimeterLabel": "Show perimeter/radius",
+      "showPerimeterOff": "Turn off to hide the perimeter/radius of the objects.",
+      "showPerimeterOn": "Turn on to show the perimeter/radius of the objects.",
+      "showTextLabel": "Show text on the objects",
+      "showTextOff": "Turn off to hide text on the objects.",
+      "showTextOn": "Turn on to show text on the objects.",
+      "snapLabel": "Snapping enabled",
+      "snapOff": "Turn off snapping. When snapping is on, the drawing tool automatically snaps to nearby points and lines.",
+      "snapOn": "Turn on snapping. When snapping is on, the drawing tool automatically snaps to nearby points and lines.",
+      "snapTolerance": "Snapping distance",
+      "snapToleranceHelp": "Choose how sensitive the snapping should be. A higher value means snapping activates from further away."
+    },
+    "split": {
+      "failed": "Couldn't split the object",
+      "notFound": "Couldn't find the object to split"
+    },
+    "strokeTypes": {
+      "dashed": {
+        "label": "Dashed",
+        "tooltip": "Dashed line."
+      },
+      "dotted": {
+        "label": "Dotted",
+        "tooltip": "Dotted line."
+      },
+      "none": {
+        "label": "None",
+        "tooltip": "No line."
+      },
+      "solid": {
+        "label": "Solid",
+        "tooltip": "Solid line."
+      }
+    },
+    "style": {
+      "appearance": "Appearance",
+      "background": "Color - background",
+      "changeHint": "Click here to change the {{name}}.",
+      "color": "Color",
+      "fill": "Fill",
+      "foreground": "Color - foreground",
+      "large": "Large",
+      "line": "Line",
+      "lineType": "Line type",
+      "medium": "Medium",
+      "radius": "Radius (m)",
+      "reset": "Reset the appearance to the defaults",
+      "size": "Size",
+      "small": "Small",
+      "textSize": "Text size",
+      "variant": "Variant",
+      "widthAndColor": "Width and color"
+    },
+    "title": "Draw",
+    "titleHint": "Enter a title that can be used to identify the object.",
+    "type": "Type",
+    "units": {
+      "AUTO": "Automatic",
+      "HECTARE": "Hectares (ha)",
+      "KM": "Kilometers (km)",
+      "KM2": "Square kilometers (km²)",
+      "M": "Meters (m)",
+      "M2": "Square meters (m²)"
+    },
+    "upload": {
+      "chooseFiles": "Choose files",
+      "chooseFilesHint": "Choose one or more .kml, .gpx or .geojson files",
+      "exportGeoJson": "Export to GeoJSON",
+      "exportGeoJsonHint": "Click to export all drawn objects to a .geojson file. GeoJSON supports all geometry types and keeps styles. Circles are exported as polygons.",
+      "exportGpx": "Export to GPX",
+      "exportGpxHint": "Click to export all drawn objects to a .gpx file. GPX only supports points (waypoints) and lines (tracks/routes). Polygons and other complex geometries are left out.",
+      "exportKml": "Export to KML",
+      "exportKmlHint": "Click to export all drawn objects to a .kml file. KML supports all geometry types including polygons, lines, points and text.",
+      "hideLabels": "Click here to hide the objects' labels.",
+      "hideObjects": "Click to hide the objects from the map.",
+      "import": "Import drawn objects",
+      "importFailed": "Couldn't import \"{{fileName}}\". The file is damaged or has the wrong format.",
+      "importHint": "Click to open a dialog where you can choose a .kml, .gpx or .geojson file from your computer.",
+      "readError": "An error occurred while reading the files.",
+      "removeImported": "Click to remove the imported objects.",
+      "showLabels": "Click here to show the objects' labels.",
+      "showObjects": "Click to show the objects in the map.",
+      "unsupportedFiles": "Hajk only supports .kml, .gpx and .geojson files. One or more files were ignored.",
+      "uploadedFiles": "Uploaded files"
+    },
+    "validation": {
+      "lineKinks_one": "The line has {{count}} self-intersection. Please check and correct the geometry.",
+      "lineKinks_other": "The line has {{count}} self-intersections. Please check and correct the geometry.",
+      "polygonKinks_one": "The polygon has {{count}} self-intersection. Please check and correct the geometry.",
+      "polygonKinks_other": "The polygon has {{count}} self-intersections. Please check and correct the geometry."
+    }
+  }
+}

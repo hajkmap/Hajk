@@ -2,8 +2,10 @@ import { Box, Fab } from "@mui/material";
 import NavigationIcon from "@mui/icons-material/Navigation";
 import { darken } from "@mui/material/styles";
 import { visuallyHidden } from "@mui/utils";
+import { useTranslation } from "react-i18next";
 
 const ScrollToTop = (props) => {
+  const { t } = useTranslation();
   return (
     <Fab
       size="small"
@@ -23,7 +25,7 @@ const ScrollToTop = (props) => {
         },
       })}
     >
-      <Box sx={visuallyHidden}>Scrolla till toppen av dokumentet</Box>
+      <Box sx={visuallyHidden}>{t("documentHandler.scrollToTop")}</Box>
       {/* Inner box so opacity can fade the disk. The Fab stays
           transparent — MUI resets its background on hover/focus,
           so opacity on the Fab itself has no painted surface to fade. */}

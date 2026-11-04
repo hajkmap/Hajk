@@ -1,0 +1,17 @@
+{
+  "buffer": {
+    "buffer": "Buffra",
+    "description": "Skapa en buffer runt objekt utvalda objekt i kartan",
+    "distanceLabel": "Bufferavstånd (i meter)",
+    "selectAtLeastOne": "Du måste markera minst ett objekt i kartan för att kunna buffra",
+    "selectFeatures": "Välj objekt",
+    "selectMultiple": "Markera flera objekt",
+    "startOver": "Börja om",
+    "steps": {
+      "distance": "Ange bufferavstånd",
+      "done": "Klart",
+      "select": "Välj objekt att buffra"
+    },
+    "title": "Buffra"
+  }
+}

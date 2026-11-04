@@ -1,0 +1,26 @@
+{
+  "location": {
+    "autoRotate": "Rotera automatiskt",
+    "controlTooltip": "Positionera: Visa min position i kartan",
+    "description": "Visa min position i kartan",
+    "details": {
+      "accuracy": "Precision (m)",
+      "altitude": "Höjd (m. ö. h.)",
+      "altitudeAccuracy": "Höjdprecision (m)",
+      "heading": "Riktning (rad)",
+      "speed": "Hastighet (m/s)"
+    },
+    "error": "Kunde inte fastställa din plats. Felkod: {{code}}. Detaljer: \"{{message}}\".",
+    "follow": "Följ position",
+    "property": "Egenskap",
+    "showMyPosition": "Visa min position",
+    "title": "Positionera",
+    "tooltip": {
+      "accuracy": "Noggranhet: {{accuracy}} m",
+      "altitude": "Höjd: {{altitude}} (+/- {{altitudeAccuracy}}) m",
+      "heading": "Riktning: {{heading}} rad",
+      "speed": "Hastighet: {{speed}} km/h"
+    },
+    "unavailable": "Positionera: position ej tillgänglig"
+  }
+}

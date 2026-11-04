@@ -4,6 +4,7 @@ import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import { styled } from "@mui/material/styles";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 const IconWrapper = styled("div")(({ theme }) => ({
   display: "flex",
@@ -30,7 +31,9 @@ const StyledTypography = styled(Typography)(() => ({
 class SearchResultsDatasetFeature extends React.PureComponent {
   renderShowInMapCheckbox = () => {
     const { visibleInMap } = this.props;
-    const helpText = !visibleInMap ? "Lägg till i urval" : "Ta bort från urval";
+    const helpText = !visibleInMap
+      ? i18n.t("search.results.addToSelection")
+      : i18n.t("search.results.removeFromSelection");
 
     return (
       <HajkToolTip title={helpText}>

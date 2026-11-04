@@ -5,6 +5,7 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import PublicIcon from "@mui/icons-material/Public";
 import { styled } from "@mui/material/styles";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 const MenuTogglerButton = styled(IconButton)(() => ({
   minWidth: 30,
@@ -24,14 +25,14 @@ class SearchResultsDownloadMenu extends React.PureComponent {
 
     this.downloadOptions = [
       {
-        name: "Ladda ner till Excel",
+        name: i18n.t("search.results.downloadExcel"),
         icon: <DescriptionIcon />,
         type: "Excel",
         enabled: true,
         onClick: this.handleXLSXDownloadClick,
       },
       {
-        name: "Ladda ner till KML",
+        name: i18n.t("search.results.downloadKml"),
         icon: <PublicIcon />,
         type: "kml",
         enabled: true,
@@ -57,7 +58,7 @@ class SearchResultsDownloadMenu extends React.PureComponent {
 
   renderMenuTogglerButton = () => {
     return (
-      <HajkToolTip title="Ladda ner objekten">
+      <HajkToolTip title={i18n.t("search.results.downloadFeatures")}>
         <MenuTogglerButton
           onClick={(e) =>
             this.setState({
@@ -99,7 +100,7 @@ class SearchResultsDownloadMenu extends React.PureComponent {
   render() {
     return (
       <>
-        <HajkToolTip title="Ladda ner objekten">
+        <HajkToolTip title={i18n.t("search.results.downloadFeatures")}>
           <MenuTogglerButton
             onClick={(e) =>
               this.setState({

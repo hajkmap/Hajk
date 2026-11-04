@@ -11,6 +11,7 @@ import { Button } from "@mui/material";
 import GeneralOptions from "./GeneralOptions";
 import AdvancedOptions from "./AdvancedOptions";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 const Root = styled("div")(() => ({
   display: "flex",
@@ -110,7 +111,7 @@ class PrintView extends React.PureComponent {
 
     props.localObserver.subscribe("print-completed", () => {
       this.props.closeSnackbar(this.snackbarKey);
-      this.props.enqueueSnackbar("Din utskrift är klar!", {
+      this.props.enqueueSnackbar(i18n.t("print.done"), {
         variant: "success",
       });
       this.setState({ printInProgress: false });
@@ -118,19 +119,16 @@ class PrintView extends React.PureComponent {
 
     props.localObserver.subscribe("print-failed-to-save", () => {
       this.props.closeSnackbar(this.snackbarKey);
-      this.props.enqueueSnackbar(
-        "Utskriften gick inte att spara, kontakta systemadministratören.",
-        {
-          variant: "error",
-        }
-      );
+      this.props.enqueueSnackbar(i18n.t("print.saveFailed"), {
+        variant: "error",
+      });
       this.setState({ printInProgress: false });
     });
 
     this.localObserver.subscribe("error-loading-image", (imgLoadingError) => {
       console.warn(imgLoadingError.error);
       this.props.enqueueSnackbar(
-        `"${imgLoadingError.type} kunde inte laddas in."`,
+        i18n.t("print.imageLoadFailed", { image: imgLoadingError.type }),
         {
           variant: "warning",
         }
@@ -166,13 +164,10 @@ class PrintView extends React.PureComponent {
     e.preventDefault();
     // Print starts, tell the user
     this.setState({ printInProgress: true });
-    this.snackbarKey = this.props.enqueueSnackbar(
-      "Utskrift pågår – var god vänta…",
-      {
-        variant: "info",
-        persist: true,
-      }
-    );
+    this.snackbarKey = this.props.enqueueSnackbar(i18n.t("print.inProgress"), {
+      variant: "info",
+      persist: true,
+    });
 
     this.valuesToRestoreFrom = {
       snackbarKey: this.snackbarKey,
@@ -216,12 +211,9 @@ class PrintView extends React.PureComponent {
 
     // Print done, hide messages
     this.props.closeSnackbar(this.valuesToRestoreFrom.snackbarKey);
-    this.props.enqueueSnackbar(
-      "Du avbröt utskriften – ingen data har sparats",
-      {
-        variant: "warning",
-      }
-    );
+    this.props.enqueueSnackbar(i18n.t("print.cancelled"), {
+      variant: "warning",
+    });
     this.setState({ printInProgress: false });
   };
 
@@ -386,10 +378,10 @@ class PrintView extends React.PureComponent {
               variant="fullWidth"
               textColor="inherit"
             >
-              <HajkToolTip title="Generella inställningar">
+              <HajkToolTip title={i18n.t("common.generalSettings")}>
                 <Tab icon={<PrintIcon />} {...this.a11yProps(0)} />
               </HajkToolTip>
-              <HajkToolTip title="Avancerade inställningar">
+              <HajkToolTip title={i18n.t("print.advancedSettings")}>
                 <Tab icon={<SettingsIcon />} {...this.a11yProps(1)} />
               </HajkToolTip>
             </Tabs>
@@ -405,7 +397,7 @@ class PrintView extends React.PureComponent {
                 onClick={this.initiatePrint}
                 disabled={printInProgress || !printOptionsOk}
               >
-                Skriv ut
+                {i18n.t("print.title")}
               </Button>
             </PrintButtonContainer>
           </TabContent>

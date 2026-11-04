@@ -1,5 +1,6 @@
 import { useTheme } from "@mui/material/styles";
 import { getThemedLegendGraphicUrl } from "../LayerSwitcherUtils";
+import i18n from "src/i18n";
 
 export default function LegendIcon({ url }) {
   const theme = useTheme();
@@ -7,7 +8,7 @@ export default function LegendIcon({ url }) {
 
   return (
     <img
-      alt="Teckenförklaringsikon"
+      alt={i18n.t("layerSwitcher.legendIcon")}
       src={getThemedLegendGraphicUrl(url, isDarkMode)}
       style={{
         width: "18px",

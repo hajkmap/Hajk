@@ -10,6 +10,7 @@ import Popover from "@mui/material/Popover";
 
 // Version 8.2.0 of react-horizontal-scrolling-menu removed drag functionality. We need to manage drag events manually.
 import { horizontalScrollDragManager } from "../HorizontalScrollMenuDragManager";
+import i18n from "src/i18n";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   // Display as inline-flex on desktop to prevent the breadcrumbs from wrapping to the next line.
@@ -200,7 +201,7 @@ class BreadCrumb extends Component {
                   ? undefined
                   : this.setLayerOpacity(layer)
               }
-              aria-label="Visa/dölj lagret tillfälligt"
+              aria-label={i18n.t("layerSwitcher.toggleLayerTemporarily")}
             >
               {!hidden ? <VisibilityIcon /> : <VisibilityOffIcon />}
             </IconButton>
@@ -231,7 +232,7 @@ class BreadCrumb extends Component {
                   ? undefined
                   : this.setLayerVisibility(layer)
               }
-              aria-label="Ta bort lagret från kartan"
+              aria-label={i18n.t("layerSwitcher.removeLayerFromMap")}
             >
               <CloseIcon />
             </IconButton>

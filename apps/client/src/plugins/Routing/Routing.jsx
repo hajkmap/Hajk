@@ -26,8 +26,6 @@ class Routing extends React.PureComponent {
         type="Routing"
         custom={{
           icon: <DirectionsIcon />,
-          title: "Navigation",
-          description: "Hitta rätt väg till din destination",
           height: "auto",
           width: 400,
         }}

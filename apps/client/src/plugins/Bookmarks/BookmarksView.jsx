@@ -17,6 +17,7 @@ import ConfirmationDialog from "../../components/ConfirmationDialog";
 // Hooks
 import useUpdateEffect from "../../hooks/useUpdateEffect";
 import useCookieStatus from "../../hooks/useCookieStatus";
+import { useTranslation } from "react-i18next";
 
 const List = styled("div")(() => ({
   display: "flex",
@@ -115,6 +116,7 @@ const StyledDeleteIcon = styled(DeleteIcon)(() => ({
 }));
 
 const BookmarksView = (props) => {
+  const { t } = useTranslation();
   const { globalObserver } = props;
   const { functionalCookiesOk } = useCookieStatus(globalObserver);
 
@@ -164,7 +166,7 @@ const BookmarksView = (props) => {
 
     if (exists) {
       setError(true);
-      setHelperText(`Namnet upptaget. Ersätt bokmärke "${trimmedName}"?`);
+      setHelperText(t("bookmarks.nameTaken", { name: trimmedName }));
       return false;
     } else {
       setError(false);
@@ -199,15 +201,14 @@ const BookmarksView = (props) => {
     return (
       <div>
         <Typography sx={{ marginBottom: 1 }}>
-          Du har inte tillåtit funktionella kakor. För att kunna spara bokmärken
-          måste du tillåta funktionella kakor.
+          {t("bookmarks.cookiesRequired")}
         </Typography>
         <Button
           fullWidth
           variant="contained"
           onClick={props.model.handleChangeCookieSettingsClick}
         >
-          Cookie-inställningar
+          {t("common.cookieSettings")}
         </Button>
       </div>
     );
@@ -215,10 +216,7 @@ const BookmarksView = (props) => {
 
   return functionalCookiesOk ? (
     <div>
-      <Typography sx={{ marginBottom: 1 }}>
-        Skapa ett bokmärke med kartans synliga lager, aktuella zoomnivå och
-        utbredning.
-      </Typography>
+      <Typography sx={{ marginBottom: 1 }}>{t("bookmarks.intro")}</Typography>
       <Box
         sx={{
           display: "flex",
@@ -227,8 +225,8 @@ const BookmarksView = (props) => {
         }}
       >
         <TextField
-          placeholder="Skriv bokmärkets namn"
-          label="Namn"
+          placeholder={t("bookmarks.namePlaceholder")}
+          label={t("bookmarks.name")}
           value={name}
           onChange={handleChange}
           onKeyUp={handleKeyUp}
@@ -245,7 +243,7 @@ const BookmarksView = (props) => {
           onClick={addBookmark}
           disabled={!name.trim()}
         >
-          {error ? "Ersätt" : "Lägg till"}
+          {error ? t("common.replace") : t("bookmarks.add")}
         </AddButton>
       </Box>
 
@@ -262,7 +260,7 @@ const BookmarksView = (props) => {
                 <ItemNameSpan>{id}</ItemNameSpan>
               </BookmarkButton>
               <DeleteButton
-                aria-label="Ta bort"
+                aria-label={t("common.delete")}
                 size="large"
                 onClick={() => deleteBookmark(id)}
               >
@@ -273,10 +271,12 @@ const BookmarksView = (props) => {
         })}
         <ConfirmationDialog
           open={showRemovalConfirmation === true}
-          titleName={"Radera bokmärke"}
-          contentDescription={`Är du säker på att du vill radera bokmärket "${bookmarkToDelete}"?`}
-          cancel={"Avbryt"}
-          confirm={"Radera"}
+          titleName={t("bookmarks.deleteTitle")}
+          contentDescription={t("bookmarks.deleteConfirm", {
+            name: bookmarkToDelete,
+          })}
+          cancel={t("common.cancel")}
+          confirm={t("bookmarks.deleteButton")}
           handleConfirm={handleRemoveConfirmation}
           handleAbort={handleRemoveConfirmationAbort}
         />

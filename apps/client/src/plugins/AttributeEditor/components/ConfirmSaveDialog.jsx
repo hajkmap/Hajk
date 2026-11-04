@@ -21,6 +21,8 @@ import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRou
 import EditNoteRoundedIcon from "@mui/icons-material/EditNoteRounded";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import { Trans } from "react-i18next";
+import i18n from "src/i18n";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -34,9 +36,9 @@ export default function ConfirmSaveDialog({
   summary = {},
   saving = false,
   error = null,
-  title = "Spara ändringar",
-  body = "Det finns osparade ändringar. Vill du spara nu?",
-  primaryLabel = "Spara",
+  title = i18n.t("attributeEditor.dialog.saveTitle"),
+  body = i18n.t("attributeEditor.dialog.saveBody"),
+  primaryLabel = i18n.t("common.save"),
 }) {
   const { adds = 0, edits = 0, deletes = 0 } = summary;
   const [discardConfirmOpen, setDiscardConfirmOpen] = React.useState(false);
@@ -91,7 +93,7 @@ export default function ConfirmSaveDialog({
         {title}
         <span style={{ flex: 1 }} />
         <IconButton
-          aria-label="Stäng"
+          aria-label={i18n.t("common.close")}
           onClick={() => handleClose()}
           size="small"
           disabled={saving}
@@ -115,7 +117,7 @@ export default function ConfirmSaveDialog({
           >
             <Chip
               icon={<AddCircleOutlineRoundedIcon />}
-              label={`Tillagda: ${adds}`}
+              label={i18n.t("attributeEditor.dialog.added", { number: adds })}
               color={adds ? "success" : "default"}
               variant="outlined"
               size="medium"
@@ -127,7 +129,7 @@ export default function ConfirmSaveDialog({
             />
             <Chip
               icon={<EditNoteRoundedIcon />}
-              label={`Ändrade: ${edits}`}
+              label={i18n.t("attributeEditor.dialog.edited", { number: edits })}
               color={edits ? "warning" : "default"}
               variant="outlined"
               size="medium"
@@ -139,7 +141,9 @@ export default function ConfirmSaveDialog({
             />
             <Chip
               icon={<DeleteOutlineRoundedIcon />}
-              label={`Raderade: ${deletes}`}
+              label={i18n.t("attributeEditor.dialog.deleted", {
+                number: deletes,
+              })}
               color={deletes ? "error" : "default"}
               variant="outlined"
               size="medium"
@@ -177,7 +181,7 @@ export default function ConfirmSaveDialog({
             disabled={saving}
             fullWidth={isMobile}
           >
-            Radera alla förändringar
+            {i18n.t("attributeEditor.dialog.discardAll")}
           </Button>
         )}
 
@@ -189,7 +193,7 @@ export default function ConfirmSaveDialog({
           fullWidth={isMobile}
           variant={isMobile ? "outlined" : "text"}
         >
-          Avbryt
+          {i18n.t("common.cancel")}
         </Button>
 
         <Button
@@ -200,7 +204,7 @@ export default function ConfirmSaveDialog({
           fullWidth={isMobile}
           sx={{ minWidth: isMobile ? "auto" : 140 }}
         >
-          {saving ? "Sparar…" : primaryLabel}
+          {saving ? i18n.t("attributeEditor.saving") : primaryLabel}
         </Button>
       </DialogActions>
 
@@ -222,13 +226,14 @@ export default function ConfirmSaveDialog({
           }}
         >
           <WarningAmberRoundedIcon fontSize="small" />
-          Radera alla förändringar
+          {i18n.t("attributeEditor.dialog.discardAll")}
         </DialogTitle>
         <DialogContent sx={{ pt: 4, pb: 3, textAlign: "center" }}>
           <Typography variant="body1">
-            Det finns förändringar som inte är sparade!
-            <br />
-            Vill du verkligen radera dessa förändringar?
+            <Trans
+              i18nKey="attributeEditor.dialog.discardConfirm"
+              components={{ br: <br /> }}
+            />
           </Typography>
         </DialogContent>
         <DialogActions sx={{ px: 2, py: 1.5 }}>
@@ -236,7 +241,7 @@ export default function ConfirmSaveDialog({
             onClick={() => setDiscardConfirmOpen(false)}
             variant="outlined"
           >
-            NEJ
+            {i18n.t("common.no").toUpperCase()}
           </Button>
           <Button
             onClick={handleConfirmDiscard}
@@ -244,7 +249,7 @@ export default function ConfirmSaveDialog({
             color="error"
             sx={{ color: "common.white" }}
           >
-            JA
+            {i18n.t("common.yes").toUpperCase()}
           </Button>
         </DialogActions>
       </Dialog>

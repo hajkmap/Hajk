@@ -3,6 +3,7 @@ import { Grid, Typography } from "@mui/material";
 import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
 import Buffer from "plugins/Sketch/components/SketchBuffer/Buffer";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 const StyledAccordionSummary = styled(AccordionSummary)(() => ({
   minHeight: 35,
@@ -24,7 +25,9 @@ const FeatureBufferAccordion = (props) => {
   return (
     <Accordion size="small" style={{ marginBottom: 8 }}>
       <HajkToolTip
-        title={`Klicka här för att ändra ${props.title.toLowerCase()}.`}
+        title={i18n.t("sketch.style.changeHint", {
+          name: props.title.toLowerCase(),
+        })}
       >
         <StyledAccordionSummary>
           <Grid

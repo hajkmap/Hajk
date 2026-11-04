@@ -14,6 +14,7 @@ import {
   MAX_IMAGES_FOR_PRINT,
 } from "./constants";
 import useCancelToken from "hooks/useCancelToken";
+import i18n from "src/i18n";
 
 export default function PrintView(props) {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -158,13 +159,13 @@ export default function PrintView(props) {
       }}
     >
       <PrintInformationPanel
-        message={`Vid utskrift så kommer en bild skapas för varje "steg" i tidslinjen. Nuvarande inställningar kommer resultera i ${numImages} bilder.`}
+        message={i18n.t("timeSlider.print.info", { count: numImages })}
         mode={informationPanelMode}
       />
       <RangeSlider
-        title="Välj utskriftsintervall:"
+        title={i18n.t("timeSlider.print.selectRange")}
         value={dateRange}
-        getAriaLabel={() => "Utskriftsintervall"}
+        getAriaLabel={() => i18n.t("timeSlider.print.range")}
         onChange={(e, v) => setDateRange(v)}
         valueLabelFormat={(v) => props.getDateLabel(v, resolution)}
         min={props.startTime}
@@ -176,24 +177,32 @@ export default function PrintView(props) {
         <Grid size={6}>
           <FormControl fullWidth={true}>
             <InputLabel variant="standard" htmlFor="resolution">
-              Upplösning
+              {i18n.t("timeSlider.resolution")}
             </InputLabel>
             <Select
               variant="standard"
               value={resolution}
               onChange={handleResolutionChange}
             >
-              <MenuItem value={"days"}>Dag</MenuItem>
-              <MenuItem value={"months"}>Månad</MenuItem>
-              <MenuItem value={"quarters"}>Kvartal</MenuItem>
-              <MenuItem value={"years"}>År</MenuItem>
+              <MenuItem value={"days"}>
+                {i18n.t("timeSlider.resolutions.days")}
+              </MenuItem>
+              <MenuItem value={"months"}>
+                {i18n.t("timeSlider.resolutions.months")}
+              </MenuItem>
+              <MenuItem value={"quarters"}>
+                {i18n.t("timeSlider.resolutions.quarters")}
+              </MenuItem>
+              <MenuItem value={"years"}>
+                {i18n.t("timeSlider.resolutions.years")}
+              </MenuItem>
             </Select>
           </FormControl>
         </Grid>
         <Grid size={6}>
           <FormControl fullWidth={true}>
             <InputLabel variant="standard" htmlFor="scale">
-              Skala
+              {i18n.t("timeSlider.print.scale")}
             </InputLabel>
             <Select
               variant="standard"

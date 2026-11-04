@@ -6,61 +6,89 @@ import SaveIcon from "@mui/icons-material/Save";
 import ImportExportIcon from "@mui/icons-material/ImportExport";
 import SettingsIcon from "@mui/icons-material/Settings";
 import AddLocationAltIcon from "@mui/icons-material/AddLocationAlt";
+import i18n from "src/i18n";
 
+// Texts are getters, so they are translated when read (this module is also
+// imported at startup, before the language is resolved).
 export const ACTIVITIES = [
   {
     id: "ADD",
-    tooltip: "Lägg till nya objekt.",
-    information:
-      "Lägg till objekt genom att rita i kartan. Börja med att välja vilken typ av objekt du vill rita nedan. Observera att export till GPX-format endast stödjer punkter och linjer.",
+    get tooltip() {
+      return i18n.t("sketch.activities.ADD.tooltip");
+    },
+    get information() {
+      return i18n.t("sketch.activities.ADD.information");
+    },
     icon: <EditIcon />,
   },
   {
     id: "EDIT",
-    tooltip: "Redigera existerande objekt.",
-    information:
-      "Redigera noder (radera nod med alt-klick), byt ritordning, eller ändra färg på ritade objekt.",
+    get tooltip() {
+      return i18n.t("sketch.activities.EDIT.tooltip");
+    },
+    get information() {
+      return i18n.t("sketch.activities.EDIT.information");
+    },
     icon: <FormatShapesIcon />,
   },
   {
     id: "MOVE",
-    tooltip: "Flytta existerande objekt.",
-    information:
-      'Klicka på det objekt i kartan som du vill flytta för att aktivera "flytt-läge". Dra sedan objektet till rätt plats.',
+    get tooltip() {
+      return i18n.t("sketch.activities.MOVE.tooltip");
+    },
+    get information() {
+      return i18n.t("sketch.activities.MOVE.information");
+    },
     icon: <OpenWithIcon />,
   },
   {
     id: "DELETE",
-    tooltip: "Ta bort objekt.",
-    information:
-      "Klicka på det rit-objekt som du vill ta bort, eller klicka på knappen nedan för att ta bort alla rit-objekt.",
+    get tooltip() {
+      return i18n.t("sketch.activities.DELETE.tooltip");
+    },
+    get information() {
+      return i18n.t("sketch.activities.DELETE.information");
+    },
     icon: <DeleteIcon />,
   },
   {
     id: "SAVE",
-    tooltip: "Spara ritade objekt.",
-    information:
-      "Behöver du ta en paus? Spara det du har ritat och fortsätt senare. Tänk på att enbart de objekt som syns i kartan sparas.",
+    get tooltip() {
+      return i18n.t("sketch.activities.SAVE.tooltip");
+    },
+    get information() {
+      return i18n.t("sketch.activities.SAVE.information");
+    },
     icon: <SaveIcon />,
   },
   {
     id: "UPLOAD",
-    tooltip: "Ladda ned eller ladda upp ritade objekt.",
-    information:
-      "Importera eller exportera ritobjekt i .kml/.gpx/.geojson-format. Använd knapparna nedan, eller dra in en fil direkt till kartan.",
+    get tooltip() {
+      return i18n.t("sketch.activities.UPLOAD.tooltip");
+    },
+    get information() {
+      return i18n.t("sketch.activities.UPLOAD.information");
+    },
     icon: <ImportExportIcon />,
   },
   {
     id: "SETTINGS",
-    tooltip: "Ändra om objektens mått ska synas etc.",
-    information: "Här kan du ändra verktygets inställningar.",
+    get tooltip() {
+      return i18n.t("sketch.activities.SETTINGS.tooltip");
+    },
+    get information() {
+      return i18n.t("sketch.activities.SETTINGS.information");
+    },
     icon: <SettingsIcon />,
   },
   {
     id: "OGC",
-    tooltip: "Välj redigerbart lager att spara till.",
-    information:
-      "Här kan du välja ett redigeringsbart lager kopplat till en kartserver.",
+    get tooltip() {
+      return i18n.t("sketch.activities.OGC.tooltip");
+    },
+    get information() {
+      return i18n.t("sketch.activities.OGC.information");
+    },
     icon: <AddLocationAltIcon />,
   },
 ];
@@ -84,50 +112,75 @@ export const DRAW_COLORS = [
 export const DRAW_TYPES = [
   {
     type: "Circle",
-    label: "Cirkel",
-    tooltip:
-      "Rita en cikel i kartan genom att klicka en gång där cikeln ska börja, dra sedan till önskad storlek och släpp.",
+    get label() {
+      return i18n.t("sketch.drawTypes.Circle.label");
+    },
+    get tooltip() {
+      return i18n.t("sketch.drawTypes.Circle.tooltip");
+    },
   },
   {
     type: "LineString",
-    label: "Linje",
-    tooltip:
-      "Rita en linje i kartan genom att klicka en gång per nod, avsluta med ett dubbelklick.",
+    get label() {
+      return i18n.t("sketch.drawTypes.LineString.label");
+    },
+    get tooltip() {
+      return i18n.t("sketch.drawTypes.LineString.tooltip");
+    },
   },
   {
     type: "Rectangle",
-    label: "Rektangel",
-    tooltip:
-      "Rita en rektangel i kartan genom att klicka en gång där rektangeln ska börja, dra sedan till önskad storlek och släpp.",
+    get label() {
+      return i18n.t("sketch.drawTypes.Rectangle.label");
+    },
+    get tooltip() {
+      return i18n.t("sketch.drawTypes.Rectangle.tooltip");
+    },
   },
   {
     type: "Arrow",
-    label: "Pil",
-    tooltip:
-      "Rita en pil i kartan genom att klicka en gång per nod, avsluta med ett dubbelklick.",
+    get label() {
+      return i18n.t("sketch.drawTypes.Arrow.label");
+    },
+    get tooltip() {
+      return i18n.t("sketch.drawTypes.Arrow.tooltip");
+    },
   },
   {
     type: "Select",
-    label: "Välj i kartan",
-    tooltip:
-      "Klicka på ett existerande objekt i kartan och kopiera in det i ritlagret.",
+    get label() {
+      return i18n.t("sketch.drawTypes.Select.label");
+    },
+    get tooltip() {
+      return i18n.t("sketch.drawTypes.Select.tooltip");
+    },
   },
   {
     type: "Polygon",
-    label: "Polygon",
-    tooltip:
-      "Rita en polygon i kartan genom att klicka en gång per nod, avsluta med ett dubbelklick.",
+    get label() {
+      return i18n.t("sketch.drawTypes.Polygon.label");
+    },
+    get tooltip() {
+      return i18n.t("sketch.drawTypes.Polygon.tooltip");
+    },
   },
   {
     type: "Point",
-    label: "Punkt",
-    tooltip:
-      "Infoga en punkt i kartan genom att klicka där du vill ha punkten.",
+    get label() {
+      return i18n.t("sketch.drawTypes.Point.label");
+    },
+    get tooltip() {
+      return i18n.t("sketch.drawTypes.Point.tooltip");
+    },
   },
   {
     type: "Text",
-    label: "Text",
-    tooltip: "Infoga text i kartan genom att klicka där du vill ha texten.",
+    get label() {
+      return i18n.t("sketch.drawTypes.Text.label");
+    },
+    get tooltip() {
+      return i18n.t("sketch.drawTypes.Text.tooltip");
+    },
   },
 ];
 
@@ -144,23 +197,39 @@ export const PLUGIN_MARGIN = 10;
 export const STROKE_TYPES = [
   {
     type: "none",
-    label: "Ingen",
-    tooltip: "Ingen linje.",
+    get label() {
+      return i18n.t("sketch.strokeTypes.none.label");
+    },
+    get tooltip() {
+      return i18n.t("sketch.strokeTypes.none.tooltip");
+    },
   },
   {
     type: "solid",
-    label: "Heldragen",
-    tooltip: "Heldragen linje.",
+    get label() {
+      return i18n.t("sketch.strokeTypes.solid.label");
+    },
+    get tooltip() {
+      return i18n.t("sketch.strokeTypes.solid.tooltip");
+    },
   },
   {
     type: "dotted",
-    label: "Punktad",
-    tooltip: "Punktad linje.",
+    get label() {
+      return i18n.t("sketch.strokeTypes.dotted.label");
+    },
+    get tooltip() {
+      return i18n.t("sketch.strokeTypes.dotted.tooltip");
+    },
   },
   {
     type: "dashed",
-    label: "Streckad",
-    tooltip: "Streckad linje.",
+    get label() {
+      return i18n.t("sketch.strokeTypes.dashed.label");
+    },
+    get tooltip() {
+      return i18n.t("sketch.strokeTypes.dashed.tooltip");
+    },
   },
 ];
 
@@ -186,12 +255,42 @@ export const DEFAULT_MEASUREMENT_SETTINGS = {
 };
 
 export const SNAP_TOLERANCE_OPTIONS = [
-  { value: 4, name: "4 pixlar" },
-  { value: 6, name: "6 pixlar" },
-  { value: 8, name: "8 pixlar" },
-  { value: 10, name: "10 pixlar" },
-  { value: 12, name: "12 pixlar" },
-  { value: 15, name: "15 pixlar" },
+  {
+    value: 4,
+    get name() {
+      return i18n.t("sketch.pixels", { count: 4 });
+    },
+  },
+  {
+    value: 6,
+    get name() {
+      return i18n.t("sketch.pixels", { count: 6 });
+    },
+  },
+  {
+    value: 8,
+    get name() {
+      return i18n.t("sketch.pixels", { count: 8 });
+    },
+  },
+  {
+    value: 10,
+    get name() {
+      return i18n.t("sketch.pixels", { count: 10 });
+    },
+  },
+  {
+    value: 12,
+    get name() {
+      return i18n.t("sketch.pixels", { count: 12 });
+    },
+  },
+  {
+    value: 15,
+    get name() {
+      return i18n.t("sketch.pixels", { count: 15 });
+    },
+  },
 ];
 
 export const DEFAULT_SNAP_SETTINGS = {
@@ -205,52 +304,132 @@ export const STORAGE_KEY = "sketch";
 export const MAX_LS_CHARS = 1e6;
 
 export const PROMPT_TEXTS = {
-  saveOverflow: "Objekten kunde inte sparas. Arbetsytan för många objekt.",
-  saveNoFeatures: "Kunde inte skapa arbetsyta, inga ritobjekt hittades.",
-  saveSuccess: "Arbetsytan sparades utan problem.",
-  CircleHelp:
-    "Du kan skapa en cirkel genom att klicka med en bestämd radie, eller dra för att få en önskad radie.",
-  LineStringHelp:
-    "Skapa linjer genom att klicka på en position för varje nod, avsluta med dubbelklick.",
-  RectangleHelp:
-    "Skapa en rektangel genom att hålla vänsterklick med musen och dra över en yta för att få en önskad storlek.",
-  ArrowHelp:
-    "En pil skapas genom att klicka på en position för varje nod, avsluta med dubbelklick.",
-  SelectHelp:
-    "Klicka på ett existerande objekt i kartan och kopiera in det i ritlagret.",
-  PolygonHelp:
-    "Skapa en polygon genom att klicka på en position för varje nod, avsluta med dubbelklick.",
-  PointHelp: "Klicka på en position för att infoga en punkt.",
-  TextHelp: "Klicka på en position för att infoga text.",
-  MultiDrawHelp:
-    "Rita flera separata delar som blir ett gemensamt objekt (MultiPolygon/MultiLineString/MultiPoint). Klicka 'Avsluta multi-ritning' när du är klar.",
-  EDITHelp:
-    "Klicka på ett objekt för att ändra dess utseende eller ritordning.",
-  MOVEHelp: "Klicka på ett objekt för att förflytta det.",
-  DELETEHelp: "Klicka på ett objekt för att radera det från din skiss.",
-  SAVEHelp:
-    "Här kan du spara en arbetsyta för att fortsätta ditt arbete senare. För att spara över en äldre arbetsyta, ange samma namn.",
-  OGCHelp: "Här kan du aktivera redigeringsbart lager att spara till.",
+  get saveOverflow() {
+    return i18n.t("sketch.prompts.saveOverflow");
+  },
+  get saveNoFeatures() {
+    return i18n.t("sketch.prompts.saveNoFeatures");
+  },
+  get saveSuccess() {
+    return i18n.t("sketch.prompts.saveSuccess");
+  },
+  get CircleHelp() {
+    return i18n.t("sketch.prompts.CircleHelp");
+  },
+  get LineStringHelp() {
+    return i18n.t("sketch.prompts.LineStringHelp");
+  },
+  get RectangleHelp() {
+    return i18n.t("sketch.prompts.RectangleHelp");
+  },
+  get ArrowHelp() {
+    return i18n.t("sketch.prompts.ArrowHelp");
+  },
+  get SelectHelp() {
+    return i18n.t("sketch.prompts.SelectHelp");
+  },
+  get PolygonHelp() {
+    return i18n.t("sketch.prompts.PolygonHelp");
+  },
+  get PointHelp() {
+    return i18n.t("sketch.prompts.PointHelp");
+  },
+  get TextHelp() {
+    return i18n.t("sketch.prompts.TextHelp");
+  },
+  get MultiDrawHelp() {
+    return i18n.t("sketch.prompts.MultiDrawHelp");
+  },
+  get EDITHelp() {
+    return i18n.t("sketch.prompts.EDITHelp");
+  },
+  get MOVEHelp() {
+    return i18n.t("sketch.prompts.MOVEHelp");
+  },
+  get DELETEHelp() {
+    return i18n.t("sketch.prompts.DELETEHelp");
+  },
+  get SAVEHelp() {
+    return i18n.t("sketch.prompts.SAVEHelp");
+  },
+  get OGCHelp() {
+    return i18n.t("sketch.prompts.OGCHelp");
+  },
 };
 
 export const AREA_MEASUREMENT_UNITS = [
-  { type: "AUTO", name: "Automatisk" },
-  { type: "M2", name: "Kvadratmeter (m²)" },
-  { type: "KM2", name: "Kvadratkilometer (km²)" },
-  { type: "HECTARE", name: "Hektar (ha)" },
+  {
+    type: "AUTO",
+    get name() {
+      return i18n.t("sketch.units.AUTO");
+    },
+  },
+  {
+    type: "M2",
+    get name() {
+      return i18n.t("sketch.units.M2");
+    },
+  },
+  {
+    type: "KM2",
+    get name() {
+      return i18n.t("sketch.units.KM2");
+    },
+  },
+  {
+    type: "HECTARE",
+    get name() {
+      return i18n.t("sketch.units.HECTARE");
+    },
+  },
 ];
 
 export const LENGTH_MEASUREMENT_UNITS = [
-  { type: "AUTO", name: "Automatisk" },
-  { type: "M", name: "Meter (m)" },
-  { type: "KM", name: "Kilometer (km)" },
+  {
+    type: "AUTO",
+    get name() {
+      return i18n.t("sketch.units.AUTO");
+    },
+  },
+  {
+    type: "M",
+    get name() {
+      return i18n.t("sketch.units.M");
+    },
+  },
+  {
+    type: "KM",
+    get name() {
+      return i18n.t("sketch.units.KM");
+    },
+  },
 ];
 
 export const MEASUREMENT_PRECISIONS = [
-  { value: 0, name: "0 decimaler" },
-  { value: 1, name: "1 decimal" },
-  { value: 2, name: "2 decimaler" },
-  { value: 3, name: "3 decimaler" },
+  {
+    value: 0,
+    get name() {
+      return i18n.t("common.decimals", { count: 0 });
+    },
+  },
+  {
+    value: 1,
+    get name() {
+      return i18n.t("common.decimals", { count: 1 });
+    },
+  },
+  {
+    value: 2,
+    get name() {
+      return i18n.t("common.decimals", { count: 2 });
+    },
+  },
+  {
+    value: 3,
+    get name() {
+      return i18n.t("common.decimals", { count: 3 });
+    },
+  },
 ];
 
 export const DEFAULT_DRAW_STYLE_SETTINGS = {

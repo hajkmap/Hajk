@@ -1,0 +1,73 @@
+{
+  "commandPalette": {
+    "backDescription": "Back to commands",
+    "backgroundLayers": "Background layers",
+    "backgrounds": {
+      "description": "Choose the map's background layer",
+      "title": "Change background layer"
+    },
+    "clearSearch": {
+      "description": "Clear the search and focus the search field",
+      "title": "Clear search"
+    },
+    "closeAllWindows": {
+      "description": "Close all open plugin windows",
+      "title": "Close all windows"
+    },
+    "darkTheme": "Switch to dark theme",
+    "hideAllLayers": {
+      "description": "Make all visible layers invisible",
+      "title": "Hide all active layers"
+    },
+    "layers": {
+      "description": "Show and manage map layers",
+      "title": "Layers"
+    },
+    "lightTheme": "Switch to light theme",
+    "moreBackgrounds_one": "Show {{count}} background layer",
+    "moreBackgrounds_other": "Show all {{count}} background layers",
+    "moreLayers_one": "Show {{count}} layer",
+    "moreLayers_other": "Show all {{count}} layers",
+    "morePresets_one": "Show {{count}} preset",
+    "morePresets_other": "Show all {{count}} presets",
+    "moreTools_one": "Show {{count}} tool",
+    "moreTools_other": "Show all {{count}} tools",
+    "noBackgrounds": "No background layers found",
+    "noLayers": "No layers found",
+    "noPresets": "No presets found",
+    "noSearchCommands": "No search commands found",
+    "noTools": "No tools found",
+    "openTools": {
+      "description": "Show all available tools",
+      "title": "Open tools"
+    },
+    "presets": {
+      "description": "Shortcuts to predefined places and layers",
+      "title": "Presets"
+    },
+    "recentlyUsed": "Recently used",
+    "searchCommands": {
+      "description": "Show search options",
+      "title": "Search..."
+    },
+    "searchExtent": {
+      "description": "Search in the current map view",
+      "title": "Search within view"
+    },
+    "searchFor": "Search for \"{{query}}\" in the search tool",
+    "searchPolygon": {
+      "description": "Draw a polygon to search within the area",
+      "title": "Search by polygon"
+    },
+    "searchRadius": {
+      "description": "Draw a circle to search within the radius",
+      "title": "Search by radius"
+    },
+    "searchSelect": {
+      "description": "Select features in the map to search",
+      "title": "Search by feature"
+    },
+    "searchTool": "Search",
+    "tools": "Tools"
+  }
+}

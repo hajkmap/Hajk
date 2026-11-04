@@ -16,6 +16,7 @@ import BreadCrumbs from "./components/BreadCrumbs";
 import Alert from "../../components/Alert";
 import withSnackbar from "components/WithSnackbar";
 import { styled } from "@mui/material/styles";
+import i18n from "src/i18n";
 
 const homeHeader = "";
 var homeHtml = "";
@@ -226,18 +227,18 @@ class Informative extends React.PureComponent {
             variant="contained"
             onClick={this.displayMap(chapter.layers, chapter.mapSettings)}
           >
-            Karta
+            {i18n.t("informative.map")}
             <MapIconRightIcon color="primary" />
           </Button>
           <IconButtonButton
-            aria-label="Teckenförklaring"
+            aria-label={i18n.t("common.legend")}
             onClick={this.toggleLegend}
             size="large"
           >
             {this.state.displayLegend ? (
-              <ExpandLessIcon color="primary" title="Teckenförklaring" />
+              <ExpandLessIcon color="primary" title={i18n.t("common.legend")} />
             ) : (
-              <TocIcon color="primary" title="Teckenförklaring" />
+              <TocIcon color="primary" title={i18n.t("common.legend")} />
             )}
           </IconButtonButton>
         </div>
@@ -338,7 +339,7 @@ class Informative extends React.PureComponent {
         <div onClick={this.onBackButtonClick}>
           <ArrowBackIcon />
           &nbsp;
-          <Typography>Tillbaka</Typography>
+          <Typography>{i18n.t("common.back")}</Typography>
         </div>
       </div>
     );
@@ -397,21 +398,21 @@ class Informative extends React.PureComponent {
         {this.state.loading && <LinearProgressLoader />}
         <Alert
           open={this.state.alert}
-          dialogTitle="Felmeddelande"
-          message="Det gick inte att skriva ut för tillfället, försök igen senare"
+          dialogTitle={i18n.t("common.errorTitle")}
+          message={i18n.t("informative.printFailed")}
           parent={this}
         />
         <DivTocHeader>
           <Button variant="contained" onClick={this.toggleToc}>
-            Innehållsförteckning
+            {i18n.t("informative.tableOfContents")}
             <MenuIconRightIcon color="primary" />
           </Button>
           <IconButtonButton
-            aria-label="Skriv ut"
+            aria-label={i18n.t("informative.print")}
             onClick={this.print}
             size="large"
           >
-            <PrintIcon color="primary" title="Skriv ut" />
+            <PrintIcon color="primary" title={i18n.t("informative.print")} />
           </IconButtonButton>
         </DivTocHeader>
         <div>
@@ -426,7 +427,7 @@ class Informative extends React.PureComponent {
                 });
               }}
             >
-              <ArrowDownwardIcon /> Ladda ner
+              <ArrowDownwardIcon /> {i18n.t("common.download")}
             </Button>
           )}
         </div>
@@ -443,7 +444,7 @@ class Informative extends React.PureComponent {
     return (
       this.state.displayLegend && (
         <div>
-          <Typography variant="overline">Teckenförklaring</Typography>
+          <Typography variant="overline">{i18n.t("common.legend")}</Typography>
           <DivLegend>
             {this.props.parent.informativeModel
               .getLegends(this.state.chapter)
@@ -451,7 +452,11 @@ class Informative extends React.PureComponent {
                 return (
                   <DivLegendItem key={i}>
                     <div>{legend.caption}</div>
-                    <img key={i} alt="toc" src={legend.url} />
+                    <img
+                      key={i}
+                      alt={i18n.t("common.legend")}
+                      src={legend.url}
+                    />
                   </DivLegendItem>
                 );
               })}

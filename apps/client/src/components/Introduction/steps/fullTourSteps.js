@@ -1,4 +1,6 @@
 import { getLayerSwitcherSteps } from "./layerSwitcherSteps";
+import { step } from "./step";
+import i18n, { configText } from "src/i18n";
 
 // Initial steps for the full tour (before layer switcher)
 const getInitialSteps = (
@@ -9,76 +11,45 @@ const getInitialSteps = (
   _isDrawerPermanent
 ) => {
   const steps = [
-    {
-      title: "Välkommen",
-      intro:
-        "Här får du en kort guide som visar dig runt i applikationen. Syftet är att ge en överblick över grundfunktionerna och de nyheter som tillkommit i Hajk 4. <br><br>Observera att inga andra åtgärder, som att klicka på knappar eller använda andra funktioner i applikationen, är möjliga under introduktionen. <br><br>👉 Följ med!",
-    },
-    {
-      title: "Verktygspanel",
+    step("welcome"),
+    step("toolPanel", {
       element: "#drawer-toggle-button-group",
-      intro: () => {
-        let intro = `<b>${drawerButtonTitle || "Verktygspanel"}:</b> här hittar du olika funktioner och verktyg som hjälper dig att interagera med kartan.`;
-
-        if (documenthandler) {
-          intro += `<br /><br /><b>${documenthandlerDrawerButtonTitle || "Meny"}:</b> är ett verktyg som används för att visa större mängder text i Hajk. Klicka på knappen för att visa sidomenyn.`;
-        }
-
-        return intro;
-      },
-    },
+      intro: () =>
+        i18n.t("introduction.steps.toolPanel.intro", {
+          // Same name as the drawer button itself (see App.jsx)
+          name: configText("app.mapTools", drawerButtonTitle),
+          documentHandler: documenthandler
+            ? i18n.t("introduction.steps.toolPanel.documentHandlerIntro", {
+                name: configText(
+                  "documentHandler.drawerButtonTitle",
+                  documenthandlerDrawerButtonTitle
+                ),
+              })
+            : "",
+        }),
+    }),
   ];
 
   // Add Kartverktyg step
-  steps.push({
-    title: "Kartverktyg",
-    element: "#drawer-content",
-    intro:
-      "Kartverktygen har olika funktioner som hjälper dig att navigera i kartan.<br><br>Här visas de verktyg som är placerade i sidomenyn.<br><br>Verktygens placering kan ändras av administratörer.",
-  });
+  steps.push(step("mapTools", { element: "#drawer-content" }));
 
   // Add remaining steps
   steps.push(
-    {
-      title: "Lås fast sidomenyn",
-      element: "#toggle-drawer-permanent",
-      intro: "Klicka på knappen för att låsa fast sidomenyn.",
-    },
+    step("lockDrawer", { element: "#toggle-drawer-permanent" }),
     // Show the Document Handler content after locking the drawer (when available)
     ...(documenthandler
-      ? [
-          {
-            title: "Dokumenthanteraren",
-            element: "#drawer-content",
-            intro:
-              "Dokumenthanteraren används för att visa och hantera texter som är kopplade till kartan. Dokumenten är fristående och kan återanvändas i flera kartor.<br><br>Med Dokumenthanteraren kan du: <ul><li>Visa utförliga texter som är kopplade till kartbokmärken.</li><li>Kombinera text och karta genom att lägga till kartlänkar som motsvarar kartlager i kartan.</li></ul>",
-          },
-        ]
+      ? [step("documentHandler", { element: "#drawer-content" })]
       : []),
-    {
-      title: "Sökruta",
-      element: "#search-bar",
-      intro: "Sökverktyget hjälper dig att snabbt hitta rätt plats i kartan.",
-    },
-    {
-      title: "Fler sökalternativ",
+    step("searchBar", { element: "#search-bar" }),
+    step("searchOptions", {
       element: "#search-options-button",
-      intro: "Här hittar du fler avancerade sökalternativ.",
       position: "left",
-    },
-    {
-      title: "Meny för sökverktyg",
+    }),
+    step("searchToolsMenu", {
       element: "#search-tools-menu",
-      intro:
-        "Här kan du välja mellan olika sökverktyg för att göra din sökning.<br><br>Du kan också klicka på <b>Sökinställningar</b> för att öppna en separat meny.",
       position: "left",
-    },
-    {
-      title: "Kartkontroller",
-      element: "#controls-column",
-      intro:
-        "Längst till höger på skärmen finns kontrollknappar som du kan använda för att navigera i kartan.",
-    }
+    }),
+    step("mapControls", { element: "#controls-column" })
   );
 
   return steps;

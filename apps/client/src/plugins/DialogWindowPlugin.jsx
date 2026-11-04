@@ -8,6 +8,7 @@ import Card from "../components/Card";
 import Dialog from "../components/Dialog/Dialog";
 import PluginControlButton from "../components/PluginControlButton";
 import LocalStorageHelper from "../utils/LocalStorageHelper";
+import i18n from "src/i18n";
 
 import ListItemButton from "@mui/material/ListItemButton";
 
@@ -31,8 +32,8 @@ class DialogWindowPlugin extends React.PureComponent {
       this.opts.name ? "." + this.opts.name : ""
     }`;
 
-    this.title = this.opts.title || "Unnamed plugin";
-    this.description = this.opts.description || "No description provided";
+    this.title = this.opts.title || i18n.t("common.unnamedPlugin");
+    this.description = this.opts.description || i18n.t("common.noDescription");
 
     // Allow Admin UI to provide an icon (as a string that will be turned to
     // a ligature by the MUI Icon component), or fall back to the default icon

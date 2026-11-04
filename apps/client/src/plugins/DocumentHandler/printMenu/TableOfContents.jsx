@@ -5,6 +5,7 @@ import ListItemText from "@mui/material/ListItemText";
 import List from "@mui/material/List";
 import { Typography } from "@mui/material";
 import Grid from "@mui/material/Grid";
+import i18n from "src/i18n";
 
 class TableOfContents extends React.PureComponent {
   state = {
@@ -126,7 +127,7 @@ class TableOfContents extends React.PureComponent {
     return (
       <Grid container sx={{ pageBreakAfter: "always" }}>
         <Typography variant="h4" gutterBottom={true}>
-          Innehållsförteckning
+          {i18n.t("documentHandler.tableOfContents")}
         </Typography>
         <List style={{ width: "100%" }} disablePadding>
           {titlesAndLevels.map((document, index) => {

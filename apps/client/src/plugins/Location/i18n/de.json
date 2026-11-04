@@ -1,0 +1,26 @@
+{
+  "location": {
+    "autoRotate": "Automatisch drehen",
+    "controlTooltip": "Mein Standort: Meine Position in der Karte anzeigen",
+    "description": "Meine Position in der Karte anzeigen",
+    "details": {
+      "accuracy": "Genauigkeit (m)",
+      "altitude": "Höhe (m über dem Meeresspiegel)",
+      "altitudeAccuracy": "Höhengenauigkeit (m)",
+      "heading": "Richtung (rad)",
+      "speed": "Geschwindigkeit (m/s)"
+    },
+    "error": "Ihr Standort konnte nicht bestimmt werden. Fehlercode: {{code}}. Details: \"{{message}}\".",
+    "follow": "Position folgen",
+    "property": "Eigenschaft",
+    "showMyPosition": "Meine Position anzeigen",
+    "title": "Mein Standort",
+    "tooltip": {
+      "accuracy": "Genauigkeit: {{accuracy}} m",
+      "altitude": "Höhe: {{altitude}} (+/- {{altitudeAccuracy}}) m",
+      "heading": "Richtung: {{heading}} rad",
+      "speed": "Geschwindigkeit: {{speed}} km/h"
+    },
+    "unavailable": "Mein Standort: Position nicht verfügbar"
+  }
+}

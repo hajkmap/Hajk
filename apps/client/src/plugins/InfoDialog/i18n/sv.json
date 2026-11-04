@@ -1,0 +1,17 @@
+{
+  "infoDialog": {
+    "description": "Visa en informativ dialogruta",
+    "dialogs": {
+      "announcements": {
+        "buttonText": "Ok, uppfattat!",
+        "headerText": "Nyheter i Hajk",
+        "title": "Visa nyheter"
+      },
+      "help": {
+        "buttonText": "Stäng",
+        "title": "Visa hjälp"
+      }
+    },
+    "title": "Informationsdialog"
+  }
+}

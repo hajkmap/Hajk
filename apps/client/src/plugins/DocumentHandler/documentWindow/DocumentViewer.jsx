@@ -8,6 +8,7 @@ import { delay } from "../../../utils/Delay";
 import { isMobile } from "../../../utils/IsMobile";
 import { animateScroll as scroll } from "react-scroll";
 import ScrollToTop from "./ScrollToTop";
+import { configText } from "src/i18n";
 
 const GridContainer = styled(Grid)(({ theme }) => ({
   maxHeight: "100%",
@@ -174,13 +175,15 @@ class DocumentViewer extends React.PureComponent {
     const documentSettingTitle = activeDocument?.tableOfContents?.title;
     const mapConfigSettingTitle = options?.tableOfContents?.title;
 
-    if (documentSettingTitle || documentSettingTitle === false) {
-      return documentSettingTitle;
+    // false hides the title. Otherwise it's admin text, see configText().
+    const adminTitle =
+      documentSettingTitle || documentSettingTitle === false
+        ? documentSettingTitle
+        : mapConfigSettingTitle;
+    if (adminTitle === false) {
+      return false;
     }
-    if (mapConfigSettingTitle || mapConfigSettingTitle === false) {
-      return mapConfigSettingTitle;
-    }
-    return "Innehållsförteckning";
+    return configText("documentHandler.tableOfContents", adminTitle);
   };
 
   getChapterLevelsToShowInToc = () => {

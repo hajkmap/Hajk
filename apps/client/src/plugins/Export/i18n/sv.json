@@ -1,0 +1,15 @@
+{
+  "export": {
+    "createPdf": "Skapa PDF",
+    "description": "Exportera kartan till andra format",
+    "landscape": "liggande",
+    "orientation": "Orientering",
+    "otherScale": "Annan skala",
+    "paperSize": "Pappersstorlek",
+    "pdfFailed": "Utskriften kunde inte skapas. Prova med lägre upplösning, mindre område eller färre lager i kartan.",
+    "portrait": "stående",
+    "resolution": "Upplösning",
+    "scale": "Skala",
+    "title": "Exportera"
+  }
+}

@@ -3,6 +3,7 @@ import ImageLayer from "ol/layer/Image";
 import TileWMS from "ol/source/TileWMS";
 import ImageWMS from "ol/source/ImageWMS";
 import { hfetch } from "../../utils/FetchWrapper";
+import i18n from "src/i18n";
 
 // ---------------------------------------------------------------------------
 // Layer helpers
@@ -273,7 +274,7 @@ export const buildLegendPdfPages = async (
     pageHeight,
     orientation,
     textColor = { r: 0, g: 0, b: 0 },
-    title = "Teckenförklaring",
+    title = i18n.t("common.legend"),
   }
 ) => {
   const legendInfos = (layers || []).map(toLegendInfo).filter(Boolean);

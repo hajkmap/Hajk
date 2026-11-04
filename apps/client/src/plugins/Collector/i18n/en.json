@@ -1,0 +1,29 @@
+{
+  "collector": {
+    "addLine": "Add line",
+    "addPoint": "Add place",
+    "addPolygon": "Add area",
+    "clickToDraw": "Click in the map to draw features",
+    "collectAgain": "Give feedback again",
+    "configurationMissing": "Required configuration is missing. The tool can't be used at the moment.",
+    "description": "We want to know what you think!",
+    "invalidUrl": "Enter a valid URL, e.g. https://www.example.com",
+    "line": "Line",
+    "point": "Place",
+    "polygon": "Area",
+    "saveErrorText": "Error - your comment couldn't be saved.",
+    "saveFailed": "Saving failed, please try again later.",
+    "selectValue": "-Select value-",
+    "send": "Send",
+    "status": {
+      "deleted": "Number of deleted features: {{number}}",
+      "failed": "The update failed: {{message}}",
+      "inserted": "Number of created features: {{number}}",
+      "noChanges": "The update succeeded but no changes were detected.",
+      "succeeded": "The update succeeded.",
+      "unknown": "The update status couldn't be read from the server's response.",
+      "updated": "Number of updated features: {{number}}"
+    },
+    "title": "Feedback"
+  }
+}
