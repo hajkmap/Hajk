@@ -186,19 +186,25 @@ export default function LayerPicker({
                     />
                   )}
                 </ListItemIcon>
-                <ListItemText
-                  primary={option.name}
-                  secondary={option.secondary}
-                  slotProps={{
-                    primary: { noWrap: true },
-                    secondary: { noWrap: true },
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    flex: 1,
+                    minWidth: 0,
                   }}
-                />
-                {option.adornment ? (
-                  <Box sx={{ display: "flex", gap: 0.5, ml: 1, flexShrink: 0 }}>
-                    {option.adornment}
-                  </Box>
-                ) : null}
+                >
+                  <ListItemText
+                    primary={option.name}
+                    secondary={option.secondary}
+                    slotProps={{
+                      primary: { noWrap: true },
+                      secondary: { noWrap: true },
+                    }}
+                  />
+                  {option.adornment}
+                </Box>
               </ListItemButton>
             ))}
           </List>
