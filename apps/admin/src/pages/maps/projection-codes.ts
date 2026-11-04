@@ -27,6 +27,12 @@ export function epsgNumber(code: string): number | null {
   return match ? Number(match[1]) : null;
 }
 
+/** EPSG:3857 and EPSG:4326 use zoom levels; other projections use scales. */
+export function usesZoomLevelFields(code: string): boolean {
+  const n = epsgNumber(code);
+  return n === 3857 || n === 4326;
+}
+
 /** One group per EPSG number; codes in other forms stand alone. */
 export function groupProjectionCodes(codes: string[]): ProjectionGroup[] {
   const groups = new Map<string, ProjectionGroup>();

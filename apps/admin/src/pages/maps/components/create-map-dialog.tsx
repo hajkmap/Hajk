@@ -39,14 +39,14 @@ interface CreateMapFormValues {
     title: string;
     description: string;
     projection: string;
-    startZoom: string;
+    zoom: string;
     minZoom: string;
     maxZoom: string;
-    centerCoordinate: string;
+    center: string;
     origin: string;
     extent: string;
     resolutions: string;
-    printResolutions: string;
+    extraPrintResolutions: string;
     constrainResolution: boolean;
     constrainOnlyCenter: boolean;
     constrainResolutionMobile: boolean;
@@ -96,14 +96,14 @@ function buildDefaultValues(): CreateMapFormValues {
       title: "",
       description: "",
       projection: getDefaultMapProjectionCode(),
-      startZoom: "1.33",
+      zoom: "1.33",
       minZoom: "0",
       maxZoom: "8",
-      centerCoordinate: "576357, 6386049",
+      center: "576357, 6386049",
       origin: "0,0",
       extent: "-1200000, 4700000, 2600000, 8500000",
       resolutions: "2048, 1024, 512, 256, 128, 64, 32, 16, 8",
-      printResolutions: "",
+      extraPrintResolutions: "",
       constrainResolution: false,
       constrainOnlyCenter: false,
       constrainResolutionMobile: false,
@@ -349,14 +349,14 @@ export default function CreateMapDialog({
               label={t("map.startZoom")}
               fullWidth
               slotProps={{ htmlInput: { inputMode: "decimal" } }}
-              {...register("options.startZoom")}
+              {...register("options.zoom")}
             />
           </Grid>
           <Grid size={6}>
             <TextField
               label={t("map.centerCoordinate")}
               fullWidth
-              {...register("options.centerCoordinate")}
+              {...register("options.center")}
             />
           </Grid>
           <Grid size={6}>
@@ -400,7 +400,7 @@ export default function CreateMapDialog({
             <TextField
               label={t("map.printResolutions")}
               fullWidth
-              {...register("options.printResolutions")}
+              {...register("options.extraPrintResolutions")}
             />
           </Grid>
           <Grid size={12}>

@@ -13,6 +13,18 @@ export function getTheme(mode: PaletteMode): Theme {
     typography: { ...typography },
     components: {
       ...defaultComponentSizes,
+      MuiFormControlLabel: {
+        styleOverrides: {
+          root: {
+            // Keep the control on the first line when the label wraps.
+            "&:has(> .MuiCheckbox-root, > .MuiRadio-root)": {
+              alignItems: "flex-start",
+              // (38px small control - 24px body1 line) / 2
+              "& > .MuiFormControlLabel-label": { paddingTop: 7 },
+            },
+          },
+        },
+      },
       MuiPaper: {
         styleOverrides: {
           root: {},

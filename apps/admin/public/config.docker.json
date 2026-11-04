@@ -34,14 +34,16 @@
     "projection": "EPSG:3006",
     "logoLight": "/logoLight.png",
     "logoDark": "",
-    "preferredColorScheme": "user",
-    "primaryColor": "#333333",
-    "secondaryColor": "#ffa000",
+    "colors": {
+      "preferredColorScheme": "user",
+      "primaryColor": "#333333",
+      "secondaryColor": "#ffa000"
+    },
     "showThemeToggler": "false",
     "showCookieNotice": "false",
     "cookieUse3dPart": "false",
     "showCookieNoticeButton": "false",
-    "cookieLink": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
-    "cookieMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen."
+    "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
+    "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen."
   }
 }

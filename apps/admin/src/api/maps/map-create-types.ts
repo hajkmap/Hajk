@@ -6,20 +6,20 @@ export interface MapCreateOptionsInput {
   description?: string;
   /** EPSG code selected in the create wizard; falls back to config default. */
   projection?: string;
-  startZoom?: string;
+  zoom?: string;
   minZoom?: string;
   maxZoom?: string;
-  centerCoordinate?: string;
+  center?: string;
   origin?: string;
   extent?: string;
   resolutions?: string;
-  printResolutions?: string;
+  extraPrintResolutions?: string;
   constrainResolution?: boolean | string;
   constrainOnlyCenter?: boolean | string;
   constrainResolutionMobile?: boolean | string;
 }
 
-export type MapOptionsRecord = Record<string, string>;
+export type MapOptionsRecord = Record<string, unknown>;
 
 export interface MapCreateInput {
   name: string;
@@ -47,6 +47,10 @@ function normalizeMapOptions(
 ): MapOptionsRecord {
   const normalized: MapOptionsRecord = {};
   for (const [key, value] of Object.entries(options)) {
+    if (key === "colors") {
+      normalized.colors = value;
+      continue;
+    }
     const asString = toOptionString(value);
     if (asString !== undefined) {
       normalized[key] = asString;

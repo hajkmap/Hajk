@@ -16,12 +16,15 @@ import {
 
 interface FormAccordionProps {
   title: string;
+  /** Muted text after the title, e.g. a current value. Not part of settings search. */
+  titleDetail?: string;
   children?: React.ReactNode;
   defaultExpanded?: boolean;
 }
 
 export default function FormAccordion({
   title,
+  titleDetail,
   children,
   defaultExpanded = false,
 }: FormAccordionProps) {
@@ -30,7 +33,10 @@ export default function FormAccordion({
   const rootRef = useRef<HTMLDivElement>(null);
   const expandedRef = useRef(expanded);
   const openedBySearch = useRef(false);
-  expandedRef.current = expanded;
+
+  useEffect(() => {
+    expandedRef.current = expanded;
+  }, [expanded]);
 
   useEffect(() => {
     const node = rootRef.current;
@@ -96,6 +102,11 @@ export default function FormAccordion({
           <Typography variant="h6" sx={{ flexShrink: 0, paddingRight: 2 }}>
             {title}
           </Typography>
+          {titleDetail && (
+            <Typography variant="body2" noWrap sx={{ color: "text.secondary" }}>
+              {titleDetail}
+            </Typography>
+          )}
         </Box>
       </AccordionSummary>
       <AccordionDetails sx={{ p: 2 }}>{children}</AccordionDetails>

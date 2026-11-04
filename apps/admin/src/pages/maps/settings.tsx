@@ -50,6 +50,13 @@ import FormActionPanel from "../../components/form-action-panel";
 import { toast } from "react-toastify";
 import { HttpError } from "../../lib/http-error";
 import FormContainer from "../../components/form-components/form-container";
+import {
+  SCALE_FIELD_NAMES,
+  SCALE_KEYS,
+  scaleEditsBlockSave,
+  toScaleValues,
+} from "./map-scales";
+import { usesZoomLevelFields } from "./projection-codes";
 import MapSettingsForm, {
   type MapSettingsSection,
 } from "./components/map-settings-form";
@@ -629,12 +636,28 @@ export default function MapSettings() {
     register,
     control,
     getValues,
+    setValue,
     formState: { isDirty },
   } = useForm<FieldValues>({
     mode: "onChange",
     reValidateMode: "onChange",
     values: formBaseline ?? undefined,
   });
+
+  const mainProjectionCode = useWatch({ control, name: "projection.code" }) as
+    string | undefined;
+  const watchedScales = useWatch({
+    control,
+    name: SCALE_FIELD_NAMES,
+  }) as unknown[];
+  const scalesBlockSave = useMemo(() => {
+    if (usesZoomLevelFields(mainProjectionCode ?? "")) return false;
+    const loaded = (formBaseline?.options ?? {}) as Record<string, unknown>;
+    return scaleEditsBlockSave(
+      toScaleValues(watchedScales),
+      toScaleValues(SCALE_KEYS.map((key) => loaded[key])),
+    );
+  }, [formBaseline, mainProjectionCode, watchedScales]);
 
   const cookieButtonOn =
     useWatch({ control, name: "options.showCookieNoticeButton" }) === true;
@@ -703,7 +726,7 @@ export default function MapSettings() {
   const savePending = isSaving || updateStatus === "pending";
 
   const handleUpdateMap = async (formData: FieldValues) => {
-    if (!map || saveInFlightRef.current) return;
+    if (!map || saveInFlightRef.current || scalesBlockSave) return;
 
     saveInFlightRef.current = true;
     setIsSaving(true);
@@ -851,7 +874,7 @@ export default function MapSettings() {
         createdDate={map?.createdDate}
         lastSavedBy={map?.lastSavedBy}
         lastSavedDate={map?.lastSavedDate}
-        isDirty={mapSettingsDirty && !savePending}
+        isDirty={mapSettingsDirty && !savePending && !scalesBlockSave}
         sidebarExtra={
           mapLayersMoveZoneVisible || activeTab === "tools" ? (
             <Box
@@ -990,6 +1013,8 @@ export default function MapSettings() {
               settingsSearchTerm={settingsSearchTerm}
               showSettingsSearchUi={showSettingsSearchUi}
               getValues={getValues}
+              setValue={setValue}
+              savedValues={formBaseline}
               highlightField={settingFocus?.field ?? null}
               highlightTick={settingFocus?.tick ?? 0}
             />

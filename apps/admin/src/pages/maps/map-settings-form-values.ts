@@ -1,11 +1,12 @@
 import type { FieldValues } from "react-hook-form";
 import type { Map as MapRecord, MapMutation } from "../../api/maps/types";
 import { getDefaultMapProjectionCode } from "../../lib/map-defaults";
+import { deriveScalesFromOptions } from "./map-scales";
 
 interface MapProjectionSource {
   projection?: { code: string } | null;
   projections?: { code: string }[] | null;
-  options?: Record<string, string>;
+  options?: Record<string, unknown>;
 }
 
 /** Unique, trimmed projection codes from a many-to-many projections array. */
@@ -31,8 +32,9 @@ function getFormProjectionCodes(data: FieldValues): string[] {
   return Array.from(new Set(codes));
 }
 
-function fromOptionFlag(value: string | undefined): boolean {
-  return value === "true";
+/** Map files store real booleans, Admin saves them as text. */
+function fromOptionFlag(value: unknown): boolean {
+  return value === true || value === "true";
 }
 
 function toOptionFlag(value: unknown): string {
@@ -61,12 +63,15 @@ function toStringValue(value: unknown, fallback: string): string {
   return fallback;
 }
 
-function getFormOptions(data: FieldValues): Record<string, unknown> {
-  const options: unknown = data.options;
-  if (options && typeof options === "object" && !Array.isArray(options)) {
-    return options as Record<string, unknown>;
+function toRecord(value: unknown): Record<string, unknown> {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    return value as Record<string, unknown>;
   }
   return {};
+}
+
+function getFormOptions(data: FieldValues): Record<string, unknown> {
+  return toRecord(data.options);
 }
 
 function getMapProjectionCode(map: MapProjectionSource): string {
@@ -96,19 +101,37 @@ function getProjectionCode(data: FieldValues, fallback?: string): string {
   return fallback ?? getDefaultMapProjectionCode();
 }
 
+/** Map files store numbers and arrays; the form and saved options use text. */
+function asText(value: unknown): string | undefined {
+  if (Array.isArray(value)) return value.join(", ");
+  if (typeof value === "number") return String(value);
+  return typeof value === "string" ? value : undefined;
+}
+
+function stepsAsText(value: unknown): string | undefined {
+  return Array.isArray(value) ? JSON.stringify(value) : asText(value);
+}
+
 function buildOptionsFormValues(
-  options: Record<string, string>,
+  options: Record<string, unknown>,
 ): Record<string, unknown> {
-  return {
-    startZoom: options.startZoom ?? "1.33",
-    maxZoom: options.maxZoom ?? "8",
-    minZoom: options.minZoom ?? "0",
-    centerCoordinate: options.centerCoordinate ?? "576357, 6386049",
-    origin: options.origin ?? "0,0",
-    extent: options.extent ?? "-1200000, 4700000, 2600000, 8500000",
+  const colors = toRecord(options.colors);
+  const zoomOptions = {
+    zoom: asText(options.zoom) ?? "1.33",
+    maxZoom: asText(options.maxZoom) ?? "8",
+    minZoom: asText(options.minZoom) ?? "0",
     resolutions:
-      options.resolutions ?? "2048, 1024, 512, 256, 128, 64, 32, 16, 8",
-    printResolutions: options.printResolutions ?? "",
+      asText(options.resolutions) ?? "2048, 1024, 512, 256, 128, 64, 32, 16, 8",
+    extraPrintResolutions: asText(options.extraPrintResolutions) ?? "",
+  };
+
+  return {
+    ...zoomOptions,
+    // Form-only: scales are always derived and never saved.
+    ...deriveScalesFromOptions(zoomOptions),
+    center: asText(options.center) ?? "576357, 6386049",
+    origin: asText(options.origin) ?? "0,0",
+    extent: asText(options.extent) ?? "-1200000, 4700000, 2600000, 8500000",
     constrainResolution: fromOptionFlag(options.constrainResolution),
     constrainOnlyCenter: fromOptionFlag(options.constrainOnlyCenter),
     constrainResolutionMobile: fromOptionFlag(
@@ -117,9 +140,9 @@ function buildOptionsFormValues(
     enableDownloadLink: fromOptionFlag(options.enableDownloadLink),
     enableAppStateInHash: fromOptionFlag(options.enableAppStateInHash),
     confirmOnWindowClose: fromOptionFlag(options.confirmOnWindowClose),
-    logoLight: options.logoLight ?? "/logoLight.png",
+    logoLight: options.logoLight ?? options.logo ?? "/logoLight.png",
     logoDark: options.logoDark ?? "/logoDark.png",
-    legendOptions: options.legendOptions ?? "",
+    geoserverLegendOptions: options.geoserverLegendOptions ?? "",
     crossOrigin: options.crossOrigin ?? "anonymous",
     mapselector: fromOptionFlag(options.mapselector),
     mapSelectorStyle:
@@ -138,33 +161,35 @@ function buildOptionsFormValues(
     dragPan: fromOptionFlag(options.dragPan),
     pinchRotate: fromOptionFlag(options.pinchRotate),
     pinchZoom: fromOptionFlag(options.pinchZoom),
-    zoomLevelDelta: options.zoomLevelDelta ?? "",
-    zoomAnimationDuration: options.zoomAnimationDuration ?? "",
-    preferredColorScheme: options.preferredColorScheme ?? "user",
-    primaryColor: options.primaryColor ?? "#333333",
-    secondaryColor: options.secondaryColor ?? "#ffa000",
+    zoomDelta: asText(options.zoomDelta) ?? "",
+    zoomDuration: asText(options.zoomDuration) ?? "",
+    colors: {
+      preferredColorScheme: colors.preferredColorScheme ?? "user",
+      primaryColor: colors.primaryColor ?? "#333333",
+      secondaryColor: colors.secondaryColor ?? "#ffa000",
+    },
     drawerStatic: fromOptionFlag(options.drawerStatic),
     drawerVisible: fromOptionFlag(options.drawerVisible),
     drawerVisibleMobile: fromOptionFlag(options.drawerVisibleMobile),
     drawerPermanent: fromOptionFlag(options.drawerPermanent),
-    drawerContent: options.drawerContent ?? "plugins",
+    activeDrawerOnStart: options.activeDrawerOnStart ?? "plugins",
     drawerTitle: options.drawerTitle ?? "Kartverktyg",
     drawerButtonTitle: options.drawerButtonTitle ?? "Kartverktyg",
     drawerButtonIcon: options.drawerButtonIcon ?? "MapIcon",
     showCookieNotice: fromOptionFlag(options.showCookieNotice),
     cookieUse3dPart: fromOptionFlag(options.cookieUse3dPart),
     showCookieNoticeButton: fromOptionFlag(options.showCookieNoticeButton),
-    cookieLink:
-      options.cookieLink ??
+    defaultCookieNoticeUrl:
+      options.defaultCookieNoticeUrl ??
       "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
-    cookieMessage:
-      options.cookieMessage ??
+    defaultCookieNoticeMessage:
+      options.defaultCookieNoticeMessage ??
       "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
     introductionEnabled: fromOptionFlag(options.introductionEnabled),
     introductionShowControlButton: fromOptionFlag(
       options.introductionShowControlButton,
     ),
-    introductionSteps: options.introductionSteps ?? "[]",
+    introductionSteps: stepsAsText(options.introductionSteps) ?? "[]",
   };
 }
 
@@ -188,19 +213,17 @@ export function buildMapSettingsFormValues(map: MapRecord): FieldValues {
   };
 }
 
-function formOptionsFromValues(data: FieldValues): Record<string, string> {
+function formOptionsFromValues(data: FieldValues): Record<string, unknown> {
   const options = getFormOptions(data);
+  const colors = toRecord(options.colors);
   const projectionCode = getProjectionCode(data);
 
   return {
     projection: projectionCode,
-    startZoom: toStringValue(options.startZoom, "1.33"),
+    zoom: toStringValue(options.zoom, "1.33"),
     maxZoom: String(toNumber(options.maxZoom) ?? 8),
     minZoom: String(toNumber(options.minZoom) ?? 0),
-    centerCoordinate: toStringValue(
-      options.centerCoordinate,
-      "576357, 6386049",
-    ),
+    center: toStringValue(options.center, "576357, 6386049"),
     origin: toStringValue(options.origin, "0,0"),
     extent: toStringValue(
       options.extent,
@@ -210,7 +233,7 @@ function formOptionsFromValues(data: FieldValues): Record<string, string> {
       options.resolutions,
       "2048, 1024, 512, 256, 128, 64, 32, 16, 8",
     ),
-    printResolutions: toStringValue(options.printResolutions, ""),
+    extraPrintResolutions: toStringValue(options.extraPrintResolutions, ""),
     constrainResolution: toOptionFlag(options.constrainResolution),
     constrainOnlyCenter: toOptionFlag(options.constrainOnlyCenter),
     constrainResolutionMobile: toOptionFlag(options.constrainResolutionMobile),
@@ -219,7 +242,7 @@ function formOptionsFromValues(data: FieldValues): Record<string, string> {
     confirmOnWindowClose: toOptionFlag(options.confirmOnWindowClose),
     logoLight: toStringValue(options.logoLight, "/logoLight.png"),
     logoDark: toStringValue(options.logoDark, ""),
-    legendOptions: toStringValue(options.legendOptions, ""),
+    geoserverLegendOptions: toStringValue(options.geoserverLegendOptions, ""),
     crossOrigin: toStringValue(options.crossOrigin, "anonymous"),
     mapselector: toOptionFlag(options.mapselector),
     mapSelectorStyle:
@@ -238,30 +261,30 @@ function formOptionsFromValues(data: FieldValues): Record<string, string> {
     dragPan: toOptionFlag(options.dragPan),
     pinchRotate: toOptionFlag(options.pinchRotate),
     pinchZoom: toOptionFlag(options.pinchZoom),
-    zoomLevelDelta: String(toNumber(options.zoomLevelDelta) ?? ""),
-    zoomAnimationDuration: String(
-      toNumber(options.zoomAnimationDuration) ?? "",
-    ),
-    preferredColorScheme: toStringValue(options.preferredColorScheme, "user"),
-    primaryColor: toStringValue(options.primaryColor, "#333333"),
-    secondaryColor: toStringValue(options.secondaryColor, "#ffa000"),
+    zoomDelta: String(toNumber(options.zoomDelta) ?? ""),
+    zoomDuration: String(toNumber(options.zoomDuration) ?? ""),
+    colors: {
+      preferredColorScheme: toStringValue(colors.preferredColorScheme, "user"),
+      primaryColor: toStringValue(colors.primaryColor, "#333333"),
+      secondaryColor: toStringValue(colors.secondaryColor, "#ffa000"),
+    },
     drawerStatic: toOptionFlag(options.drawerStatic),
     drawerVisible: toOptionFlag(options.drawerVisible),
     drawerVisibleMobile: toOptionFlag(options.drawerVisibleMobile),
     drawerPermanent: toOptionFlag(options.drawerPermanent),
-    drawerContent: toStringValue(options.drawerContent, "plugins"),
+    activeDrawerOnStart: toStringValue(options.activeDrawerOnStart, "plugins"),
     drawerTitle: toStringValue(options.drawerTitle, "Kartverktyg"),
     drawerButtonTitle: toStringValue(options.drawerButtonTitle, "Kartverktyg"),
     drawerButtonIcon: toStringValue(options.drawerButtonIcon, "MapIcon"),
     showCookieNotice: toOptionFlag(options.showCookieNotice),
     cookieUse3dPart: toOptionFlag(options.cookieUse3dPart),
     showCookieNoticeButton: toOptionFlag(options.showCookieNoticeButton),
-    cookieLink: toStringValue(
-      options.cookieLink,
+    defaultCookieNoticeUrl: toStringValue(
+      options.defaultCookieNoticeUrl,
       "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
     ),
-    cookieMessage: toStringValue(
-      options.cookieMessage,
+    defaultCookieNoticeMessage: toStringValue(
+      options.defaultCookieNoticeMessage,
       "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
     ),
     introductionEnabled: toOptionFlag(options.introductionEnabled),
@@ -291,6 +314,10 @@ export function buildMapUpdatePayload(
     options: {
       ...(map.options ?? {}),
       ...formOptions,
+      colors: {
+        ...toRecord(map.options?.colors),
+        ...toRecord(formOptions.colors),
+      },
     },
   };
 }

@@ -12,6 +12,8 @@ export function FieldHelpTooltip({ title }: { title: string }) {
           display: "inline-flex",
           alignItems: "center",
           verticalAlign: "middle",
+          height: "1lh",
+          flexShrink: 0,
           ml: 0.5,
           color: "text.secondary",
           cursor: "help",
@@ -36,7 +38,7 @@ export function FieldLabelWithHelp({
   return (
     <Box
       component="span"
-      sx={{ display: "inline-flex", alignItems: "center", gap: 0.25 }}
+      sx={{ display: "inline-flex", alignItems: "flex-start", gap: 0.25 }}
     >
       {label}
       <FieldHelpTooltip title={help} />

@@ -20,9 +20,11 @@ import {
   Controller,
   FieldValues,
   UseFormRegister,
+  UseFormSetValue,
   useWatch,
 } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import FormAccordion from "../../../components/form-components/form-accordion";
 import FormPanel from "../../../components/form-components/form-panel";
 import FormFieldGrid, {
   FormFieldRow,
@@ -37,10 +39,14 @@ import {
 import FormColorPicker from "../../../components/form-components/form-color-picker";
 import { useSettingsSearchLabels } from "../../../hooks/use-settings-search-labels";
 import ProjectionsDialog from "./projections";
+import MapScaleFields from "./map-scale-fields";
 import {
   getMainProjectionChoices,
   groupProjectionCodes,
+  usesZoomLevelFields,
 } from "../projection-codes";
+import { optionsForProjectionGroupChange } from "../map-scales";
+import { useProjectionsWithUsage } from "../../../api/projections";
 
 export type MapSettingsSection =
   "map" | "controls" | "appearance" | "content" | "search";
@@ -52,6 +58,9 @@ interface MapSettingsFormProps {
   settingsSearchTerm: string;
   showSettingsSearchUi: boolean;
   getValues: () => FieldValues;
+  setValue: UseFormSetValue<FieldValues>;
+  /** The form values as last loaded or saved. */
+  savedValues: FieldValues | null;
   /** Map-tools board asked to show this field. `highlightTick` changes on every request. */
   highlightField?: string | null;
   highlightTick?: number;
@@ -129,6 +138,7 @@ function MapColorField({
   settingsSearchTerm,
   showSettingsSearchUi,
   getValues,
+  newRow,
 }: {
   name: string;
   labelKey: string;
@@ -136,6 +146,7 @@ function MapColorField({
   settingsSearchTerm: string;
   showSettingsSearchUi: boolean;
   getValues: () => FieldValues;
+  newRow?: boolean;
 }) {
   const { t } = useTranslation();
 
@@ -147,7 +158,7 @@ function MapColorField({
       searchTerm={settingsSearchTerm}
       allValues={showSettingsSearchUi ? getValues() : undefined}
     >
-      <FormFieldRow>
+      <FormFieldRow newRow={newRow}>
         <Controller
           name={name}
           control={control}
@@ -192,6 +203,7 @@ function MapTextField({
   fullWidth = false,
   span,
   newRow,
+  readOnly = false,
 }: {
   name: string;
   labelKey: string;
@@ -207,6 +219,7 @@ function MapTextField({
   fullWidth?: boolean;
   span?: 2;
   newRow?: boolean;
+  readOnly?: boolean;
 }) {
   const { t, i18n } = useTranslation();
   const helpKey = `${labelKey}Help`;
@@ -216,7 +229,7 @@ function MapTextField({
     type,
     multiline,
     rows,
-    slotProps: inputMode ? { htmlInput: { inputMode } } : undefined,
+    slotProps: { htmlInput: { inputMode, readOnly } },
     ...register(name),
   };
 
@@ -251,6 +264,8 @@ export default function MapSettingsForm({
   settingsSearchTerm,
   showSettingsSearchUi,
   getValues,
+  setValue,
+  savedValues,
   highlightField = null,
   highlightTick = 0,
 }: MapSettingsFormProps) {
@@ -274,6 +289,29 @@ export default function MapSettingsForm({
     ),
   ).length;
   const [projectionsDialogOpen, setProjectionsDialogOpen] = useState(false);
+  const usesZoomFields = usesZoomLevelFields(mainProjectionCode ?? "");
+  const previousUsesZoomFields = useRef(usesZoomFields);
+  const { data: projections } = useProjectionsWithUsage();
+
+  useEffect(() => {
+    if (previousUsesZoomFields.current === usesZoomFields) return;
+    previousUsesZoomFields.current = usesZoomFields;
+    if (!savedValues) return;
+    const saved = savedValues as {
+      projection: { code: string };
+      options: Record<string, unknown>;
+    };
+    const options = optionsForProjectionGroupChange({
+      usesZoomFields,
+      savedUsesZoomFields: usesZoomLevelFields(saved.projection.code),
+      savedOptions: saved.options,
+      extent: projections?.find(({ code }) => code === mainProjectionCode)
+        ?.extent,
+    });
+    for (const [key, value] of Object.entries(options ?? {})) {
+      setValue(`options.${key}`, value, { shouldDirty: true });
+    }
+  }, [mainProjectionCode, projections, savedValues, setValue, usesZoomFields]);
 
   useEffect(() => {
     if (!highlightField || highlightTick === 0) return;
@@ -312,6 +350,35 @@ export default function MapSettingsForm({
     activeSection === "content" || showSettingsSearchUi;
 
   const searchValues = showSettingsSearchUi ? getValues() : undefined;
+
+  const resolutionFields = [
+    <MapTextField
+      key="resolutions"
+      name="options.resolutions"
+      labelKey="map.resolutions"
+      synonyms={["resolution"]}
+      placeholder="4096, 2048, 1024, 512, …"
+      span={2}
+      newRow
+      readOnly={!usesZoomFields}
+      register={register}
+      settingsSearchTerm={settingsSearchTerm}
+      searchValues={searchValues}
+    />,
+    <MapTextField
+      key="extraPrintResolutions"
+      name="options.extraPrintResolutions"
+      labelKey="map.printResolutions"
+      synonyms={["print", "resolution"]}
+      placeholder="0.5, 0.25, …"
+      span={2}
+      newRow
+      readOnly={!usesZoomFields}
+      register={register}
+      settingsSearchTerm={settingsSearchTerm}
+      searchValues={searchValues}
+    />,
+  ];
 
   return (
     <Box ref={rootRef}>
@@ -388,28 +455,40 @@ export default function MapSettingsForm({
                 "map.extent",
                 "map.resolutions",
                 "map.printResolutions",
+                "map.scales",
+                "map.printScales",
               ),
               "projection",
               "zoom",
               "extent",
               "resolution",
+              "scale",
+              "skala",
             ]}
             fields={[
               "projection.code",
               "projections",
-              "options.startZoom",
+              "options.zoom",
               "options.maxZoom",
               "options.minZoom",
-              "options.centerCoordinate",
+              "options.center",
               "options.origin",
               "options.extent",
               "options.resolutions",
-              "options.printResolutions",
+              "options.extraPrintResolutions",
+              "options.scales",
+              "options.printScales",
+              "options.startScale",
+              "options.minScale",
+              "options.maxScale",
             ]}
             allValues={searchValues}
             searchTerm={settingsSearchTerm}
           >
-            <FormPanel title={t("map.baseSettings")}>
+            <FormAccordion
+              title={t("map.baseSettings")}
+              titleDetail={mainProjectionCode}
+            >
               <FormFieldGrid columns={4}>
                 <SettingsSearchField
                   labelKeys={["map.projection", "map.projections"]}
@@ -470,59 +549,54 @@ export default function MapSettingsForm({
                     />
                   </FormFieldRow>
                 </SettingsSearchField>
+                <FormFieldRow fullWidth>
+                  {usesZoomFields ? (
+                    <FormFieldGrid columns={4}>
+                      <MapTextField
+                        name="options.zoom"
+                        labelKey="map.startZoom"
+                        synonyms={["zoom", "start"]}
+                        inputMode="decimal"
+                        placeholder="2"
+                        newRow
+                        register={register}
+                        settingsSearchTerm={settingsSearchTerm}
+                        searchValues={searchValues}
+                      />
+                      <MapTextField
+                        name="options.maxZoom"
+                        labelKey="map.maxZoom"
+                        synonyms={["zoom", "max"]}
+                        type="number"
+                        register={register}
+                        settingsSearchTerm={settingsSearchTerm}
+                        searchValues={searchValues}
+                      />
+                      <MapTextField
+                        name="options.minZoom"
+                        labelKey="map.minZoom"
+                        synonyms={["zoom", "min"]}
+                        type="number"
+                        register={register}
+                        settingsSearchTerm={settingsSearchTerm}
+                        searchValues={searchValues}
+                      />
+                      {resolutionFields}
+                    </FormFieldGrid>
+                  ) : (
+                    <MapScaleFields
+                      control={control}
+                      getValues={getValues}
+                      setValue={setValue}
+                      settingsSearchTerm={settingsSearchTerm}
+                      searchValues={searchValues}
+                    >
+                      {resolutionFields}
+                    </MapScaleFields>
+                  )}
+                </FormFieldRow>
                 <MapTextField
-                  name="options.startZoom"
-                  labelKey="map.startZoom"
-                  synonyms={["zoom", "start"]}
-                  inputMode="decimal"
-                  placeholder="2"
-                  newRow
-                  register={register}
-                  settingsSearchTerm={settingsSearchTerm}
-                  searchValues={searchValues}
-                />
-                <MapTextField
-                  name="options.minZoom"
-                  labelKey="map.minZoom"
-                  synonyms={["zoom", "min"]}
-                  type="number"
-                  register={register}
-                  settingsSearchTerm={settingsSearchTerm}
-                  searchValues={searchValues}
-                />
-                <MapTextField
-                  name="options.maxZoom"
-                  labelKey="map.maxZoom"
-                  synonyms={["zoom", "max"]}
-                  type="number"
-                  register={register}
-                  settingsSearchTerm={settingsSearchTerm}
-                  searchValues={searchValues}
-                />
-                <MapTextField
-                  name="options.resolutions"
-                  labelKey="map.resolutions"
-                  synonyms={["resolution"]}
-                  placeholder="4096, 2048, 1024, 512, …"
-                  span={2}
-                  newRow
-                  register={register}
-                  settingsSearchTerm={settingsSearchTerm}
-                  searchValues={searchValues}
-                />
-                <MapTextField
-                  name="options.printResolutions"
-                  labelKey="map.printResolutions"
-                  synonyms={["print", "resolution"]}
-                  placeholder="0.5, 0.25, …"
-                  span={2}
-                  newRow
-                  register={register}
-                  settingsSearchTerm={settingsSearchTerm}
-                  searchValues={searchValues}
-                />
-                <MapTextField
-                  name="options.centerCoordinate"
+                  name="options.center"
                   labelKey="map.centerCoordinate"
                   synonyms={["center", "coordinate"]}
                   placeholder="110600, 6283796"
@@ -550,7 +624,7 @@ export default function MapSettingsForm({
                   searchValues={searchValues}
                 />
               </FormFieldGrid>
-            </FormPanel>
+            </FormAccordion>
           </SearchablePanel>
 
           <SearchablePanel
@@ -581,7 +655,7 @@ export default function MapSettingsForm({
               "options.confirmOnWindowClose",
               "options.logoLight",
               "options.logoDark",
-              "options.legendOptions",
+              "options.geoserverLegendOptions",
               "options.crossOrigin",
             ]}
             allValues={searchValues}
@@ -658,7 +732,7 @@ export default function MapSettingsForm({
                   searchValues={searchValues}
                 />
                 <MapTextField
-                  name="options.legendOptions"
+                  name="options.geoserverLegendOptions"
                   labelKey="map.legendOptions"
                   synonyms={["legend"]}
                   register={register}
@@ -844,8 +918,8 @@ export default function MapSettingsForm({
               "options.dragPan",
               "options.pinchRotate",
               "options.pinchZoom",
-              "options.zoomLevelDelta",
-              "options.zoomAnimationDuration",
+              "options.zoomDelta",
+              "options.zoomDuration",
             ]}
             allValues={searchValues}
             searchTerm={settingsSearchTerm}
@@ -929,7 +1003,7 @@ export default function MapSettingsForm({
                   </FormGroup>
                 </FormFieldRow>
                 <MapTextField
-                  name="options.zoomLevelDelta"
+                  name="options.zoomDelta"
                   labelKey="map.zoomLevelDelta"
                   synonyms={["zoom"]}
                   type="number"
@@ -938,7 +1012,7 @@ export default function MapSettingsForm({
                   searchValues={searchValues}
                 />
                 <MapTextField
-                  name="options.zoomAnimationDuration"
+                  name="options.zoomDuration"
                   labelKey="map.zoomAnimationDuration"
                   synonyms={["zoom", "animation"]}
                   type="number"
@@ -970,9 +1044,9 @@ export default function MapSettingsForm({
             "light",
           ]}
           fields={[
-            "options.preferredColorScheme",
-            "options.primaryColor",
-            "options.secondaryColor",
+            "options.colors.preferredColorScheme",
+            "options.colors.primaryColor",
+            "options.colors.secondaryColor",
           ]}
           allValues={searchValues}
           searchTerm={settingsSearchTerm}
@@ -981,14 +1055,14 @@ export default function MapSettingsForm({
             <FormFieldGrid columns={2}>
               <SettingsSearchField
                 labelKeys={["map.preferredColorScheme"]}
-                fields={["options.preferredColorScheme"]}
+                fields={["options.colors.preferredColorScheme"]}
                 synonyms={["color", "theme", "dark", "light"]}
                 searchTerm={settingsSearchTerm}
                 allValues={searchValues}
               >
-                <FormFieldRow fullWidth>
+                <FormFieldRow>
                   <Controller
-                    name="options.preferredColorScheme"
+                    name="options.colors.preferredColorScheme"
                     control={control}
                     render={({ field }) => (
                       <SelectWithHelp
@@ -1012,15 +1086,16 @@ export default function MapSettingsForm({
                 </FormFieldRow>
               </SettingsSearchField>
               <MapColorField
-                name="options.primaryColor"
+                name="options.colors.primaryColor"
                 labelKey="map.primaryColor"
+                newRow
                 control={control}
                 settingsSearchTerm={settingsSearchTerm}
                 showSettingsSearchUi={showSettingsSearchUi}
                 getValues={getValues}
               />
               <MapColorField
-                name="options.secondaryColor"
+                name="options.colors.secondaryColor"
                 labelKey="map.secondaryColor"
                 control={control}
                 settingsSearchTerm={settingsSearchTerm}
@@ -1055,7 +1130,7 @@ export default function MapSettingsForm({
             "options.drawerVisible",
             "options.drawerVisibleMobile",
             "options.drawerPermanent",
-            "options.drawerContent",
+            "options.activeDrawerOnStart",
             "options.drawerTitle",
             "options.drawerButtonTitle",
             "options.drawerButtonIcon",
@@ -1102,7 +1177,7 @@ export default function MapSettingsForm({
                 </FormGroup>
               </FormFieldRow>
               <MapTextField
-                name="options.drawerContent"
+                name="options.activeDrawerOnStart"
                 labelKey="map.drawerContent"
                 synonyms={["drawer"]}
                 register={register}
@@ -1174,8 +1249,8 @@ export default function MapSettingsForm({
               "options.showCookieNotice",
               "options.cookieUse3dPart",
               "options.showCookieNoticeButton",
-              "options.cookieLink",
-              "options.cookieMessage",
+              "options.defaultCookieNoticeUrl",
+              "options.defaultCookieNoticeMessage",
             ]}
             allValues={searchValues}
             searchTerm={settingsSearchTerm}
@@ -1211,7 +1286,7 @@ export default function MapSettingsForm({
                   </FormGroup>
                 </FormFieldRow>
                 <MapTextField
-                  name="options.cookieLink"
+                  name="options.defaultCookieNoticeUrl"
                   labelKey="map.cookieLink"
                   synonyms={["cookie", "link"]}
                   placeholder="https://…"
@@ -1220,7 +1295,7 @@ export default function MapSettingsForm({
                   searchValues={searchValues}
                 />
                 <MapTextField
-                  name="options.cookieMessage"
+                  name="options.defaultCookieNoticeMessage"
                   labelKey="map.cookieMessage"
                   synonyms={["cookie", "message"]}
                   multiline

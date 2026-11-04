@@ -107,15 +107,18 @@ function toJsonArray(value: unknown): unknown[] | undefined {
 }
 
 /**
- * Translates the admin map `options` (flat key/value, mostly strings) into the
- * typed/nested shape the client expects (`center: [x,y]`, `zoom: number`,
- * `colors: {...}`, `defaultCookieNoticeMessage`, etc.). See `App_Data/map_1.json`
- * for the reference client format consumed by `mapFactory.js`.
+ * Stored map `options` use the keys of the client's map config, see
+ * `App_Data/map_1.json`. Values may be typed, as in that file, or text, as Admin
+ * saves them, so this parses them to the types `mapFactory.js` expects.
  */
 function translateMapOptionsToClient(
   options: Prisma.JsonObject,
   context: { name: string; locked: boolean; projectionCode?: string }
 ): Record<string, unknown> {
+  const colors = isPlainObject(options.colors) ? options.colors : {};
+  const logoLight =
+    toStringOrUndefined(options.logoLight) ?? toStringOrUndefined(options.logo);
+
   return {
     target: "map",
     name: context.name,
@@ -124,12 +127,12 @@ function translateMapOptionsToClient(
     ...(context.projectionCode ? { projection: context.projectionCode } : {}),
 
     // View geometry
-    center: toNumberArray(options.centerCoordinate),
+    center: toNumberArray(options.center),
     origin: toNumberArray(options.origin),
     extent: toNumberArray(options.extent),
     resolutions: toNumberArray(options.resolutions),
-    extraPrintResolutions: toNumberArray(options.printResolutions),
-    zoom: toNumber(options.startZoom),
+    extraPrintResolutions: toNumberArray(options.extraPrintResolutions),
+    zoom: toNumber(options.zoom),
     minZoom: toNumber(options.minZoom),
     maxZoom: toNumber(options.maxZoom),
     constrainOnlyCenter: toBoolOrUndefined(options.constrainOnlyCenter),
@@ -140,14 +143,16 @@ function translateMapOptionsToClient(
 
     // Appearance
     colors: {
-      primaryColor: toStringOrUndefined(options.primaryColor),
-      secondaryColor: toStringOrUndefined(options.secondaryColor),
-      preferredColorScheme: toStringOrUndefined(options.preferredColorScheme),
+      primaryColor: toStringOrUndefined(colors.primaryColor),
+      secondaryColor: toStringOrUndefined(colors.secondaryColor),
+      preferredColorScheme: toStringOrUndefined(colors.preferredColorScheme),
     },
-    logo: toStringOrUndefined(options.logoLight),
-    logoLight: toStringOrUndefined(options.logoLight),
+    logo: logoLight,
+    logoLight,
     logoDark: toStringOrUndefined(options.logoDark),
-    geoserverLegendOptions: toStringOrUndefined(options.legendOptions),
+    geoserverLegendOptions: toStringOrUndefined(
+      options.geoserverLegendOptions
+    ),
     crossOrigin: toStringOrUndefined(options.crossOrigin),
 
     // Controls
@@ -168,7 +173,9 @@ function translateMapOptionsToClient(
     drawerVisible: toBoolOrUndefined(options.drawerVisible),
     drawerVisibleMobile: toBoolOrUndefined(options.drawerVisibleMobile),
     drawerPermanent: toBoolOrUndefined(options.drawerPermanent),
-    activeDrawerOnStart: toStringOrUndefined(options.drawerContent),
+    activeDrawerOnStart: toStringOrUndefined(
+      options.activeDrawerOnStart
+    ),
     drawerTitle: toStringOrUndefined(options.drawerTitle),
     drawerButtonTitle: toStringOrUndefined(options.drawerButtonTitle),
     drawerButtonIcon: toStringOrUndefined(options.drawerButtonIcon),
@@ -183,15 +190,19 @@ function translateMapOptionsToClient(
     dragPan: toBoolOrUndefined(options.dragPan),
     pinchRotate: toBoolOrUndefined(options.pinchRotate),
     pinchZoom: toBoolOrUndefined(options.pinchZoom),
-    zoomDelta: toNumber(options.zoomLevelDelta),
-    zoomDuration: toNumber(options.zoomAnimationDuration),
+    zoomDelta: toNumber(options.zoomDelta),
+    zoomDuration: toNumber(options.zoomDuration),
 
     // Cookies
     showCookieNotice: toBoolOrUndefined(options.showCookieNotice),
     showCookieNoticeButton: toBoolOrUndefined(options.showCookieNoticeButton),
     cookieUse3dPart: toBoolOrUndefined(options.cookieUse3dPart),
-    defaultCookieNoticeMessage: toStringOrUndefined(options.cookieMessage),
-    defaultCookieNoticeUrl: toStringOrUndefined(options.cookieLink),
+    defaultCookieNoticeMessage: toStringOrUndefined(
+      options.defaultCookieNoticeMessage
+    ),
+    defaultCookieNoticeUrl: toStringOrUndefined(
+      options.defaultCookieNoticeUrl
+    ),
 
     // Introduction guide
     introductionEnabled: toBoolOrUndefined(options.introductionEnabled),

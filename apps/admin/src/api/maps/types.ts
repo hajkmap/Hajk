@@ -1,10 +1,16 @@
 import type { Layer } from "../layers/types";
 
+/** Same keys as the `map` object in `map_*.json`. */
+export type MapOptions = Record<string, unknown> & {
+  title?: string;
+  description?: string;
+};
+
 export interface Map {
   id: number;
   name: string;
   locked: boolean;
-  options?: Record<string, string>;
+  options?: MapOptions;
   projection?: {
     code: string;
   } | null;
@@ -73,7 +79,7 @@ export interface MapMutation {
   };
   /** Many-to-many projections to link to the map (replaces the set on PATCH). */
   projections?: { code: string }[];
-  options?: Record<string, string>;
+  options?: MapOptions;
 }
 
 /** Where a tool instance is placed in the map setting tools' placement containers. */

@@ -14,7 +14,7 @@ import { useCreateProjection, useUpdateProjection } from "../api/projections";
 import type { Projection } from "../api/services/types";
 import { isEpsgCode } from "../pages/maps/projection-codes";
 
-interface Projecti onFormDialogProps {
+interface ProjectionFormDialogProps {
   open: boolean;
   onClose: () => void;
   /** Edit this projection; create a new one when omitted. */
