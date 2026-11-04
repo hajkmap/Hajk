@@ -1,4 +1,5 @@
 import { Box, Button, Typography } from "@mui/material";
+import { useEventCallback } from "@mui/material/utils";
 import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -17,7 +18,13 @@ import {
   type LayerTreePlaceProblem,
 } from "./layer-tree-model";
 import type { LayerTreeMoveZoneItem } from "./layer-tree-move-zone";
+import {
+  createHoverStore,
+  type LayerTreePlaceLines,
+} from "./layer-tree-place-lines";
 import type { LayerTreeClickPick } from "./use-click-place";
+
+const NO_ROW_PROPS = {};
 
 /** Click and place as the editor hands it to the panel. */
 export interface PanelClickPlace {
@@ -69,11 +76,7 @@ export function useTreeClickPlace({
   warn,
 }: UseTreeClickPlaceOptions) {
   const { t } = useTranslation();
-  // The row and the part of it the pointer is over.
-  const [hover, setHover] = useState<{
-    id: string;
-    part: LayerTreeClickPart;
-  } | null>(null);
+  const [hover] = useState(createHoverStore);
   const pick = clickPlace?.pick ?? null;
   const byId = new Map(nodes.map((node) => [node.id, node]));
   const zoneHeld =
@@ -195,7 +198,7 @@ export function useTreeClickPlace({
 
   const placeAt = async (destination: Destination) => {
     if (!clickPlace || !pick) return;
-    setHover(null);
+    hover.set(null);
     if (pick.source === "catalog") {
       let placed = false;
       // The first picked ends first.
@@ -281,33 +284,36 @@ export function useTreeClickPlace({
     if (movable(node)) clickPlace.pickTree(node.id, false);
   };
 
-  const rowProps = (node: LayerTreeFlatNode, depth: number) => {
-    if (!clickPlace) return {};
-    const target =
-      pick && hover?.id === node.id && !heldNodeIds.has(node.id)
-        ? clickDestination(nodes, node.id, hover.part)
-        : null;
-    return {
-      onRowClick: (additive: boolean, part: LayerTreeClickPart) =>
-        clickNode(node, additive, part),
-      onRowHover: (part: LayerTreeClickPart) =>
-        setHover((current) =>
-          current?.id === node.id && current.part === part
-            ? current
-            : { id: node.id, part },
-        ),
-      picked: heldNodeIds.has(node.id),
-      // Above the row before it, under it after it or (inset) in it.
-      placeLine: target
-        ? {
-            depth: target.part === "into" ? depth + 1 : depth,
-            edge:
-              target.part === "before" ? ("top" as const) : ("bottom" as const),
-            ok: canPlace(target.parentId),
-          }
-        : undefined,
-    };
-  };
+  // The same two handlers for every row, so rows only re-render when what
+  // they show changes.
+  const onRowClick = useEventCallback(
+    (nodeId: string, additive: boolean, part: LayerTreeClickPart) => {
+      const node = byId.get(nodeId);
+      if (node) clickNode(node, additive, part);
+    },
+  );
+  const onRowHover = useEventCallback(
+    (nodeId: string, part: LayerTreeClickPart) =>
+      hover.set({ id: nodeId, part }),
+  );
+
+  const rowProps = (nodeId: string) =>
+    clickPlace
+      ? { onRowClick, onRowHover, picked: heldNodeIds.has(nodeId) }
+      : NO_ROW_PROPS;
+
+  const placeLines: LayerTreePlaceLines | null = clickPlace
+    ? {
+        hover,
+        lineAt: (nodeId, part) => {
+          if (!pick || heldNodeIds.has(nodeId)) return null;
+          const target = clickDestination(nodes, nodeId, part);
+          return target
+            ? { part: target.part, ok: canPlace(target.parentId) }
+            : null;
+        },
+      }
+    : null;
 
   const heldName = (() => {
     if (!pick) return null;
@@ -351,6 +357,8 @@ export function useTreeClickPlace({
   return {
     active: clickPlace !== undefined,
     rowProps,
+    /** For the rows' place lines, through LayerTreePlaceLinesContext. */
+    placeLines,
     /** Hands the catalog its clicks. */
     catalogPick: clickPlace
       ? {
@@ -401,6 +409,6 @@ export function useTreeClickPlace({
     /** The top and the end of the tree, while something is held. */
     top: pick ? edge(t("layerTree.clickPlace.first"), 0) : null,
     bottom: pick ? edge(t("layerTree.clickPlace.last"), rootCount) : null,
-    clearHover: () => setHover(null),
+    clearHover: () => hover.set(null),
   };
 }

@@ -12,11 +12,12 @@ import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { Box, Chip, IconButton, Tooltip, Typography } from "@mui/material";
-import type { MouseEvent as ReactMouseEvent } from "react";
+import { memo, type MouseEvent as ReactMouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 
 import LayerTreeItemTooltip from "./layer-tree-item-tooltip";
 import type { LayerTreeClickPart, LayerTreeFlatNode } from "./layer-tree-model";
+import { LayerTreePlaceLine } from "./layer-tree-place-line";
 import type { LayerTreeToggleState } from "./layer-tree-settings";
 import LayerTreeVisibilityToggle from "./layer-tree-visibility-toggle";
 import type { LayerTreeItemDetails } from "./use-item-details";
@@ -30,6 +31,11 @@ export interface LayerTreeRowToggle {
   onClick?: () => void;
 }
 
+/**
+ * The handlers take the row's id, so all rows share the same functions, and
+ * objects come ready made: a row then re-renders only when what it shows
+ * changes, not every time a drop line moves.
+ */
 interface LayerTreeRowProps {
   node: LayerTreeFlatNode;
   details: LayerTreeItemDetails;
@@ -37,6 +43,8 @@ interface LayerTreeRowProps {
   isOpen: boolean;
   hasChild: boolean;
   isDragging: boolean;
+  /** Left out by the search. */
+  filteredOut?: boolean;
   /** Can't be dragged, e.g. the content of a linked group in a map. */
   fixed: boolean;
   /** A linked group: its content is edited on the group itself. */
@@ -51,11 +59,11 @@ interface LayerTreeRowProps {
   /** A layer straight in a map's tree, which the client can't show. */
   misplaced?: boolean;
   layerCount?: number;
-  onToggle: () => void;
-  onRemove?: () => void;
-  onEditGroup?: () => void;
+  onToggle: (id: string, isOpen: boolean) => void;
+  onRemove?: (id: string) => void;
+  onEditGroup?: (groupId: string) => void;
   /** Map mode: hides one of a group's own items on the map, or shows it. */
-  onToggleHidden?: () => void;
+  onToggleHidden?: (id: string) => void;
   /** Map mode: hidden with a group above it; the name of that group. */
   hiddenWith?: string;
   /** Map mode: visible at start for a layer, all its layers for a group. */
@@ -72,21 +80,24 @@ interface LayerTreeRowProps {
    * Click and place: a click on the row picks it or places what is held,
    * before, in or after the row by where it lands.
    */
-  onRowClick?: (additive: boolean, part: LayerTreeClickPart) => void;
-  onRowHover?: (part: LayerTreeClickPart) => void;
+  onRowClick?: (
+    id: string,
+    additive: boolean,
+    part: LayerTreeClickPart,
+  ) => void;
+  onRowHover?: (id: string, part: LayerTreeClickPart) => void;
   /** Click and place: held. */
   picked?: boolean;
-  /** Click and place: what is held would go here, at this depth, if it can. */
-  placeLine?: { depth: number; edge: "top" | "bottom"; ok: boolean };
 }
 
-export default function LayerTreeRow({
+function LayerTreeRow({
   node,
   details,
   depth,
   isOpen,
   hasChild,
   isDragging,
+  filteredOut = false,
   fixed,
   locked,
   from,
@@ -106,10 +117,10 @@ export default function LayerTreeRow({
   onRowClick,
   onRowHover,
   picked = false,
-  placeLine,
 }: LayerTreeRowProps) {
   const { t } = useTranslation();
   const isGroup = node.data.kind === "group";
+  const toggleOpen = () => onToggle(node.id, isOpen);
   const isHidden = node.data.hidden === true || hiddenWith !== undefined;
   /** Upper edge: before the row; middle: in a group; lower edge: after it. */
   const partAt = (event: ReactMouseEvent<HTMLElement>): LayerTreeClickPart => {
@@ -136,17 +147,21 @@ export default function LayerTreeRow({
           ? (event) => {
               // The row's buttons do their own thing.
               if ((event.target as HTMLElement).closest("button")) return;
-              onRowClick(event.ctrlKey || event.metaKey, partAt(event));
+              onRowClick(
+                node.id,
+                event.ctrlKey || event.metaKey,
+                partAt(event),
+              );
             }
           : undefined
       }
       onMouseMove={
-        onRowHover ? (event) => onRowHover(partAt(event)) : undefined
+        onRowHover ? (event) => onRowHover(node.id, partAt(event)) : undefined
       }
       aria-selected={onRowClick ? picked : undefined}
       sx={{
         position: "relative",
-        display: "flex",
+        display: filteredOut ? "none" : "flex",
         alignItems: "center",
         gap: 0.5,
         minHeight: 38,
@@ -162,21 +177,7 @@ export default function LayerTreeRow({
         outlineOffset: -2,
       }}
     >
-      {placeLine ? (
-        <Box
-          aria-hidden
-          sx={{
-            position: "absolute",
-            left: `${placeLine.depth * 24 + 8}px`,
-            right: 8,
-            ...(placeLine.edge === "top" ? { top: -1 } : { bottom: -1 }),
-            height: 3,
-            borderRadius: 1,
-            bgcolor: placeLine.ok ? "primary.main" : "error.main",
-            zIndex: 1,
-          }}
-        />
-      ) : null}
+      <LayerTreePlaceLine nodeId={node.id} depth={depth} />
       {/* What comes from a linked group shows a link where yours can be
           dragged, and is toned down. */}
       {from ? (
@@ -195,7 +196,7 @@ export default function LayerTreeRow({
       {isGroup ? (
         <IconButton
           size="small"
-          onClick={onToggle}
+          onClick={toggleOpen}
           disabled={!hasChild}
           aria-label={t(
             isOpen ? "layerTree.collapseGroup" : "layerTree.expandGroup",
@@ -251,7 +252,7 @@ export default function LayerTreeRow({
         <Typography
           variant="body2"
           noWrap
-          onClick={canToggle && !onRowClick ? onToggle : undefined}
+          onClick={canToggle && !onRowClick ? toggleOpen : undefined}
           sx={{
             flex: 1,
             minWidth: 0,
@@ -366,7 +367,7 @@ export default function LayerTreeRow({
             aria-label={t(
               node.data.hidden ? "layerTree.showInMap" : "layerTree.hideInMap",
             )}
-            onClick={onToggleHidden}
+            onClick={() => onToggleHidden(node.id)}
           >
             {/* The eye shows the state: open while shown, struck when hidden. */}
             {node.data.hidden ? (
@@ -393,7 +394,7 @@ export default function LayerTreeRow({
           <IconButton
             size="small"
             aria-label={t("layerTree.editGroup")}
-            onClick={onEditGroup}
+            onClick={() => onEditGroup(node.data.sourceId)}
           >
             <EditOutlinedIcon fontSize="small" />
           </IconButton>
@@ -404,7 +405,7 @@ export default function LayerTreeRow({
           <IconButton
             size="small"
             aria-label={t("layerTree.remove")}
-            onClick={onRemove}
+            onClick={() => onRemove(node.id)}
           >
             <DeleteOutlineIcon fontSize="small" />
           </IconButton>
@@ -413,3 +414,5 @@ export default function LayerTreeRow({
     </Box>
   );
 }
+
+export default memo(LayerTreeRow);

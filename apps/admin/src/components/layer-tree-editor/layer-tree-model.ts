@@ -184,9 +184,8 @@ export const placedHere = (
  */
 export function placedFrom(
   node: LayerTreeFlatNode,
-  nodes: LayerTreeFlatNode[],
+  byId: ReadonlyMap<string, LayerTreeFlatNode>,
 ): string | undefined {
-  const byId = new Map(nodes.map((other) => [other.id, other]));
   const { placedBy } = node.data;
   if (!placedBy) return byId.get(node.parent)?.text;
   for (

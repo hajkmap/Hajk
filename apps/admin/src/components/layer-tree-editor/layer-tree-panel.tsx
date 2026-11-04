@@ -2,8 +2,10 @@ import {
   Tree,
   type DropOptions,
   type NodeModel,
+  type TreeMethods,
 } from "@minoru/react-dnd-treeview";
 import { Alert, Box, Paper, Typography, useTheme } from "@mui/material";
+import { useEventCallback } from "@mui/material/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
@@ -43,6 +45,7 @@ import {
   type LayerTreeMoveZoneItem,
 } from "./layer-tree-move-zone";
 import LayerTreeNewGroupDialog from "./layer-tree-new-group-dialog";
+import { LayerTreePlaceLinesContext } from "./layer-tree-place-lines";
 import LayerTreeRow from "./layer-tree-row";
 import type { LayerTreeSettings } from "./layer-tree-settings";
 import type { LayerTreeShadowRow } from "./layer-tree-shadow";
@@ -58,6 +61,8 @@ import {
   type PanelClickPlace,
 } from "./use-tree-click-place";
 import { useTreeSettingsUi } from "./use-tree-settings-ui";
+
+const NO_DETAILS: LayerTreeItemDetails = { lines: [], context: "" };
 
 interface LayerTreePanelProps {
   mode: LayerTreeEditorMode;
@@ -283,6 +288,59 @@ export default function LayerTreePanel({
     isMovable(node, byId.get(node.parent), mode, rootGroupId);
   // In a map, everything under a hidden group is hidden with it.
   const hiddenWith = useMemo(() => hiddenGroupsAbove(nodes), [nodes]);
+
+  // What the rows show, made once per change of the tree rather than in every
+  // row each time it renders.
+  const newGroupDetails = useMemo<LayerTreeItemDetails>(
+    () => ({ lines: [t("layerTree.newGroupHint")], context: "" }),
+    [t],
+  );
+  const detailsById = useMemo(
+    () =>
+      new Map(
+        nodes.map((node) => [
+          node.id,
+          node.data.isNew
+            ? newGroupDetails
+            : getDetails(node.data.kind, node.data.sourceId),
+        ]),
+      ),
+    [nodes, getDetails, newGroupDetails],
+  );
+  const fromById = useMemo(
+    () => new Map(nodes.map((node) => [node.id, placedFrom(node, byId)])),
+    [nodes, byId],
+  );
+  // What this tree put in a linked group, as an exception, and whose: the
+  // group edited here, or a new group in it.
+  const exceptionById = useMemo(() => {
+    const exceptions = new Map<string, { group: string; target: string }>();
+    if (mode !== "group") return exceptions;
+    for (const node of nodes) {
+      if (!placedHere(node.data.placedBy, rootGroupId)) continue;
+      exceptions.set(node.id, {
+        group: fromById.get(node.id) ?? rootGroupName ?? "",
+        target: byId.get(node.parent)?.text ?? "",
+      });
+    }
+    return exceptions;
+  }, [nodes, byId, fromById, mode, rootGroupId, rootGroupName]);
+
+  // The same handlers for every row; they take the row's id.
+  const treeRef = useRef<TreeMethods>(null);
+  const toggleOpen = useEventCallback((id: string, isOpen: boolean) => {
+    if (isOpen) treeRef.current?.close(id);
+    else treeRef.current?.open(id);
+  });
+  const removeRow = useEventCallback((id: string) =>
+    commit(removeNode(nodesRef.current, id)),
+  );
+  const toggleRowHidden = useEventCallback((id: string) =>
+    commit(toggleHidden(nodesRef.current, id)),
+  );
+  const editGroup = useEventCallback(
+    (groupId: string) => void navigate(`/groups/${groupId}`),
+  );
   const { rowSettings, dialog: settingsDialog } = useTreeSettingsUi({
     settings,
     onChange: onSettingsChange,
@@ -478,112 +536,92 @@ export default function LayerTreePanel({
             {t(found ? "layerTree.noMatches" : "layerTree.empty")}
           </Typography>
         ) : null}
-        <Tree<LayerTreeNodeData>
-          tree={nodes}
-          rootId={LAYER_TREE_ROOT_ID}
-          extraAcceptTypes={
-            moveZone
-              ? [LAYER_TREE_CATALOG_DRAG_TYPE, MOVE_ZONE_DRAG_TYPE]
-              : [LAYER_TREE_CATALOG_DRAG_TYPE]
-          }
-          initialOpen={shownOpenIds}
-          onChangeOpen={(ids) => setOpen(ids.map(String))}
-          sort={false}
-          insertDroppableFirst={false}
-          enableAnimateExpand
-          dropTargetOffset={8}
-          canDrag={(node) =>
-            canEdit &&
-            !click.active &&
-            node !== undefined &&
-            movable(node as LayerTreeFlatNode)
-          }
-          canDrop={canDrop}
-          onDrop={handleDrop}
-          classes={{
-            root: "layer-tree-root",
-            dropTarget: "layer-tree-drop-target",
-          }}
-          placeholderRender={(_, { depth }) => (
-            <Box
-              sx={{
-                height: 2,
-                ml: `${depth * 24}px`,
-                bgcolor: "primary.main",
-                borderRadius: 1,
-              }}
-            />
-          )}
-          render={(node, { depth, isOpen, hasChild, isDragging, onToggle }) => {
-            const flatNode = node as LayerTreeFlatNode;
-            const { kind, sourceId, isNew, added, placedBy } = flatNode.data;
-            const topLevel = flatNode.parent === LAYER_TREE_ROOT_ID;
-            const parent = byId.get(flatNode.parent);
-            const editable = movable(flatNode);
-            const details: LayerTreeItemDetails = isNew
-              ? { lines: [t("layerTree.newGroupHint")], context: "" }
-              : getDetails(kind, sourceId);
-            return (
+        <LayerTreePlaceLinesContext.Provider value={click.placeLines}>
+          <Tree<LayerTreeNodeData>
+            ref={treeRef}
+            tree={nodes}
+            rootId={LAYER_TREE_ROOT_ID}
+            extraAcceptTypes={
+              moveZone
+                ? [LAYER_TREE_CATALOG_DRAG_TYPE, MOVE_ZONE_DRAG_TYPE]
+                : [LAYER_TREE_CATALOG_DRAG_TYPE]
+            }
+            initialOpen={shownOpenIds}
+            onChangeOpen={(ids) => setOpen(ids.map(String))}
+            sort={false}
+            insertDroppableFirst={false}
+            enableAnimateExpand
+            dropTargetOffset={8}
+            canDrag={(node) =>
+              canEdit &&
+              !click.active &&
+              node !== undefined &&
+              movable(node as LayerTreeFlatNode)
+            }
+            canDrop={canDrop}
+            onDrop={handleDrop}
+            classes={{
+              root: "layer-tree-root",
+              dropTarget: "layer-tree-drop-target",
+            }}
+            placeholderRender={(_, { depth }) => (
               <Box
                 sx={{
-                  display:
-                    found && !found.visible.has(flatNode.id) ? "none" : "block",
+                  height: 2,
+                  ml: `${depth * 24}px`,
+                  bgcolor: "primary.main",
+                  borderRadius: 1,
                 }}
-              >
+              />
+            )}
+            render={(node, { depth, isOpen, hasChild, isDragging }) => {
+              const flatNode = node as LayerTreeFlatNode;
+              const { kind, isNew, added } = flatNode.data;
+              const topLevel = flatNode.parent === LAYER_TREE_ROOT_ID;
+              const parent = byId.get(flatNode.parent);
+              const editable = movable(flatNode);
+              return (
                 <LayerTreeRow
                   node={flatNode}
-                  details={details}
+                  details={detailsById.get(flatNode.id) ?? NO_DETAILS}
                   depth={depth}
                   isOpen={isOpen}
                   hasChild={hasChild}
                   isDragging={isDragging}
+                  filteredOut={
+                    found !== null && !found.visible.has(flatNode.id)
+                  }
                   fixed={!editable || !canEdit || click.active}
                   locked={kind === "group" && !isNew && editable}
-                  from={editable ? undefined : placedFrom(flatNode, nodes)}
-                  // What this tree put in a linked group, as an exception,
-                  // and whose: the group edited here, or a new group in it.
-                  exceptionIn={
-                    mode === "group" && placedHere(placedBy, rootGroupId)
-                      ? {
-                          group:
-                            placedFrom(flatNode, nodes) ?? rootGroupName ?? "",
-                          target: parent?.text ?? "",
-                        }
-                      : undefined
-                  }
+                  from={editable ? undefined : fromById.get(flatNode.id)}
+                  exceptionIn={exceptionById.get(flatNode.id)}
                   misplaced={mode === "map" && kind === "layer" && topLevel}
                   layerCount={layerCounts.get(flatNode.id)}
-                  onToggle={onToggle}
-                  onRemove={
-                    editable && !isSaving
-                      ? () => commit(removeNode(nodes, flatNode.id))
-                      : undefined
-                  }
+                  onToggle={toggleOpen}
+                  onRemove={editable && !isSaving ? removeRow : undefined}
                   onEditGroup={
-                    kind === "group" && !isNew
-                      ? () => void navigate(`/groups/${sourceId}`)
-                      : undefined
+                    kind === "group" && !isNew ? editGroup : undefined
                   }
-                  // A map hides what a linked group holds; what lies in a
-                  // new group is its own, and is removed instead.
+                  // A map hides what a linked group holds; what lies in a new
+                  // group is its own, and is removed instead.
                   onToggleHidden={
                     mode === "map" &&
                     !topLevel &&
                     !added &&
                     !parent?.data.isNew &&
                     !isSaving
-                      ? () => commit(toggleHidden(nodes, flatNode.id))
+                      ? toggleRowHidden
                       : undefined
                   }
                   hiddenWith={hiddenWith.get(flatNode.id)}
                   inMoveZone={moveZone?.flagged.has(flatNode.id)}
                   {...rowSettings(flatNode)}
-                  {...click.rowProps(flatNode, depth)}
+                  {...click.rowProps(flatNode.id)}
                 />
-              </Box>
-            );
-          }}
-        />
+              );
+            }}
+          />
+        </LayerTreePlaceLinesContext.Provider>
         {click.bottom}
       </Paper>
     </>

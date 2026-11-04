@@ -1,4 +1,5 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useEventCallback } from "@mui/material/utils";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import LayerTreeGroupSettingsDialog from "./layer-tree-group-settings-dialog";
@@ -22,6 +23,8 @@ export interface LayerTreeRowSettings {
   displayName?: string;
   onEditSettings?: () => void;
 }
+
+const NO_SETTINGS: LayerTreeRowSettings = {};
 
 type SettingsTarget =
   | { kind: "group"; groupId: string; name: string }
@@ -66,85 +69,101 @@ export function useTreeSettingsUi({
     [nodes],
   );
   const hiddenWith = useMemo(() => hiddenGroupsAbove(nodes), [nodes]);
+  const change = useEventCallback(onChange);
 
-  const rowSettings = (node: LayerTreeFlatNode): LayerTreeRowSettings => {
-    if (!settings) return {};
-    const hidden = Boolean(node.data.hidden) || hiddenWith.has(node.id);
+  // Made once per change of the settings or the tree, so each row keeps the
+  // same objects and is left alone while something is dragged over it.
+  const settingsByNode = useMemo(() => {
+    const rows = new Map<string, LayerTreeRowSettings>();
+    if (!settings) return rows;
 
-    if (node.data.kind === "group") {
-      if (node.data.cycle) return {};
-      const groupId = node.data.sourceId;
-      const group = groupSettingsOf(settings, groupId);
-      const state = groupToggleState(settings, nodes, node.id);
+    const settingsFor = (node: LayerTreeFlatNode): LayerTreeRowSettings => {
+      const hidden = Boolean(node.data.hidden) || hiddenWith.has(node.id);
+
+      if (node.data.kind === "group") {
+        if (node.data.cycle) return NO_SETTINGS;
+        const groupId = node.data.sourceId;
+        const group = groupSettingsOf(settings, groupId);
+        const state = groupToggleState(settings, nodes, node.id);
+        return {
+          displayName: group.name ?? undefined,
+          active: state === "checked",
+          // As in Lagerordning: only where the group has its toggle-all button.
+          toggle:
+            group.toggled && !group.exclusive
+              ? {
+                  state,
+                  variant: "checkbox",
+                  label: t("layerTree.settings.toggleGroup"),
+                  disabled: disabled || hidden,
+                  onClick: () =>
+                    change(toggleGroupVisible(settings, nodes, node.id)),
+                }
+              : undefined,
+          onEditSettings: disabled
+            ? undefined
+            : () => setTarget({ kind: "group", groupId, name: node.text }),
+        };
+      }
+
+      const parent = byId.get(node.parent);
+      if (parent?.data.kind !== "group") return NO_SETTINGS;
+      const groupId = parent.data.sourceId;
+      const layerId = node.data.sourceId;
+      const layer = layerSettingsOf(settings, groupId, layerId);
+      const exclusive = groupSettingsOf(settings, groupId).exclusive;
+      const picked = radioPreview[parent.id] === node.id;
       return {
-        displayName: group.name ?? undefined,
-        active: state === "checked",
-        // As in Lagerordning: only where the group has its toggle-all button.
-        toggle:
-          group.toggled && !group.exclusive
-            ? {
-                state,
-                variant: "checkbox",
-                label: t("layerTree.settings.toggleGroup"),
-                disabled: disabled || hidden,
-                onClick: () =>
-                  onChange(toggleGroupVisible(settings, nodes, node.id)),
-              }
-            : undefined,
+        active: layer.visibleAtStart,
+        toggle: exclusive
+          ? {
+              state: picked ? "checked" : "unchecked",
+              variant: "radio",
+              label: t("layerTree.settings.radioPreview"),
+              disabled: hidden,
+              onClick: () =>
+                setRadioPreview((current) => {
+                  const next = { ...current };
+                  if (picked) delete next[parent.id];
+                  else next[parent.id] = node.id;
+                  return next;
+                }),
+            }
+          : {
+              state: layer.visibleAtStart ? "checked" : "unchecked",
+              variant: "checkbox",
+              label: t("layerTree.settings.visibleAtStart"),
+              disabled: disabled || hidden,
+              onClick: () =>
+                change(
+                  withLayerSettings(settings, groupId, layerId, {
+                    ...layer,
+                    visibleAtStart: !layer.visibleAtStart,
+                  }),
+                ),
+            },
         onEditSettings: disabled
           ? undefined
-          : () => setTarget({ kind: "group", groupId, name: node.text }),
-      };
-    }
-
-    const parent = byId.get(node.parent);
-    if (parent?.data.kind !== "group") return {};
-    const groupId = parent.data.sourceId;
-    const layerId = node.data.sourceId;
-    const layer = layerSettingsOf(settings, groupId, layerId);
-    const exclusive = groupSettingsOf(settings, groupId).exclusive;
-    const picked = radioPreview[parent.id] === node.id;
-    return {
-      active: layer.visibleAtStart,
-      toggle: exclusive
-        ? {
-            state: picked ? "checked" : "unchecked",
-            variant: "radio",
-            label: t("layerTree.settings.radioPreview"),
-            disabled: hidden,
-            onClick: () =>
-              setRadioPreview((current) => {
-                const next = { ...current };
-                if (picked) delete next[parent.id];
-                else next[parent.id] = node.id;
-                return next;
+          : () =>
+              setTarget({
+                kind: "layer",
+                groupId,
+                groupName:
+                  groupSettingsOf(settings, groupId).name ?? parent.text,
+                layerId,
+                name: node.text,
               }),
-          }
-        : {
-            state: layer.visibleAtStart ? "checked" : "unchecked",
-            variant: "checkbox",
-            label: t("layerTree.settings.visibleAtStart"),
-            disabled: disabled || hidden,
-            onClick: () =>
-              onChange(
-                withLayerSettings(settings, groupId, layerId, {
-                  ...layer,
-                  visibleAtStart: !layer.visibleAtStart,
-                }),
-              ),
-          },
-      onEditSettings: disabled
-        ? undefined
-        : () =>
-            setTarget({
-              kind: "layer",
-              groupId,
-              groupName: groupSettingsOf(settings, groupId).name ?? parent.text,
-              layerId,
-              name: node.text,
-            }),
+      };
     };
-  };
+
+    for (const node of nodes) rows.set(node.id, settingsFor(node));
+    return rows;
+  }, [settings, nodes, byId, hiddenWith, radioPreview, disabled, t, change]);
+
+  const rowSettings = useCallback(
+    (node: LayerTreeFlatNode) => settingsByNode.get(node.id) ?? NO_SETTINGS,
+    [settingsByNode],
+  );
 
   let dialog: ReactNode = null;
   if (settings && target?.kind === "group") {
