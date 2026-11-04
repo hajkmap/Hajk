@@ -383,7 +383,8 @@ async function availableEditingLayerIds(): Promise<Set<string>> {
 
 /**
  * The tool's options with only the activeServices (editing layers) its users
- * can have now, since the client fetches each of them.
+ * can have now, since the client fetches each of them. An entry is a layer's
+ * id or an object with it as `id`.
  */
 function withAvailableActiveServices(
   options: Prisma.JsonObject,
@@ -393,11 +394,8 @@ function withAvailableActiveServices(
   if (!Array.isArray(activeServices)) return options;
   return {
     ...options,
-    activeServices: activeServices.filter(
-      (service) =>
-        isPlainObject(service) &&
-        typeof service.id === "string" &&
-        editingLayerIds.has(service.id)
+    activeServices: activeServices.filter((service) =>
+      editingLayerIds.has(String(isPlainObject(service) ? service.id : service))
     ),
   };
 }
