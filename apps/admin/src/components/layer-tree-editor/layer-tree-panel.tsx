@@ -333,10 +333,10 @@ export default function LayerTreePanel({
     else treeRef.current?.open(id);
   });
   const removeRow = useEventCallback((id: string) =>
-    commit(removeNode(nodesRef.current, id)),
+    commit(removeNode(nodes, id)),
   );
   const toggleRowHidden = useEventCallback((id: string) =>
-    commit(toggleHidden(nodesRef.current, id)),
+    commit(toggleHidden(nodes, id)),
   );
   const editGroup = useEventCallback(
     (groupId: string) => void navigate(`/groups/${groupId}`),
