@@ -29,6 +29,7 @@ import {
   Tool,
   ToolCreateInput,
 } from "../../../api/tools";
+import { getCatalogToolDisplayName } from "../../maps/map-tools-utils";
 import StyledDataGrid from "../../../components/data-grid";
 import DialogWrapper from "../../../components/flexible-dialog";
 import CreateButton from "../../../components/create-button";
@@ -333,10 +334,7 @@ export default function ToolsList({
       >
         <Typography>
           {t("tools.deleteConfirm", {
-            title:
-              toolToDelete?.internalName?.trim() ||
-              toolToDelete?.type ||
-              "",
+            title: toolToDelete ? getCatalogToolDisplayName(toolToDelete) : "",
           })}
         </Typography>
         {(toolToDelete?.mapsCount ?? 0) > 0 && (

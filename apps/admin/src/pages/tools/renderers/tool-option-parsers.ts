@@ -70,3 +70,10 @@ export function encodeInstruction(text: string): string | null {
     return null;
   }
 }
+
+/** An id from stored options as text, or null when it isn't a string or number. */
+export function optionId(value: unknown): string | null {
+  return typeof value === "string" || typeof value === "number"
+    ? String(value)
+    : null;
+}

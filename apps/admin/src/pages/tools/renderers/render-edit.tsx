@@ -12,6 +12,7 @@ import {
   GroupsOption,
   InstructionOption,
 } from "./tool-option-fields";
+import { optionId } from "./tool-option-parsers";
 
 interface ActiveService {
   id: string;
@@ -74,10 +75,11 @@ function servicesOf(value: unknown): ActiveService[] {
     }
     if (!item || typeof item !== "object") return [];
     const service = item as { id?: unknown; visibleForGroups?: unknown };
-    if (service.id == null) return [];
+    const id = optionId(service.id);
+    if (id === null) return [];
     return [
       {
-        id: String(service.id),
+        id,
         visibleForGroups: Array.isArray(service.visibleForGroups)
           ? service.visibleForGroups.map(String)
           : [],

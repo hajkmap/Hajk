@@ -18,9 +18,13 @@ export default function DefaultMapSwitcher() {
     <Paper elevation={4} sx={{ height: 80, width: 250, mt: 2 }}>
       <Grid
         container
-        sx={{ height: "100%", width: "100%", p: 2 }}
-        justifyContent="center"
-        alignContent="center"
+        sx={{
+          height: "100%",
+          width: "100%",
+          p: 2,
+          justifyContent: "center",
+          alignContent: "center",
+        }}
       >
         {isLoading ? (
           <CircularProgress size={24} />

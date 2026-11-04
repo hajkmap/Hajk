@@ -10,6 +10,7 @@ import { Tool } from "../../../api/tools";
 import LayerPicker from "../components/layer-picker";
 import { timesliderDefaults } from "./tool-option-defaults";
 import { CheckboxOption, InstructionOption } from "./tool-option-fields";
+import { optionId } from "./tool-option-parsers";
 
 interface TimeSliderRendererProps {
   tool: Tool;
@@ -50,11 +51,7 @@ export default function TimeSliderRenderer({
                   fullWidth
                   label={t("tools.timeslider.resolution")}
                   helperText={t("tools.timeslider.resolutionHelp")}
-                  value={
-                    field.value === "days" || field.value === "months"
-                      ? field.value
-                      : "years"
-                  }
+                  value={resolutionOf(field.value)}
                   onChange={(event) => field.onChange(event.target.value)}
                   onBlur={field.onBlur}
                 >
@@ -87,21 +84,22 @@ export default function TimeSliderRenderer({
   );
 }
 
+function resolutionOf(value: unknown): "days" | "months" | "years" {
+  return value === "days" || value === "months" ? value : "years";
+}
+
 function layerIdsOf(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
-  return value.flatMap((item) => {
-    if (typeof item === "string" || typeof item === "number") {
-      return [String(item)];
-    }
-    if (item && typeof item === "object" && "id" in item && item.id != null) {
-      return [String(item.id)];
-    }
-    return [];
+  return value.flatMap((item: unknown) => {
+    const id = optionId(
+      item && typeof item === "object" ? (item as { id?: unknown }).id : item,
+    );
+    return id === null ? [] : [id];
   });
 }
 
 function formatDate(value?: string): string {
-  return value && value.length === 8
+  return value?.length === 8
     ? `${value.slice(0, 4)}-${value.slice(4, 6)}-${value.slice(6)}`
     : "";
 }

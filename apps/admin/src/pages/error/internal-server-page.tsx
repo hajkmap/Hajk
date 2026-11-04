@@ -1,4 +1,4 @@
-import { LazyMotion, m, domAnimation } from "framer-motion";
+import { LazyMotion, m, domAnimation, type Variants } from "framer-motion";
 import { Box, useTheme } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import "./error.css";
@@ -7,7 +7,7 @@ import PageTitle from "../../layouts/root/components/page-title";
 export default function InternalServerPage() {
   const { palette } = useTheme();
   const { t } = useTranslation();
-  const imgVariants = {
+  const imgVariants: Variants = {
     initial: { opacity: 0, scale: 0.8 },
     animate: {
       opacity: 1,
@@ -20,7 +20,7 @@ export default function InternalServerPage() {
     },
   };
 
-  const textVariants = {
+  const textVariants: Variants = {
     initial: { opacity: 0, y: 50 },
     animate: {
       opacity: 1,

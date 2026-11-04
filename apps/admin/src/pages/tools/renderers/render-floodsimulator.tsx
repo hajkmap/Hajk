@@ -49,7 +49,7 @@ function withTileGridPart(
   text: string,
 ): TileGrid | null {
   const next: TileGrid = {
-    ...(current && typeof current === "object" ? (current as TileGrid) : {}),
+    ...(current && typeof current === "object" ? current : {}),
     [key]: parseNumberList(text),
   };
   if (!next.origin && !next.extent && !next.resolutions) return null;
@@ -108,7 +108,7 @@ export default function FloodSimulatorRenderer({
                 <SelectWithHelp
                   labelKey="tools.floodsimulator.encoding"
                   helpKey="tools.floodsimulator.encodingHelp"
-                  value={field.value ?? "terrarium"}
+                  value={(field.value as string | undefined) ?? "terrarium"}
                   onChange={(event) => field.onChange(event.target.value)}
                 >
                   <MenuItem value="terrarium">terrarium</MenuItem>
@@ -125,7 +125,7 @@ export default function FloodSimulatorRenderer({
                 <SelectWithHelp
                   labelKey="tools.floodsimulator.crossOrigin"
                   helpKey="tools.floodsimulator.crossOriginHelp"
-                  value={field.value ?? "anonymous"}
+                  value={(field.value as string | undefined) ?? "anonymous"}
                   onChange={(event) => field.onChange(event.target.value)}
                 >
                   <MenuItem value="anonymous">anonymous</MenuItem>

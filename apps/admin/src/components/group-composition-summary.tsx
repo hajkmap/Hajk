@@ -1,4 +1,3 @@
-import React from "react";
 import { Box, Chip, Tooltip, Typography } from "@mui/material";
 import LayersIcon from "@mui/icons-material/Layers";
 import FolderIcon from "@mui/icons-material/Folder";
@@ -124,7 +123,7 @@ export function GroupCompositionIconsCell({
       <Tooltip title={t("groups.composition.layerCount", { count: layerCount })}>
         <Box sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}>
           <LayersIcon fontSize="small" color="action" />
-          <Typography variant="body2" lineHeight={1}>
+          <Typography variant="body2" sx={{ lineHeight: 1 }}>
             {layerCount}
           </Typography>
         </Box>
@@ -136,7 +135,7 @@ export function GroupCompositionIconsCell({
       >
         <Box sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}>
           <FolderIcon fontSize="small" color="action" />
-          <Typography variant="body2" lineHeight={1}>
+          <Typography variant="body2" sx={{ lineHeight: 1 }}>
             {nestedGroupCount}
           </Typography>
         </Box>

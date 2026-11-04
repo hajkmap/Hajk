@@ -70,7 +70,7 @@ export default function LayerPicker({
         (option) =>
           !needle ||
           option.name.toLowerCase().includes(needle) ||
-          option.secondary?.toLowerCase().includes(needle) ||
+          (option.secondary?.toLowerCase().includes(needle) ?? false) ||
           option.id.toLowerCase().includes(needle),
       )
       .sort(

@@ -1,6 +1,6 @@
 import { GridLocaleText } from "@mui/x-data-grid";
 
-export const GRID_SWEDISH_LOCALE_TEXT: GridLocaleText = {
+export const GRID_SWEDISH_LOCALE_TEXT: Partial<GridLocaleText> = {
   // Root
   noRowsLabel: "Inga rader",
   noResultsOverlayLabel: "Inga resultat funna.",
@@ -51,7 +51,7 @@ export const GRID_SWEDISH_LOCALE_TEXT: GridLocaleText = {
   filterPanelOperator: "Operator",
   filterPanelOperatorAnd: "Och",
   filterPanelOperatorOr: "Eller",
-  filterPanelColumns: "Kolumner",
+  filterPanelColumn: "Kolumner",
   filterPanelInputLabel: "Värde",
   filterPanelInputPlaceholder: "Filtervärde",
 
@@ -169,11 +169,16 @@ export const GRID_SWEDISH_LOCALE_TEXT: GridLocaleText = {
   expandDetailPanel: "Expandera",
   collapseDetailPanel: "Minimera",
 
-  // Used core components translation keys
-  MuiTablePagination: {
-    labelDisplayedRows: ({ from, to, count }) =>
-      `${from} - ${to} av ${count === -1 ? `mer än ${to}` : count}`,
-    labelRowsPerPage: "Rader per sida:",
+  // Pagination
+  paginationRowsPerPage: "Rader per sida:",
+  paginationDisplayedRows: ({ from, to, count, estimated }) => {
+    const unknownRowCount = count == null || count === -1;
+    if (!estimated) {
+      return `${from}–${to} av ${!unknownRowCount ? count : `fler än ${to}`}`;
+    }
+    const estimatedLabel =
+      estimated > to ? `ungefär ${estimated}` : `fler än ${to}`;
+    return `${from}–${to} av ${!unknownRowCount ? count : estimatedLabel}`;
   },
 
   // Row reordering text

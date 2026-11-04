@@ -1,3 +1,5 @@
+import type { MapSummary } from "../maps";
+
 /**
  * A tool instance: a configured instance of a ToolType. Several instances of
  * the same type can exist, and one instance can be used on many maps.
@@ -57,7 +59,7 @@ export interface ToolsApiResponse {
 
 /** Response of `GET /tools/:toolName/maps`. */
 export interface GlobalMapsApiResponse {
-  maps: { name: string; id: string; locked: boolean }[];
+  maps: MapSummary[];
   count: number;
   error: string;
   errorId: string;

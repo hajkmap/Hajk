@@ -11,7 +11,7 @@ import {
   Projection,
 } from "./types";
 import { LayersApiResponse } from "../layers";
-import { Map } from "../maps";
+import { MapSummary } from "../maps";
 import { GlobalMapsApiResponse } from "../tools";
 import { mergeWithConfigDefaults } from "../../lib/merge-with-config-defaults";
 import useAppStateStore from "../../store/use-app-state-store";
@@ -143,7 +143,9 @@ export const getLayerCountByServiceId = async (
   }
 };
 
-export const getMapsByServiceId = async (serviceId: string): Promise<Map[]> => {
+export const getMapsByServiceId = async (
+  serviceId: string,
+): Promise<MapSummary[]> => {
   const internalApiClient = getApiClient();
   try {
     const response = await internalApiClient.get<GlobalMapsApiResponse>(

@@ -13,7 +13,7 @@ import {
   deleteTool,
 } from "./requests";
 import { Tool, ToolType, ToolCreateInput, ToolUpdateInput } from "./types";
-import { Map } from "../maps";
+import { MapSummary } from "../maps";
 
 // React Query hook to fetch all tool instances
 // This hook uses the `getTools` function from the tools `requests` module
@@ -26,7 +26,9 @@ export const useTools = (): UseQueryResult<Tool[]> => {
 
 // React Query hook to fetch maps using a tool of the given type
 // This hook uses the `getMapsByToolName` function from the tools `requests` module
-export const useMapsByToolName = (toolName: string): UseQueryResult<Map[]> => {
+export const useMapsByToolName = (
+  toolName: string,
+): UseQueryResult<MapSummary[]> => {
   return useQuery({
     queryKey: ["mapsByTool", toolName],
     queryFn: () => getMapsByToolName(toolName),

@@ -347,7 +347,9 @@ export function getToolDisplayName(tool: ToolOnMap): string {
 }
 
 export function getCatalogToolDisplayName(tool: Tool): string {
-  return tool.internalName?.trim() || tool.type;
+  const internalName = tool.internalName?.trim();
+  if (internalName) return internalName;
+  return tool.type;
 }
 
 /**

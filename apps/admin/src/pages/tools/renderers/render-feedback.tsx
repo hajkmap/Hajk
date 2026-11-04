@@ -85,7 +85,7 @@ export default function FeedbackRenderer({
                 helpKey="tools.feedback.maxLengthHelp"
                 fullWidth
                 type="number"
-                value={field.value ?? ""}
+                value={(field.value as number | "" | undefined) ?? ""}
                 error={!!fieldState.error}
                 helperText={fieldState.error?.message}
                 onChange={(event) => {

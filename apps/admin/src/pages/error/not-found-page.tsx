@@ -1,4 +1,4 @@
-import { LazyMotion, m, domAnimation } from "framer-motion";
+import { LazyMotion, m, domAnimation, type Variants } from "framer-motion";
 import { useNavigate } from "react-router";
 import { Box, useTheme } from "@mui/material";
 import { useTranslation, Trans } from "react-i18next";
@@ -9,7 +9,7 @@ export default function NotFound() {
   const { palette } = useTheme();
   const { t } = useTranslation();
 
-  const imgVariants = {
+  const imgVariants: Variants = {
     initial: { opacity: 0, scale: 0.8 },
     animate: {
       opacity: 1,
@@ -22,7 +22,7 @@ export default function NotFound() {
     },
   };
 
-  const textVariants = {
+  const textVariants: Variants = {
     initial: { opacity: 0, y: 50 },
     animate: {
       opacity: 1,

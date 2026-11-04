@@ -14,6 +14,7 @@ import DnsIcon from "@mui/icons-material/Dns";
 import LayersIcon from "@mui/icons-material/Layers";
 import PaletteIcon from "@mui/icons-material/Palette";
 import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
+import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
@@ -60,7 +61,7 @@ function groupTypeLabel(
   return key ? t(`groupType.${key}`) : type;
 }
 
-function itemDetail(item: DeletedItem, t: (key: string, options?: object) => string): string {
+function itemDetail(item: DeletedItem, t: TFunction): string {
   switch (item.kind) {
     case "map":
       return t("deleted.detail.themeCount", {
@@ -87,9 +88,9 @@ function itemDetail(item: DeletedItem, t: (key: string, options?: object) => str
   }
 }
 
-type DeletedItemsListProps = {
+interface DeletedItemsListProps {
   filter: DeletedItemsFilter;
-};
+}
 
 export default function DeletedItemsList({ filter }: DeletedItemsListProps) {
   const { t } = useTranslation();

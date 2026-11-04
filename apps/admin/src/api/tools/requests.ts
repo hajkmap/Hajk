@@ -7,7 +7,7 @@ import {
   ToolCreateInput,
   ToolUpdateInput,
 } from "./types";
-import { Map } from "../maps";
+import { MapSummary } from "../maps";
 import { getApiClient, InternalApiError } from "../../lib/internal-api-client";
 
 /**
@@ -47,7 +47,9 @@ export const getTools = async (): Promise<Tool[]> => {
   }
 };
 
-export const getMapsByToolName = async (toolName: string): Promise<Map[]> => {
+export const getMapsByToolName = async (
+  toolName: string,
+): Promise<MapSummary[]> => {
   const internalApiClient = getApiClient();
   try {
     const response = await internalApiClient.get<GlobalMapsApiResponse>(

@@ -12,6 +12,7 @@ import { useLayerById } from "../../../api/layers/hooks";
 import { useGroupById } from "../../../api/groups/hooks";
 import { useMaps } from "../../../api/maps/hooks";
 import { useTools } from "../../../api/tools/hooks";
+import { getCatalogToolDisplayName } from "../../../pages/maps/map-tools-utils";
 
 export default function Header() {
   const { t } = useTranslation();
@@ -26,10 +27,9 @@ export default function Header() {
   const location = useLocation();
   const pathParts = location.pathname.split("/").filter(Boolean);
 
-  const mapName = maps?.find((m) => m.id == mapId)?.name;
+  const mapName = maps?.find((m) => String(m.id) === mapId)?.name;
   const tool = tools?.find((item) => String(item.id) === toolId);
-  const toolLabel =
-    tool?.internalName?.trim() || tool?.type;
+  const toolLabel = tool && getCatalogToolDisplayName(tool);
 
   useServicesHealthCheck(services ?? []);
 

@@ -27,6 +27,7 @@ import {
   GroupsOption,
   InstructionOption,
 } from "./tool-option-fields";
+import { optionId } from "./tool-option-parsers";
 
 interface ChosenLayer {
   id: string;
@@ -44,7 +45,7 @@ function chosenLayersOf(value: unknown): ChosenLayer[] {
   return value.flatMap((item) => {
     if (!item || typeof item !== "object") return [];
     const layer = item as { id?: unknown; caption?: unknown };
-    const id = layer.id != null ? String(layer.id) : "";
+    const id = optionId(layer.id);
     if (!id) return [];
     return [
       {

@@ -6,6 +6,9 @@ export type MapOptions = Record<string, unknown> & {
   description?: string;
 };
 
+/** The map fields returned by the "maps using X" endpoints. */
+export type MapSummary = Pick<Map, "id" | "name">;
+
 export interface Map {
   id: number;
   name: string;

@@ -1,6 +1,10 @@
 import { memo, useEffect, useMemo, useRef } from "react";
 import { useEditor, EditorContent, ReactNodeViewRenderer } from "@tiptap/react";
-import { createDocument, type AnyExtension } from "@tiptap/core";
+import {
+  createDocument,
+  type AnyExtension,
+  type Node as TiptapNode,
+} from "@tiptap/core";
 import type { Node as PMNode } from "@tiptap/pm/model";
 import { Box } from "@mui/material";
 import { useTranslation } from "react-i18next";
@@ -58,7 +62,7 @@ export const RichTextEditor = memo(function RichTextEditor({
   const extensions = useMemo((): AnyExtension[] => {
     return buildExtensions(placeholder).map((ext): AnyExtension => {
       if (ext.name === "mediaFigure") {
-        return ext.extend({
+        return (ext as TiptapNode).extend({
           addNodeView() {
             return ReactNodeViewRenderer((props) => (
               <MediaFigureView
@@ -72,14 +76,14 @@ export const RichTextEditor = memo(function RichTextEditor({
         }) as AnyExtension;
       }
       if (ext.name === "iframeEmbed") {
-        return ext.extend({
+        return (ext as TiptapNode).extend({
           addNodeView() {
             return ReactNodeViewRenderer(IframeEmbedView);
           },
         }) as AnyExtension;
       }
       if (ext.name === "textSection") {
-        return ext.extend({
+        return (ext as TiptapNode).extend({
           addNodeView() {
             return ReactNodeViewRenderer(TextSectionView);
           },

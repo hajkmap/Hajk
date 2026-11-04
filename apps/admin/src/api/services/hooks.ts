@@ -28,7 +28,7 @@ import {
   SERVICE_STATUS,
 } from "./types";
 import { LayersApiResponse } from "../layers";
-import { Map } from "../maps";
+import { MapSummary } from "../maps";
 import { fetchCapabilities } from "./requests";
 import { useEffect, useRef } from "react";
 
@@ -105,7 +105,7 @@ export const useLayerCountByServiceId = (
 // This hook uses the `getMapsByServiceId` function from the  services `requests` module
 export const useMapsByServiceId = (
   serviceId: string,
-): UseQueryResult<Map[]> => {
+): UseQueryResult<MapSummary[]> => {
   return useQuery({
     queryKey: ["mapsByServiceId", serviceId],
     queryFn: () => getMapsByServiceId(serviceId),

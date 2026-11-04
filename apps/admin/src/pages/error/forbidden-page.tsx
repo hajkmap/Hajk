@@ -1,4 +1,4 @@
-import { LazyMotion, m, domAnimation } from "framer-motion";
+import { LazyMotion, m, domAnimation, type Variants } from "framer-motion";
 import { Box, useTheme } from "@mui/material";
 import DoNotTouchIcon from "@mui/icons-material/DoNotTouch";
 import { useTranslation } from "react-i18next";
@@ -8,7 +8,7 @@ export default function Forbidden() {
   const { palette } = useTheme();
   const { t } = useTranslation();
 
-  const imgVariants = {
+  const imgVariants: Variants = {
     initial: { opacity: 0, scale: 0.8 },
     animate: {
       opacity: 1,
@@ -21,7 +21,7 @@ export default function Forbidden() {
     },
   };
 
-  const textVariants = {
+  const textVariants: Variants = {
     initial: { opacity: 0, y: 50 },
     animate: {
       opacity: 1,

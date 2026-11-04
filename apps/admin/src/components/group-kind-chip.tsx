@@ -1,4 +1,3 @@
-import React from "react";
 import { Chip, Tooltip } from "@mui/material";
 import TitleIcon from "@mui/icons-material/Title";
 import ToggleOnIcon from "@mui/icons-material/ToggleOn";

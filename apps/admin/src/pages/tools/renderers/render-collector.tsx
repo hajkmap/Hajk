@@ -30,6 +30,7 @@ import {
   GroupsOption,
   TextOption,
 } from "./tool-option-fields";
+import { optionId } from "./tool-option-parsers";
 
 interface CollectorPage {
   id: string;
@@ -156,7 +157,7 @@ function pagesOf(value: unknown): CollectorPage[] {
     const page =
       item && typeof item === "object" ? (item as Record<string, unknown>) : {};
     return {
-      id: page.id != null ? String(page.id) : String(index),
+      id: optionId(page.id) ?? String(index),
       order: index,
       header: typeof page.header === "string" ? page.header : "",
       text: typeof page.text === "string" ? page.text : "",

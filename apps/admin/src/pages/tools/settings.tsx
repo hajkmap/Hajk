@@ -6,6 +6,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 
 import { useTools, useUpdateTool, Tool } from "../../api/tools";
+import { getCatalogToolDisplayName } from "../maps/map-tools-utils";
 import { useMaps } from "../../api/maps";
 import FormContainer from "../../components/form-components/form-container";
 import FormActionPanel from "../../components/form-action-panel";
@@ -192,7 +193,7 @@ export default function ToolSettings() {
         ? "error"
         : "idle";
 
-  const displayName = tool?.internalName?.trim() || tool?.type;
+  const displayName = tool && getCatalogToolDisplayName(tool);
 
   return (
     <Page
