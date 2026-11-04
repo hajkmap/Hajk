@@ -84,6 +84,8 @@ cd apps/admin && npm run build
    - area: Description. [#issue-number](https://github.com/hajkmap/Hajk/issues/issue-number)
    ```
 
+   Exception for the new admin only: on the `admin-ui/main` branch, where the new admin is developed, changes get no CHANGELOG.md entries until the new admin is released; it gets its notes then. All other work, including every branch from `develop`, still updates CHANGELOG.md.
+
 ## Code Patterns
 
 ### Design Principles
@@ -134,4 +136,4 @@ cd apps/admin && npm run build
 2. Update appropriate configuration files
 3. Follow Material Design patterns for UI components
 4. Add appropriate tests
-5. Update CHANGELOG.md
+5. Update CHANGELOG.md, except on `admin-ui/main` while the new admin is developed (see Git Workflow Conventions)
