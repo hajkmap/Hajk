@@ -103,7 +103,6 @@ import {
   availabilityOf,
   fromDateTimeLocal,
   hasValidPeriod,
-  isAvailableNow,
 } from "../../lib/availability";
 
 const ALL_SETTINGS_TABS: {
@@ -357,23 +356,18 @@ export default function LayerSettings() {
     ? `${layer.id}:${roleOnLayer?.roleId ?? ""}`
     : null;
 
-  const [committedFormBaseline, setCommittedFormBaseline] =
-    useState<FieldValues | null>(null);
   const [syncedLayerFormKey, setSyncedLayerFormKey] = useState<string | null>(
     null,
   );
 
   if (layerFormSyncKey !== syncedLayerFormKey) {
     setSyncedLayerFormKey(layerFormSyncKey);
-    setCommittedFormBaseline(null);
     if (layerEditingDefaults) {
       setEditingOptions(layerEditingDefaults.options);
       setEditingEditableFields(layerEditingDefaults.editableFields);
       setEditingNonEditableFields(layerEditingDefaults.nonEditableFields);
     }
   }
-
-  const formBaseline = committedFormBaseline ?? layerFormBaseline;
 
   const {
     register,
@@ -385,7 +379,9 @@ export default function LayerSettings() {
   } = useForm<FieldValues>({
     mode: "onChange",
     reValidateMode: "onChange",
-    values: formBaseline ?? undefined,
+    // A save puts the saved layer in the cache, so this also resets the
+    // form to what was saved.
+    values: layerFormBaseline ?? undefined,
   });
 
   const watchRoleIdInput = useWatch({ control, name: "roleId" }) as
@@ -864,87 +860,6 @@ export default function LayerSettings() {
           layerId: layer?.id ?? "",
           roleId: watchRoleIdInput,
         });
-      }
-
-      // Reset form with updated data to clear dirty state after successful save
-      // This ensures the form reflects the saved state
-      if (layer) {
-        const savedBaseline: FieldValues = {
-          name: layerData.name,
-          serviceId: layerData.serviceId,
-          internalName: layerData.internalName,
-          description: layerData.description,
-          hidpi: layerData.hidpi,
-          tiled: layerData.tiled,
-          singleTile: layerData.singleTile,
-          customRatio: layerData.customRatio,
-          timeSliderVisible: layerData.timeSliderVisible,
-          timeSliderStart: layerData.timeSliderStart,
-          timeSliderEnd: layerData.timeSliderEnd,
-          hideExpandArrow: layerData.hideExpandArrow,
-          zIndex: layerData.zIndex,
-          style: layerData.style,
-          opacity: layerData.opacity,
-          minZoom: layerData.minZoom,
-          maxZoom: layerData.maxZoom,
-          minMaxZoomAlertOnToggleOnly: layerData.minMaxZoomAlertOnToggleOnly,
-          infoClickActive: layerData.infoClickActive,
-          showMetadata: layerData.showMetadata,
-          legendUrl: layerData.legendUrl,
-          legendIconUrl: layerData.legendIconUrl,
-          legendOptions: layerData.legendOptions,
-          useCustomDpiList: false,
-          roleId: watchRoleIdInput,
-          metadata: {
-            title: layerData.metadata?.title,
-            description: layerData.metadata?.description,
-            owner: layerData.metadata?.owner,
-            url: layerData.metadata?.url,
-            urlTitle: layerData.metadata?.urlTitle,
-            attribution: layerData.metadata?.attribution,
-          },
-          searchSettings: {
-            active: layerData.searchSettings?.active,
-            url: layerData.searchSettings?.url,
-            searchFields: (layerData.searchSettings?.searchFields ?? []).join(
-              ", ",
-            ),
-            primaryDisplayFields: (
-              layerData.searchSettings?.primaryDisplayFields ?? []
-            ).join(", "),
-            secondaryDisplayFields: (
-              layerData.searchSettings?.secondaryDisplayFields ?? []
-            ).join(", "),
-            shortDisplayFields: (
-              layerData.searchSettings?.shortDisplayFields ?? []
-            ).join(", "),
-            geometryField:
-              resolveGeometryFieldFromPayload(
-                layerData as Record<string, unknown>,
-              ) ?? "",
-            outputFormat: layerData.searchSettings?.outputFormat,
-          },
-          infoClickSettings: {
-            definition: layerData.infoClickSettings?.definition,
-            icon: layerData.infoClickSettings?.icon,
-            format: layerData.infoClickSettings?.format,
-            sortProperty: layerData.infoClickSettings?.sortProperty,
-            sortMethod: layerData.infoClickSettings?.sortMethod,
-            sortDescending: layerData.infoClickSettings?.sortDescending,
-          },
-          options: {
-            keyword: layerData.options?.keyword,
-            category: layerData.options?.category,
-            layerDisplayDescription: layerData.options?.layerDisplayDescription,
-            geoWebCache: layerData.options?.geoWebCache,
-            showAttributeTableButton:
-              layerData.options?.showAttributeTableButton,
-            ...editingOptions,
-            editableFields: editingEditableFields,
-            nonEditableFields: editingNonEditableFields,
-          },
-        };
-        setCommittedFormBaseline(savedBaseline);
       }
     } catch (error) {
       console.error("Failed to update layer:", error);
@@ -1440,14 +1355,7 @@ export default function LayerSettings() {
                     </FormFieldRow>
                   </SettingsSearchField>
                   <FormFieldRow fullWidth>
-                    <AvailabilityStatus control={control} />
-                    {service && !isAvailableNow(service.options) ? (
-                      <Alert severity="warning" sx={{ mt: 2 }}>
-                        {t("availability.status.serviceUnavailable", {
-                          name: service.name,
-                        })}
-                      </Alert>
-                    ) : null}
+                    <AvailabilityStatus control={control} service={service} />
                   </FormFieldRow>
                 </FormFieldGrid>
               </FormPanel>
