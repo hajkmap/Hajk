@@ -1,4 +1,5 @@
 import {
+  type QueryClient,
   useQuery,
   UseQueryResult,
   useMutation,
@@ -30,15 +31,32 @@ import {
 import { LayersApiResponse } from "../layers";
 import { MapSummary } from "../maps";
 import { fetchCapabilities } from "./requests";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const HEALTH_CHECK_CONCURRENCY = 3;
 const HEALTH_CHECK_INTERVAL_MS = 5 * 60 * 1000;
 
-function isStale(lastChecked?: string): boolean {
-  if (!lastChecked) return true;
-  return (
-    Date.now() - new Date(lastChecked).getTime() >= HEALTH_CHECK_INTERVAL_MS
+/** Whether a service is due for a check: one found down waits twice as long. */
+function isDue(service: Service): boolean {
+  if (!service.lastChecked) return true;
+  const wait =
+    service.status === SERVICE_STATUS.UNHEALTHY
+      ? 2 * HEALTH_CHECK_INTERVAL_MS
+      : HEALTH_CHECK_INTERVAL_MS;
+  return Date.now() - new Date(service.lastChecked).getTime() >= wait;
+}
+
+/** Puts a finished check's status and time in the cached service list. */
+function cacheCheckResult(
+  queryClient: QueryClient,
+  id: string,
+  status: SERVICE_STATUS,
+) {
+  const lastChecked = new Date().toISOString();
+  queryClient.setQueryData(["services"], (oldServices: Service[] | undefined) =>
+    oldServices?.map((service) =>
+      service.id === id ? { ...service, status, lastChecked } : service,
+    ),
   );
 }
 
@@ -247,7 +265,6 @@ export const useServiceCapabilities = ({
 export const useServicesHealthCheck = (services: Service[]) => {
   const queryClient = useQueryClient();
   const servicesRef = useRef<Service[]>(services);
-  const skipNextCheck = useRef<Set<string>>(new Set());
   const runChecksRef = useRef<(() => Promise<void>) | null>(null);
   const isCheckRunning = useRef(false);
 
@@ -257,32 +274,14 @@ export const useServicesHealthCheck = (services: Service[]) => {
   }, [services]);
 
   useEffect(() => {
-    const updateCache = (id: string, status: SERVICE_STATUS) => {
-      const lastChecked = new Date().toISOString();
-      queryClient.setQueryData(["services"], (oldServices: Service[]) =>
-        oldServices?.map((service: Service) =>
-          service.id === id ? { ...service, status, lastChecked } : service,
-        ),
-      );
-      if (status === SERVICE_STATUS.UNHEALTHY) {
-        skipNextCheck.current.add(id);
-      } else {
-        skipNextCheck.current.delete(id);
-      }
-    };
+    const updateCache = (id: string, status: SERVICE_STATUS) =>
+      cacheCheckResult(queryClient, id, status);
 
     runChecksRef.current = async () => {
       if (isCheckRunning.current) return;
       isCheckRunning.current = true;
       try {
-        const toCheck = servicesRef.current.filter((service) => {
-          if (!isStale(service.lastChecked)) return false;
-          if (skipNextCheck.current.has(service.id)) {
-            skipNextCheck.current.delete(service.id);
-            return false;
-          }
-          return true;
-        });
+        const toCheck = servicesRef.current.filter(isDue);
         if (!toCheck.length) return;
         await runWithConcurrencyLimit(
           toCheck,
@@ -301,10 +300,37 @@ export const useServicesHealthCheck = (services: Service[]) => {
     return () => clearInterval(interval);
   }, [queryClient]);
 
-  // Trigger check on load and after refetch — only when stale or missing
+  // Trigger check on load and after refetch — only when one is due
   useEffect(() => {
-    if (services.length > 0 && services.some((s) => isStale(s.lastChecked))) {
+    if (services.some(isDue)) {
       void runChecksRef.current?.();
     }
   }, [services]);
+};
+
+/**
+ * Checks a service now, outside the schedule. `checking` holds the ids of
+ * the services being checked.
+ */
+export const useRecheckService = () => {
+  const queryClient = useQueryClient();
+  const [checking, setChecking] = useState<ReadonlySet<string>>(new Set());
+  const recheck = useCallback(
+    async (service: Service) => {
+      setChecking((ids) => new Set(ids).add(service.id));
+      try {
+        await checkServiceHealth(service, (id, status) =>
+          cacheCheckResult(queryClient, id, status),
+        );
+      } finally {
+        setChecking((ids) => {
+          const next = new Set(ids);
+          next.delete(service.id);
+          return next;
+        });
+      }
+    },
+    [queryClient],
+  );
+  return { recheck, checking };
 };

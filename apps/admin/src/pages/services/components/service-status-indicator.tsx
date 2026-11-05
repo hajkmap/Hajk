@@ -1,3 +1,4 @@
+import type { MouseEventHandler } from "react";
 import { Grid } from "@mui/material";
 import { CircularProgress, IconButton, Tooltip } from "@mui/material";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
@@ -26,7 +27,7 @@ interface Props {
   // Optional reason shown in the tooltip above the last-checked time.
   message?: string;
   // When given, the icon becomes a button that runs the check again.
-  onClick?: () => void;
+  onClick?: MouseEventHandler<HTMLButtonElement>;
 }
 
 export default function ServiceStatusIndicator({

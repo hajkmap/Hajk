@@ -36,6 +36,8 @@ import { LayerCreationError } from "../../../api/layers/types";
 import { LAYER_CATEGORY_I18N_KEYS } from "../layer-category";
 import {
   useServices,
+  useRecheckService,
+  type Service,
   SERVICE_TYPE,
   SERVICE_STATUS,
   useServiceCapabilities,
@@ -75,7 +77,7 @@ type LayersGridRow = Omit<Layer, "status"> & {
   url: string;
   status: SERVICE_STATUS | undefined;
   lastChecked: string | undefined;
-  serviceOptions: Record<string, unknown> | undefined;
+  service: Service | undefined;
   usedInMapsCount: number;
   usedInMapNames: string[];
 };
@@ -192,6 +194,7 @@ export default function LayersList({
   const navigate = useNavigate();
   const [open, setOpen] = useState<boolean>(false);
   const { data: services } = useServices();
+  const { recheck, checking } = useRecheckService();
 
   const { palette } = useTheme();
   const [searchTerm, setSearchTerm] = useState("");
@@ -318,9 +321,13 @@ export default function LayersList({
         ...layer,
         layerKind: normalizeLayerCategory(layer.layerKind),
         url: service?.url ?? "",
-        status: service?.status,
+        // A service being checked shows as unknown, with a spinner.
+        status:
+          service && checking.has(service.id)
+            ? SERVICE_STATUS.UNKNOWN
+            : service?.status,
         lastChecked: service?.lastChecked,
-        serviceOptions: service?.options,
+        service,
         usedInMapsCount: usage?.mapCount ?? 0,
         usedInMapNames: usage?.mapNames ?? [],
       };
@@ -333,6 +340,7 @@ export default function LayersList({
     availabilityFilter,
     layerKind,
     usageSummary,
+    checking,
   ]);
 
   const handleClose = () => {
@@ -779,7 +787,7 @@ export default function LayersList({
                         />
                         <AvailabilityChip options={params.row.options} />
                         <ServiceAvailabilityChip
-                          options={params.row.serviceOptions}
+                          options={params.row.service?.options}
                         />
                       </Box>
                     ),
@@ -815,12 +823,23 @@ export default function LayersList({
                     headerAlign: "center",
                     renderCell: (
                       params: GridRenderCellParams<LayersGridRow>,
-                    ) => (
-                      <ServiceStatusIndicator
-                        status={params.row.status!}
-                        lastChecked={params.row.lastChecked}
-                      />
-                    ),
+                    ) => {
+                      const { service } = params.row;
+                      return (
+                        <ServiceStatusIndicator
+                          status={params.row.status!}
+                          lastChecked={params.row.lastChecked}
+                          onClick={
+                            service
+                              ? (event) => {
+                                  event.stopPropagation();
+                                  void recheck(service);
+                                }
+                              : undefined
+                          }
+                        />
+                      );
+                    },
                   },
                   {
                     field: "actions",

@@ -31,6 +31,7 @@ import { Trans, useTranslation } from "react-i18next";
 import Page from "../../../layouts/root/components/page";
 import {
   useServices,
+  useRecheckService,
   Service,
   useCreateService,
   useDeleteService,
@@ -125,6 +126,7 @@ export default function ServicesList({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: services, isLoading, isError } = useServices();
+  const { recheck, checking } = useRecheckService();
   const { mutateAsync: createService, isPending: isCreatingService } =
     useCreateService();
   const { mutateAsync: removeService, isPending: isDeletingService } =
@@ -217,25 +219,34 @@ export default function ServicesList({
   const filteredServices = useMemo<Service[]>(() => {
     if (!services) return [];
 
-    return filterServices(services).filter((service) => {
-      if (
-        searchTerm &&
-        !`${service.name} ${service.url} ${service.type} ${service.version ?? ""}`
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase())
-      ) {
-        return false;
-      }
-      if (typeFilter && service.type !== typeFilter) return false;
-      if (statusFilter !== "" && service.status !== statusFilter) return false;
-      if (
-        availabilityFilter &&
-        isAvailableNow(service.options) !== (availabilityFilter === "available")
-      ) {
-        return false;
-      }
-      return true;
-    });
+    return filterServices(services)
+      .filter((service) => {
+        if (
+          searchTerm &&
+          !`${service.name} ${service.url} ${service.type} ${service.version ?? ""}`
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())
+        ) {
+          return false;
+        }
+        if (typeFilter && service.type !== typeFilter) return false;
+        if (statusFilter !== "" && service.status !== statusFilter)
+          return false;
+        if (
+          availabilityFilter &&
+          isAvailableNow(service.options) !==
+            (availabilityFilter === "available")
+        ) {
+          return false;
+        }
+        return true;
+      })
+      .map((service) =>
+        // A service being checked shows as unknown, with a spinner.
+        checking.has(service.id)
+          ? { ...service, status: SERVICE_STATUS.UNKNOWN }
+          : service,
+      );
   }, [
     services,
     searchTerm,
@@ -243,6 +254,7 @@ export default function ServicesList({
     statusFilter,
     availabilityFilter,
     filterServices,
+    checking,
   ]);
 
   const defaultValues: ServiceCreateInput = {
@@ -649,6 +661,10 @@ export default function ServicesList({
                         <ServiceStatusIndicator
                           status={status}
                           lastChecked={row?.lastChecked}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            void recheck(row);
+                          }}
                         />
                       );
                     },
