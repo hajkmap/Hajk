@@ -145,7 +145,7 @@ export default function ToolsList({
     reset,
     formState: { errors },
   } = useForm<ToolCreateInput>({
-    defaultValues: { type: "", internalName: "" },
+    defaultValues: { type: "", internalName: "", options: { title: "" } },
     mode: "onChange",
   });
 
@@ -184,7 +184,9 @@ export default function ToolsList({
     const needle = searchTerm.toLowerCase();
     return pageTools.filter((tool) => {
       if (typeFilter && tool.type !== typeFilter) return false;
-      const combinedText = `${tool.type} ${typeLabel(tool.type)} ${
+      const title =
+        typeof tool.options?.title === "string" ? tool.options.title : "";
+      const combinedText = `${tool.type} ${typeLabel(tool.type)} ${title} ${
         tool.internalName ?? ""
       }`.toLowerCase();
       return combinedText.includes(needle);
@@ -196,6 +198,12 @@ export default function ToolsList({
       const response = await createTool({
         type: data.type,
         internalName: data.internalName,
+        options: {
+          title:
+            typeof data.options?.title === "string"
+              ? data.options.title.trim()
+              : "",
+        },
       });
       toast.success(t("tools.createSuccess"), {
         position: "bottom-left",
@@ -300,6 +308,13 @@ export default function ToolsList({
           </Grid>
           <Grid size={12}>
             <TextField
+              label={t("tools.title")}
+              fullWidth
+              {...register("options.title")}
+            />
+          </Grid>
+          <Grid size={12}>
+            <TextField
               label={t("layers.internalName")}
               fullWidth
               {...register("internalName")}
@@ -400,6 +415,15 @@ export default function ToolsList({
               customSx={{ height: "calc(100vh - 320px)", minHeight: 420 }}
               rows={filteredTools}
               columns={[
+                {
+                  field: "title",
+                  headerName: t("tools.title"),
+                  flex: 0.2,
+                  valueGetter: (_value: unknown, row: Tool) => {
+                    const title = row.options?.title;
+                    return typeof title === "string" ? title : "";
+                  },
+                },
                 {
                   field: "internalName",
                   headerName: t("layers.internalName"),

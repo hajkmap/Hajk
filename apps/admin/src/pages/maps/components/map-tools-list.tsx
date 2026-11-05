@@ -22,6 +22,7 @@ import {
   getCatalogToolDisplayName,
   getToolDisplayName,
   isFixedControlTool,
+  toolLabels,
   type ToolWindowSize,
   type ToolZones,
 } from "../map-tools-utils";
@@ -99,7 +100,6 @@ function listUnplacedTools(
 ): UnplacedBoardTool[] {
   const byId = new Map<number, UnplacedBoardTool>();
 
-  // Catalog tools come first, so their internal name wins over the map's title.
   const consider = (toolId: number, type: string, title: string) => {
     if (!Number.isFinite(toolId) || getMapToolFieldConfig(type).target) return;
     if (byId.has(toolId)) return;
@@ -512,18 +512,21 @@ function MapToolsList({
 
   const warnCannotPlace = useCallback(
     (toolId: number) => {
-      let name = String(toolId);
+      let tool: { title: string; type: string } | undefined;
       for (const zone of TOOL_PLACEMENT_ZONES) {
-        const tool = board.columns[zone].find((item) => item.toolId === toolId);
-        if (tool) {
-          name = tool.title;
-          break;
+        tool = board.columns[zone].find((item) => item.toolId === toolId);
+        if (tool) break;
+      }
+      if (!tool) {
+        const catalog = catalogToolsById.get(toolId);
+        if (catalog) {
+          tool = {
+            title: getCatalogToolDisplayName(catalog),
+            type: catalog.type,
+          };
         }
       }
-      if (name === String(toolId)) {
-        const catalog = catalogToolsById.get(toolId);
-        if (catalog) name = getCatalogToolDisplayName(catalog);
-      }
+      const name = tool ? toolLabels(tool, t).label : String(toolId);
       toast.warning(t("layerTree.problem.notHere", { name }), {
         position: "bottom-left",
         theme: theme.palette.mode,

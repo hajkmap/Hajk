@@ -338,18 +338,25 @@ const OPTIONS_TARGET_TO_ZONE: Record<string, ToolZoneKey | null> = {
   hidden: null,
 };
 
+/** Internal name, then `options.title`, then the type (translated by `toolLabels`). */
+function toolDisplayName(tool: {
+  type: string;
+  internalName?: string | null;
+  options?: Record<string, unknown>;
+}): string {
+  const internalName = tool.internalName?.trim();
+  if (internalName) return internalName;
+  const title = tool.options?.title;
+  if (typeof title === "string" && title.trim()) return title.trim();
+  return tool.type;
+}
+
 export function getToolDisplayName(tool: ToolOnMap): string {
-  const title = tool.tool.options?.title;
-  if (typeof title === "string" && title.trim()) {
-    return title.trim();
-  }
-  return tool.tool.type;
+  return toolDisplayName(tool.tool);
 }
 
 export function getCatalogToolDisplayName(tool: Tool): string {
-  const internalName = tool.internalName?.trim();
-  if (internalName) return internalName;
-  return tool.type;
+  return toolDisplayName(tool);
 }
 
 /**

@@ -106,6 +106,7 @@ export interface ToolOnMap {
   tool: {
     id: number;
     type: string;
+    internalName?: string | null;
     options: Record<string, unknown>;
   };
 }
