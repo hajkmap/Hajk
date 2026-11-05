@@ -1134,13 +1134,29 @@ export default function LayerSettings() {
                     </FormFieldRow>
                   </SettingsSearchField>
                   <SettingsSearchField
+                    labelKeys={["layers.internalName"]}
+                    fields={["internalName"]}
+                    synonyms={["intern", "internal"]}
+                    searchTerm={settingsSearchTerm}
+                    allValues={showSettingsSearchUi ? getValues() : undefined}
+                  >
+                    <FormFieldRow>
+                      <TextFieldWithHelp
+                        labelKey="layers.internalName"
+                        helpKey="layers.help.internalName"
+                        fullWidth
+                        {...register("internalName")}
+                      />
+                    </FormFieldRow>
+                  </SettingsSearchField>
+                  <SettingsSearchField
                     labelKeys={["layers.common.service"]}
                     fields={["serviceId"]}
                     synonyms={["tjänst", "service"]}
                     searchTerm={settingsSearchTerm}
                     allValues={showSettingsSearchUi ? getValues() : undefined}
                   >
-                    <FormFieldRow>
+                    <FormFieldRow fullWidth>
                       <Controller
                         name="serviceId"
                         control={control}
@@ -1161,11 +1177,11 @@ export default function LayerSettings() {
                       />
                     </FormFieldRow>
                     {service && (
-                      <FormFieldRow>
+                      <FormFieldRow fullWidth>
                         <Alert
                           severity="info"
                           variant="outlined"
-                          sx={{ py: 0.5, my: 0 }}
+                          sx={{ py: 0.5, mt: 1 }}
                         >
                           <Typography variant="body2" component="span">
                             {t("layers.serviceConnectionSummary", {
@@ -1181,22 +1197,6 @@ export default function LayerSettings() {
                     )}
                   </SettingsSearchField>
                   <SettingsSearchField
-                    labelKeys={["layers.internalName"]}
-                    fields={["internalName"]}
-                    synonyms={["intern", "internal"]}
-                    searchTerm={settingsSearchTerm}
-                    allValues={showSettingsSearchUi ? getValues() : undefined}
-                  >
-                    <FormFieldRow>
-                      <TextFieldWithHelp
-                        labelKey="layers.internalName"
-                        helpKey="layers.help.internalName"
-                        fullWidth
-                        {...register("internalName")}
-                      />
-                    </FormFieldRow>
-                  </SettingsSearchField>
-                  <SettingsSearchField
                     labelKeys={["layers.copyRight"]}
                     fields={["metadata.attribution"]}
                     searchTerm={settingsSearchTerm}
@@ -1208,24 +1208,6 @@ export default function LayerSettings() {
                         helpKey="layers.help.attribution"
                         fullWidth
                         {...register("metadata.attribution")}
-                      />
-                    </FormFieldRow>
-                  </SettingsSearchField>
-                  <SettingsSearchField
-                    labelKeys={["map.description"]}
-                    fields={["description"]}
-                    synonyms={["beskrivning", "description"]}
-                    searchTerm={settingsSearchTerm}
-                    allValues={showSettingsSearchUi ? getValues() : undefined}
-                  >
-                    <FormFieldRow>
-                      <TextFieldWithHelp
-                        labelKey="map.description"
-                        helpKey="layers.help.description"
-                        fullWidth
-                        multiline
-                        rows={3}
-                        {...register("description")}
                       />
                     </FormFieldRow>
                   </SettingsSearchField>
@@ -1258,6 +1240,24 @@ export default function LayerSettings() {
                         helpKey="layers.help.category"
                         fullWidth
                         {...register("options.category")}
+                      />
+                    </FormFieldRow>
+                  </SettingsSearchField>
+                  <SettingsSearchField
+                    labelKeys={["map.description"]}
+                    fields={["description"]}
+                    synonyms={["beskrivning", "description"]}
+                    searchTerm={settingsSearchTerm}
+                    allValues={showSettingsSearchUi ? getValues() : undefined}
+                  >
+                    <FormFieldRow>
+                      <TextFieldWithHelp
+                        labelKey="map.description"
+                        helpKey="layers.help.description"
+                        fullWidth
+                        multiline
+                        rows={3}
+                        {...register("description")}
                       />
                     </FormFieldRow>
                   </SettingsSearchField>
@@ -2355,22 +2355,6 @@ export default function LayerSettings() {
                       </FormFieldRow>
                     </SettingsSearchField>
                     <SettingsSearchField
-                      labelKeys={["layers.sortByAttribute"]}
-                      fields={["infoClickSettings.sortProperty"]}
-                      synonyms={["sortering", "sort"]}
-                      searchTerm={settingsSearchTerm}
-                      allValues={showSettingsSearchUi ? getValues() : undefined}
-                    >
-                      <FormFieldRow>
-                        <TextFieldWithHelp
-                          labelKey="layers.sortByAttribute"
-                          helpKey="layers.help.sortByAttribute"
-                          fullWidth
-                          {...register("infoClickSettings.sortProperty")}
-                        />
-                      </FormFieldRow>
-                    </SettingsSearchField>
-                    <SettingsSearchField
                       labelKeys={["layers.infoClickFormat"]}
                       fields={["infoClickSettings.format"]}
                       searchTerm={settingsSearchTerm}
@@ -2397,6 +2381,22 @@ export default function LayerSettings() {
                               ))}
                             </SelectWithHelp>
                           )}
+                        />
+                      </FormFieldRow>
+                    </SettingsSearchField>
+                    <SettingsSearchField
+                      labelKeys={["layers.sortByAttribute"]}
+                      fields={["infoClickSettings.sortProperty"]}
+                      synonyms={["sortering", "sort"]}
+                      searchTerm={settingsSearchTerm}
+                      allValues={showSettingsSearchUi ? getValues() : undefined}
+                    >
+                      <FormFieldRow>
+                        <TextFieldWithHelp
+                          labelKey="layers.sortByAttribute"
+                          helpKey="layers.help.sortByAttribute"
+                          fullWidth
+                          {...register("infoClickSettings.sortProperty")}
                         />
                       </FormFieldRow>
                     </SettingsSearchField>

@@ -1,4 +1,5 @@
 import { createContext, useContext } from "react";
+import type { SxProps, Theme } from "@mui/material/styles";
 
 /**
  * `null` outside a search tab: fields render exactly as usual.
@@ -13,7 +14,7 @@ export function useSettingsSearchTerm(): string | null {
 }
 
 /** Hides rows the search marked. Kept off the fields so MUI styles cannot override it. */
-export const settingsSearchHiddenSx = {
+export const settingsSearchHiddenSx: SxProps<Theme> = {
   "& [data-settings-hidden]": { display: "none !important" },
 };
 

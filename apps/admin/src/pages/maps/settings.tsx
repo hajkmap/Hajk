@@ -171,7 +171,9 @@ export default function MapSettings() {
   const [isSaving, setIsSaving] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = (searchParams.get("tab") ?? "settings") as
-    "menu" | "settings" | "tools";
+    | "menu"
+    | "settings"
+    | "tools";
   const setActiveTab = (tab: string) =>
     setSearchParams(
       (prev) => {
@@ -646,7 +648,8 @@ export default function MapSettings() {
   });
 
   const mainProjectionCode = useWatch({ control, name: "projection.code" }) as
-    string | undefined;
+    | string
+    | undefined;
   const watchedScales = useWatch({
     control,
     name: SCALE_FIELD_NAMES,
@@ -961,22 +964,22 @@ export default function MapSettings() {
               ref={searchResultsRef}
               sx={showSettingsSearchUi ? settingsSearchHiddenSx : undefined}
             >
-            <SettingsSearchTermProvider
-              term={showSettingsSearchUi ? "" : null}
-            >
-            <MapSettingsForm
-              register={register}
-              control={control}
-              activeSection={settingsSection}
-              settingsSearchTerm={settingsSearchTerm}
-              showSettingsSearchUi={showSettingsSearchUi}
-              getValues={getValues}
-              setValue={setValue}
-              savedValues={formBaseline}
-              highlightField={settingFocus?.field ?? null}
-              highlightTick={settingFocus?.tick ?? 0}
-            />
-            </SettingsSearchTermProvider>
+              <SettingsSearchTermProvider
+                term={showSettingsSearchUi ? "" : null}
+              >
+                <MapSettingsForm
+                  register={register}
+                  control={control}
+                  activeSection={settingsSection}
+                  settingsSearchTerm={settingsSearchTerm}
+                  showSettingsSearchUi={showSettingsSearchUi}
+                  getValues={getValues}
+                  setValue={setValue}
+                  savedValues={formBaseline}
+                  highlightField={settingFocus?.field ?? null}
+                  highlightTick={settingFocus?.tick ?? 0}
+                />
+              </SettingsSearchTermProvider>
             </Box>
           </FormContainer>
         </Box>

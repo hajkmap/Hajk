@@ -40,26 +40,24 @@ const WIDE_CONTENT = [
   ".MuiToggleButtonGroup-root",
 ].join(", ");
 
-/** A grid item that is `field`, or a settings search wrapper around it. */
-const gridItem = (field: string) =>
-  `& > ${field}, & > [data-settings-field]:has(> ${field})`;
-
-// :has() can't be nested, so wide rows are matched by a later rule instead
-// of being excluded inside the half-width one.
+// Field rows sit inside display:contents wrappers (the search markers), so the
+// grid rules target the row itself rather than a direct child.
 const autoLayoutSx = {
   gridTemplateColumns: {
     xs: "minmax(0, 1fr)",
     md: "repeat(2, minmax(0, 1fr))",
   },
-  "& > *": { gridColumnStart: 1, gridColumnEnd: -1 },
-  [gridItem("[data-form-field]")]: {
+  "& > *": { gridColumn: "1 / -1" },
+  "& [data-form-field]": {
     gridColumnStart: "auto",
     gridColumnEnd: "auto",
   },
-  [`${gridItem("[data-grid-full]")}, & > [data-form-field]:has(${WIDE_CONTENT}), & > [data-settings-field]:has(${WIDE_CONTENT})`]:
-    { gridColumnStart: 1, gridColumnEnd: -1 },
-  [gridItem("[data-grid-span='2']")]: { gridColumnEnd: "span 2" },
-  [gridItem("[data-grid-new-row]")]: { gridColumnStart: 1 },
+  [`& [data-form-field][data-grid-full], & [data-form-field]:has(${WIDE_CONTENT})`]:
+    { gridColumn: "1 / -1" },
+  "& [data-form-field][data-grid-span='2']": { gridColumnEnd: "span 2" },
+  "& [data-form-field][data-grid-new-row]": { gridColumnStart: 1 },
+  // A nested field grid, such as the DPI rows, takes the row under the field above it.
+  "& [data-form-grid]": { gridColumn: "1 / -1" },
 };
 
 /**
@@ -91,10 +89,14 @@ export function FormFieldRow({
   );
 }
 
-/** Marks one grid row so the settings search can show or hide it without re-rendering. */
+/**
+ * Marks one grid child so the settings search can show or hide it.
+ * `display: contents` leaves the field rows as the grid items, so opening
+ * the search tab does not change which fields share a row.
+ */
 function SettingsSearchItem({ children }: { children: ReactNode }) {
   return (
-    <Box data-settings-field="" sx={{ width: "100%", minWidth: 0 }}>
+    <Box data-settings-field="" sx={{ display: "contents" }}>
       {children}
     </Box>
   );
@@ -159,18 +161,9 @@ export default function FormFieldGrid({
           columnGap: 2,
           rowGap: FORM_FIELD_ROW_SPACING,
           alignItems: "start",
-          // Full-width rows span both columns, also when search wraps them.
-          "& > [data-grid-full], & > *:has(> [data-grid-full])": {
-            gridColumn: "1 / -1",
-          },
-          "& > [data-grid-span='2'], & > *:has(> [data-grid-span='2'])": {
-            // On the end line, so `newRow` (which sets the start) keeps the span.
-            gridColumnEnd: "span 2",
-          },
-          // After the span rule so a spanning field can also start a new row.
-          "& > [data-grid-new-row], & > *:has(> [data-grid-new-row])": {
-            gridColumnStart: 1,
-          },
+          "& [data-form-field][data-grid-full]": { gridColumn: "1 / -1" },
+          "& [data-form-field][data-grid-span='2']": { gridColumnEnd: "span 2" },
+          "& [data-form-field][data-grid-new-row]": { gridColumnStart: 1 },
           ...sx,
         }}
       >
