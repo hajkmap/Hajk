@@ -771,6 +771,10 @@ export default function LayersList({
                         <ListItemText
                           primary={params.row.name}
                           secondary={params.row.url}
+                          slotProps={{
+                            primary: { noWrap: true },
+                            secondary: { noWrap: true },
+                          }}
                           sx={{ minWidth: 0 }}
                         />
                         <AvailabilityChip options={params.row.options} />
