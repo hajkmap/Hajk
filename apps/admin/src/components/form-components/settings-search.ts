@@ -12,7 +12,12 @@ export function useSettingsSearchTerm(): string | null {
   return useContext(SettingsSearchTermContext);
 }
 
-/** Label text plus aria-labels, so a checkbox label is searchable. */
+/** Hides rows the search marked. Kept off the fields so MUI styles cannot override it. */
+export const settingsSearchHiddenSx = {
+  "& [data-settings-hidden]": { display: "none !important" },
+};
+
+/** Label text, extra keywords, aria-labels and typed values. */
 function fieldSearchText(field: HTMLElement): string {
   const labels = Array.from(
     field.querySelectorAll<HTMLElement>(
@@ -21,7 +26,32 @@ function fieldSearchText(field: HTMLElement): string {
   ).map(
     (element) => element.getAttribute("aria-label") ?? element.textContent ?? "",
   );
-  return [field.textContent ?? "", ...labels].join(" ");
+  const keywords = [
+    field.getAttribute("data-settings-keywords") ?? "",
+    ...Array.from(
+      field.querySelectorAll<HTMLElement>("[data-settings-keywords]"),
+    ).map((element) => element.getAttribute("data-settings-keywords") ?? ""),
+  ];
+  // Checkbox and radio values ("on") would match searches that have nothing
+  // to do with the field. Their labels are already in the text above.
+  const values = Array.from(
+    field.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
+      "input, textarea",
+    ),
+  )
+    .filter(
+      (element) =>
+        element.type !== "checkbox" &&
+        element.type !== "radio" &&
+        element.type !== "hidden",
+    )
+    .map((element) => element.value);
+  return [field.textContent ?? "", ...labels, ...keywords, ...values].join(" ");
+}
+
+/** Only the section title. A title match shows every field; a field match does not. */
+function sectionSearchText(section: HTMLElement): string {
+  return section.getAttribute("data-settings-title") ?? "";
 }
 
 /**
@@ -92,8 +122,7 @@ export function applySettingsSearch(
   }
 
   sections.forEach((section) => {
-    const title = section.getAttribute("data-settings-title") ?? "";
-    if (fieldTextMatches(needle, title)) {
+    if (fieldTextMatches(needle, sectionSearchText(section))) {
       section.setAttribute("data-settings-show-all", "");
     } else {
       section.removeAttribute("data-settings-show-all");

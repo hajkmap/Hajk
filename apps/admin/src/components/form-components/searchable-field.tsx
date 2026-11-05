@@ -53,15 +53,23 @@ export function SettingsSearchField({
   children,
 }: SettingsSearchFieldProps) {
   const settingsSearchLabels = useSettingsSearchLabels();
+  const keywords = [...settingsSearchLabels(...labelKeys), ...synonyms];
 
   return (
     <SearchableField
-      keywords={[...settingsSearchLabels(...labelKeys), ...synonyms]}
+      keywords={keywords}
       fields={fields}
       allValues={allValues}
       searchTerm={searchTerm}
     >
-      {children}
+      {/* display:contents keeps the layout; the attributes feed the DOM search. */}
+      <span
+        data-settings-field=""
+        data-settings-keywords={keywords.join(" ")}
+        style={{ display: "contents" }}
+      >
+        {children}
+      </span>
     </SearchableField>
   );
 }

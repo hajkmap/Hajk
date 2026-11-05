@@ -418,7 +418,7 @@ export default function ToolsList({
                 {
                   field: "title",
                   headerName: t("tools.title"),
-                  flex: 0.2,
+                  flex: 0.4,
                   valueGetter: (_value: unknown, row: Tool) => {
                     const title = row.options?.title;
                     return typeof title === "string" ? title : "";

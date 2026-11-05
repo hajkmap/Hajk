@@ -25,6 +25,9 @@ import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
 import SearchablePanel from "../../components/form-components/searchable-panel";
 import { SettingsSearchField } from "../../components/form-components/searchable-field";
+import { SettingsSearchTermProvider } from "../../components/form-components/settings-search-context";
+import { settingsSearchHiddenSx } from "../../components/form-components/settings-search";
+import { SettingsSearchBox } from "../../components/form-components/settings-search-box";
 import { useSettingsSearchLabels } from "../../hooks/use-settings-search-labels";
 import {
   useServiceById,
@@ -110,8 +113,10 @@ export default function ServiceSettings() {
   const showDisplayPanels = activeTab === "display" || activeTab === "search";
   const setActiveTab = (tab: string) =>
     setSearchParams({ tab }, { replace: true });
-  const [searchQuery, setSearchQuery] = useState("");
-  const settingsSearchTerm = showSearchUi ? searchQuery : "";
+  const searchResultsRef = useRef<HTMLDivElement>(null);
+  // Filtering happens in the DOM (see SettingsSearchBox), so the form never
+  // re-renders as the user types.
+  const settingsSearchTerm = "";
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogUrl, setDialogUrl] = useState("");
   const [dialogServiceType, setDialogServiceType] = useState("");
@@ -458,26 +463,16 @@ export default function ServiceSettings() {
           tabs={[...SERVICE_PAGE_TABS]}
         />
         <FormContainer formRef={formRef} onSubmit={onSubmit} noValidate={false}>
+          <SettingsSearchBox
+            active={showSearchUi}
+            resultsRef={searchResultsRef}
+          />
+          <Box
+            ref={searchResultsRef}
+            sx={showSearchUi ? settingsSearchHiddenSx : undefined}
+          >
+          <SettingsSearchTermProvider term={showSearchUi ? "" : null}>
           <Box sx={{ display: showSettingsPanels ? "block" : "none" }}>
-            {showSearchUi && (
-              <TextField
-                placeholder={t("common.searchSettings") + "..."}
-                fullWidth
-                autoFocus
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <ManageSearchIcon
-                        sx={{ mr: 1, color: "text.secondary" }}
-                      />
-                    ),
-                  },
-                }}
-                sx={{ mb: 2 }}
-              />
-            )}
             <SearchablePanel
               panelTitleKeywords={settingsSearchLabels("common.information")}
               keywords={[
@@ -972,6 +967,8 @@ export default function ServiceSettings() {
                 </FormFieldGrid>
               </FormPanel>
             </SearchablePanel>
+          </Box>
+          </SettingsSearchTermProvider>
           </Box>
 
           {activeTab === "layers" && (

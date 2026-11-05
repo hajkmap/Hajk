@@ -46,6 +46,9 @@ import { SquareSpinnerComponent } from "../../components/progress/square-progres
 import FormActionPanel, {
   CollapsibleWarning,
 } from "../../components/form-action-panel";
+import { SettingsSearchTermProvider } from "../../components/form-components/settings-search-context";
+import { settingsSearchHiddenSx } from "../../components/form-components/settings-search";
+import { SettingsSearchBox } from "../../components/form-components/settings-search-box";
 import { availabilityOf, hasValidPeriod } from "../../lib/availability";
 import { toast } from "react-toastify";
 import { HttpError } from "../../lib/http-error";
@@ -201,7 +204,7 @@ export default function MapSettings() {
     );
   };
 
-  const [settingsSearchQuery, setSettingsSearchQuery] = useState("");
+  const searchResultsRef = useRef<HTMLDivElement>(null);
   const [settingFocus, setSettingFocus] = useState<{
     field: string;
     tick: number;
@@ -218,7 +221,9 @@ export default function MapSettings() {
   };
   const showSettingsSearchUi =
     activeTab === "settings" && settingsSection === "search";
-  const settingsSearchTerm = showSettingsSearchUi ? settingsSearchQuery : "";
+  // Filtering happens in the DOM (see SettingsSearchBox), so the form never
+  // re-renders as the user types.
+  const settingsSearchTerm = "";
   const { data: mapTools } = useToolsByMapName(mapName ?? "");
   const { data: catalogTools } = useTools();
   // The map's layer tree, saved with the rest of the map (see handleUpdateMap).
@@ -948,26 +953,17 @@ export default function MapSettings() {
               }))}
             />
 
-            {showSettingsSearchUi && (
-              <TextField
-                placeholder={`${t("common.searchSettings")}...`}
-                fullWidth
-                autoFocus
-                value={settingsSearchQuery}
-                onChange={(e) => setSettingsSearchQuery(e.target.value)}
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <ManageSearchIcon
-                        sx={{ mr: 1, color: "text.secondary" }}
-                      />
-                    ),
-                  },
-                }}
-                sx={{ mb: 2 }}
-              />
-            )}
-
+            <SettingsSearchBox
+              active={showSettingsSearchUi}
+              resultsRef={searchResultsRef}
+            />
+            <Box
+              ref={searchResultsRef}
+              sx={showSettingsSearchUi ? settingsSearchHiddenSx : undefined}
+            >
+            <SettingsSearchTermProvider
+              term={showSettingsSearchUi ? "" : null}
+            >
             <MapSettingsForm
               register={register}
               control={control}
@@ -980,6 +976,8 @@ export default function MapSettings() {
               highlightField={settingFocus?.field ?? null}
               highlightTick={settingFocus?.tick ?? 0}
             />
+            </SettingsSearchTermProvider>
+            </Box>
           </FormContainer>
         </Box>
 

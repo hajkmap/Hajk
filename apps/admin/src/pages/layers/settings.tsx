@@ -94,6 +94,9 @@ import {
 import FormFieldGrid, { FormFieldRow } from "../../components/form-components/form-field-grid";
 import SearchablePanel from "../../components/form-components/searchable-panel";
 import { SettingsSearchField } from "../../components/form-components/searchable-field";
+import { SettingsSearchTermProvider } from "../../components/form-components/settings-search-context";
+import { settingsSearchHiddenSx } from "../../components/form-components/settings-search";
+import { SettingsSearchBox } from "../../components/form-components/settings-search-box";
 import { useSettingsSearchLabels } from "../../hooks/use-settings-search-labels";
 import { useLayerFieldLabels } from "./use-layer-field-labels";
 import { SettingsPageTabs } from "../../components/settings-page-tabs";
@@ -266,8 +269,8 @@ export default function LayerSettings() {
       setSearchParams(withTab(settingsVisibility.tabs[0]), { replace: true });
     }
   }, [tabFromUrl, settingsVisibility.tabs, setSearchParams]);
-  const [settingsSearchQuery, setSettingsSearchQuery] = useState("");
   const showSettingsSearchUi = activeTab === "search";
+  const searchResultsRef = useRef<HTMLDivElement>(null);
   // The search covers the tabs the layer has, and no others.
   const showsTab = (tab: LayerSettingsTab) =>
     activeTab === tab ||
@@ -277,7 +280,9 @@ export default function LayerSettings() {
   const showMetadataTab = showsTab("metadata");
   const showInfoclickTab = showsTab("infoclick");
   const showEditingTab = showsTab("editing");
-  const settingsSearchTerm = showSettingsSearchUi ? settingsSearchQuery : "";
+  // Filtering happens in the DOM (see SettingsSearchBox), so the form never
+  // re-renders as the user types.
+  const settingsSearchTerm = "";
   const [searchTerm, setSearchTerm] = useState("");
   const [selectGridId, setSelectGridId] = useState<GridRowSelectionModel>();
   const [useCustomDpiList, setUseCustomDpiList] = useState<boolean>(false);
@@ -1061,23 +1066,15 @@ export default function LayerSettings() {
           formRef={formRef}
           noValidate={false}
         >
-          {showSettingsSearchUi && (
-            <TextField
-              placeholder={`${t("common.searchSettings")}...`}
-              fullWidth
-              autoFocus
-              value={settingsSearchQuery}
-              onChange={(e) => setSettingsSearchQuery(e.target.value)}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <ManageSearchIcon sx={{ mr: 1, color: "text.secondary" }} />
-                  ),
-                },
-              }}
-              sx={{ mb: 2 }}
-            />
-          )}
+          <SettingsSearchBox
+            active={showSettingsSearchUi}
+            resultsRef={searchResultsRef}
+          />
+          <Box
+            ref={searchResultsRef}
+            sx={showSettingsSearchUi ? settingsSearchHiddenSx : undefined}
+          >
+          <SettingsSearchTermProvider term={showSettingsSearchUi ? "" : null}>
           <Box sx={{ display: showGeneralTab ? "block" : "none" }}>
             <SearchablePanel
               panelTitleKeywords={settingsSearchLabels("common.information")}
@@ -2795,6 +2792,8 @@ export default function LayerSettings() {
                   </SettingsSearchField>
                 )}
             </SearchablePanel>
+          </Box>
+          </SettingsSearchTermProvider>
           </Box>
 
           {activeTab === "layers" && layer && (

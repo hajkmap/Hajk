@@ -1,7 +1,7 @@
 import { useParams, useSearchParams } from "react-router";
 import Page from "../../layouts/root/components/page";
 import { useTranslation } from "react-i18next";
-import { Box, TextField, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 
@@ -16,8 +16,9 @@ import FormActionPanel from "../../components/form-action-panel";
 import UnsavedChangesGuard from "../../components/unsaved-changes-guard";
 import { SettingsPageTabs } from "../../components/settings-page-tabs";
 import { SettingsSearchTermProvider } from "../../components/form-components/settings-search-context";
-import { applySettingsSearch } from "../../components/form-components/settings-search";
-import { useRef, useEffect, useState, type RefObject } from "react";
+import { settingsSearchHiddenSx } from "../../components/form-components/settings-search";
+import { SettingsSearchBox } from "../../components/form-components/settings-search-box";
+import { useRef, useEffect } from "react";
 import { toast } from "react-toastify";
 import RenderTool from "./renderers/render-tool";
 import { withToolOptionDefaults } from "./renderers/tool-option-defaults";
@@ -33,71 +34,12 @@ const TOOL_PAGE_TABS = [
   },
 ] as const;
 
-/** Hides rows the search marked. Kept off the fields so MUI styles cannot override it. */
-const settingsSearchSx = {
-  "& [data-settings-hidden]": { display: "none !important" },
-};
-
-/**
- * The query stays in this field. The form is filtered after a short pause,
- * directly in the DOM, so a keystroke does not re-render every setting.
- */
-function ToolSearchField({
-  active,
-  resultsRef,
-  emptyRef,
-}: {
-  active: boolean;
-  resultsRef: RefObject<HTMLDivElement | null>;
-  emptyRef: RefObject<HTMLElement | null>;
-}) {
-  const { t } = useTranslation();
-  const [query, setQuery] = useState("");
-
-  useEffect(() => {
-    if (!active) {
-      applySettingsSearch(resultsRef.current, "");
-      if (emptyRef.current) emptyRef.current.style.display = "none";
-      return;
-    }
-    const id = window.setTimeout(() => {
-      const root = resultsRef.current;
-      const empty = applySettingsSearch(root, query);
-      if (emptyRef.current) {
-        emptyRef.current.style.display = empty ? "block" : "none";
-      }
-    }, 200);
-    return () => window.clearTimeout(id);
-  }, [active, query, resultsRef, emptyRef]);
-
-  if (!active) return null;
-
-  return (
-    <TextField
-      placeholder={t("common.searchSettings") + "..."}
-      fullWidth
-      autoFocus
-      value={query}
-      onChange={(event) => setQuery(event.target.value)}
-      slotProps={{
-        input: {
-          startAdornment: (
-            <ManageSearchIcon sx={{ mr: 1, color: "text.secondary" }} />
-          ),
-        },
-      }}
-      sx={{ mb: 2 }}
-    />
-  );
-}
-
 export default function ToolSettings() {
   const { t } = useTranslation();
   const { toolId } = useParams<{ toolId?: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") === "search" ? "search" : "settings";
   const searchResultsRef = useRef<HTMLDivElement>(null);
-  const searchEmptyRef = useRef<HTMLElement>(null);
   const { data: tools, isLoading } = useTools();
   const { data: maps } = useMaps();
   const updateToolMutation = useUpdateTool();
@@ -245,28 +187,19 @@ export default function ToolSettings() {
               onChange={(tab) => setSearchParams({ tab }, { replace: true })}
               tabs={[...TOOL_PAGE_TABS]}
             />
-            <ToolSearchField
+            <SettingsSearchBox
               active={activeTab === "search"}
               resultsRef={searchResultsRef}
-              emptyRef={searchEmptyRef}
             />
             <Box
               ref={searchResultsRef}
-              sx={activeTab === "search" ? settingsSearchSx : undefined}
+              sx={activeTab === "search" ? settingsSearchHiddenSx : undefined}
             >
               <SettingsSearchTermProvider
                 term={activeTab === "search" ? "" : null}
               >
                 {renderTool(tool)}
               </SettingsSearchTermProvider>
-              <Typography
-                ref={searchEmptyRef}
-                variant="body2"
-                color="text.secondary"
-                sx={{ display: "none", py: 2 }}
-              >
-                {t("common.noSettingsMatches")}
-              </Typography>
             </Box>
             <UsedInMapsPanel
               rows={tool.mapNames.map((mapName) => ({
