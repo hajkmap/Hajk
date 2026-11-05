@@ -193,7 +193,7 @@ export default function Header() {
           <Box
             sx={{
               display: "inline-flex",
-              fontSize: "0.875rem",
+              typography: "body2",
               fontWeight: 500,
               ml: 4,
               alignItems: "center",

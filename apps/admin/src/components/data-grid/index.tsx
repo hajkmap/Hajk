@@ -45,7 +45,7 @@ export default function StyledDataGrid<
   storageKey,
   ...otherProps
 }: StyledDataGridProps<T>) {
-  const { palette } = useTheme();
+  const { palette, typography } = useTheme();
   const language = useAppStateStore((state) => state.language);
 
   const storedPageSize = storageKey
@@ -79,8 +79,8 @@ export default function StyledDataGrid<
       cursor: onRowClick ? "pointer" : "default",
     },
     "& .MuiDataGrid-columnHeaderTitle": {
-      fontSize: "1.3rem",
-      letterSpacing: "0.02em",
+      fontSize: typography.h6.fontSize,
+      fontWeight: typography.h6.fontWeight,
       color: palette.text.primary,
     },
     "& .MuiDataGrid-columnSeparator": {

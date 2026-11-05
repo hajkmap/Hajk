@@ -361,10 +361,9 @@ export default function DeletedItemsList({ filter }: DeletedItemsListProps) {
                 }}
               >
                 <Typography
-                  variant="body2"
+                  variant="subtitle2"
                   noWrap
                   title={params.row.name}
-                  sx={{ fontWeight: 500 }}
                 >
                   {params.row.name}
                 </Typography>

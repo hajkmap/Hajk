@@ -1,100 +1,83 @@
+const fontFamily = [
+  '"Inter Variable"',
+  '"Segoe UI Variable Text"',
+  '"Segoe UI"',
+  "system-ui",
+  "-apple-system",
+  "BlinkMacSystemFont",
+  "Roboto",
+  '"Helvetica Neue"',
+  "Arial",
+  "sans-serif",
+].join(",");
+
 export default {
+  fontFamily,
   h1: {
-    // Default values for h1:
-    // fontWeight: 300,
-    // fontSize: '6rem',
-    // lineHeight: 1.167,
-    // letterSpacing: '-0.01562em',
-    fontSize: "2.2rem",
-  },
-  h2: {
-    // Default values for h2:
-    // fontWeight: 300,
-    // fontSize: '3.75rem',
-    // lineHeight: 1.2,
-    // letterSpacing: '-0.00833em',
+    // Page titles.
+    fontSize: "2rem",
+    fontWeight: 600,
+    lineHeight: 1.25,
+    letterSpacing: "-0.02em",
   },
   h3: {
-    // Default values for h3:
-    // fontWeight: 400,
-    // fontSize: '1.875rem',
-    // lineHeight: 1.167,
-    // letterSpacing: '0em',
-  },
-  h4: {
-    // Default values for h4:
-    // fontWeight: 400,
-    // fontSize: '2.125rem',
-    // lineHeight: 1.235,
-    // letterSpacing: '0.00735em',
+    // Large figures, e.g. the counts on the start page.
+    fontSize: "2.5rem",
+    fontWeight: 600,
+    lineHeight: 1.2,
+    letterSpacing: "-0.02em",
+    fontVariantNumeric: "tabular-nums",
   },
   h5: {
-    // Default values for h5:
-    // fontWeight: 400,
-    // fontSize: '1.5rem',
-    // lineHeight: 1.334,
-    // letterSpacing: '0em',
+    fontSize: "1.25rem",
+    fontWeight: 600,
+    lineHeight: 1.4,
+    letterSpacing: "-0.005em",
   },
   h6: {
-    fontWeight: 500,
+    // Section headings (form panels, accordions, cards, dialog titles).
     fontSize: "1rem",
-    lineHeight: 1.75,
-    letterSpacing: "0.00938em",
-    // Default values for h6:
-    // fontWeight: 500,
-    // fontSize: '1.25rem',
-    // lineHeight: 1.6,
-    // letterSpacing: '0.0075em',
+    fontWeight: 600,
+    lineHeight: 1.5,
+    letterSpacing: "-0.005em",
   },
   subtitle1: {
-    // Default values for subtitle1:
-    // fontWeight: 400,
-    // fontSize: '1rem',
-    // lineHeight: 1.75,
-    // letterSpacing: '0.00938em',
+    fontSize: "1rem",
+    fontWeight: 500,
+    lineHeight: 1.5,
+    letterSpacing: 0,
   },
   subtitle2: {
-    // Default values for subtitle2:
-    // fontWeight: 500,
-    // fontSize: '0.875rem',
-    // lineHeight: 1.57,
-    // letterSpacing: '0.00714em',
+    // Sub-headings and item titles inside a section.
+    fontSize: "0.875rem",
+    fontWeight: 600,
+    lineHeight: 1.5,
+    letterSpacing: 0,
   },
   body1: {
-    // Default values for body1:
-    // fontWeight: 400,
-    // fontSize: '1rem',
-    // lineHeight: 1.5,
-    // letterSpacing: '0.00938em',
+    fontSize: "1rem",
+    lineHeight: 1.6,
+    letterSpacing: 0,
   },
   body2: {
-    // Default values for body2:
-    // fontWeight: 400,
-    // fontSize: '0.875rem',
-    // lineHeight: 1.43,
-    // letterSpacing: '0.01071em',
+    fontSize: "0.875rem",
+    lineHeight: 1.55,
+    letterSpacing: 0,
   },
   button: {
-    // Default values for button:
-    // fontWeight: 500,
-    // fontSize: '0.875rem',
-    // lineHeight: 1.75,
-    // letterSpacing: '0.02857em',
-    // textTransform: 'uppercase',
+    fontWeight: 600,
+    letterSpacing: "0.01em",
+    textTransform: "none" as const,
   },
   caption: {
-    // Default values for caption:
-    // fontWeight: 400,
-    // fontSize: '0.75rem',
-    // lineHeight: 1.66,
-    // letterSpacing: '0.03333em',
+    fontSize: "0.75rem",
+    lineHeight: 1.5,
+    letterSpacing: "0.01em",
   },
   overline: {
-    // Default values for overline:
-    // fontWeight: 400,
-    // fontSize: '0.75rem',
-    // lineHeight: 2.66,
-    // letterSpacing: '0.08333em',
-    // textTransform: 'uppercase',
+    fontSize: "0.6875rem",
+    fontWeight: 600,
+    lineHeight: 2,
+    letterSpacing: "0.08em",
   },
 };

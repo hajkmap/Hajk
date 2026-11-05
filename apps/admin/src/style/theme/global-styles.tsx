@@ -1,8 +1,10 @@
 import { PaletteMode } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { GlobalStyles } from "@mui/system";
 
 export function GlobalStylesComponent({ mode }: { mode: PaletteMode }) {
   const isDarkMode = mode === "dark";
+  const { palette } = useTheme();
 
   return (
     <GlobalStyles
@@ -32,9 +34,9 @@ export function GlobalStylesComponent({ mode }: { mode: PaletteMode }) {
           },
         },
         ".form-container .MuiFormLabel-root": {
-          color: isDarkMode ? "#fff" : "rgba(0, 0, 0, 0.87)",
+          color: palette.text.primary,
           "&.Mui-focused": {
-            color: isDarkMode ? "#fff" : "rgba(0, 0, 0, 0.87)",
+            color: palette.text.primary,
           },
         },
         ".form-container .MuiPaper-root .MuiGrid-root > .MuiGrid-root > .MuiGrid-root":

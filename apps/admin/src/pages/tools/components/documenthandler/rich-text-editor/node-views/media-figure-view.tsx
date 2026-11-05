@@ -92,9 +92,16 @@ export function MediaFigureView({
             }}
           >
             🔊{" "}
-            <span style={{ fontSize: 12, color: "#666", wordBreak: "break-all" }}>
+            <Box
+              component="span"
+              sx={{
+                typography: "caption",
+                color: "text.secondary",
+                wordBreak: "break-all",
+              }}
+            >
               {attrs.src || t("dhRichTextEditor.media.audioPlaceholder")}
-            </span>
+            </Box>
           </Box>
         ) : (
           <img
@@ -110,7 +117,7 @@ export function MediaFigureView({
         {attrs.caption && (
           <Box
             component="figcaption"
-            sx={{ fontSize: 11, color: "text.secondary", px: 0.5 }}
+            sx={{ typography: "caption", color: "text.secondary", px: 0.5 }}
           >
             {attrs.caption}
           </Box>

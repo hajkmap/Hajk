@@ -82,7 +82,6 @@ export default function LayerTreePreviewFrame({
           sx={{
             textTransform: "uppercase",
             letterSpacing: "0.08em",
-            fontWeight: 700,
           }}
         >
           {t("common.layerSwitcherHierarchyTree")}

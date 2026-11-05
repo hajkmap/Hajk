@@ -16,6 +16,7 @@ import {
   GridValidRowModel,
 } from "@mui/x-data-grid";
 import useAppStateStore from "../../store/use-app-state-store";
+import { cellTooltipSlotProps } from "../../components/cell-tooltip";
 import { GRID_SWEDISH_LOCALE_TEXT } from "../../i18n/translations/datagrid/sv";
 import { useTranslation } from "react-i18next";
 import SearchIcon from "@mui/icons-material/Search";
@@ -69,21 +70,6 @@ function AvailableLayersGrid({
     setSearchTerm(event.target.value);
   };
 
-  const tooltipSlotProps = {
-    tooltip: {
-      sx: {
-        "&&": {
-          bgcolor: "background.paper",
-          color: "text.primary",
-          border: "1px solid black",
-          borderRadius: 0,
-          boxShadow: "none",
-          fontSize: "1.1rem",
-        },
-      },
-    },
-  } as const;
-
   const columns: GridColDef[] = [
     {
       field: "layer",
@@ -94,7 +80,7 @@ function AvailableLayersGrid({
           title={params.value as string}
           enterDelay={500}
           enterNextDelay={500}
-          slotProps={tooltipSlotProps}
+          slotProps={cellTooltipSlotProps}
         >
           <Box
             sx={{
@@ -180,7 +166,7 @@ function AvailableLayersGrid({
         </Box>
       ) : isEmpty ? (
         <Typography
-          sx={{ textAlign: "center", fontSize: "large", mt: 1, py: 4 }}
+          sx={{ textAlign: "center", mt: 1, py: 4 }}
           color="text.secondary"
         >
           {t("services.error.layers")}

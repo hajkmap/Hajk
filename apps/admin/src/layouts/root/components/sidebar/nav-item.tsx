@@ -19,7 +19,6 @@ const StyledButton = styled(Button, {
   component?: React.ElementType;
   to?: string;
 }>(({ theme, isActive, isSubItem }) => ({
-  textTransform: "none",
   // Nested items are indented with a margin (and a matching width reduction)
   // so the selected background is inset, which keeps the hierarchy clear
   // without overflowing the sidebar.
@@ -66,7 +65,7 @@ const NavItem = (props: Props) => {
         isActive={active}
         isSubItem={props.isSubItem}
       >
-        <Typography noWrap sx={{ fontSize: "0.875rem" }}>
+        <Typography variant="body2" noWrap>
           {t(props.titleKey)}
         </Typography>
       </StyledButton>

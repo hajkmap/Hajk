@@ -543,10 +543,9 @@ function MapToolColumn({
           }}
         >
           <Typography
+            variant="h6"
             component="h3"
             sx={{
-              fontWeight: 700,
-              fontSize: "0.95rem",
               lineHeight: 1.25,
               minWidth: 0,
               wordBreak: "break-word",
@@ -564,7 +563,7 @@ function MapToolColumn({
         <Chip
           size="small"
           label={tools.length}
-          sx={{ height: 22, minWidth: 28, fontWeight: 700, flexShrink: 0 }}
+          sx={{ height: 22, minWidth: 28, fontWeight: 600, flexShrink: 0 }}
         />
         <Tooltip title={t("maps.toolsAddToPlacement", { placement: title })}>
           <IconButton
@@ -676,7 +675,7 @@ function MapToolColumn({
             borderRadius: 1,
             bgcolor: (theme) => alpha(theme.palette.background.paper, 0.85),
             color: "primary.main",
-            fontSize: "0.7rem",
+            typography: "caption",
             fontWeight: 600,
             lineHeight: 1,
             opacity: 0,

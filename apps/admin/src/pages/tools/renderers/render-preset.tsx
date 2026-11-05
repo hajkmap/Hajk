@@ -95,7 +95,7 @@ export default function PresetRenderer({
       <FormPanel title={t("tools.preset.presetList")}>
         <FormFieldGrid>
           {fields.map((item, index) => (
-            <FormFieldRow key={item.id}>
+            <FormFieldRow key={item.id} fullWidth>
               <Stack direction="row" spacing={1} sx={{ alignItems: "flex-start" }}>
                 <Controller
                   name={`options.presetList.${index}.name`}
@@ -131,7 +131,7 @@ export default function PresetRenderer({
             </FormFieldRow>
           ))}
 
-          <FormFieldRow>
+          <FormFieldRow fullWidth>
             <Stack direction="row" spacing={1} sx={{ alignItems: "flex-start" }}>
               <TextField
                 label={t("tools.preset.presetName")}

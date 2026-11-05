@@ -195,7 +195,7 @@ export default function MapToolZoneHelp({
         <Box sx={{ display: "flex", gap: 1.5, alignItems: "flex-start" }}>
           <ZonePreview zone={zone} accent={accent} />
           <Box sx={{ minWidth: 0 }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5 }}>
+            <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
               {title}
             </Typography>
             <Typography variant="body2" sx={{ mb: 0.75 }}>

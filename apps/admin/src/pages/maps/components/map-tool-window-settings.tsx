@@ -146,7 +146,6 @@ function MapToolWindowSettings({
                 sx={{
                   "& .MuiToggleButton-root": {
                     py: 0.4,
-                    textTransform: "none",
                   },
                 }}
               >

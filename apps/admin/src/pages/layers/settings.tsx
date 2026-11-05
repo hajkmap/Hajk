@@ -1645,7 +1645,7 @@ export default function LayerSettings() {
                       >
                         <FormFieldGrid>
                           {customDpiList.map((item, index) => (
-                            <FormFieldRow key={index}>
+                            <FormFieldRow key={index} fullWidth>
                               <Box
                                 sx={{
                                   display: "flex",

@@ -189,7 +189,7 @@ export function DocumentEditorDialog({
             flexDirection: "column",
           }}
         >
-          <DialogTitle sx={{ pb: 0, pr: 6, fontWeight: "bold" }}>
+          <DialogTitle sx={{ pb: 0, pr: 6 }}>
             {docTitle}
           </DialogTitle>
 
@@ -298,8 +298,8 @@ export function DocumentEditorDialog({
                         spellCheck={false}
                         sx={{
                           flex: 1,
+                          typography: "body2",
                           fontFamily: "monospace",
-                          fontSize: 11,
                           border: "none",
                           outline: "none",
                           resize: "none",

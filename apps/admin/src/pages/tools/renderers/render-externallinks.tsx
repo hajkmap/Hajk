@@ -95,7 +95,7 @@ export default function ExternalLinksRenderer({
       <FormPanel title={t("tools.externalLinks.linkList")}>
         <FormFieldGrid>
           {fields.map((item, index) => (
-            <FormFieldRow key={item.id}>
+            <FormFieldRow key={item.id} fullWidth>
               <Stack direction="row" spacing={1} sx={{ alignItems: "flex-start" }}>
                 <Controller
                   name={`options.list.${index}.name`}
@@ -131,7 +131,7 @@ export default function ExternalLinksRenderer({
             </FormFieldRow>
           ))}
 
-          <FormFieldRow>
+          <FormFieldRow fullWidth>
             <Stack direction="row" spacing={1} sx={{ alignItems: "flex-start" }}>
               <TextField
                 label={t("tools.externalLinks.linkName")}

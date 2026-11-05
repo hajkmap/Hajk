@@ -9,6 +9,16 @@ export function getTheme(mode: PaletteMode): Theme {
   return createTheme({
     palette: {
       mode: mode,
+      text:
+        mode === "dark"
+          ? {
+              primary: "rgba(255, 255, 255, 0.92)",
+              secondary: "rgba(255, 255, 255, 0.66)",
+            }
+          : {
+              primary: "rgba(0, 0, 0, 0.85)",
+              secondary: "rgba(0, 0, 0, 0.6)",
+            },
     },
     typography: { ...typography },
     components: {

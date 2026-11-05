@@ -34,7 +34,6 @@ const settingsPageTabsSx = {
     minHeight: 36,
     fontSize: (theme: Theme) => theme.typography.body2.fontSize,
     fontWeight: 500,
-    textTransform: "none",
     px: 1.5,
     py: 0.5,
     minWidth: "auto",

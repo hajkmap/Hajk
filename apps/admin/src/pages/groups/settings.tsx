@@ -417,7 +417,7 @@ function GroupSettings() {
                   )}
                 />
               </FormFieldRow>
-              <FormFieldRow>
+              <FormFieldRow fullWidth>
                 <Controller
                   name="roleIds"
                   control={control}

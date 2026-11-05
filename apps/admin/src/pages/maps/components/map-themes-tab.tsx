@@ -305,7 +305,7 @@ export default function MapThemesTab({ mapName }: MapThemesTabProps) {
     <>
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 4 }}>
-          <Typography variant="subtitle1" sx={{ mb: 1 }}>
+          <Typography variant="h6" sx={{ mb: 1 }}>
             {t("maps.themes.listTitle")}
           </Typography>
           <TextField
@@ -360,7 +360,7 @@ export default function MapThemesTab({ mapName }: MapThemesTabProps) {
         </Grid>
 
         <Grid size={{ xs: 12, md: 8 }}>
-          <Typography variant="subtitle1" sx={{ mb: 2 }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>
             {isEditing ? t("maps.themes.editTitle") : t("maps.themes.addTitle")}
           </Typography>
 

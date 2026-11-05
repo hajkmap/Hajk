@@ -103,16 +103,40 @@ export function CollapsibleWarning({
           severity={severity}
           sx={{
             alignItems: "flex-start",
-            "& .MuiAlert-message": {
-              fontSize: "0.8rem",
-              lineHeight: 1.4,
-              overflowWrap: "anywhere",
-            },
+            "& .MuiAlert-message": { overflowWrap: "anywhere" },
           }}
         >
           {children}
         </Alert>
       </Popover>
+    </Box>
+  );
+}
+
+function AuditRow({ name, text }: { name: string; text: string }) {
+  const initials = name
+    .split(" ")
+    .map((p) => p.charAt(0))
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  return (
+    <Box
+      sx={{ display: "flex", gap: 1, alignItems: "center", textAlign: "left" }}
+    >
+      <Tooltip title={name}>
+        <Avatar sx={{ width: 28, height: 28, typography: "caption" }}>
+          {initials}
+        </Avatar>
+      </Tooltip>
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        sx={{ minWidth: 0, overflowWrap: "anywhere" }}
+      >
+        {text}
+      </Typography>
     </Box>
   );
 }
@@ -139,13 +163,8 @@ const FormActionPanel: React.FC<FormActionProps> = ({
   const { data: lastSavedUser } = useUser(lastSavedBy ?? "");
 
   const formatDate = (d?: string) => (d ? new Date(d).toLocaleString() : "");
-  const initials = (name?: string) =>
-    (name ?? "")
-      .split(" ")
-      .map((p) => p.charAt(0))
-      .join("")
-      .slice(0, 2)
-      .toUpperCase();
+  const createdName = createdUser?.fullName ?? createdBy ?? "";
+  const lastSavedName = lastSavedUser?.fullName ?? lastSavedBy ?? "";
 
   const handleCancel = () => {
     if (onCancel) {
@@ -174,7 +193,7 @@ const FormActionPanel: React.FC<FormActionProps> = ({
           gap: 2,
           p: 2,
           border: "1px solid",
-          borderColor: "grey.300",
+          borderColor: "divider",
           borderRadius: 3,
           width: 200,
           maxWidth: 200,
@@ -196,7 +215,6 @@ const FormActionPanel: React.FC<FormActionProps> = ({
           }}
           variant="contained"
           disabled={updateStatus === "pending" || !isDirty}
-          sx={{ height: 30 }}
         >
           {updateStatus === "pending" ? (
             <CircularProgress color="primary" size={20} />
@@ -219,39 +237,23 @@ const FormActionPanel: React.FC<FormActionProps> = ({
         )}
 
         {createdBy && createdDate && (
-          <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-            <Tooltip title={createdUser?.fullName ?? createdBy}>
-              <Avatar sx={{ width: 30, height: 30, fontSize: 13 }}>
-                {initials(createdUser?.fullName ?? createdBy)}
-              </Avatar>
-            </Tooltip>
-            <Box>
-              <Typography variant="body2" color="text.secondary">
-                {t("common.createdBy", {
-                  createdBy: createdUser?.fullName ?? createdBy,
-                  createdDate: formatDate(createdDate),
-                })}
-              </Typography>
-            </Box>
-          </Box>
+          <AuditRow
+            name={createdName}
+            text={t("common.createdBy", {
+              createdBy: createdName,
+              createdDate: formatDate(createdDate),
+            })}
+          />
         )}
 
         {lastSavedBy && lastSavedDate && (
-          <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-            <Tooltip title={lastSavedUser?.fullName ?? lastSavedBy}>
-              <Avatar sx={{ width: 30, height: 30, fontSize: 13 }}>
-                {initials(lastSavedUser?.fullName ?? lastSavedBy)}
-              </Avatar>
-            </Tooltip>
-            <Box>
-              <Typography variant="body2" color="text.secondary">
-                {t("common.lastSavedBy", {
-                  lastSavedBy: lastSavedUser?.fullName ?? lastSavedBy,
-                  lastSavedDate: formatDate(lastSavedDate),
-                })}
-              </Typography>
-            </Box>
-          </Box>
+          <AuditRow
+            name={lastSavedName}
+            text={t("common.lastSavedBy", {
+              lastSavedBy: lastSavedName,
+              lastSavedDate: formatDate(lastSavedDate),
+            })}
+          />
         )}
 
         {warning}

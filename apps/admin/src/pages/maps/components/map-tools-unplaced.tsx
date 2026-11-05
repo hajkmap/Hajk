@@ -148,7 +148,7 @@ export default function MapToolsUnplaced({
             "&:hover": { bgcolor: "action.hover" },
           }}
         >
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, flex: 1 }}>
+          <Typography variant="subtitle2" sx={{ flex: 1 }}>
             {t("maps.toolsUnplacedTitle")}
           </Typography>
           <Chip

@@ -221,7 +221,7 @@ export default function CoordinatesRenderer({
             />
           </FormFieldRow>
 
-          <FormFieldRow>
+          <FormFieldRow fullWidth>
             <Stack direction="row" spacing={2}>
               <Controller
                 name="options.anchor.0"

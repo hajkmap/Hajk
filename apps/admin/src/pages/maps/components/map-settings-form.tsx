@@ -837,7 +837,7 @@ export default function MapSettingsForm({
             searchTerm={settingsSearchTerm}
           >
             <FormPanel title={t("map.extraMapControls")}>
-              <FormFieldGrid>
+              <FormFieldGrid columns={1}>
                 <FormFieldRow>
                   <FormGroup sx={CHECKBOX_COLUMNS_SX}>
                     <MapCheckboxField
@@ -1384,7 +1384,7 @@ export default function MapSettingsForm({
             searchTerm={settingsSearchTerm}
           >
             <FormPanel title={t("map.introGuide")}>
-              <FormFieldGrid>
+              <FormFieldGrid columns={1}>
                 <FormFieldRow>
                   <FormGroup>
                     <MapCheckboxField

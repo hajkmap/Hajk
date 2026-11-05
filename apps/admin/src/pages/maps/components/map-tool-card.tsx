@@ -261,8 +261,8 @@ function MapToolCard({
               flexShrink: 0,
               bgcolor: "action.selected",
               color: "text.secondary",
-              fontSize: "0.7rem",
-              fontWeight: 700,
+              typography: "caption",
+              fontWeight: 600,
               fontVariantNumeric: "tabular-nums",
             }}
           >
@@ -280,11 +280,10 @@ function MapToolCard({
           }}
         >
           <Typography
+            variant="subtitle2"
             title={primaryLabel}
             noWrap
             sx={{
-              fontWeight: 600,
-              fontSize: "0.9rem",
               lineHeight: 1.3,
               flex: 1,
               minWidth: 0,

@@ -229,7 +229,7 @@ function MapToolsAddDialog({
                   }}
                 >
                   <Box sx={{ minWidth: 0, flex: 1 }}>
-                    <Typography noWrap sx={{ fontWeight: 600, minWidth: 0 }}>
+                    <Typography variant="subtitle2" noWrap sx={{ minWidth: 0 }}>
                       {label}
                     </Typography>
                     {hasTitle ? (

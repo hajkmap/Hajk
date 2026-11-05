@@ -36,7 +36,7 @@ function ServiceUsagePanel({ serviceId }: { serviceId: string }) {
             <Skeleton variant="rounded" width={100} height={24} />
           </Box>
         ) : maps.length === 0 ? (
-          <Typography color="text.secondary" sx={{ fontSize: "0.9rem" }}>
+          <Typography variant="body2" color="text.secondary">
             {t("services.noAffectedMaps")}
           </Typography>
         ) : (
@@ -58,7 +58,7 @@ function ServiceUsagePanel({ serviceId }: { serviceId: string }) {
             <Skeleton variant="rounded" width={100} height={24} />
           </Box>
         ) : groups.length === 0 ? (
-          <Typography color="text.secondary" sx={{ fontSize: "0.9rem" }}>
+          <Typography variant="body2" color="text.secondary">
             {t("services.noAffectedGroups")}
           </Typography>
         ) : (

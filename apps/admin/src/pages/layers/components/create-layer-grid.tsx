@@ -28,6 +28,7 @@ import {
   ListFilterRow,
   ListFilterSearch,
 } from "../../../components/form-components/list-filter-row";
+import { cellTooltipSlotProps } from "../../../components/cell-tooltip";
 
 export interface CapabilityRow {
   id: number;
@@ -81,25 +82,6 @@ export function CreateLayerGrid({
     return { page: 0, pageSize };
   });
 
-  const tooltipSlotProps = useMemo(
-    () =>
-      ({
-        tooltip: {
-          sx: {
-            "&&": {
-              bgcolor: "background.paper",
-              color: "text.primary",
-              border: "1px solid black",
-              borderRadius: 0,
-              boxShadow: "none",
-              fontSize: "1.1rem",
-            },
-          },
-        },
-      }) as const,
-    [],
-  );
-
   const columns = useMemo<GridColDef[]>(
     () => [
       {
@@ -111,7 +93,7 @@ export function CreateLayerGrid({
             title={params.value as string}
             enterDelay={500}
             enterNextDelay={500}
-            slotProps={tooltipSlotProps}
+            slotProps={cellTooltipSlotProps}
           >
             <Box
               sx={{
@@ -151,7 +133,7 @@ export function CreateLayerGrid({
           return (
             <Tooltip
               title={actionTooltip}
-              slotProps={tooltipSlotProps}
+              slotProps={cellTooltipSlotProps}
               disableHoverListener={isBlocked}
             >
               <span>
@@ -183,7 +165,7 @@ export function CreateLayerGrid({
         },
       },
     ],
-    [onToggleCapabilityLayer, selectedCapabilityLayers, t, tooltipSlotProps],
+    [onToggleCapabilityLayer, selectedCapabilityLayers, t],
   );
 
   return (

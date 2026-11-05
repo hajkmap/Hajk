@@ -211,7 +211,7 @@ export default function LayerTreeMoveZoneBox({
           minHeight: 32,
         }}
       >
-        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+        <Typography variant="subtitle2">
           {t("layerTree.moveZone.title")}
         </Typography>
         {clickPlace ? (

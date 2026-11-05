@@ -110,7 +110,9 @@ export function ActiveAdminsBadge({
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
         <AvatarGroup
           max={3}
-          sx={{ "& .MuiAvatar-root": { width: 28, height: 28, fontSize: 12 } }}
+          sx={{
+            "& .MuiAvatar-root": { width: 28, height: 28, typography: "caption" },
+          }}
         >
           {admins.map((admin) => (
             <Avatar key={admin.id} sx={{ bgcolor: "warning.main" }}>

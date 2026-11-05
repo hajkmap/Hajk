@@ -5,21 +5,7 @@ import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutlined";
 import { SERVICE_STATUS } from "../../../api/services";
 import { useTranslation } from "react-i18next";
-
-const tooltipSlotProps = {
-  tooltip: {
-    sx: {
-      "&&": {
-        bgcolor: "background.paper",
-        color: "text.primary",
-        border: "1px solid black",
-        borderRadius: 0,
-        boxShadow: "none",
-        fontSize: "1.1rem",
-      },
-    },
-  },
-} as const;
+import { cellTooltipSlotProps } from "../../../components/cell-tooltip";
 
 interface Props {
   status: SERVICE_STATUS;
@@ -76,7 +62,7 @@ export default function ServiceStatusIndicator({
         <Tooltip
           title={tooltip}
           disableHoverListener={!tooltip}
-          slotProps={tooltipSlotProps}
+          slotProps={cellTooltipSlotProps}
         >
           {onClick ? (
             <IconButton

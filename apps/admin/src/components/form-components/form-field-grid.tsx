@@ -17,12 +17,50 @@ interface FormFieldGridProps {
   /** @deprecated column layout is no longer used; kept for call-site compatibility */
   columnSpacing?: number;
   /**
-   * 2 = two equal columns from `md` up. 4 = four columns from `md` up, two
-   * from `sm`. One column below that. Default 1.
+   * "auto" = two columns from `md` up, where wide content (text areas, lists,
+   * tables, sliders, checkbox groups and anything outside a FormFieldRow)
+   * takes the whole row. 2 = two equal columns from `md` up. 4 = four columns
+   * from `md` up, two from `sm`. 1 = a single stacked column. Default "auto".
    */
-  columns?: 1 | 2 | 4;
+  columns?: "auto" | 1 | 2 | 4;
   sx?: SxProps<Theme>;
 }
+
+/** Content that needs the whole row in the "auto" layout. */
+const WIDE_CONTENT = [
+  "textarea",
+  "table",
+  "[data-form-wide]",
+  "[data-form-grid]",
+  ".MuiFormGroup-root",
+  ".MuiDataGrid-root",
+  ".MuiSlider-root",
+  ".MuiList-root",
+  ".MuiPaper-root",
+  ".MuiToggleButtonGroup-root",
+].join(", ");
+
+/** A grid item that is `field`, or a settings search wrapper around it. */
+const gridItem = (field: string) =>
+  `& > ${field}, & > [data-settings-field]:has(> ${field})`;
+
+// :has() can't be nested, so wide rows are matched by a later rule instead
+// of being excluded inside the half-width one.
+const autoLayoutSx = {
+  gridTemplateColumns: {
+    xs: "minmax(0, 1fr)",
+    md: "repeat(2, minmax(0, 1fr))",
+  },
+  "& > *": { gridColumnStart: 1, gridColumnEnd: -1 },
+  [gridItem("[data-form-field]")]: {
+    gridColumnStart: "auto",
+    gridColumnEnd: "auto",
+  },
+  [`${gridItem("[data-grid-full]")}, & > [data-form-field]:has(${WIDE_CONTENT}), & > [data-settings-field]:has(${WIDE_CONTENT})`]:
+    { gridColumnStart: 1, gridColumnEnd: -1 },
+  [gridItem("[data-grid-span='2']")]: { gridColumnEnd: "span 2" },
+  [gridItem("[data-grid-new-row]")]: { gridColumnStart: 1 },
+};
 
 /**
  * One form field inside a settings panel. In a column grid it takes one
@@ -42,6 +80,7 @@ export function FormFieldRow({
 }) {
   return (
     <Box
+      data-form-field=""
       data-grid-full={fullWidth ? "" : undefined}
       data-grid-span={span}
       data-grid-new-row={newRow ? "" : undefined}
@@ -61,10 +100,10 @@ function SettingsSearchItem({ children }: { children: ReactNode }) {
   );
 }
 
-/** Field layout for FormPanel / FormAccordion content: one column, or two with `columns={2}`. */
+/** Field layout for FormPanel / FormAccordion content. See `columns`. */
 export default function FormFieldGrid({
   children,
-  columns = 1,
+  columns = "auto",
   sx,
 }: FormFieldGridProps) {
   const term = useSettingsSearchTerm();
@@ -80,9 +119,29 @@ export default function FormFieldGrid({
           ),
         );
 
+  if (columns === "auto") {
+    return (
+      <Box
+        data-form-grid=""
+        sx={{
+          width: "100%",
+          display: "grid",
+          columnGap: 2,
+          rowGap: FORM_FIELD_ROW_SPACING,
+          alignItems: "start",
+          ...autoLayoutSx,
+          ...sx,
+        }}
+      >
+        {content}
+      </Box>
+    );
+  }
+
   if (columns === 2 || columns === 4) {
     return (
       <Box
+        data-form-grid=""
         sx={{
           width: "100%",
           display: "grid",
@@ -121,7 +180,11 @@ export default function FormFieldGrid({
   }
 
   return (
-    <Stack spacing={FORM_FIELD_ROW_SPACING} sx={{ width: "100%", ...sx }}>
+    <Stack
+      data-form-grid=""
+      spacing={FORM_FIELD_ROW_SPACING}
+      sx={{ width: "100%", ...sx }}
+    >
       {content}
     </Stack>
   );

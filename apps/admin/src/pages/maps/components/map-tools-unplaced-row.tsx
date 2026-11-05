@@ -65,7 +65,7 @@ function MapToolsUnplacedRow({
         }}
       >
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography variant="body2" noWrap sx={{ fontWeight: 600 }}>
+          <Typography variant="subtitle2" noWrap>
             {label}
           </Typography>
           {hasTitle ? (

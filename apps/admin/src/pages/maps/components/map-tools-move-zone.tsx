@@ -219,7 +219,7 @@ export default function MapToolsMoveZone({
       >
         <Typography
           variant="subtitle2"
-          sx={{ fontWeight: 600, textAlign: "center" }}
+          sx={{ textAlign: "center" }}
         >
           {t("layerTree.moveZone.title")}
         </Typography>

@@ -30,6 +30,7 @@ import { getDocuments, useFolders } from "@/api/documents";
 import FormAccordion from "@/components/form-components/form-accordion";
 import FormColorPicker from "@/components/form-components/form-color-picker";
 import FormPanel from "@/components/form-components/form-panel";
+import FormFieldGrid from "@/components/form-components/form-field-grid";
 import { FieldLabelWithHelp } from "@/components/form-components/field-help-tooltip";
 import { AttachmentsEditor } from "../attachments/attachments-editor";
 import { storedNumber } from "@/pages/tools/renderers/tool-option-parsers";
@@ -111,7 +112,9 @@ export function SettingsTabPanel({
       <FormPanel title={t("common.information")}>
         <Grid container spacing={2}>
           <Grid size={12}>
-            <ToolNameField control={control} />
+            <FormFieldGrid>
+              <ToolNameField control={control} />
+            </FormFieldGrid>
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
             <Controller

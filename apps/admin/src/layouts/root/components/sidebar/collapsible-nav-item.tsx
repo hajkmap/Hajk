@@ -28,7 +28,6 @@ const StyledButton = styled(Button, {
 })<{
   hasActiveSubItem: boolean;
 }>(({ theme, hasActiveSubItem }) => ({
-  textTransform: "none",
   display: "flex",
   width: "100%",
   borderRadius: 8,
@@ -88,7 +87,7 @@ const CollapsibleNavItem = (props: Props) => {
           <Box
             sx={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}
           >
-            <Typography noWrap sx={{ fontSize: "0.9375rem", fontWeight: 500 }}>
+            <Typography variant="subtitle2" noWrap>
               {t(props.titleKey)}
             </Typography>
           </Box>

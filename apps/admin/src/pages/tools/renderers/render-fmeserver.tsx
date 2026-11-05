@@ -303,7 +303,7 @@ export default function FmeServerRenderer({
             />
           </FormFieldRow>
 
-          <FormFieldRow>
+          <FormFieldRow fullWidth>
             <Stack direction="row" spacing={2}>
               <Controller
                 name="options.drawFillColor"

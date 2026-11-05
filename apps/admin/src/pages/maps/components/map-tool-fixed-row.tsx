@@ -70,8 +70,8 @@ export default function MapToolFixedRow({
               flexShrink: 0,
               bgcolor: "action.selected",
               color: "text.secondary",
-              fontSize: "0.7rem",
-              fontWeight: 700,
+              typography: "caption",
+              fontWeight: 600,
               fontVariantNumeric: "tabular-nums",
             }}
           >
@@ -79,12 +79,11 @@ export default function MapToolFixedRow({
           </Box>
         ) : null}
         <Typography
-          variant="body2"
+          variant="subtitle2"
           noWrap
           sx={{
             flex: 1,
             minWidth: 0,
-            fontWeight: 600,
             color: "text.secondary",
           }}
         >

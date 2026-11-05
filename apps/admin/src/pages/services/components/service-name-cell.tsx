@@ -1,4 +1,5 @@
 import { ListItemText, Tooltip } from "@mui/material";
+import { cellTooltipSx } from "../../../components/cell-tooltip";
 
 interface ServiceNameCellProps {
   name: string;
@@ -19,17 +20,7 @@ export default function ServiceNameCell({
       enterNextDelay={800}
       slotProps={{
         tooltip: {
-          sx: {
-            "&&": {
-              bgcolor: "background.paper",
-              color: "text.primary",
-              border: "1px solid black",
-              borderRadius: 0,
-              boxShadow: "none",
-              fontSize: "1.1rem",
-              maxWidth: 300,
-            },
-          },
+          sx: { "&&": { ...cellTooltipSx, maxWidth: 300 } },
         },
       }}
     >

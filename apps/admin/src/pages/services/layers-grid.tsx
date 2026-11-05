@@ -24,6 +24,7 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
 import CircularProgress from "../../components/progress/circular-progress";
+import { cellTooltipSlotProps } from "../../components/cell-tooltip";
 import { toast } from "react-toastify";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { Trans, useTranslation } from "react-i18next";
@@ -153,21 +154,6 @@ function LayersGrid({
     setSelectedWorkspace("");
   };
 
-  const tooltipSlotProps = {
-    tooltip: {
-      sx: {
-        "&&": {
-          bgcolor: "background.paper",
-          color: "text.primary",
-          border: "1px solid black",
-          borderRadius: 0,
-          boxShadow: "none",
-          fontSize: "1.1rem",
-        },
-      },
-    },
-  } as const;
-
   const handleCreateLayer = async (
     layerName: string,
     options: { layerKind?: LayerCategory; force?: boolean } = {},
@@ -240,7 +226,7 @@ function LayersGrid({
           title={params.value as string}
           enterDelay={500}
           enterNextDelay={500}
-          slotProps={tooltipSlotProps}
+          slotProps={cellTooltipSlotProps}
         >
           <Box
             sx={{
@@ -424,7 +410,10 @@ function LayersGrid({
       />
 
       {!isLoadingLayersByService && !hasExistingLayers && (
-        <Typography sx={{ textAlign: "center", fontSize: "large", mt: 1 }}>
+        <Typography
+          color="text.secondary"
+          sx={{ textAlign: "center", mt: 1, py: 4 }}
+        >
           {t("services.layerInServiceNone")}
         </Typography>
       )}
@@ -458,7 +447,7 @@ function LayersGrid({
                   title={params.value as string}
                   enterDelay={500}
                   enterNextDelay={500}
-                  slotProps={tooltipSlotProps}
+                  slotProps={cellTooltipSlotProps}
                 >
                   <Box
                     sx={{

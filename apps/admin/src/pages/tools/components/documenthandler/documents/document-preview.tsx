@@ -165,7 +165,7 @@ export function DocumentPreview({
           opacity: isStale ? 0.5 : 1,
           transition: "opacity 120ms",
           // Shrink the content so the preview stays compact.
-          fontSize: "0.85rem",
+          typography: "body2",
           "& .tiptap": { minHeight: 0 },
         }}
       >

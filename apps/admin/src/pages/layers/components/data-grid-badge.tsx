@@ -33,8 +33,8 @@ export default function DataGridBadgeButton({
           title={
             <Box>
               <Typography
+                variant="subtitle2"
                 sx={{
-                  fontWeight: "bold",
                   mb: 1,
                   textAlign: "center",
                   color: isDarkMode ? "#fff" : "#000",
