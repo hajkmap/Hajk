@@ -703,38 +703,6 @@ export default function ServiceSettings() {
                     </FormFieldRow>
                   </SettingsSearchField>
                   <SettingsSearchField
-                    labelKeys={["services.url"]}
-                    fields={["url"]}
-                    searchTerm={settingsSearchTerm}
-                    allValues={showSearchUi ? getValues() : undefined}
-                  >
-                    <FormFieldRow>
-                      <TextFieldWithHelp
-                        labelKey="services.url"
-                        helpKey="services.help.url"
-                        fullWidth
-                        disabled
-                        {...register("url")}
-                        slotProps={{
-                          input: {
-                            endAdornment: (
-                              <Button
-                                sx={{
-                                  color: palette.primary.main,
-                                  fontWeight: 600,
-                                }}
-                                size="small"
-                                onClick={handleDialogOpen}
-                              >
-                                {t("services.url.btnLabel")}
-                              </Button>
-                            ),
-                          },
-                        }}
-                      />
-                    </FormFieldRow>
-                  </SettingsSearchField>
-                  <SettingsSearchField
                     labelKeys={["services.workspace"]}
                     fields={["workspace"]}
                     synonyms={["arbetsområde", "workspace"]}
@@ -760,6 +728,38 @@ export default function ServiceSettings() {
                             ))}
                           </SelectWithHelp>
                         )}
+                      />
+                    </FormFieldRow>
+                  </SettingsSearchField>
+                  <SettingsSearchField
+                    labelKeys={["services.url"]}
+                    fields={["url"]}
+                    searchTerm={settingsSearchTerm}
+                    allValues={showSearchUi ? getValues() : undefined}
+                  >
+                    <FormFieldRow fullWidth>
+                      <TextFieldWithHelp
+                        labelKey="services.url"
+                        helpKey="services.help.url"
+                        fullWidth
+                        disabled
+                        {...register("url")}
+                        slotProps={{
+                          input: {
+                            endAdornment: (
+                              <Button
+                                sx={{
+                                  color: palette.primary.main,
+                                  fontWeight: 600,
+                                }}
+                                size="small"
+                                onClick={handleDialogOpen}
+                              >
+                                {t("services.url.btnLabel")}
+                              </Button>
+                            ),
+                          },
+                        }}
                       />
                     </FormFieldRow>
                   </SettingsSearchField>
