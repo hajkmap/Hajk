@@ -17,7 +17,6 @@ import {
   Alert,
   Typography,
   CircularProgress,
-  IconButton,
 } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
 import LayersIcon from "@mui/icons-material/Layers";
@@ -28,8 +27,6 @@ import TouchAppIcon from "@mui/icons-material/TouchApp";
 import PaletteIcon from "@mui/icons-material/Palette";
 import CookieIcon from "@mui/icons-material/Cookie";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 import { FieldValues, useForm, useWatch } from "react-hook-form";
 import {
@@ -46,7 +43,9 @@ import {
   buildMapUpdatePayload,
 } from "./map-settings-form-values";
 import { SquareSpinnerComponent } from "../../components/progress/square-progress";
-import FormActionPanel from "../../components/form-action-panel";
+import FormActionPanel, {
+  CollapsibleWarning,
+} from "../../components/form-action-panel";
 import { availabilityOf, hasValidPeriod } from "../../lib/availability";
 import { toast } from "react-toastify";
 import { HttpError } from "../../lib/http-error";
@@ -162,7 +161,6 @@ export default function MapSettings() {
   const { mutateAsync: updateMapTools } = useUpdateMapTools();
   const { mutateAsync: deleteMap, isPending: isDeletingMap } = useDeleteMap();
   const { palette } = useTheme();
-  const [deleteWarningExpanded, setDeleteWarningExpanded] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteConfirmName, setDeleteConfirmName] = useState("");
   const formRef = useRef<HTMLFormElement | null>(null);
@@ -250,9 +248,6 @@ export default function MapSettings() {
   // With Lagerordning open, the move zone has its place by the save button.
   const handleLayerTreeOpenChange = useCallback((active: boolean) => {
     setMapLayersMoveZoneVisible(active);
-    if (!active) {
-      setDeleteWarningExpanded(false);
-    }
   }, []);
 
   useEffect(() => {
@@ -910,65 +905,11 @@ export default function MapSettings() {
         }
         warning={
           <Box sx={{ mt: 1 }}>
-            {mapLayersMoveZoneVisible || activeTab === "tools" ? (
-              <Box>
-                <Box sx={{ display: "flex", justifyContent: "center" }}>
-                  <IconButton
-                    size="small"
-                    color={map.locked ? "info" : "warning"}
-                    aria-label={
-                      map.locked
-                        ? t("maps.deleteLockedWarning")
-                        : t("maps.deleteMapWarning")
-                    }
-                    aria-expanded={deleteWarningExpanded}
-                    onClick={() => {
-                      setDeleteWarningExpanded((open) => !open);
-                    }}
-                  >
-                    {map.locked ? (
-                      <InfoOutlinedIcon fontSize="small" />
-                    ) : (
-                      <WarningAmberIcon fontSize="small" />
-                    )}
-                  </IconButton>
-                </Box>
-                {deleteWarningExpanded ? (
-                  <Alert
-                    severity={map.locked ? "info" : "warning"}
-                    sx={{
-                      mt: 1,
-                      alignItems: "flex-start",
-                      "& .MuiAlert-message": {
-                        fontSize: "0.8rem",
-                        lineHeight: 1.4,
-                        overflowWrap: "anywhere",
-                      },
-                    }}
-                  >
-                    {map.locked
-                      ? t("maps.deleteLockedWarning")
-                      : t("maps.deleteMapWarning")}
-                  </Alert>
-                ) : null}
-              </Box>
-            ) : (
-              <Alert
-                severity={map.locked ? "info" : "warning"}
-                sx={{
-                  alignItems: "flex-start",
-                  "& .MuiAlert-message": {
-                    fontSize: "0.8rem",
-                    lineHeight: 1.4,
-                    overflowWrap: "anywhere",
-                  },
-                }}
-              >
-                {map.locked
-                  ? t("maps.deleteLockedWarning")
-                  : t("maps.deleteMapWarning")}
-              </Alert>
-            )}
+            <CollapsibleWarning severity={map.locked ? "info" : "warning"}>
+              {map.locked
+                ? t("maps.deleteLockedWarning")
+                : t("maps.deleteMapWarning")}
+            </CollapsibleWarning>
             <Button
               variant="outlined"
               color="error"

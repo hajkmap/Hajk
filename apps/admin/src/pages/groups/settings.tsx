@@ -19,7 +19,9 @@ import { Trans, useTranslation } from "react-i18next";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
 import Page from "../../layouts/root/components/page";
 import { GroupType, GroupUpdateInput } from "../../api/groups";
-import FormActionPanel from "../../components/form-action-panel";
+import FormActionPanel, {
+  CollapsibleWarning,
+} from "../../components/form-action-panel";
 import {
   useDeleteGroup,
   useGroupById,
@@ -295,7 +297,9 @@ function GroupSettings() {
         isDirty={isDirty || layerTreeDirty}
         warning={
           <Box sx={{ mt: 1 }}>
-            <Alert severity="warning">{t("groups.deleteGroupWarning")}</Alert>
+            <CollapsibleWarning>
+              {t("groups.deleteGroupWarning")}
+            </CollapsibleWarning>
             <Button
               variant="outlined"
               color="error"

@@ -1,5 +1,16 @@
-import React from "react";
-import { Alert, Box, Button, Typography, Avatar, Tooltip } from "@mui/material";
+import React, { useRef, useState } from "react";
+import {
+  Alert,
+  Box,
+  Button,
+  IconButton,
+  Popover,
+  Typography,
+  Avatar,
+  Tooltip,
+} from "@mui/material";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import CircularProgress from "../components/progress/circular-progress";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
@@ -24,6 +35,86 @@ interface FormActionProps {
   warning?: React.ReactNode;
   /** Optional content rendered below the action buttons in the sticky sidebar. */
   sidebarExtra?: React.ReactNode;
+}
+
+/** A warning icon. Click it to show the message, click it again to hide the message. */
+export function CollapsibleWarning({
+  severity = "warning",
+  label,
+  children,
+}: {
+  severity?: "warning" | "info" | "error" | "success";
+  /** Accessible name for the icon. Falls back to the message when that is text. */
+  label?: string;
+  children: React.ReactNode;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const anchorRef = useRef<HTMLDivElement>(null);
+  const iconLabel = label ?? (typeof children === "string" ? children : undefined);
+
+  return (
+    <Box ref={anchorRef} sx={{ minWidth: 0, width: "100%" }}>
+      <Box sx={{ display: "flex", justifyContent: "center" }}>
+        <IconButton
+          size="small"
+          color={
+            severity === "info"
+              ? "info"
+              : severity === "error"
+                ? "error"
+                : "warning"
+          }
+          aria-label={iconLabel}
+          aria-expanded={expanded}
+          onClick={() => setExpanded((open) => !open)}
+        >
+          {severity === "info" ? (
+            <InfoOutlinedIcon fontSize="small" />
+          ) : (
+            <WarningAmberIcon fontSize="small" />
+          )}
+        </IconButton>
+      </Box>
+      <Popover
+        open={expanded}
+        anchorEl={anchorRef.current}
+        onClose={(event) => {
+          const target = event && "target" in event ? event.target : null;
+          if (target instanceof Node && anchorRef.current?.contains(target)) {
+            return;
+          }
+          setExpanded(false);
+        }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        transformOrigin={{ vertical: "top", horizontal: "center" }}
+        disableScrollLock
+        disableAutoFocus
+        disableRestoreFocus
+        slotProps={{
+          paper: {
+            sx: {
+              width: anchorRef.current?.clientWidth ?? 168,
+              mt: 1,
+            },
+          },
+        }}
+      >
+        <Alert
+          severity={severity}
+          sx={{
+            alignItems: "flex-start",
+            "& .MuiAlert-message": {
+              fontSize: "0.8rem",
+              lineHeight: 1.4,
+              overflowWrap: "anywhere",
+            },
+          }}
+        >
+          {children}
+        </Alert>
+      </Popover>
+    </Box>
+  );
 }
 
 const FormActionPanel: React.FC<FormActionProps> = ({
@@ -87,6 +178,8 @@ const FormActionPanel: React.FC<FormActionProps> = ({
           borderRadius: 3,
           width: 200,
           maxWidth: 200,
+          minWidth: 0,
+          overflow: "hidden",
           top: "100px",
           position: "sticky",
         }}

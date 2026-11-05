@@ -61,7 +61,9 @@ import DialogWrapper from "../../components/flexible-dialog";
 import LayersGrid from "./layers-grid";
 import ServiceUsagePanel from "./service-usage-panel";
 import { toast } from "react-toastify";
-import FormActionPanel from "../../components/form-action-panel";
+import FormActionPanel, {
+  CollapsibleWarning,
+} from "../../components/form-action-panel";
 import { SquareSpinnerComponent } from "../../components/progress/square-progress";
 import useAppStateStore from "../../store/use-app-state-store";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router";
@@ -419,13 +421,18 @@ export default function ServiceSettings() {
         warning={
           <Box sx={{ mt: 1 }}>
             {count > 0 ? (
-              <Alert severity="warning">
+              <CollapsibleWarning
+                label={t("services.settingsWarning", { count }).replace(
+                  /<\/?strong>/g,
+                  "",
+                )}
+              >
                 <Trans
                   i18nKey="services.settingsWarning"
                   values={{ count }}
                   components={{ strong: <strong /> }}
                 />
-              </Alert>
+              </CollapsibleWarning>
             ) : null}
             <Button
               variant="outlined"
