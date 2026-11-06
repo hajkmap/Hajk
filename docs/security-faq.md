@@ -110,7 +110,7 @@ All security-related settings are documented in `apps/backend/.env.example`. The
 - **Configure the reverse proxy correctly**: set `EXPRESS_TRUST_PROXY` to the number of proxies or their addresses (not `true`), and set `AD_TRUSTED_PROXY_IPS` if you use header-based login.
 - **Keep rate limiting enabled** (`RATE_LIMIT_ENABLED`, on by default).
 - **Only expose what you need**: review the proxies (`PROXY_*`) and statically exposed directories (`EXPOSE_*`).
-- **Run Hajk on a supported Node.js version** as a non-privileged user, and keep Hajk updated to the latest release.
+- **Run Hajk on a supported Node.js version** as a non-privileged user, and keep Hajk updated to the latest release. The [official Docker image](../Docker/README.md#hajk) already runs as a non-root user.
 
 ### Do you offer certifications, SLAs or support contracts?
 
