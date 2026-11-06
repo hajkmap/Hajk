@@ -36,7 +36,7 @@ import CreateButton from "../../../components/create-button";
 import {
   ListFilterField,
   ListFilterRow,
-  ListFilterSearch,
+  ListSearchField,
 } from "../../../components/form-components/list-filter-row";
 
 function ToolUsedInMapsCell({
@@ -148,10 +148,6 @@ export default function ToolsList({
     defaultValues: { type: "", internalName: "", options: { title: "" } },
     mode: "onChange",
   });
-
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(event.target.value);
-  };
 
   const typeLabel = useCallback(
     (type: string) =>
@@ -378,15 +374,12 @@ export default function ToolsList({
       ) : (
         <>
           <ListFilterRow>
-            <ListFilterSearch>
-              <TextField
-                fullWidth
+            <Box sx={{ width: { xs: "100%", sm: "50%", md: "33%" }, minWidth: 0 }}>
+              <ListSearchField
                 label={t("tools.searchTitle")}
-                variant="outlined"
-                value={searchTerm}
-                onChange={handleSearchChange}
+                onSearch={setSearchTerm}
               />
-            </ListFilterSearch>
+            </Box>
             <ListFilterField>
               <FormControl fullWidth>
                 <InputLabel id="tool-type-filter-label">

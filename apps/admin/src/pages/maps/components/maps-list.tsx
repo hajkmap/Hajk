@@ -39,7 +39,7 @@ import StyledDataGrid from "../../../components/data-grid";
 import {
   ListFilterField,
   ListFilterRow,
-  ListFilterSearch,
+  ListSearchField,
 } from "../../../components/form-components/list-filter-row";
 import CreateMapDialog from "./create-map-dialog";
 import DuplicateMapDialog from "./duplicate-map-dialog";
@@ -283,15 +283,12 @@ export default function MapsList({
       ) : (
         <>
           <ListFilterRow>
-            <ListFilterSearch>
-              <TextField
-                fullWidth
+            <Box sx={{ width: { xs: "100%", sm: "50%", md: "33%" }, minWidth: 0 }}>
+              <ListSearchField
                 label={t("map.searchTitle")}
-                variant="outlined"
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
+                onSearch={setSearchTerm}
               />
-            </ListFilterSearch>
+            </Box>
             <ListFilterField>
               <FormControl fullWidth variant="outlined">
                 <InputLabel id="maps-locked-filter-label">

@@ -23,7 +23,7 @@ import CreateButton from "../../../components/create-button";
 import {
   ListFilterField,
   ListFilterRow,
-  ListFilterSearch,
+  ListSearchField,
 } from "../../../components/form-components/list-filter-row";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import type { TFunction } from "i18next";
@@ -154,9 +154,6 @@ export default function ServicesList({
     selectedServiceId ?? "",
   );
   const selectedServiceLayerCount = layerCountByService?.count ?? 0;
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(event.target.value);
-  };
 
   const handleOpenActionsMenu = (
     event: React.MouseEvent<HTMLElement>,
@@ -522,15 +519,12 @@ export default function ServicesList({
             </DialogWrapper>
 
             <ListFilterRow>
-              <ListFilterSearch>
-                <TextField
-                  fullWidth
+              <Box sx={{ width: { xs: "100%", sm: "50%", md: "33%" }, minWidth: 0 }}>
+                <ListSearchField
                   label={t("layers.searchTitle")}
-                  variant="outlined"
-                  value={searchTerm}
-                  onChange={handleSearchChange}
+                  onSearch={setSearchTerm}
                 />
-              </ListFilterSearch>
+              </Box>
               <ListFilterField>
                 <FormControl fullWidth variant="outlined">
                   <InputLabel id="type-filter-label">

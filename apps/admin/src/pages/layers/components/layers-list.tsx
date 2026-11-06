@@ -55,7 +55,7 @@ import StyledDataGrid from "../../../components/data-grid";
 import {
   ListFilterField,
   ListFilterRow,
-  ListFilterSearch,
+  ListSearchField,
 } from "../../../components/form-components/list-filter-row";
 import { CapabilityRow, CreateLayerGrid } from "./create-layer-grid";
 import AvailabilityChip from "../../../components/availability/availability-chip";
@@ -219,10 +219,6 @@ export default function LayersList({
   );
   const { mutateAsync: removeLayer, isPending: isDeletingLayer } =
     useDeleteLayer(selectedLayer?.serviceId ?? "");
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(event.target.value);
-  };
-
   const handleOpenActionsMenu = (
     event: React.MouseEvent<HTMLElement>,
     layerId: string,
@@ -692,15 +688,12 @@ export default function LayersList({
           </DialogWrapper>
 
           <ListFilterRow>
-            <ListFilterSearch>
-              <TextField
-                fullWidth
+            <Box sx={{ width: { xs: "100%", sm: "50%", md: "33%" }, minWidth: 0 }}>
+              <ListSearchField
                 label={t("layers.searchTitle")}
-                variant="outlined"
-                value={searchTerm}
-                onChange={handleSearchChange}
+                onSearch={setSearchTerm}
               />
-            </ListFilterSearch>
+            </Box>
             <ListFilterField>
               <FormControl fullWidth variant="outlined">
                 <InputLabel id="service-url-filter-label">

@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 /** Primary page tabs (Settings / Layers / …) — matches maps settings. */
 const settingsPageTabsSx = {
   mb: 2,
+  maxWidth: "100%",
   "& .MuiTab-root": {
     color: (theme: Theme) =>
       theme.palette.mode === "dark"
@@ -24,8 +25,9 @@ const settingsPageTabsSx = {
 };
 
 /** Nested section tabs inside a settings page (maps settings sections, tool sub-tabs). */
- const settingsSectionTabsSx = {
+const settingsSectionTabsSx = {
   mb: 2,
+  maxWidth: "100%",
   minHeight: 36,
   pl: 1,
   borderLeft: 2,
@@ -84,8 +86,9 @@ export function SettingsPageTabs<T extends string>({
     <Tabs
       value={value}
       onChange={(_, next) => onChange(next as T)}
-      variant={isSection ? "scrollable" : undefined}
-      scrollButtons={isSection ? "auto" : undefined}
+      variant="scrollable"
+      scrollButtons="auto"
+      allowScrollButtonsMobile
       sx={isSection ? settingsSectionTabsSx : settingsPageTabsSx}
     >
       {tabs.map((tab) => (

@@ -36,6 +36,7 @@ import { useLayers } from "../../../api/layers";
 import type { Layer } from "../../../api/layers";
 import DialogWrapper from "../../../components/flexible-dialog";
 import CreateButton from "../../../components/create-button";
+import { ListSearchField } from "../../../components/form-components/list-filter-row";
 import { SquareSpinnerComponent } from "../../../components/progress/square-progress";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { toast } from "react-toastify";
@@ -96,10 +97,6 @@ export default function GroupsList({
     () => groups?.find((group) => group.id === selectedGroupId),
     [groups, selectedGroupId],
   );
-
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(event.target.value);
-  };
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -382,12 +379,9 @@ export default function GroupsList({
       ) : (
         <>
           <Box sx={{ mb: 2, width: { xs: "100%", sm: "50%", md: "33%" } }}>
-            <TextField
-              fullWidth
+            <ListSearchField
               label={t("groups.search")}
-              variant="outlined"
-              value={searchTerm}
-              onChange={handleSearchChange}
+              onSearch={setSearchTerm}
             />
           </Box>
 
