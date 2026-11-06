@@ -16,6 +16,7 @@ Security is therefore a **shared responsibility**. The Hajk project is responsib
 | Handling reported vulnerabilities and publishing fixed releases     |      ✔       |                   |
 | Keeping Hajk's own dependencies up to date                          |      ✔       |                   |
 | Documenting security-related settings                               |      ✔       |                   |
+| Base image of the official Docker images (Node.js, OS packages)     |      ✔¹      |                   |
 | Installing updates in time                                          |              |         ✔         |
 | Servers, operating system, Node.js, network, firewall, TLS          |              |         ✔         |
 | Configuring Hajk securely (access to Admin, CORS, CSP, rate limits) |              |         ✔         |
@@ -24,6 +25,8 @@ Security is therefore a **shared responsibility**. The Hajk project is responsib
 | Penetration testing and vulnerability scanning of the installation  |              |         ✔         |
 | Monitoring, logging, backups, incident response                     |              |         ✔         |
 | Data protection (GDPR), information classification                  |              |         ✔         |
+
+¹ The project picks the base image and rebuilds the latest release on it every night as `nightly-master`. Pulling the updated image, and keeping the host and container runtime up to date, is up to your organisation. See [Which Docker image should we use?](#which-docker-image-should-we-use)
 
 ## Frequently asked questions
 
@@ -64,9 +67,15 @@ To get notified about new releases and security advisories, click **Watch** on t
 
 ### How are third-party dependencies managed?
 
-Hajk is built on widely used open-source libraries such as React, OpenLayers, Material UI and Express. The maintainers update them regularly and check them with `npm audit` and Dependabot. Known vulnerabilities are fixed by updating the affected package. The official Docker image is based on a slim Node.js image to reduce the number of packages it contains.
+Hajk is built on widely used open-source libraries such as React, OpenLayers, Material UI and Express. The maintainers update them regularly and check them with `npm audit` and Dependabot. Known vulnerabilities are fixed by updating the affected package. The exact versions are locked in Hajk's lockfiles, so every build, including the Docker images, installs the versions the maintainers have tested.
 
 Note that a vulnerability scanner will sometimes report issues in packages that are only used to build Hajk and never run on your server or in the browser. See the threat model in [SECURITY.md](../SECURITY.md) for how we assess such findings.
+
+### Which Docker image should we use?
+
+The official Docker image is based on a slim Node.js image to reduce the number of packages it contains. Release images, such as `4.3`, are built once and never rebuilt, so the Node.js and operating system packages in them get older over time. If your organisation scans images for vulnerabilities, these are usually what it finds.
+
+To get those updates without waiting for the next Hajk release, use `nightly-master`. It is the latest release, rebuilt every night on the current upstream base image. The trade-off is that it changes every night, while a release tag only changes at a patch release. See [Nightly builds](releases.md#nightly-builds) and [Official Docker images](../SECURITY.md#official-docker-images) in SECURITY.md.
 
 ### How do users log in? How is access controlled?
 
