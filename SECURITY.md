@@ -45,6 +45,12 @@ Fixes ship with the next release. For severe vulnerabilities we also publish a p
 
 We do not backport fixes to older releases, such as 4.2.x. If you run an older release, the fix is to upgrade.
 
+### Official Docker images
+
+For the official images (`ghcr.io/hajkmap/hajk` and `ghcr.io/hajkmap/hajk-simple`), we choose the base image, and with it the Node.js version and operating system packages. A release image is built once and never rebuilt, so over time its base image falls behind. The `nightly-master` image is the latest release, rebuilt every night on the current upstream base image, so it picks up Node.js and OS fixes soon after upstream publishes them. npm dependencies in the images are installed from Hajk's lockfiles, so they change only when we update them, as described under [Third-party dependencies](#third-party-dependencies). See [Nightly builds](docs/releases.md#nightly-builds) for details.
+
+You don't need to report publicly known CVEs in the base image: pull `nightly-master`, or rebuild the image yourself. Do report it if our Dockerfiles add something insecure that the base image does not have, such as an unneeded package, a weak permission or an unsafe default.
+
 ## Disclosure policy
 
 When we receive a report, a maintainer takes ownership of it and:
@@ -77,7 +83,7 @@ If such input can make Hajk do something beyond its documented behaviour, it is 
 
 ### What Hajk trusts
 
-1. **The operator and the infrastructure Hajk runs on.** This includes the operating system, the Node.js runtime, the reverse proxy, TLS termination and the network.
+1. **The operator and the infrastructure Hajk runs on.** This includes the operating system, the Node.js runtime, the reverse proxy, TLS termination and the network. If you run an official Docker image, the container runtime and host are still yours, and the image's base is covered under [Official Docker images](#official-docker-images).
 2. **The Backend's configuration.** This includes `.env`, the files in `App_Data` and any directories exposed as static content.
 3. **Admins and everything they create.** Anyone with access to Admin (or the admin API) can change what all users see, including map and layer configuration, infoclick templates and DocumentHandler documents. These may contain HTML, links and embedded content by design.
 4. **The identity infrastructure.** This means the Active Directory/LDAP server, and the user and group headers set by a reverse proxy listed in `AD_TRUSTED_PROXY_IPS`.
@@ -95,7 +101,7 @@ These are commonly reported, but fall outside Hajk's scope. They are the operato
 - **Spoofed identity headers.** With header-based AD, the reverse proxy is trusted to set the user and group headers. If the Backend can be reached without passing through that proxy, or if `AD_TRUSTED_PROXY_IPS` and `EXPRESS_TRUST_PROXY` are set too permissively, headers can be forged. That is a deployment issue.
 - **Denial of service through traffic volume.** Hajk has basic, in-memory rate limiting (`RATE_LIMIT_*`), but protecting against volumetric attacks is the job of the infrastructure. A single request that crashes the Backend or uses an unreasonable amount of resources is in scope, though.
 - **Scanner or `npm audit` output with no exploit path.** A dependency with a known CVE is a vulnerability in Hajk only if the vulnerable code can be reached in a way an attacker can use. Dependencies that are used only for building or development, including the legacy build tooling of Admin, are updated as regular maintenance and are not treated as vulnerabilities. Show us how it can be exploited in Hajk and we'll treat it as a vulnerability.
-- **Vulnerabilities in Node.js, the operating system or unsupported versions.** This includes running Hajk on an end-of-life Node.js release or on a Hajk version older than the latest release.
+- **Vulnerabilities in Node.js, the operating system or unsupported versions.** This includes running Hajk on an end-of-life Node.js release or on a Hajk version older than the latest release. For the base image of the official Docker images, see [Official Docker images](#official-docker-images).
 - **Self-XSS**, where a user has to paste code into their own browser console or address bar.
 - **Third-party plugins, community extensions and forks.** Report these to their maintainers. See [community extensions](docs/community-extensions.md).
 

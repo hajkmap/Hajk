@@ -88,6 +88,8 @@ Both run on `linux/amd64` and `linux/arm64`, and get the same tags. How to run t
 > In production, use the tag of your minor version, such as `ghcr.io/hajkmap/hajk:4.3`. It is moved to each new patch release, so pulling the image again gives you security fixes, but never new features or breaking changes. Avoid `4` and `latest`, which move to new minor and major releases without warning.
 >
 > Patch releases are only made for the latest release. When 4.4.0 is out, `4.3` gets no more fixes, so plan the upgrade to `4.4`.
+>
+> A release tag does not get Node.js or operating system updates between releases. If you need those, use [`nightly-master`](#nightly-builds) instead.
 
 If you need full control over when anything changes, pin an exact version such as `4.3.1` instead, and follow the releases so you can upgrade when a patch release is published.
 
