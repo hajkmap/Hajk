@@ -213,10 +213,6 @@ export default function DocumentHandlerRenderer({
 
   return (
     <>
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      />
       <Box sx={{ mb: 2 }}>
         <Tabs
           value={activeTab}

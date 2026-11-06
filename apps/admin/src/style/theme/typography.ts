@@ -1,15 +1,4 @@
-const fontFamily = [
-  '"Inter Variable"',
-  '"Segoe UI Variable Text"',
-  '"Segoe UI"',
-  "system-ui",
-  "-apple-system",
-  "BlinkMacSystemFont",
-  "Roboto",
-  '"Helvetica Neue"',
-  "Arial",
-  "sans-serif",
-].join(",");
+const fontFamily = ["Roboto", "Helvetica", "Arial", "sans-serif"].join(",");
 
 export default {
   fontFamily,

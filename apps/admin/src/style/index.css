@@ -41,6 +41,7 @@ body {
 
 /* Set core body defaults */
 body {
+  font-family: "Roboto", sans-serif;
   text-rendering: optimizeSpeed;
   line-height: 1.5;
 }
