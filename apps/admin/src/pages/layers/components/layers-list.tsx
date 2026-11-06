@@ -55,6 +55,7 @@ import StyledDataGrid from "../../../components/data-grid";
 import {
   ListFilterField,
   ListFilterRow,
+  ListFilterSearch,
   ListSearchField,
 } from "../../../components/form-components/list-filter-row";
 import { CapabilityRow, CreateLayerGrid } from "./create-layer-grid";
@@ -688,12 +689,12 @@ export default function LayersList({
           </DialogWrapper>
 
           <ListFilterRow>
-            <Box sx={{ width: { xs: "100%", sm: "50%", md: "33%" }, minWidth: 0 }}>
+            <ListFilterSearch>
               <ListSearchField
                 label={t("layers.searchTitle")}
                 onSearch={setSearchTerm}
               />
-            </Box>
+            </ListFilterSearch>
             <ListFilterField>
               <FormControl fullWidth variant="outlined">
                 <InputLabel id="service-url-filter-label">

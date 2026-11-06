@@ -36,6 +36,7 @@ import CreateButton from "../../../components/create-button";
 import {
   ListFilterField,
   ListFilterRow,
+  ListFilterSearch,
   ListSearchField,
 } from "../../../components/form-components/list-filter-row";
 
@@ -374,12 +375,12 @@ export default function ToolsList({
       ) : (
         <>
           <ListFilterRow>
-            <Box sx={{ width: { xs: "100%", sm: "50%", md: "33%" }, minWidth: 0 }}>
+            <ListFilterSearch>
               <ListSearchField
                 label={t("tools.searchTitle")}
                 onSearch={setSearchTerm}
               />
-            </Box>
+            </ListFilterSearch>
             <ListFilterField>
               <FormControl fullWidth>
                 <InputLabel id="tool-type-filter-label">

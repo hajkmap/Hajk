@@ -28,12 +28,13 @@ export function ListFilterRow({ children, sx }: ListFilterRowProps) {
   );
 }
 
-/** Primary search field — largest share of the row (4:2:2 vs filter fields). */
+/** Search field on a list page: full width on phones, half on tablets, a third on desktop. */
 export function ListFilterSearch({ children }: { children: ReactNode }) {
   return (
     <Box
       sx={{
-        flex: { xs: "1 1 100%", sm: "1 1 100%", md: "4 1 0" },
+        width: { xs: "100%", sm: "50%", md: "33%" },
+        flexShrink: 0,
         minWidth: 0,
       }}
     >

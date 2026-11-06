@@ -26,7 +26,6 @@ import { useTranslation } from "react-i18next";
 import {
   ListFilterField,
   ListFilterRow,
-  ListFilterSearch,
 } from "../../../components/form-components/list-filter-row";
 import { cellTooltipSlotProps } from "../../../components/cell-tooltip";
 
@@ -180,7 +179,7 @@ export function CreateLayerGrid({
         }}
       >
         <ListFilterRow sx={{ flex: 1, mt: 1, mb: 0 }}>
-          <ListFilterSearch>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
             <TextField
               fullWidth
               label={t("common.search")}
@@ -189,7 +188,7 @@ export function CreateLayerGrid({
               onChange={(e) => onCapabilitiesSearchTermChange(e.target.value)}
               slotProps={{ input: { endAdornment: <SearchIcon /> } }}
             />
-          </ListFilterSearch>
+          </Box>
           {workspaces.length > 0 && (
             <ListFilterField>
               <FormControl fullWidth>

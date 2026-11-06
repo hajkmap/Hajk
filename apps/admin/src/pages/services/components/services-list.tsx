@@ -23,6 +23,7 @@ import CreateButton from "../../../components/create-button";
 import {
   ListFilterField,
   ListFilterRow,
+  ListFilterSearch,
   ListSearchField,
 } from "../../../components/form-components/list-filter-row";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -519,12 +520,12 @@ export default function ServicesList({
             </DialogWrapper>
 
             <ListFilterRow>
-              <Box sx={{ width: { xs: "100%", sm: "50%", md: "33%" }, minWidth: 0 }}>
+              <ListFilterSearch>
                 <ListSearchField
                   label={t("layers.searchTitle")}
                   onSearch={setSearchTerm}
                 />
-              </Box>
+              </ListFilterSearch>
               <ListFilterField>
                 <FormControl fullWidth variant="outlined">
                   <InputLabel id="type-filter-label">

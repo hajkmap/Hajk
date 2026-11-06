@@ -36,7 +36,11 @@ import { useLayers } from "../../../api/layers";
 import type { Layer } from "../../../api/layers";
 import DialogWrapper from "../../../components/flexible-dialog";
 import CreateButton from "../../../components/create-button";
-import { ListSearchField } from "../../../components/form-components/list-filter-row";
+import {
+  ListFilterRow,
+  ListFilterSearch,
+  ListSearchField,
+} from "../../../components/form-components/list-filter-row";
 import { SquareSpinnerComponent } from "../../../components/progress/square-progress";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { toast } from "react-toastify";
@@ -378,12 +382,14 @@ export default function GroupsList({
         <SquareSpinnerComponent />
       ) : (
         <>
-          <Box sx={{ mb: 2, width: { xs: "100%", sm: "50%", md: "33%" } }}>
-            <ListSearchField
-              label={t("groups.search")}
-              onSearch={setSearchTerm}
-            />
-          </Box>
+          <ListFilterRow>
+            <ListFilterSearch>
+              <ListSearchField
+                label={t("groups.search")}
+                onSearch={setSearchTerm}
+              />
+            </ListFilterSearch>
+          </ListFilterRow>
 
           <Grid size={12}>
             <StyledDataGrid<Group>
