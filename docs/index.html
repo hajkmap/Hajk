@@ -688,8 +688,27 @@
         font-family: "Fira Code", "Cascadia Code", monospace;
         font-size: 0.84rem;
         color: #e2e8f0;
+        line-height: 1.7;
+        white-space: pre;
         overflow-x: auto;
         margin-top: 32px;
+      }
+      .code-note {
+        margin-top: 14px;
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.6);
+      }
+      .code-note code {
+        font-family: "Fira Code", "Cascadia Code", monospace;
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.85);
+      }
+      .code-note a {
+        color: #7dd3fc;
+        text-decoration: none;
+      }
+      .code-note a:hover {
+        text-decoration: underline;
       }
       .code-block .cmd {
         color: #7dd3fc;
@@ -917,7 +936,7 @@
             <h3>Powerful search</h3>
             <p>
               Search across several WFS layers simultaneously. Pan and zoom the
-              map, highlight matching features. Export to Excel or KLM for
+              map, highlight matching features. Export to Excel or KML for
               further analysis.
             </p>
           </div>
@@ -1644,17 +1663,18 @@
           <div class="tech-badge">⬡ Node.js ≥22</div>
           <div class="tech-badge">⚡ Express 5</div>
           <div class="tech-badge">📦 ES Modules</div>
-          <div class="tech-badge">🐳 Docker Hub image</div>
+          <div class="tech-badge">🐳 Official Docker images</div>
           <div class="tech-badge">🔑 ActiveDirectory auth</div>
           <div class="tech-badge">📖 API Explorer</div>
         </div>
 
         <div class="backend-grid">
           <div class="backend-card">
-            <h3>Pre-built Docker image</h3>
+            <h3>Pre-built Docker images</h3>
             <p>
-              Pull the official image from Docker Hub and have Hajk running in
-              seconds. No build step, no toolchain required.
+              Pull the official image from the GitHub Container Registry and
+              have Hajk running in seconds. <code>nightly-master</code> keeps
+              Node.js and OS packages current between releases.
             </p>
           </div>
           <div class="backend-card">
@@ -1681,29 +1701,44 @@
           </div>
         </div>
 
-        <div class="code-block">
-          <span class="comment"
-            ># Pull the pre-built image from Docker Hub and run</span
-          >
-          <span class="cmd">docker pull</span> hallbergs/hajk
-          <span class="cmd">docker run</span> -p 3002:3002 hallbergs/hajk
-          <span class="comment"
-            ># → Image on Docker Hub: hub.docker.com/r/hallbergs/hajk</span
-          >
+        <!-- prettier-ignore -->
+        <pre class="code-block"><span class="comment"># Latest release, rebuilt every night on a fresh base image</span>
+<span class="cmd">docker volume create</span> hajk-appdata
+<span class="cmd">docker run</span> -d --name hajk -p 3002:3002 \
+  -v hajk-appdata:/usr/app/App_Data \
+  ghcr.io/hajkmap/hajk:nightly-master
+<span class="comment"># → Client on http://localhost:3002, Admin on http://localhost:3002/admin</span>
+<span class="comment"># ⚠ Admin is open to anyone until you configure AD — see the Security FAQ</span>
 
-          <span class="comment"
-            ># Prefer to develop locally? Clone and start each app:</span
+<span class="comment"># Prefer to develop locally? Clone and start each app:</span>
+<span class="cmd">cd</span> apps/backend &amp;&amp; npm install &amp;&amp; <span class="cmd">npm run dev</span>  <span class="comment"># :3002</span>
+<span class="cmd">cd</span> apps/client  &amp;&amp; npm install &amp;&amp; <span class="cmd">npm run dev</span>  <span class="comment"># :3000</span>
+<span class="cmd">cd</span> apps/admin   &amp;&amp; npm install &amp;&amp; <span class="cmd">npm start</span>    <span class="comment"># :3001</span></pre>
+        <p class="code-note">
+          Images for <code>linux/amd64</code> and <code>linux/arm64</code> on
+          the GitHub Container Registry. For production tags such as
+          <code>4.3</code>, the Client-only <code>hajk-simple</code> image and
+          how to harden your installation, see
+          <a
+            href="https://github.com/hajkmap/Hajk/blob/master/docs/releases.md#docker-images"
+            target="_blank"
+            rel="noopener"
+            >Releases</a
+          >,
+          <a
+            href="https://github.com/hajkmap/Hajk/blob/master/Docker/README.md"
+            target="_blank"
+            rel="noopener"
+            >Docker README</a
           >
-          <span class="cmd">cd</span> apps/backend &amp;&amp; npm install
-          &amp;&amp; <span class="cmd">npm run dev</span>
-          <span class="comment"># :3002</span>
-          <span class="cmd">cd</span> apps/client &amp;&amp; npm install
-          &amp;&amp; <span class="cmd">npm run dev</span>
-          <span class="comment"># :3000</span>
-          <span class="cmd">cd</span> apps/admin &amp;&amp; npm install
-          &amp;&amp; <span class="cmd">npm start</span>
-          <span class="comment"># :3001</span>
-        </div>
+          and the
+          <a
+            href="https://github.com/hajkmap/Hajk/blob/master/docs/security-faq.md#how-do-we-harden-our-installation"
+            target="_blank"
+            rel="noopener"
+            >Security FAQ</a
+          >.
+        </p>
       </div>
     </section>
 
