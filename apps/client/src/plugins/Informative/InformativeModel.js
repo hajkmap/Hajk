@@ -1,4 +1,5 @@
 import { hfetch } from "../../utils/FetchWrapper";
+import i18n from "src/i18n";
 
 class InformativeModel {
   constructor(settings) {
@@ -150,8 +151,7 @@ class InformativeModel {
       this.chapters = data.chapters;
     } catch (_err) {
       this.localObserver.publish("showSnackbar", {
-        message:
-          "Laddning av Informative-pluginet misslyckades. Pluginet verkar vara felaktigt konfigurerat. Var god kontakta systemadministratören.",
+        message: i18n.t("informative.loadFailed"),
         options: { variant: "error" },
       });
       console.error(

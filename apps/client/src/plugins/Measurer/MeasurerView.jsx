@@ -28,6 +28,7 @@ import HajkToolTip from "components/HajkToolTip";
 import SelectFeaturesDialog from "utils/SelectFeaturesDialog";
 import SettingsIcon from "@mui/icons-material/Settings";
 import SettingsDialog from "./views/SettingsDialog";
+import { Trans, useTranslation } from "react-i18next";
 
 const SvgImg = styled("img")(({ _theme }) => ({
   height: "24px",
@@ -69,6 +70,7 @@ const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
 }));
 
 function HelpDialog(props) {
+  const { t } = useTranslation();
   return (
     <BaseDialog
       open={props.open}
@@ -76,32 +78,13 @@ function HelpDialog(props) {
         props.setShowHelp(false);
       }}
     >
-      <DialogTitle>{"Hjälp"}</DialogTitle>
+      <DialogTitle>{t("common.help")}</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          <strong>Avsluta mätning</strong>
-          <br />
-          Tryck på Esc/Enter-tangenten eller klicka igen på sista punkten för
-          att avsluta mätning.
-          <br />
-          <br />
-          <strong>Rita på fri hand</strong>
-          <br />
-          Håll ner Shift-tangenten för att rita på fri hand. Det här är möjligt
-          när du ritar sträckor eller arealer.
-          <br />
-          <br />
-          <strong>Stäng av snäppning</strong>
-          <br />
-          Håll ner Mellanslags-tangenten för att temporärt stänga av
-          snäppningsfunktionen.
-          <br />
-          <br />
-          <strong>Vinkelrät mätning</strong>
-          <br />
-          Håll ner Ctrl på Windows eller Cmd (⌘) på Mac och klicka på en linje
-          så kan du göra vinkelräta mätningar från den linjen. Observera: Linjen
-          du klickar på måste vara en vektorlinje som du snäpper mot.
+          <Trans
+            i18nKey="measurer.help.text"
+            components={{ strong: <strong />, br: <br /> }}
+          />
         </DialogContentText>
       </DialogContent>
       <DialogActions>
@@ -111,7 +94,7 @@ function HelpDialog(props) {
             props.setShowHelp(false);
           }}
         >
-          OK
+          {t("common.ok")}
         </Button>
       </DialogActions>
     </BaseDialog>
@@ -128,6 +111,7 @@ function MeasurerView(props) {
     measurementSettings,
     onUpdateMeasurementSettings,
   } = props;
+  const { t } = useTranslation();
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showSegmentButton, setShowSegmentButton] = useState(true);
@@ -182,40 +166,40 @@ function MeasurerView(props) {
             onChange={handleDrawTypeChange}
             orientation="horizontal"
             variant="contained"
-            aria-label="outlined button group"
+            aria-label={t("measurer.measureType")}
           >
-            <HajkToolTip title="Punkt (Visar koordinat)">
+            <HajkToolTip title={t("measurer.point")}>
               <StyledToggleButton value="Point">
                 <SvgImg src={IconPoint()} />
               </StyledToggleButton>
             </HajkToolTip>
-            <HajkToolTip title="Sträcka">
+            <HajkToolTip title={t("measurer.line")}>
               <StyledToggleButton value="LineString">
                 <SvgImg src={IconLine()} />
               </StyledToggleButton>
             </HajkToolTip>
-            <HajkToolTip title="Areal">
+            <HajkToolTip title={t("measurer.area")}>
               <StyledToggleButton value="Polygon">
                 <SvgImg src={IconPolygon()} />
               </StyledToggleButton>
             </HajkToolTip>
-            <HajkToolTip title="Cirkel">
+            <HajkToolTip title={t("measurer.circle")}>
               <StyledToggleButton value="Circle">
                 <SvgImg src={IconCircle()} />
               </StyledToggleButton>
             </HajkToolTip>
-            <HajkToolTip title="Välj på kartan">
+            <HajkToolTip title={t("measurer.select")}>
               <StyledToggleButton value="Select">
                 <TouchAppIcon />
               </StyledToggleButton>
             </HajkToolTip>
-            <HajkToolTip title="Ta bort enskild mätning">
+            <HajkToolTip title={t("measurer.deleteOne")}>
               <StyledToggleButton value="Delete">
                 <DeleteIcon />
               </StyledToggleButton>
             </HajkToolTip>
           </StyledToggleButtonGroup>
-          <HajkToolTip title="Rita del-längder av mätningar">
+          <HajkToolTip title={t("measurer.segments")}>
             <Zoom in={showSegmentButton}>
               <StyledToggleButton
                 value="Segments"
@@ -239,7 +223,7 @@ function MeasurerView(props) {
             gap: 1,
           }}
         >
-          <HajkToolTip title="Rensa bort alla mätningar">
+          <HajkToolTip title={t("measurer.clearAll")}>
             <Button
               size="small"
               variant="contained"
@@ -248,14 +232,14 @@ function MeasurerView(props) {
                 setShowDeleteConfirmation(true);
               }}
             >
-              Rensa
+              {t("search.results.clear")}
             </Button>
           </HajkToolTip>
-          <HajkToolTip title="Inställningar — välj antal decimaler">
+          <HajkToolTip title={t("measurer.settingsTooltip")}>
             <IconButton
               aria-expanded={showSettings}
               aria-haspopup="dialog"
-              aria-label="Inställningar — välj antal decimaler"
+              aria-label={t("measurer.settingsTooltip")}
               onMouseDown={(e) => e.stopPropagation()}
               onClick={() => {
                 setShowSettings(true);
@@ -273,12 +257,10 @@ function MeasurerView(props) {
       </Grid>
       <ConfirmationDialog
         open={showDeleteConfirmation === true}
-        titleName={"Rensa"}
-        contentDescription={
-          "Är du säker på att du vill rensa bort alla mätningar?"
-        }
-        cancel={"Avbryt"}
-        confirm={"Ja rensa"}
+        titleName={t("search.results.clear")}
+        contentDescription={t("measurer.clearAllConfirm")}
+        cancel={t("common.cancel")}
+        confirm={t("measurer.clearAllConfirmButton")}
         handleConfirm={deleteAll}
         handleAbort={() => {
           setShowDeleteConfirmation(false);
@@ -294,7 +276,7 @@ function MeasurerView(props) {
       <SelectFeaturesDialog
         localObserver={props.localObserver}
         drawModel={drawModel}
-        dialogTitle="Välj de objekt du vill mäta"
+        dialogTitle={t("measurer.selectFeaturesTitle")}
       />
     </>
   );

@@ -6,6 +6,7 @@ import lineIntersect from "@turf/line-intersect";
 import difference from "@turf/difference";
 import { polygon as turfPolygon } from "@turf/helpers";
 import { transform } from "ol/proj";
+import i18n from "src/i18n";
 
 class HajkTransformer {
   #mapProjection;
@@ -97,15 +98,13 @@ class HajkTransformer {
       return this.#splitPolygon(featureGeoJSON, cuttingGeoJSON);
     }
 
-    throw new Error(`Geometrityp ${geomType} kan inte delas`);
+    throw new Error(i18n.t("transformer.unsupportedGeometry", { geomType }));
   }
 
   #splitLineString(lineFeature, cuttingLine) {
     const result = lineSplit(lineFeature, cuttingLine);
     if (!result.features || result.features.length < 2) {
-      throw new Error(
-        "Linjen kunde inte delas - klipplinjen måste korsa linjen"
-      );
+      throw new Error(i18n.t("transformer.lineNotCrossed"));
     }
     return result.features.map((f) => this.#toOLFeature(f));
   }
@@ -114,7 +113,7 @@ class HajkTransformer {
     // Check that cutting line intersects the polygon at least twice
     const intersections = lineIntersect(polygonFeature, cuttingLine);
     if (intersections.features.length < 2) {
-      throw new Error("Klipplinjen måste korsa polygonen på minst två ställen");
+      throw new Error(i18n.t("transformer.polygonNotCrossedTwice"));
     }
 
     // Create a thin buffer around the cutting line to use with difference
@@ -128,7 +127,7 @@ class HajkTransformer {
     });
 
     if (!result) {
-      throw new Error("Kunde inte dela polygonen");
+      throw new Error(i18n.t("transformer.polygonSplitFailed"));
     }
 
     // If the result is a MultiPolygon, we have successfully split
@@ -141,12 +140,10 @@ class HajkTransformer {
 
     // If still a single polygon, the cut didn't work as expected
     if (result.geometry.type === "Polygon") {
-      throw new Error(
-        "Klipplinjen delade inte polygonen helt - se till att linjen korsar hela polygonen"
-      );
+      throw new Error(i18n.t("transformer.polygonNotFullySplit"));
     }
 
-    throw new Error("Oväntat resultat vid delning av polygon");
+    throw new Error(i18n.t("transformer.unexpectedSplitResult"));
   }
 
   #toOLFeature(geoJsonFeature) {

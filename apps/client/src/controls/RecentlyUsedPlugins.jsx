@@ -2,11 +2,14 @@ import { useEffect, useState } from "react";
 import { SpeedDial, SpeedDialAction, SpeedDialIcon } from "@mui/material";
 
 import RestoreIcon from "@mui/icons-material/Restore";
+import { useTranslation } from "react-i18next";
 
 export default function RecentlyUsedPlugins({
   globalObserver,
   showRecentlyUsedPlugins = false,
 }) {
+  const { t } = useTranslation();
+
   // Will be populated with actions to re-open our recently opened plugins
   const [actions, setActions] = useState([]);
 
@@ -53,7 +56,7 @@ export default function RecentlyUsedPlugins({
   return (
     showRecentlyUsedPlugins && (
       <SpeedDial
-        ariaLabel="Recently used plugins quick selector"
+        ariaLabel={t("controls.recentlyUsedPlugins")}
         FabProps={{
           size: "small",
         }}

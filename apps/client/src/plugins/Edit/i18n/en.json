@@ -1,0 +1,47 @@
+{
+  "edit": {
+    "clickFeatureToEdit": "Click a feature in the map to edit its attributes",
+    "continueEditing": "Continue editing",
+    "dataSource": "Data source",
+    "description": "Edit features in the map (WFS)",
+    "editableFields": "Editable fields:",
+    "enterAttributes": "Enter the feature's attributes:",
+    "invalidUrl": "Enter a valid URL, e.g. https://www.example.com",
+    "loadFailed": "Error loading data. Contact the system administrator.",
+    "nonEditableFields": "Non-editable fields:",
+    "readFailed": "Error: the data can't be read. Check the coordinate system.",
+    "selectValue": "-Select value-",
+    "status": {
+      "deleted": "Number of deleted features: {{number}}",
+      "failed": "The update failed: {{message}}",
+      "inserted": "Number of created features: {{number}}",
+      "noChanges": "The update succeeded but no changes were detected.",
+      "succeeded": "The update succeeded.",
+      "unknown": "The update status couldn't be read from the server's response.",
+      "updated": "Number of updated features: {{number}}"
+    },
+    "steps": {
+      "done": "Done!",
+      "edit": "Edit",
+      "editing": "Editing {{name}}",
+      "selectSource": "Select a dataset to edit"
+    },
+    "title": "Edit",
+    "toolbar": {
+      "add": "Add",
+      "addLine": "Add line",
+      "addPoint": "Add point",
+      "addPolygon": "Add polygon",
+      "edit": "Edit",
+      "line": "Line",
+      "modify": "Modify",
+      "modifyGeometry": "Modify geometry",
+      "move": "Move",
+      "moveGeometry": "Move geometry",
+      "point": "Point",
+      "polygon": "Polygon",
+      "remove": "Delete",
+      "removeGeometry": "Delete geometry"
+    }
+  }
+}

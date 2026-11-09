@@ -27,6 +27,7 @@ import InfoDialog from "./views/InfoDialog";
 import PropertyItem from "./views/PropertyItem";
 import QuickLayerToggleButtons from "./views/QuickLayerToggleButtons";
 
+import i18n from "src/i18n";
 import type Feature from "ol/Feature";
 import type SimpleGeometry from "ol/geom/SimpleGeometry";
 import type {
@@ -145,20 +146,15 @@ function PropertyCheckerView(props: PropertyCheckerViewProps) {
     }: NoFeaturesPayload) => {
       drawModel.removeDrawnFeatures();
       if (enableCheckLayerTab && amountOfProperties === 0) {
-        enqueueSnackbar(
-          "Den klickade fastigheten gav inga träffar i Fastighetskontrollens databas",
-          { variant: "info" }
-        );
+        enqueueSnackbar(i18n.t("propertyChecker.noHits"), { variant: "info" });
       } else if (enableCheckLayerTab && amountOfProperties > 1) {
-        enqueueSnackbar(
-          "Du klickade på fler än en fastighet. Vänligen prova igen. Tips: slå på fastighetsgränser och håll dig en bit från gränsen när du klickar.",
-          { variant: "warning" }
-        );
+        enqueueSnackbar(i18n.t("propertyChecker.multipleProperties"), {
+          variant: "warning",
+        });
       } else if (enableDigitalPlansTab && amountOfDigitalPlans > 1) {
-        enqueueSnackbar(
-          "Du klickade på fler än en detaljplan. Vänligen prova igen. Tips: slå på detaljplaner och titta var gränserna går. Håll dig en bit från gränsen när du klickar.",
-          { variant: "warning" }
-        );
+        enqueueSnackbar(i18n.t("propertyChecker.multiplePlans"), {
+          variant: "warning",
+        });
       }
     };
 
@@ -196,7 +192,7 @@ function PropertyCheckerView(props: PropertyCheckerViewProps) {
     if (drawInteraction === "Point") {
       // …show the snackbar and save ID for later.
       snackbarId.current = enqueueSnackbar(
-        "Klicka i kartan för att välja fastighet",
+        i18n.t("propertyChecker.clickToSelect"),
         { variant: "info", persist: true }
       );
     } else {
@@ -214,23 +210,24 @@ function PropertyCheckerView(props: PropertyCheckerViewProps) {
         open={clearDialogVisible}
         onClose={handleCloseConfirmationDialog}
       >
-        <DialogTitle>{"Är du säker på att du vill rensa listan?"}</DialogTitle>
+        <DialogTitle>{i18n.t("propertyChecker.clearDialog.title")}</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            När du rensar resultatlistan försvinner markören för respektive
-            lager. Du kommer inte längre kunna se vilka lager som påverkar
-            fastigheten eller vilken fastighet du fick träff på.
+            {i18n.t("propertyChecker.clearDialog.text")}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseConfirmationDialog}>Avbryt</Button>
-          <Button onClick={handleCleanClick}>Ja, rensa</Button>
+          <Button onClick={handleCloseConfirmationDialog}>
+            {i18n.t("common.cancel")}
+          </Button>
+          <Button onClick={handleCleanClick}>
+            {i18n.t("propertyChecker.clearDialog.confirm")}
+          </Button>
         </DialogActions>
       </BaseDialog>
       {!enableCheckLayerTab && !enableDigitalPlansTab && (
         <Alert severity="warning" sx={{ mb: 2 }}>
-          Verktyget är felinställt: varken lagerflik eller planflik är
-          aktiverad. Kontakta systemadministratören.
+          {i18n.t("propertyChecker.notConfigured")}
         </Alert>
       )}
       {qPcLookupFailedQuery !== null && (
@@ -239,9 +236,9 @@ function PropertyCheckerView(props: PropertyCheckerViewProps) {
           sx={{ mb: 2 }}
           onClose={() => setQPcLookupFailedQuery(null)}
         >
-          Den angivna texten ”{qPcLookupFailedQuery}” matchade inte unikt någon
-          befintlig fastighet eller adress. Använd verktyget manuellt genom att
-          välja en fastighet i kartan.
+          {i18n.t("propertyChecker.lookupFailed", {
+            query: qPcLookupFailedQuery,
+          })}
         </Alert>
       )}
       {(enableCheckLayerTab
@@ -251,8 +248,8 @@ function PropertyCheckerView(props: PropertyCheckerViewProps) {
           title={
             showTooltips
               ? drawInteraction === ""
-                ? "Klicka i kartan för att välja en fastighet"
-                : "Avbryt val av fastighet"
+                ? i18n.t("propertyChecker.selectPropertyTooltip")
+                : i18n.t("propertyChecker.cancelSelectionTooltip")
               : ""
           }
         >
@@ -263,7 +260,9 @@ function PropertyCheckerView(props: PropertyCheckerViewProps) {
             onClick={handleToggleDrawClick}
             disabled={!enableCheckLayerTab && !enableDigitalPlansTab}
           >
-            {drawInteraction === "" ? "Välj fastighet" : "Avbryt"}
+            {drawInteraction === ""
+              ? i18n.t("propertyChecker.selectProperty")
+              : i18n.t("common.cancel")}
           </ButtonWithBottomMargin>
         </HajkToolTip>
       )}
@@ -271,9 +270,7 @@ function PropertyCheckerView(props: PropertyCheckerViewProps) {
         ? Object.keys(groupedFeatures).length > 0
         : Object.keys(digitalPlanFeatures).length > 0) && (
         <HajkToolTip
-          title={
-            showTooltips ? "Rensa resultatlistan och ta bort markören" : ""
-          }
+          title={showTooltips ? i18n.t("propertyChecker.clearTooltip") : ""}
         >
           <ButtonWithBottomMargin
             variant="contained"
@@ -281,7 +278,7 @@ function PropertyCheckerView(props: PropertyCheckerViewProps) {
             color="secondary"
             onClick={handleShowConfirmationDialog}
           >
-            Rensa
+            {i18n.t("common.clear")}
           </ButtonWithBottomMargin>
         </HajkToolTip>
       )}

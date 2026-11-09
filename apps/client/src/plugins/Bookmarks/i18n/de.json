@@ -1,0 +1,15 @@
+{
+  "bookmarks": {
+    "add": "Hinzufügen",
+    "cookiesRequired": "Sie haben funktionale Cookies nicht erlaubt. Um Lesezeichen zu speichern, müssen Sie funktionale Cookies erlauben.",
+    "deleteButton": "Löschen",
+    "deleteConfirm": "Möchten Sie das Lesezeichen \"{{name}}\" wirklich löschen?",
+    "deleteTitle": "Lesezeichen löschen",
+    "description": "Ihre Lesezeichen",
+    "intro": "Erstellen Sie ein Lesezeichen mit den sichtbaren Ebenen, der aktuellen Zoomstufe und dem Kartenausschnitt.",
+    "name": "Name",
+    "namePlaceholder": "Name des Lesezeichens eingeben",
+    "nameTaken": "Der Name ist bereits vergeben. Lesezeichen \"{{name}}\" ersetzen?",
+    "title": "Lesezeichen"
+  }
+}

@@ -29,7 +29,8 @@ import { useSnackbar } from "notistack";
 import { Vector as VectorSource } from "ol/source";
 import { Vector as VectorLayer } from "ol/layer";
 //Bus
-import { editBus } from "../../../buses/editBus";
+import { editBus, NO_SERVICE_LABEL } from "../../../buses/editBus";
+import i18n, { configText } from "src/i18n";
 
 // Beware! In the view we only use kml, gpx and geojson, even if the actual file type might be application/vnd.google-earth.kml+xml, application/gpx+xml or application/geo+json etc.
 const FILE_TYPES = {
@@ -81,7 +82,7 @@ const SketchView = (props) => {
     model.getTextStyleSettings()
   );
 
-  const [ogcSource, setOgcSource] = React.useState("Ingen");
+  const [ogcSource, setOgcSource] = React.useState(NO_SERVICE_LABEL);
   const [serviceList, setServiceList] = React.useState([]);
 
   // We want to keep track of the last removed features so that the user can restore
@@ -272,7 +273,7 @@ const SketchView = (props) => {
 
   // This effect resets settings when switching between normal Sketch and AttributeEditor mode
   React.useEffect(() => {
-    if (ogcSource === "Ingen") {
+    if (ogcSource === NO_SERVICE_LABEL) {
       // Switching back to normal Sketch mode from AttributeEditor mode
       // Reset fixed length drawing to avoid the red cursor dot in normal mode
       props.setFixedLengthEnabled?.(false);
@@ -433,7 +434,7 @@ const SketchView = (props) => {
     };
   }, []);
 
-  const uiDisabled = isSaving || (ogcSource && ogcSource !== "Ingen");
+  const uiDisabled = isSaving || (ogcSource && ogcSource !== NO_SERVICE_LABEL);
 
   const handleOgcSourceChange = React.useCallback(
     (newOgcSourceTitle) => {
@@ -444,11 +445,11 @@ const SketchView = (props) => {
       );
       const serviceId = selectedService?.id || null;
 
-      // Check if user is trying to select a service (not "Ingen")
-      const isSelectingService = newOgcSourceTitle !== "Ingen";
+      // Check if user is trying to select a service (not NO_SERVICE_LABEL)
+      const isSelectingService = newOgcSourceTitle !== NO_SERVICE_LABEL;
 
       // If user selects a service AND there are drawn objects, show warning
-      if (isSelectingService && ogcSource === "Ingen") {
+      if (isSelectingService && ogcSource === NO_SERVICE_LABEL) {
         const drawingCount = getDrawnFeaturesCount();
 
         if (drawingCount > 0) {
@@ -474,22 +475,28 @@ const SketchView = (props) => {
 
       // Continue with switch
       props.setPluginSettings(
-        newOgcSourceTitle === "Ingen"
-          ? { title: "Rita", color: theme.palette.primary.main }
+        newOgcSourceTitle === NO_SERVICE_LABEL
+          ? {
+              title: configText("sketch.title", props.options?.title),
+              color: theme.palette.primary.main,
+            }
           : {
-              title: `Redigerar ${newOgcSourceTitle}`,
+              title: i18n.t("editing.editingService", {
+                name: newOgcSourceTitle,
+              }),
               color: theme.palette.warning.main,
             }
       );
 
-      if (newOgcSourceTitle === "Ingen") {
+      if (newOgcSourceTitle === NO_SERVICE_LABEL) {
         editBus.emit("edit:service-cleared", { source: "sketch" });
       } else {
         editBus.emit("edit:service-selected", {
           source: "sketch",
           id: serviceId,
           layerId: selectedService?.layers?.[0]?.id || "",
-          title: `Redigerar ${newOgcSourceTitle}`,
+          title: i18n.t("editing.editingService", { name: newOgcSourceTitle }),
+          serviceTitle: newOgcSourceTitle,
           color: theme.palette.warning.main,
         });
 
@@ -529,16 +536,17 @@ const SketchView = (props) => {
 
     // Continue with switch
     props.setPluginSettings({
-      title: `Redigerar ${targetService.title}`,
+      title: i18n.t("editing.editingService", { name: targetService.title }),
       color: theme.palette.warning.main,
     });
 
     editBus.emit("edit:service-selected", {
       source: "sketch",
       id: targetService.id,
-      // Same "Redigerar"-prefixed title as the normal (non-dialog) switch
+      // Same "editing" title as the normal (non-dialog) switch
       // path — AE sets its window title straight from this event.
-      title: `Redigerar ${targetService.title}`,
+      title: i18n.t("editing.editingService", { name: targetService.title }),
+      serviceTitle: targetService.title,
       color: theme.palette.warning.main,
     });
 
@@ -552,7 +560,9 @@ const SketchView = (props) => {
 
     // Show notification to user
     enqueueSnackbar(
-      `Redigeringsbart lager valt. ${drawingsWarningDialog.drawingCount} ritade objekt finns kvar i kartan.`,
+      i18n.t("sketch.serviceSelectedDrawingsKept", {
+        count: drawingsWarningDialog.drawingCount,
+      }),
       { variant: "info" }
     );
   }, [
@@ -580,16 +590,17 @@ const SketchView = (props) => {
 
     // Continue with switch
     props.setPluginSettings({
-      title: `Redigerar ${targetService.title}`,
+      title: i18n.t("editing.editingService", { name: targetService.title }),
       color: theme.palette.warning.main,
     });
 
     editBus.emit("edit:service-selected", {
       source: "sketch",
       id: targetService.id,
-      // Same "Redigerar"-prefixed title as the normal (non-dialog) switch
+      // Same "editing" title as the normal (non-dialog) switch
       // path — AE sets its window title straight from this event.
-      title: `Redigerar ${targetService.title}`,
+      title: i18n.t("editing.editingService", { name: targetService.title }),
+      serviceTitle: targetService.title,
       color: theme.palette.warning.main,
     });
 
@@ -602,7 +613,7 @@ const SketchView = (props) => {
     });
 
     // Show confirmation
-    enqueueSnackbar("Ritade objekt borttagna. Redigeringsbart lager valt.", {
+    enqueueSnackbar(i18n.t("sketch.drawingsRemovedServiceSelected"), {
       variant: "success",
     });
   }, [
@@ -616,19 +627,16 @@ const SketchView = (props) => {
 
   React.useEffect(() => {
     const offSel = editBus.on("edit:service-selected", (ev) => {
-      const { title, source } = ev.detail || {};
+      const { serviceTitle, source } = ev.detail || {};
       if (source === "sketch") return;
-      const raw =
-        typeof title === "string" && title.startsWith("Redigerar ")
-          ? title.replace(/^Redigerar\s+/, "")
-          : title;
-      if (raw) setOgcSource(raw);
+      // serviceTitle is the plain service name (title is translated display text)
+      if (serviceTitle) setOgcSource(serviceTitle);
     });
 
     const offClr = editBus.on("edit:service-cleared", (ev) => {
       const { source } = ev.detail || {};
       if (source === "sketch") return;
-      setOgcSource("Ingen");
+      setOgcSource(NO_SERVICE_LABEL);
     });
 
     return () => {

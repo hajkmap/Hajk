@@ -4,6 +4,7 @@ import ReportDialog from "./ReportDialog";
 
 import { Box, Button } from "@mui/material";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 import type { LayerCheckerTabContentViewProps } from "../../types";
 import { usePropertyCheckerContext } from "../../context";
@@ -62,7 +63,7 @@ function TabContentView({
           <HajkToolTip
             title={
               showTooltips
-                ? "Generera en granskningsrapport för de valda lagren"
+                ? i18n.t("propertyChecker.generateLayerReportTooltip")
                 : ""
             }
           >
@@ -89,7 +90,7 @@ function TabContentView({
                   );
                 }}
               >
-                Generera rapport
+                {i18n.t("propertyChecker.generateReport")}
               </Button>
             </span>
           </HajkToolTip>
@@ -100,8 +101,8 @@ function TabContentView({
           title={
             showTooltips
               ? allVisible
-                ? "Släck alla träffar i kartan"
-                : "Tänd alla träffar i kartan"
+                ? i18n.t("propertyChecker.hideAllHitsTooltip")
+                : i18n.t("propertyChecker.showAllHitsTooltip")
               : ""
           }
         >
@@ -112,7 +113,9 @@ function TabContentView({
             sx={{ mb: 1 }}
             onClick={handleToggleAll}
           >
-            {allVisible ? "Släck alla träffar" : "Tänd alla träffar"}
+            {allVisible
+              ? i18n.t("propertyChecker.hideAllHits")
+              : i18n.t("propertyChecker.showAllHits")}
           </Button>
         </HajkToolTip>
       )}

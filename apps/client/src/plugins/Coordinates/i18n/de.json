@@ -1,0 +1,18 @@
+{
+  "coordinates": {
+    "clearFields": "Felder leeren",
+    "clickInMap": "Klicken Sie in die Karte, um eine Position auszuwählen.",
+    "copied": "Die Koordinate wurde in die Zwischenablage kopiert",
+    "copyFailed": "Kopieren fehlgeschlagen, beide Felder müssen ausgefüllt sein",
+    "copyFailedShort": "Kopieren fehlgeschlagen",
+    "copyToClipboard": "In die Zwischenablage kopieren",
+    "description": "Koordinaten für einen bestimmten Ort anzeigen",
+    "enterDecimal": "Geben Sie eine Dezimalzahl ein",
+    "myPosition": "Meine Position",
+    "panToMarker": "Verschieben",
+    "panToMarkerTooltip": "Zur Markierung verschieben",
+    "title": "Koordinaten",
+    "zoomToMarker": "Zoomen",
+    "zoomToMarkerTooltip": "Auf Markierung zoomen"
+  }
+}

@@ -21,6 +21,8 @@ import ProductParameters from "./components/ProductParameters";
 import useProductParameters from "./hooks/useProductParameters";
 import useInterval from "./hooks/useInterval";
 import HajkToolTip from "components/HajkToolTip";
+import i18n, { configText } from "src/i18n";
+import { getBrowserLocale } from "../../utils/locale";
 
 // We're gonna be checking the job status against arrays of FME-status
 // messages (all of witch means that the job has completed in some way).
@@ -37,7 +39,10 @@ const FmeServerView = (props) => {
   const { model } = props;
   // The user might want to decorate the "group" label with something
   // else. Let's grab the potential value from the plugin-options.
-  const groupDisplayName = props.options.groupDisplayName || "Grupp";
+  const groupDisplayName = configText(
+    "fmeServer.groupDisplayName",
+    props.options.groupDisplayName
+  );
   // We're gonna need some state, e.g. which step are we on,
   // or which product-group the user has selected and so on.
   const [activeStep, setActiveStep] = React.useState(0);
@@ -82,29 +87,31 @@ const FmeServerView = (props) => {
   // will allow us to add another step in a simple manner.
   const steps = [
     {
-      label: `Välj ${groupDisplayName.toLowerCase()}`,
+      label: i18n.t("fmeServer.steps.selectGroup", {
+        group: groupDisplayName.toLowerCase(),
+      }),
       renderFunction: renderChooseGroupStep,
       renderValueFunction: () => {
         return renderSelectedValue(activeGroup);
       },
     },
     {
-      label: "Välj produkt",
+      label: i18n.t("fmeServer.steps.selectProduct"),
       renderFunction: renderChooseProductStep,
       renderValueFunction: () => {
         return renderSelectedValue(activeProduct);
       },
     },
     {
-      label: "Välj omfattning",
+      label: i18n.t("fmeServer.steps.selectExtent"),
       renderFunction: renderDrawGeometryStep,
     },
     {
-      label: "Fyll i parametrar",
+      label: i18n.t("fmeServer.steps.parameters"),
       renderFunction: renderEnterParametersStep,
     },
     {
-      label: "Beställ",
+      label: i18n.t("fmeServer.steps.order"),
       renderFunction: renderOrderStep,
     },
   ];
@@ -169,16 +176,13 @@ const FmeServerView = (props) => {
       setActiveDrawButton("");
     });
     localObserver.subscribe("map.maxFeaturesExceeded", () => {
-      enqueueSnackbar(
-        "Denna arbetsytan tillåter enbart en geometri. Den tidigare ritade geometrin togs bort.",
-        {
-          anchorOrigin: {
-            vertical: "bottom",
-            horizontal: "left",
-          },
-          variant: "warning",
-        }
-      );
+      enqueueSnackbar(i18n.t("fmeServer.maxFeaturesExceeded"), {
+        anchorOrigin: {
+          vertical: "bottom",
+          horizontal: "left",
+        },
+        variant: "warning",
+      });
     });
     return () => {
       // We must make sure to unsubscribe on unmount.
@@ -396,12 +400,12 @@ const FmeServerView = (props) => {
               onClick={() => handleStepperButtonClick(button.type)}
             >
               {button.type === "back"
-                ? "Tillbaka"
+                ? i18n.t("common.back")
                 : button.type === "next"
-                  ? "Nästa"
+                  ? i18n.t("common.next")
                   : button.type === "order"
-                    ? "Beställ!"
-                    : "Börja om!"}
+                    ? i18n.t("fmeServer.orderButton")
+                    : i18n.t("fmeServer.startOver")}
             </Button>
           );
         })}
@@ -467,10 +471,7 @@ const FmeServerView = (props) => {
     if (parametersError) {
       return (
         <InformationWrapper type="error">
-          <Typography>
-            Produktens parametrar kunde inte hämtas. Kontakta
-            systemadministratören.
-          </Typography>
+          <Typography>{i18n.t("fmeServer.parametersFailed")}</Typography>
         </InformationWrapper>
       );
     }
@@ -480,7 +481,7 @@ const FmeServerView = (props) => {
       return (
         <Grid container>
           <Grid size={12}>
-            <Typography>Försöker hämta parametrar...</Typography>
+            <Typography>{i18n.t("fmeServer.parametersLoading")}</Typography>
           </Grid>
           <Grid size={12}>
             <LinearProgress />
@@ -518,7 +519,7 @@ const FmeServerView = (props) => {
       <Grid container size={12}>
         <Grid size={12}>
           <Typography variant="caption">
-            Välj ritverktyg nedan för att rita beställningens omfattning.
+            {i18n.t("fmeServer.drawInstructions")}
           </Typography>
         </Grid>
         <Grid size={12}>
@@ -531,8 +532,11 @@ const FmeServerView = (props) => {
           <Grid sx={{ marginTop: 1 }} size={12}>
             <InformationWrapper type="error">
               <Typography variant="caption">
-                {`Den ritade ytan är för stor. Ta bort den och försök igen för att kunna gå vidare med beställningen! 
-                      Den ritade ytan är ${totalDrawnArea.toLocaleString()} m², och den högst tillåtna arean är ${totalAllowedArea.toLocaleString()} m²`}
+                {i18n.t("fmeServer.areaTooLarge", {
+                  drawnArea: totalDrawnArea.toLocaleString(getBrowserLocale()),
+                  allowedArea:
+                    totalAllowedArea.toLocaleString(getBrowserLocale()),
+                })}
               </Typography>
             </InformationWrapper>
           </Grid>
@@ -547,10 +551,7 @@ const FmeServerView = (props) => {
     return (
       <Grid container size={12}>
         <InformationWrapper>
-          <Typography>
-            Denna produkt kräver ingen geometri! Du kan fortsätta till nästa
-            steg.
-          </Typography>
+          <Typography>{i18n.t("fmeServer.noGeometryNeeded")}</Typography>
         </InformationWrapper>
       </Grid>
     );
@@ -579,9 +580,7 @@ const FmeServerView = (props) => {
     return (
       <Grid size={12}>
         <InformationWrapper type="error">
-          <Typography>
-            Verktyget är felkonfigurerat, kontakta systemadministratören.
-          </Typography>
+          <Typography>{i18n.t("fmeServer.notConfigured")}</Typography>
         </InformationWrapper>
       </Grid>
     );
@@ -678,17 +677,21 @@ const FmeServerView = (props) => {
                 id="fme-server-select-product"
                 value={activeProduct}
                 size="small"
-                label="Produkt"
+                label={i18n.t("fmeServer.product")}
                 onChange={(e) => setActiveProduct(e.target.value)}
                 slotProps={{
                   input:
                     infoUrl.length > 0
                       ? {
                           startAdornment: (
-                            <HajkToolTip title="Öppna länk till produktinformation.">
+                            <HajkToolTip
+                              title={i18n.t("fmeServer.openProductInfo")}
+                            >
                               <InputAdornment position="start">
                                 <IconButton
-                                  aria-label="Open information page"
+                                  aria-label={i18n.t(
+                                    "fmeServer.openProductInfo"
+                                  )}
                                   href={infoUrl || null}
                                   target="_blank"
                                   edge="start"

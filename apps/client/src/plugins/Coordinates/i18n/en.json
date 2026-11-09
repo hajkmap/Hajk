@@ -1,0 +1,18 @@
+{
+  "coordinates": {
+    "clearFields": "Clear fields",
+    "clickInMap": "Click in the map to choose a position.",
+    "copied": "The coordinate was copied to the clipboard",
+    "copyFailed": "Copying failed, both fields must be filled in",
+    "copyFailedShort": "Copying failed",
+    "copyToClipboard": "Copy to clipboard",
+    "description": "Show coordinates for a given place",
+    "enterDecimal": "Enter a decimal number",
+    "myPosition": "My position",
+    "panToMarker": "Pan",
+    "panToMarkerTooltip": "Pan to marker",
+    "title": "Coordinates",
+    "zoomToMarker": "Zoom",
+    "zoomToMarkerTooltip": "Zoom in to marker"
+  }
+}

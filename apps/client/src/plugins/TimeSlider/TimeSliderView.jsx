@@ -8,6 +8,8 @@ import Dialog from "../../components/Dialog/Dialog";
 import TimeSliderSettings from "./components/TimeSliderSettings";
 import PlayerView from "./PlayerView";
 import PrintView from "./PrintView";
+import { getBrowserLocale } from "../../utils/locale";
+import i18n from "src/i18n";
 
 class TimeSliderView extends React.PureComponent {
   static propTypes = {
@@ -344,7 +346,7 @@ class TimeSliderView extends React.PureComponent {
         break;
     }
 
-    return date.toLocaleString("default", options);
+    return date.toLocaleString(getBrowserLocale(), options);
   };
 
   getShortDateLabel = (unixTime, resolution) => {
@@ -363,7 +365,7 @@ class TimeSliderView extends React.PureComponent {
         break;
     }
 
-    return date.toLocaleString("default", options);
+    return date.toLocaleString(getBrowserLocale(), options);
   };
 
   updateLayers = () => {
@@ -468,8 +470,8 @@ class TimeSliderView extends React.PureComponent {
                 handleSliderSpeedChange={this.handleSliderSpeedChange}
               />
             ),
-            headerText: "Tidslinjeinställningar",
-            buttonText: "OK",
+            headerText: i18n.t("timeSlider.settingsTitle"),
+            buttonText: i18n.t("common.ok"),
             useLegacyNonMarkdownRenderer: true,
           }}
           open={settingsDialog}

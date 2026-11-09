@@ -6,6 +6,9 @@ import { Box, Button, Typography } from "@mui/material";
 import BugReportIcon from "@mui/icons-material/BugReport";
 
 import { useSnackbar } from "notistack";
+// All user-facing text is translated, see "Translations / i18n" in AGENTS.md.
+// The plugin's texts live in ./i18n/<lng>.json, under its own key ("dummy").
+import { useTranslation } from "react-i18next";
 
 import useCookieStatus from "../../hooks/useCookieStatus";
 
@@ -46,6 +49,9 @@ const ButtonWithBorder = styled(Button, {
 function DummyView(props) {
   // We're gonna need to access the snackbar methods. Let's use the provided hook.
   const { closeSnackbar, enqueueSnackbar } = useSnackbar();
+  // t() looks up translated texts, e.g. t("dummy.drawerTitle").
+  // (Class components and plain JS use i18n.t() from "src/i18n" instead.)
+  const { t } = useTranslation();
 
   // We're gonna need to use the event observers. Let's destruct them so that we can
   // get a hold of them easily. The observers can be accessed directly via the props:
@@ -84,15 +90,11 @@ function DummyView(props) {
       // will be set to theme.spacing(2), and not 2px! Make sure to read up on how the sx-prop
       // works before using it, check out the MUI docs.
       <Box sx={{ paddingLeft: 2, paddingRight: 2 }}>
-        <Typography variant="h6">Dummy</Typography>
-        <Typography variant="body1">
-          Dummy har anropat globalObserver och bett om att få lägga till en
-          knapp uppe i headern. När du trycker på knappen visas det här
-          innehållet i sidopanelen.
-        </Typography>
+        <Typography variant="h6">{t("dummy.title")}</Typography>
+        <Typography variant="body1">{t("dummy.drawerText")}</Typography>
       </Box>
     );
-  }, []); // <-- dependency array. (Here we can add inputs that would cause the callback to be re-calculated).
+  }, [t]); // <-- dependency array. (Here we can add inputs that would cause the callback to be re-calculated).
 
   // Another hook that is used a lot in functional components is the useEffect hook.
   // Mutations, subscriptions, timers, logging, and other side effects are not allowed inside the main body
@@ -114,12 +116,12 @@ function DummyView(props) {
     globalObserver.publish("core.addDrawerToggleButton", {
       value: "dummy",
       ButtonIcon: BugReportIcon,
-      caption: "Dummyverktyg",
-      drawerTitle: "Dummyverktyg",
+      caption: t("dummy.drawerTitle"),
+      drawerTitle: t("dummy.drawerTitle"),
       order: 100,
       renderDrawerContent: renderDrawerContent,
     });
-  }, [globalObserver, renderDrawerContent]); // <-- The dependency array. Since we reference the global observer and 'renderDrawerContent' we have to include these.
+  }, [globalObserver, renderDrawerContent, t]); // <-- The dependency array. Since we reference the global observer, 'renderDrawerContent' and 't' we have to include these.
   // There is a lot more to say regarding the useEffect hook, but I'll leave that to you to read up on. Just a couple of tips:
   // - Remember the cleanup-function! Especially when you're working with subscriptions.
   // - Remember that you can use several useEffect hooks! Maybe you want to do something when 'counter' changes?
@@ -141,7 +143,7 @@ function DummyView(props) {
 
   // Event handler for a button that shows a global info message when clicked
   const showDefaultSnackbar = () => {
-    enqueueSnackbar("Yay, a nice message with default styling.");
+    enqueueSnackbar(t("dummy.defaultSnackbarMessage"));
   };
 
   // A more complicate snackbar example, this one with an action button and persistent snackbar
@@ -150,22 +152,24 @@ function DummyView(props) {
       <>
         <Button
           onClick={() => {
-            alert(`I belong to snackbar with key ${key}`);
+            // Never concatenate translated strings, use interpolation instead
+            alert(t("dummy.snackbarKey", { key }));
           }}
         >
-          {"Alert"}
+          {t("dummy.alert")}
         </Button>
         <Button
           onClick={() => {
             closeSnackbar(key);
           }}
         >
-          {"Dismiss"}
+          {/* Shared texts (OK, Close, Cancel…) live in common.* */}
+          {t("common.close")}
         </Button>
       </>
     );
 
-    enqueueSnackbar("Oops, a message with error styling!", {
+    enqueueSnackbar(t("dummy.errorSnackbarMessage"), {
       variant: "error",
       persist: true,
       action,
@@ -221,7 +225,8 @@ function DummyView(props) {
         onClick={buttonClick}
         sx={{ marginBottom: 2 }} // The sx-prop is available on all MUI-components!
       >
-        {`Clicked ${counter} ${counter === 1 ? "time" : "times"}`}
+        {/* Plurals: "clicked_one"/"clicked_other" are picked by count */}
+        {t("dummy.clicked", { count: counter })}
       </Button>
       <ButtonWithBorder
         border="blue"
@@ -230,14 +235,14 @@ function DummyView(props) {
         fullWidth={true}
         onClick={showDefaultSnackbar}
       >
-        Show default snackbar
+        {t("dummy.showDefaultSnackbar")}
       </ButtonWithBorder>
       <ButtonWithBottomMargin
         variant="contained"
         fullWidth={true}
         onClick={showAdvancedSnackbar}
       >
-        Show error snackbar
+        {t("dummy.showErrorSnackbar")}
       </ButtonWithBottomMargin>
       <ButtonWithBottomMargin
         variant="contained"
@@ -245,16 +250,16 @@ function DummyView(props) {
         color="primary"
         onClick={handleToggleDrawClick}
       >
-        {`${
-          props.drawInteraction === "" ? "Activate" : "Disable"
-        } draw interaction`}
+        {props.drawInteraction === ""
+          ? t("dummy.activateDraw")
+          : t("dummy.disableDraw")}
       </ButtonWithBottomMargin>
       <ButtonWithBottomMargin
         variant="contained"
         fullWidth={true}
         onClick={handleClickOnRandomTitle}
       >
-        Set random title and color
+        {t("dummy.randomTitleAndColor")}
       </ButtonWithBottomMargin>
       <ButtonWithBorder
         border={borderColor} // Let's keep the borderColor in state so that we can update it!
@@ -263,7 +268,7 @@ function DummyView(props) {
         fullWidth={true}
         onClick={updateBorderColor} // When we click the button, we update the borderColor.
       >
-        Set random border color
+        {t("dummy.randomBorderColor")}
       </ButtonWithBorder>
     </>
   );

@@ -1,0 +1,29 @@
+{
+  "collector": {
+    "addLine": "Linie hinzufügen",
+    "addPoint": "Ort hinzufügen",
+    "addPolygon": "Fläche hinzufügen",
+    "clickToDraw": "Klicken Sie in die Karte, um Objekte zu zeichnen",
+    "collectAgain": "Erneut Feedback geben",
+    "configurationMissing": "Die erforderliche Konfiguration fehlt. Das Werkzeug kann derzeit nicht verwendet werden.",
+    "description": "Wir möchten wissen, was Sie denken!",
+    "invalidUrl": "Geben Sie eine gültige URL ein, z. B. https://www.example.com",
+    "line": "Linie",
+    "point": "Ort",
+    "polygon": "Fläche",
+    "saveErrorText": "Fehler – Ihr Kommentar konnte nicht gespeichert werden.",
+    "saveFailed": "Speichern fehlgeschlagen, bitte versuchen Sie es später erneut.",
+    "selectValue": "-Wert auswählen-",
+    "send": "Senden",
+    "status": {
+      "deleted": "Anzahl gelöschter Objekte: {{number}}",
+      "failed": "Die Aktualisierung ist fehlgeschlagen: {{message}}",
+      "inserted": "Anzahl erstellter Objekte: {{number}}",
+      "noChanges": "Die Aktualisierung war erfolgreich, es wurden aber keine Änderungen festgestellt.",
+      "succeeded": "Die Aktualisierung war erfolgreich.",
+      "unknown": "Der Status der Aktualisierung konnte nicht aus der Antwort des Servers gelesen werden.",
+      "updated": "Anzahl aktualisierter Objekte: {{number}}"
+    },
+    "title": "Feedback"
+  }
+}

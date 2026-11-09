@@ -8,6 +8,7 @@ import { Grid, IconButton } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { styled } from "@mui/material/styles";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 const StyledIconButton = styled(IconButton)(({ _theme }) => ({
   justifyContent: "flex-end",
@@ -100,12 +101,9 @@ class CoordinatesTransformRow extends React.PureComponent {
     // and give an alert to the user
     if (inputX === "" || inputY === "") {
       // Display a message if any of the fields are empty
-      this.props.enqueueSnackbar(
-        "Kopiering misslyckades, båda fälten måste vara ifyllda",
-        {
-          variant: "error",
-        }
-      );
+      this.props.enqueueSnackbar(i18n.t("coordinates.copyFailed"), {
+        variant: "error",
+      });
       return;
     }
 
@@ -116,12 +114,12 @@ class CoordinatesTransformRow extends React.PureComponent {
     navigator.clipboard
       .writeText(coordinatesString)
       .then(() => {
-        this.props.enqueueSnackbar("Koordinaten kopierades till urklipp", {
+        this.props.enqueueSnackbar(i18n.t("coordinates.copied"), {
           variant: "info",
         });
       })
       .catch((_error) => {
-        this.props.enqueueSnackbar("Kopiering misslyckades", {
+        this.props.enqueueSnackbar(i18n.t("coordinates.copyFailedShort"), {
           variant: "error",
         });
       });
@@ -202,7 +200,7 @@ class CoordinatesTransformRow extends React.PureComponent {
       });
     }
     if (isNaN(event.floatValue) || !isFinite(event.floatValue)) {
-      this.setState({ errorX: "Ange ett decimaltal" });
+      this.setState({ errorX: i18n.t("coordinates.enterDecimal") });
     } else {
       this.setState({ errorX: "" });
       const updatedValue = event.floatValue;
@@ -250,7 +248,7 @@ class CoordinatesTransformRow extends React.PureComponent {
       });
     }
     if (isNaN(event.floatValue) || !isFinite(event.floatValue)) {
-      this.setState({ errorY: "Ange ett decimaltal" });
+      this.setState({ errorY: i18n.t("coordinates.enterDecimal") });
     } else {
       this.setState({ errorY: "" });
       const updatedValue = event.floatValue;
@@ -320,7 +318,7 @@ class CoordinatesTransformRow extends React.PureComponent {
               justifyContent: "end",
             }}
           >
-            <HajkToolTip title="Kopiera till urklipp">
+            <HajkToolTip title={i18n.t("coordinates.copyToClipboard")}>
               <StyledIconButton
                 onClick={() => {
                   this.handleCopyToClipBoard(this.props.transformation.title);

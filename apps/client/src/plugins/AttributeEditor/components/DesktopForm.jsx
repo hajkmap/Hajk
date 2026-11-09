@@ -28,6 +28,7 @@ import FormListItem from "./FormListItem";
 import useCookieStatus from "../../../hooks/useCookieStatus";
 import { usePagination, SHOW_ALL_VALUE } from "../hooks/usePagination";
 import { useScrollToSelectedRow } from "../hooks/useScrollToSelectedRow";
+import i18n from "src/i18n";
 
 const RESIZER_KEY = "ae_df_leftw";
 const SHOW_ALL_WARNING_THRESHOLD = 100;
@@ -351,7 +352,10 @@ export default function DesktopForm({
       }}
     >
       {/* Left: Object list */}
-      <div style={s.pane} aria-label="Objektlista">
+      <div
+        style={s.pane}
+        aria-label={i18n.t("attributeEditor.form.featureList")}
+      >
         <div style={s.list}>
           {paginatedRows.map((f, idx) => {
             const selected =
@@ -395,11 +399,11 @@ export default function DesktopForm({
             <div style={s.listEmptyFlex}>
               {isLoading ? (
                 <>
-                  Laddning pågår...
+                  {i18n.t("attributeEditor.loading")}
                   <CircularProgress size={16} />
                 </>
               ) : (
-                "Inga objekt i tjänsten"
+                i18n.t("attributeEditor.noFeatures")
               )}
             </div>
           )}
@@ -409,8 +413,14 @@ export default function DesktopForm({
         <div style={s.listFooterCompact}>
           <div style={s.paginationInfo}>
             {isShowingAll
-              ? `Alla ${totalRows}`
-              : `${startIndex + 1}-${endIndex} av ${totalRows}`}
+              ? i18n.t("attributeEditor.pagination.allCount", {
+                  number: totalRows,
+                })
+              : i18n.t("attributeEditor.pagination.range", {
+                  from: startIndex + 1,
+                  to: endIndex,
+                  total: totalRows,
+                })}
           </div>
           {showPagination && (
             <>
@@ -425,15 +435,17 @@ export default function DesktopForm({
                   <option value={20}>20</option>
                   <option value={50}>50</option>
                   <option value={100}>100</option>
-                  <option value={SHOW_ALL_VALUE}>Alla</option>
+                  <option value={SHOW_ALL_VALUE}>
+                    {i18n.t("attributeEditor.pagination.all")}
+                  </option>
                 </select>
 
                 <button
                   style={currentPage === 0 ? s.iconBtnDisabled : s.iconBtn}
                   disabled={currentPage === 0}
                   onClick={() => setCurrentPage(0)}
-                  title="Första sidan"
-                  aria-label="Första sidan"
+                  title={i18n.t("attributeEditor.pagination.first")}
+                  aria-label={i18n.t("attributeEditor.pagination.first")}
                 >
                   <FirstPageIcon fontSize="small" />
                 </button>
@@ -442,8 +454,8 @@ export default function DesktopForm({
                   style={currentPage === 0 ? s.iconBtnDisabled : s.iconBtn}
                   disabled={currentPage === 0}
                   onClick={() => setCurrentPage(currentPage - 1)}
-                  title="Föregående sida"
-                  aria-label="Föregående sida"
+                  title={i18n.t("attributeEditor.pagination.previous")}
+                  aria-label={i18n.t("attributeEditor.pagination.previous")}
                 >
                   <NavigateBeforeIcon fontSize="small" />
                 </button>
@@ -460,8 +472,8 @@ export default function DesktopForm({
                   }
                   disabled={currentPage >= totalPages - 1}
                   onClick={() => setCurrentPage(currentPage + 1)}
-                  title="Nästa sida"
-                  aria-label="Nästa sida"
+                  title={i18n.t("attributeEditor.pagination.next")}
+                  aria-label={i18n.t("attributeEditor.pagination.next")}
                 >
                   <NavigateNextIcon fontSize="small" />
                 </button>
@@ -474,8 +486,8 @@ export default function DesktopForm({
                   }
                   disabled={currentPage >= totalPages - 1}
                   onClick={() => setCurrentPage(totalPages - 1)}
-                  title="Sista sidan"
-                  aria-label="Sista sidan"
+                  title={i18n.t("attributeEditor.pagination.last")}
+                  aria-label={i18n.t("attributeEditor.pagination.last")}
                 >
                   <LastPageIcon fontSize="small" />
                 </button>
@@ -498,7 +510,7 @@ export default function DesktopForm({
         aria-valuemax={MAX_LEFT}
         aria-valuenow={Math.round(leftW)}
         tabIndex={0}
-        title="Dra för att ändra panelbredd"
+        title={i18n.t("attributeEditor.form.resizePanel")}
         onMouseDown={(e) => {
           e.preventDefault();
           resizeRef.current = { startX: e.clientX, startW: leftW };
@@ -523,7 +535,7 @@ export default function DesktopForm({
           jsx-a11y-x/no-noninteractive-tabindex */}
 
       {/* Right: Form */}
-      <div style={s.pane} aria-label="Formulär">
+      <div style={s.pane} aria-label={i18n.t("attributeEditor.form.form")}>
         {activeFilterCount > 0 && (
           <div style={s.filterWarningBanner}>
             <svg
@@ -538,15 +550,16 @@ export default function DesktopForm({
               <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
             </svg>
             <span style={s.spacer}>
-              Kolumnfilter från tabellläget är aktiva ({activeFilterCount}{" "}
-              filter påverkar kartan)
+              {i18n.t("attributeEditor.form.columnFiltersActive", {
+                count: activeFilterCount,
+              })}
             </span>
             <button
               style={s.btnSmall}
               onClick={clearColumnFilters}
-              title="Rensa alla kolumnfilter"
+              title={i18n.t("attributeEditor.form.clearAllFilters")}
             >
-              Rensa filter
+              {i18n.t("attributeEditor.form.clearFilters")}
             </button>
           </div>
         )}
@@ -566,12 +579,14 @@ export default function DesktopForm({
               <line x1="12" y1="17" x2="12.01" y2="17" />
             </svg>
             <span>
-              OBS! Nu redigerar du {selectedIds.size} objekt samtidigt
+              {i18n.t("attributeEditor.form.bulkEditWarning", {
+                count: selectedIds.size,
+              })}
             </span>
           </div>
         )}
         <div style={s.paneHeaderWithActions}>
-          <span>Redigera attribut</span>
+          <span>{i18n.t("attributeEditor.form.editAttributes")}</span>
           <div style={s.spacer} />
           <button
             style={
@@ -583,12 +598,12 @@ export default function DesktopForm({
             onClick={addFeatureFromGps}
             title={
               !supportsPointGeometry
-                ? "GPS-punkt kräver ett lager med punktgeometri"
+                ? i18n.t("attributeEditor.actions.gpsNoPointLayer")
                 : gpsLoading
-                  ? "Hämtar GPS-position..."
-                  : "Skapa punkt från GPS-position"
+                  ? i18n.t("attributeEditor.actions.gpsLoading")
+                  : i18n.t("attributeEditor.actions.gpsCreate")
             }
-            aria-label="GPS-punkt"
+            aria-label={i18n.t("attributeEditor.actions.gpsPoint")}
           >
             {gpsLoading ? (
               <CircularProgress size={18} />
@@ -600,11 +615,13 @@ export default function DesktopForm({
             style={visibleFormList.length === 0 ? s.iconBtnDisabled : s.iconBtn}
             disabled={visibleFormList.length === 0}
             onClick={() => exportToExcel(visibleFormList)}
-            aria-label="Exportera till Excel"
+            aria-label={i18n.t("attributeEditor.actions.exportExcel")}
             title={
               visibleFormList.length
-                ? `Exportera till Excel (${visibleFormList.length} rader)`
-                : "Inga rader att exportera"
+                ? i18n.t("attributeEditor.actions.exportExcelRows", {
+                    count: visibleFormList.length,
+                  })
+                : i18n.t("attributeEditor.actions.noRowsToExport")
             }
           >
             <DescriptionIcon fontSize="small" />
@@ -627,13 +644,15 @@ export default function DesktopForm({
                 editBus.emit("attrib:zoom-to-features", { ids });
               }
             }}
-            aria-label="Zooma till valda"
+            aria-label={i18n.t("attributeEditor.actions.zoomToSelected")}
             title={
               selectedIds.size > 1
-                ? `Zooma till ${selectedIds.size} objekt i kartan`
+                ? i18n.t("attributeEditor.actions.zoomToCount", {
+                    count: selectedIds.size,
+                  })
                 : selectedIds.size === 1 || focusedId != null
-                  ? "Zooma till valt objekt i kartan"
-                  : "Välj objekt först"
+                  ? i18n.t("attributeEditor.actions.zoomToOne")
+                  : i18n.t("attributeEditor.actions.chooseFeaturesFirst")
             }
           >
             <CenterFocusStrongIcon fontSize="small" />
@@ -648,12 +667,15 @@ export default function DesktopForm({
             onClick={scrollToSelectedRow}
             title={
               selectedIds.size > 1
-                ? `Visa markerad rad med tooltip (${currentScrollIndex + 1}/${selectedIds.size})`
+                ? i18n.t("attributeEditor.actions.showSelectedRowWithTooltip", {
+                    index: currentScrollIndex + 1,
+                    total: selectedIds.size,
+                  })
                 : selectedIds.size === 1 || focusedId != null
-                  ? "Visa markerad rad i listan och visa på kartan"
-                  : "Markera objekt först"
+                  ? i18n.t("attributeEditor.actions.showSelectedRowInList")
+                  : i18n.t("attributeEditor.actions.selectFeaturesFirst")
             }
-            aria-label="Visa markerad"
+            aria-label={i18n.t("attributeEditor.actions.showSelected")}
           >
             <VisibilityIcon fontSize="small" />
           </button>
@@ -665,13 +687,15 @@ export default function DesktopForm({
             }
             disabled={selectedIds.size === 0 && focusedId == null}
             onClick={duplicateInForm}
-            aria-label="Duplicera"
+            aria-label={i18n.t("attributeEditor.actions.duplicateAria")}
             title={
               selectedIds.size
-                ? `Duplicera ${selectedIds.size} objekt`
+                ? i18n.t("attributeEditor.actions.duplicateCount", {
+                    count: selectedIds.size,
+                  })
                 : focusedId != null
-                  ? "Duplicera valt objekt"
-                  : "Välj objekt först"
+                  ? i18n.t("attributeEditor.actions.duplicateOne")
+                  : i18n.t("attributeEditor.actions.chooseFeaturesFirst")
             }
           >
             <ContentCopyIcon fontSize="small" />
@@ -685,13 +709,13 @@ export default function DesktopForm({
             }
             disabled={selectedIds.size !== 1 || !canSplitGeometry}
             onClick={splitFeature}
-            aria-label="Dela objekt"
+            aria-label={i18n.t("attributeEditor.actions.split")}
             title={
               selectedIds.size !== 1
-                ? "Markera exakt ett objekt för att dela"
+                ? i18n.t("attributeEditor.actions.splitSelectOneFeature")
                 : !canSplitGeometry
-                  ? "Endast Polygon och LineString kan delas"
-                  : "Dela valt objekt med en klipplinje"
+                  ? i18n.t("attributeEditor.actions.splitOnlyPolygonLine")
+                  : i18n.t("attributeEditor.actions.splitWithLine")
             }
           >
             <CallSplitIcon fontSize="small" />
@@ -706,18 +730,20 @@ export default function DesktopForm({
             disabled={!canSplitMultiFeature && !canMergeFeatures}
             onClick={canSplitMultiFeature ? splitMultiFeature : mergeFeatures}
             aria-label={
-              canSplitMultiFeature ? "Dela upp multi-objekt" : "Slå ihop objekt"
+              canSplitMultiFeature
+                ? i18n.t("attributeEditor.actions.splitMulti")
+                : i18n.t("attributeEditor.actions.merge")
             }
             title={
               canSplitMultiFeature
-                ? "Dela upp multi-objekt till enskilda objekt"
+                ? i18n.t("attributeEditor.actions.splitMultiTooltip")
                 : canMergeFeatures
-                  ? "Slå ihop markerade objekt till ett multi-objekt. Attribut kopieras från objektet som markerades först."
+                  ? i18n.t("attributeEditor.actions.mergeTooltip")
                   : selectedIds.size === 1
-                    ? "Markera ett multi-objekt för att dela upp, eller flera objekt för att slå ihop"
+                    ? i18n.t("attributeEditor.actions.splitOrMergeFeatures")
                     : selectedIds.size < 2
-                      ? "Markera objekt för att dela upp eller slå ihop"
-                      : "Objekten måste ha samma geometrityp för att slås ihop"
+                      ? i18n.t("attributeEditor.actions.splitOrMergeSelect")
+                      : i18n.t("attributeEditor.actions.mergeSameType")
             }
           >
             {canSplitMultiFeature ? (
@@ -735,13 +761,15 @@ export default function DesktopForm({
             }
             disabled={selectedIds.size === 0 && focusedId == null}
             onClick={handleDeleteClick}
-            aria-label="Markera för radering"
+            aria-label={i18n.t("attributeEditor.actions.markForDelete")}
             title={
               selectedIds.size
-                ? `Markera ${selectedIds.size} objekt för radering`
+                ? i18n.t("attributeEditor.actions.markCountForDelete", {
+                    count: selectedIds.size,
+                  })
                 : focusedId != null
-                  ? "Markera valt objekt för radering"
-                  : "Markera objekt först"
+                  ? i18n.t("attributeEditor.actions.markOneForDelete")
+                  : i18n.t("attributeEditor.actions.selectFeaturesFirst")
             }
           >
             <DeleteOutlineIcon fontSize="small" />
@@ -770,8 +798,8 @@ export default function DesktopForm({
                 return;
               }
             }}
-            aria-label="Ångra"
-            title="Ångra"
+            aria-label={i18n.t("common.undo")}
+            title={i18n.t("common.undo")}
           >
             <UndoIcon fontSize="small" />
           </button>
@@ -780,8 +808,8 @@ export default function DesktopForm({
             style={!(dirty || tableHasPending) ? s.iconBtnDisabled : s.iconBtn}
             onClick={() => setSaveDialogOpen(true)}
             disabled={!(dirty || tableHasPending)}
-            aria-label="Spara"
-            title="Spara"
+            aria-label={i18n.t("common.save")}
+            title={i18n.t("common.save")}
           >
             <SaveIcon fontSize="small" />
           </button>
@@ -789,7 +817,7 @@ export default function DesktopForm({
 
         {!focusedFeature ? (
           <div style={s.formEmpty}>
-            Markera ett objekt i listan till vänster för att börja redigera.
+            {i18n.t("attributeEditor.form.selectToEditLeft")}
           </div>
         ) : (
           <>
@@ -809,17 +837,25 @@ export default function DesktopForm({
                           style={s.descriptionIcon}
                           title={meta.description}
                           onClick={(e) => e.stopPropagation()}
-                          aria-label={`Information om ${meta.label}`}
+                          aria-label={i18n.t("attributeEditor.fieldInfo", {
+                            field: meta.label,
+                          })}
                         >
                           <InfoOutlinedIcon style={{ fontSize: "16px" }} />
                         </button>
                       )}
-                      {changed && <span style={s.labelChanged}>(ändrad)</span>}
+                      {changed && (
+                        <span style={s.labelChanged}>
+                          {i18n.t("attributeEditor.form.changedParens")}
+                        </span>
+                      )}
                     </label>
 
                     {renderInput(
                       meta,
-                      meta.readOnly && isMissingValue(val) ? "#saknas" : val,
+                      meta.readOnly && isMissingValue(val)
+                        ? i18n.t("attributeEditor.missingValue")
+                        : val,
                       (v) => handleFieldChange(meta.key, v),
                       changed,
                       s,
@@ -841,17 +877,19 @@ export default function DesktopForm({
               }
             >
               <button style={s.btn} onClick={focusPrev}>
-                &larr; Föregående objekt
+                &larr; {i18n.t("attributeEditor.form.previousFeature")}
               </button>
               <button style={s.btn} onClick={focusNext}>
-                Nästa objekt&rarr;
+                {i18n.t("attributeEditor.form.nextFeature")}&rarr;
               </button>
               <div style={s.spacer} />
               {dirty
-                ? `Osparade ändringar (${changedFields.size} fält)`
+                ? i18n.t("attributeEditor.form.unsavedFields", {
+                    count: changedFields.size,
+                  })
                 : tableHasPending
-                  ? "Ändringar buffrade (ej sparade)"
-                  : "Allt sparat"}
+                  ? i18n.t("attributeEditor.form.buffered")
+                  : i18n.t("attributeEditor.form.allSaved")}
             </div>
           </>
         )}
@@ -867,10 +905,10 @@ export default function DesktopForm({
 
         <ConfirmationDialog
           open={showAllConfirmOpen}
-          titleName="Visa alla objekt"
-          contentDescription="Om du väljer att visa alla objekt kan systemet bli långsammare. Vill du fortsätta?"
-          cancel="Avbryt"
-          confirm="Fortsätt"
+          titleName={i18n.t("attributeEditor.dialog.showAllTitle")}
+          contentDescription={i18n.t("attributeEditor.dialog.showAllText")}
+          cancel={i18n.t("common.cancel")}
+          confirm={i18n.t("common.continue")}
           handleConfirm={handleShowAllConfirm}
           handleAbort={handleShowAllAbort}
         />

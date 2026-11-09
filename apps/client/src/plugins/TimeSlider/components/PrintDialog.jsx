@@ -9,21 +9,21 @@ import {
   DialogActions,
   DialogContentText,
 } from "@mui/material";
+import i18n from "src/i18n";
 
 export default function PrintDialog({ cancelPrint, open }) {
   return createPortal(
     <BaseDialog disableEscapeKeyDown={true} open={open}>
       <LinearProgress />
-      <DialogTitle>Dina bilder skapas</DialogTitle>
+      <DialogTitle>{i18n.t("timeSlider.print.dialogTitle")}</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          Det här kan ta en stund, speciellt om det är många bilder som ska
-          skapas.
+          {i18n.t("timeSlider.print.dialogText")}
         </DialogContentText>
       </DialogContent>
       <DialogActions>
         <Button variant="contained" onClick={cancelPrint}>
-          Avbryt
+          {i18n.t("common.cancel")}
         </Button>
       </DialogActions>
     </BaseDialog>,

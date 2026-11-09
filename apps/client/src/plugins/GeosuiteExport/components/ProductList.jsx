@@ -14,6 +14,7 @@ import {
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import WorkIcon from "@mui/icons-material/Work";
 import Crop32Icon from "@mui/icons-material/Crop32";
+import i18n from "src/i18n";
 
 const DivProductList = styled("div")(({ theme }) => ({
   maxHeight: 350,
@@ -100,7 +101,7 @@ class ProductList extends React.PureComponent {
                   handleExportAll(false);
                 }}
                 icon={<Crop32Icon />}
-                label="Inom markering"
+                label={i18n.t("geosuiteExport.withinArea")}
                 size="medium"
                 variant={`${
                   this.state.globalExportSetting === "withinArea"
@@ -114,7 +115,7 @@ class ProductList extends React.PureComponent {
                   handleExportAll(true);
                 }}
                 icon={<WorkIcon />}
-                label=" Hela projekt"
+                label={i18n.t("geosuiteExport.entireProject")}
                 size="medium"
                 variant={`${
                   this.state.globalExportSetting === "withinProject"
@@ -153,7 +154,9 @@ class ProductList extends React.PureComponent {
                               });
                             }}
                             size="small"
-                            aria-label="Visa projekt export val."
+                            aria-label={i18n.t(
+                              "geosuiteExport.projectExportOptions"
+                            )}
                           >
                             <MoreVertIcon />
                           </IconButton>
@@ -200,7 +203,13 @@ class ProductList extends React.PureComponent {
                                 }}
                               >
                                 <Crop32Icon />
-                                <Typography>{`Inom markering (${this.state.activeProject?.numBoreHolesSelected})`}</Typography>
+                                <Typography>
+                                  {i18n.t("geosuiteExport.withinAreaCount", {
+                                    number:
+                                      this.state.activeProject
+                                        ?.numBoreHolesSelected,
+                                  })}
+                                </Typography>
                               </Box>
                             </MenuItem>
                             <MenuItem
@@ -222,7 +231,13 @@ class ProductList extends React.PureComponent {
                                 }}
                               >
                                 <WorkIcon />
-                                <Typography>{`Hela projekt (${this.state.activeProject?.numBoreHolesTotal})`}</Typography>
+                                <Typography>
+                                  {i18n.t("geosuiteExport.entireProjectCount", {
+                                    number:
+                                      this.state.activeProject
+                                        ?.numBoreHolesTotal,
+                                  })}
+                                </Typography>
                               </Box>
                             </MenuItem>
                           </Menu>
@@ -235,7 +250,9 @@ class ProductList extends React.PureComponent {
                         md: 10,
                       }}
                     >
-                      <Typography>{`Id: ${project.id}`}</Typography>
+                      <Typography>
+                        {i18n.t("geosuiteExport.projectId", { id: project.id })}
+                      </Typography>
                     </Grid>
                     <Grid
                       style={{ paddingRight: "5%" }}
@@ -264,7 +281,7 @@ class ProductList extends React.PureComponent {
       return (
         <div>
           <Typography color="error">
-            Inget resultat. Gå tillbaka och markera ett nytt område.
+            {i18n.t("geosuiteExport.noResultsSelectNewArea")}
           </Typography>
         </div>
       );

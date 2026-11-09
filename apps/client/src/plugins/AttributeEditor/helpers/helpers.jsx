@@ -1,4 +1,6 @@
 /* === Helpers === */
+import i18n from "src/i18n";
+
 const idAliasCache = new Map();
 const CACHE_MAX_SIZE = 10000;
 
@@ -244,7 +246,11 @@ export function renderInput(meta, value, onChange, isChanged, s, opts = {}) {
         onChange={(e) => onChange(e.target.value)}
       >
         <option value="" disabled>
-          -- Välj {meta.label?.toLowerCase() || "värde"} --
+          {meta.label
+            ? i18n.t("attributeEditor.form.selectField", {
+                field: meta.label.toLowerCase(),
+              })
+            : i18n.t("attributeEditor.form.selectValue")}
         </option>
 
         {(meta.options || []).map((opt) => (
@@ -437,7 +443,9 @@ export function renderTableCellEditor({
       >
         {optionsWithUnknown.map((opt) => (
           <option key={opt} value={opt}>
-            {unknownSet.has(opt) ? `${opt} (okänt värde)` : opt}
+            {unknownSet.has(opt)
+              ? i18n.t("attributeEditor.form.unknownValue", { value: opt })
+              : opt}
           </option>
         ))}
       </select>
@@ -466,13 +474,17 @@ export function renderTableCellEditor({
         style={s.cellInput}
       >
         <option value="" disabled>
-          -- Välj {meta.label?.toLowerCase() || "värde"} --
+          {meta.label
+            ? i18n.t("attributeEditor.form.selectField", {
+                field: meta.label.toLowerCase(),
+              })
+            : i18n.t("attributeEditor.form.selectValue")}
         </option>
 
         {optionsWithUnknown.map((opt) => (
           <option key={opt} value={opt}>
             {!hasVal && String(val) === String(opt)
-              ? `${opt} (okänt värde)`
+              ? i18n.t("attributeEditor.form.unknownValue", { value: opt })
               : opt}
           </option>
         ))}

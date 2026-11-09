@@ -1,0 +1,36 @@
+{
+  "routing": {
+    "clickToSelectEnd": "Click in the map to select your destination.",
+    "clickToSelectStart": "Click in the map to select a starting point.",
+    "description": "Find the right way to your destination",
+    "errors": {
+      "loadFailed": "Couldn't load the Google Maps API. Contact the system administrator.",
+      "other": "An error occurred. Please try again.",
+      "pointsMissing": "Select a starting point and a destination to get directions.",
+      "requestDenied": "Couldn't get directions. Contact the system administrator and report that a valid Google Maps API license is missing.",
+      "zeroResults": "Couldn't find directions between the selected points for the selected mode of travel. Try another mode of travel and search again."
+    },
+    "myPosition": "My position",
+    "positionUnavailable": "Can't get your position. Enter a starting position in the box or click a position in the map.",
+    "result": {
+      "distance": "Distance",
+      "duration": "Time",
+      "endAddress": "End address",
+      "startAddress": "Start address",
+      "travelMode": "Mode of travel"
+    },
+    "selectInMap": "Select in map",
+    "steps": {
+      "end": "Select destination",
+      "start": "Select starting point",
+      "travelMode": "Select mode of travel"
+    },
+    "title": "Directions",
+    "travelModes": {
+      "bicycling": "Bicycle",
+      "driving": "Drive",
+      "transit": "Public transport",
+      "walking": "Walk"
+    }
+  }
+}

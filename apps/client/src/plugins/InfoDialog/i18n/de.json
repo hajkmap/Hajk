@@ -1,0 +1,17 @@
+{
+  "infoDialog": {
+    "description": "Einen Informationsdialog anzeigen",
+    "dialogs": {
+      "announcements": {
+        "buttonText": "OK, verstanden!",
+        "headerText": "Neuigkeiten in Hajk",
+        "title": "Neuigkeiten anzeigen"
+      },
+      "help": {
+        "buttonText": "Schließen",
+        "title": "Hilfe anzeigen"
+      }
+    },
+    "title": "Informationsdialog"
+  }
+}

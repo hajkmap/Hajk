@@ -17,6 +17,7 @@ import { Style, Circle as CircleStyle, Fill, Stroke } from "ol/style";
 import Overlay from "ol/Overlay";
 import DragBox from "ol/interaction/DragBox";
 import { platformModifierKeyOnly } from "ol/events/condition";
+import i18n from "src/i18n";
 
 const MAX_SCHEMA_CACHE_SIZE = 50;
 
@@ -85,7 +86,7 @@ function buildTooltipContent(tooltipEl, displayId, displayProps, colors) {
     idDiv.style.marginBottom = "0";
     const emptyDiv = document.createElement("div");
     emptyDiv.style.cssText = `font-size: 11px; color: ${mutedColor}; font-style: italic; margin-top: 4px;`;
-    emptyDiv.textContent = "Inga attribut att visa";
+    emptyDiv.textContent = i18n.t("attributeEditor.noAttributes");
     tooltipEl.appendChild(emptyDiv);
   } else {
     displayProps.forEach(({ key, value }) => {
@@ -138,14 +139,13 @@ function AttributeEditor(props) {
     props.app?.config?.appConfig?.mapservicebase;
   const ogc = React.useMemo(() => createOgcApi(apiBase), [apiBase]);
   const [ui, setUi] = React.useState({
-    title: "Attributredigerare",
+    title: i18n.t("attributeEditor.title"),
     color: "4a90e2",
     mode: "table", // "table" | "form"
   });
 
-  const DEFAULT_TITLE = "Attributredigerare";
   const [pluginSettings, setPluginSettings] = React.useState({
-    title: DEFAULT_TITLE,
+    title: i18n.t("attributeEditor.title"),
     color: muiTheme.palette.primary.main,
   });
 
@@ -622,7 +622,7 @@ function AttributeEditor(props) {
         if (e.name === "AbortError") return;
 
         if (!signal.aborted) {
-          console.warn("Kunde inte läsa serviceList:", e);
+          console.warn("Couldn't read serviceList:", e);
           setServiceList([]);
         }
       }
@@ -971,7 +971,7 @@ function AttributeEditor(props) {
 
       setPluginSettings((u) => ({
         ...u,
-        title: DEFAULT_TITLE,
+        title: i18n.t("attributeEditor.title"),
         color: muiTheme.palette.primary.main,
       }));
 
@@ -1722,7 +1722,6 @@ function AttributeEditor(props) {
           icon: <EditNoteIcon />,
           title: pluginSettings.title,
           color: pluginSettings.color,
-          description: "Redigera attribut för WFS-lager",
           onWindowShow: () => {
             windowVisibleRef.current = true;
             dragBoxRef.current?.setActive(true);

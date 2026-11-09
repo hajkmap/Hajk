@@ -9,6 +9,7 @@ import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
 import { DRAW_COLORS } from "../../constants";
 import StrokeTypeSelector from "./StrokeTypeSelector";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 const StyledAccordionSummary = styled(AccordionSummary)(() => ({
   minHeight: 35,
@@ -141,7 +142,9 @@ const FeatureStyleAccordion = (props) => {
   return (
     <Accordion size="small" style={{ marginBottom: 8 }}>
       <HajkToolTip
-        title={`Klicka här för att ändra ${props.title.toLowerCase()}.`}
+        title={i18n.t("sketch.style.changeHint", {
+          name: props.title.toLowerCase(),
+        })}
       >
         <StyledAccordionSummary>
           <AccordionSummaryContents

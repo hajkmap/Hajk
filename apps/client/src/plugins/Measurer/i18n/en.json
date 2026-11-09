@@ -1,0 +1,29 @@
+{
+  "measurer": {
+    "area": "Area",
+    "circle": "Circle",
+    "clearAll": "Clear all measurements",
+    "clearAllConfirm": "Are you sure you want to clear all measurements?",
+    "clearAllConfirmButton": "Yes, clear",
+    "deleteOne": "Delete a single measurement",
+    "description": "Measure lengths and areas",
+    "help": {
+      "text": "<strong>Finish measuring</strong><br/>Press Esc/Enter or click the last point again to finish measuring.<br/><br/><strong>Draw freehand</strong><br/>Hold down Shift to draw freehand. This works when you draw lines or areas.<br/><br/><strong>Turn off snapping</strong><br/>Hold down the Space bar to temporarily turn off snapping.<br/><br/><strong>Perpendicular measuring</strong><br/>Hold down Ctrl on Windows or Cmd (⌘) on Mac and click a line to measure perpendicular to that line. Note: the line you click must be a vector line that you snap to."
+    },
+    "line": "Distance",
+    "measureType": "Measurement type",
+    "point": "Point (shows coordinate)",
+    "segments": "Show segment lengths of measurements",
+    "select": "Select in the map",
+    "selectFeaturesTitle": "Select the objects you want to measure",
+    "settings": {
+      "pointPrecision": "Measuring precision, points",
+      "pointPrecisionHelp": "Choose the precision for coordinates of point measurements.",
+      "precision": "Measuring precision, length/area",
+      "precisionHelp": "Choose the precision for length and area measurements.",
+      "title": "Settings"
+    },
+    "settingsTooltip": "Settings — choose number of decimals",
+    "title": "Measure"
+  }
+}

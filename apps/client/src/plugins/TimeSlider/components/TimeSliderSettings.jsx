@@ -11,6 +11,7 @@ import {
 
 import WarningIcon from "@mui/icons-material/Warning";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 class TimeSliderSettings extends React.PureComponent {
   constructor(props) {
@@ -41,13 +42,13 @@ class TimeSliderSettings extends React.PureComponent {
               {error && (
                 <HajkToolTip
                   key={`tt_${index}`}
-                  title={`${
+                  title={
                     error
                       ? errorType === "date_start_equals_end"
-                        ? "Start- och slutdatumet på lagret har samma värde!"
-                        : "Start- eller slutdatumet på lagret saknas!"
-                      : "Lagret ser okej ut!"
-                  }`}
+                        ? i18n.t("timeSlider.settings.startEqualsEnd")
+                        : i18n.t("timeSlider.settings.dateMissing")
+                      : i18n.t("timeSlider.settings.layerOk")
+                  }
                 >
                   <ListItemIcon>
                     <WarningIcon />
@@ -56,7 +57,13 @@ class TimeSliderSettings extends React.PureComponent {
               )}
               <ListItemText primary={layer.get("caption")} />
               <ListItemSecondaryAction>
-                <HajkToolTip title={visible ? "Dölj lager" : "Visa lager"}>
+                <HajkToolTip
+                  title={
+                    visible
+                      ? i18n.t("timeSlider.settings.hideLayer")
+                      : i18n.t("timeSlider.settings.showLayer")
+                  }
+                >
                   <Switch
                     checked={visible}
                     onChange={() => {
@@ -97,11 +104,19 @@ class TimeSliderSettings extends React.PureComponent {
                 handleSliderSpeedChange(e.target.value);
               }}
             >
-              <MenuItem value={2000}>Långsam (0.5 Hz)</MenuItem>
-              <MenuItem value={1000}>Medium (1 Hz)</MenuItem>
-              <MenuItem value={500}>Snabb (2 Hz)</MenuItem>
+              <MenuItem value={2000}>
+                {i18n.t("timeSlider.settings.speedSlow")}
+              </MenuItem>
+              <MenuItem value={1000}>
+                {i18n.t("timeSlider.settings.speedMedium")}
+              </MenuItem>
+              <MenuItem value={500}>
+                {i18n.t("timeSlider.settings.speedFast")}
+              </MenuItem>
             </Select>
-            <FormHelperText>Ändra tidslinjens hastighet</FormHelperText>
+            <FormHelperText>
+              {i18n.t("timeSlider.settings.speedHelp")}
+            </FormHelperText>
           </FormControl>
         </Grid>
         <Grid size={6}>
@@ -115,13 +130,23 @@ class TimeSliderSettings extends React.PureComponent {
                 handleResolutionChange(e.target.value);
               }}
             >
-              <MenuItem value={"days"}>Dag</MenuItem>
-              <MenuItem value={"months"}>Månad</MenuItem>
-              <MenuItem value={"quarters"}>Kvartal</MenuItem>
-              <MenuItem value={"years"}>År</MenuItem>
+              <MenuItem value={"days"}>
+                {i18n.t("timeSlider.resolutions.days")}
+              </MenuItem>
+              <MenuItem value={"months"}>
+                {i18n.t("timeSlider.resolutions.months")}
+              </MenuItem>
+              <MenuItem value={"quarters"}>
+                {i18n.t("timeSlider.resolutions.quarters")}
+              </MenuItem>
+              <MenuItem value={"years"}>
+                {i18n.t("timeSlider.resolutions.years")}
+              </MenuItem>
             </Select>
           </FormControl>
-          <FormHelperText>Ändra tidslinjens upplösning</FormHelperText>
+          <FormHelperText>
+            {i18n.t("timeSlider.settings.resolutionHelp")}
+          </FormHelperText>
         </Grid>
       </Grid>
     );
@@ -133,20 +158,18 @@ class TimeSliderSettings extends React.PureComponent {
     if (layerStatus.errorType === "layers_missing") {
       return (
         <Grid container>
-          <Typography>
-            Inga tidslinje-lager kunde hittas. Kontakta systemadministratören.
-          </Typography>
+          <Typography>{i18n.t("timeSlider.settings.noLayers")}</Typography>
         </Grid>
       );
     } else {
       return (
         <Grid container>
           <Grid size={12}>
-            <Typography>Lagerstatus: </Typography>
+            <Typography>{i18n.t("timeSlider.settings.layerStatus")}</Typography>
           </Grid>
           <Grid size={12}>{this.renderLayerList()}</Grid>
           <Grid size={12}>
-            <Typography>Inställningar: </Typography>
+            <Typography>{i18n.t("timeSlider.settings.settings")}</Typography>
           </Grid>
           <Grid size={12}>{this.renderSettingsContainer()}</Grid>
         </Grid>

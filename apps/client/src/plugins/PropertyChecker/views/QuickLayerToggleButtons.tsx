@@ -8,6 +8,7 @@ import BorderInnerIcon from "@mui/icons-material/BorderInner";
 import TravelExploreIcon from "@mui/icons-material/TravelExplore";
 import { Box } from "@mui/system";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 import type Layer from "ol/layer/Layer";
 import type { QuickLayerToggleButtonsProps } from "../types";
@@ -118,26 +119,50 @@ function QuickLayerTogglerButtons({
       fullWidth
     >
       <ToggleButton value="buildings" size="small">
-        <HajkToolTip title={showTooltips ? "Visa/dölj byggnader" : ""}>
+        <HajkToolTip
+          title={
+            showTooltips
+              ? i18n.t("propertyChecker.quickLayers.buildingsTooltip")
+              : ""
+          }
+        >
           <StyledBox>
             <LocationCityIcon />
-            <Typography variant="button">Byggnader</Typography>
+            <Typography variant="button">
+              {i18n.t("propertyChecker.quickLayers.buildings")}
+            </Typography>
           </StyledBox>
         </HajkToolTip>
       </ToggleButton>
       <ToggleButton value="borders" size="small">
-        <HajkToolTip title={showTooltips ? "Visa/dölj fastigheter" : ""}>
+        <HajkToolTip
+          title={
+            showTooltips
+              ? i18n.t("propertyChecker.quickLayers.propertiesTooltip")
+              : ""
+          }
+        >
           <StyledBox>
             <BorderInnerIcon />
-            <Typography variant="button">Fastigheter</Typography>
+            <Typography variant="button">
+              {i18n.t("propertyChecker.quickLayers.properties")}
+            </Typography>
           </StyledBox>
         </HajkToolTip>
       </ToggleButton>
       <ToggleButton value="plans" size="small">
-        <HajkToolTip title={showTooltips ? "Visa/dölj planer" : ""}>
+        <HajkToolTip
+          title={
+            showTooltips
+              ? i18n.t("propertyChecker.quickLayers.plansTooltip")
+              : ""
+          }
+        >
           <StyledBox>
             <TravelExploreIcon />
-            <Typography variant="button">Planer</Typography>
+            <Typography variant="button">
+              {i18n.t("propertyChecker.quickLayers.plans")}
+            </Typography>
           </StyledBox>
         </HajkToolTip>
       </ToggleButton>

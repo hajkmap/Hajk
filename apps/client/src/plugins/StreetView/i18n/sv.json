@@ -1,0 +1,10 @@
+{
+  "streetView": {
+    "description": "Titta hur området ser ut från gatan",
+    "imageDate": "Bild tagen: {{date}}",
+    "instructions": "Klicka i kartan för att aktivera street view. <br/>Förstora fönstret genom att trycka på symbolen i övre högra hörnet.",
+    "loadFailed": "Kunde inte ladda Google Maps. Kontakta systemadministratören och be om att kontrollera API-nyckeln.",
+    "noImage": "Bild saknas för vald position.",
+    "title": "Gatuvy"
+  }
+}

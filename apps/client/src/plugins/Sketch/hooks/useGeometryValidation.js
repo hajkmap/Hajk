@@ -4,6 +4,7 @@ import GeoJSON from "ol/format/GeoJSON";
 import kinks from "@turf/kinks";
 import { Circle, Fill, Stroke, Style } from "ol/style";
 import { editBus } from "../../../buses/editBus";
+import i18n from "src/i18n";
 
 // Geometry types that support self-intersection validation
 const VALIDATABLE_TYPES = Object.freeze([
@@ -66,12 +67,15 @@ const useGeometryValidation = ({
         const kinksResult = kinks(geojson);
 
         if (kinksResult.features && kinksResult.features.length > 0) {
-          const geometryName =
-            geomType === "Polygon" || geomType === "MultiPolygon"
-              ? "Polygonen"
-              : "Linjen";
+          const isPolygon =
+            geomType === "Polygon" || geomType === "MultiPolygon";
           enqueueSnackbar(
-            `${geometryName} har ${kinksResult.features.length} självkorsning${kinksResult.features.length > 1 ? "ar" : ""}. Var god kontrollera och rätta geometrin.`,
+            i18n.t(
+              isPolygon
+                ? "sketch.validation.polygonKinks"
+                : "sketch.validation.lineKinks",
+              { count: kinksResult.features.length }
+            ),
             {
               variant: "warning",
               autoHideDuration: 8000,

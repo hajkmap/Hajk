@@ -11,6 +11,7 @@ import Feature from "ol/Feature";
 import { editBus } from "../../../buses/editBus";
 import HajkTransformer from "../../../utils/HajkTransformer";
 import Draw from "ol/interaction/Draw";
+import i18n from "src/i18n";
 
 const LAYER_NAME = "attributeeditor";
 
@@ -1162,7 +1163,7 @@ const useAttributeEditorIntegration = ({
       const targetFeature = findAeFeatureById(featureId);
       if (!targetFeature) {
         editBus.emit("sketch:split-error", {
-          message: "Kunde inte hitta objektet att dela",
+          message: i18n.t("sketch.split.notFound"),
         });
         splitContextRef.current = null;
         return;
@@ -1292,7 +1293,7 @@ const useAttributeEditorIntegration = ({
         const feature = findAeFeatureById(context.featureId);
         if (!feature) {
           editBus.emit("sketch:split-error", {
-            message: "Kunde inte hitta objektet att dela",
+            message: i18n.t("sketch.split.notFound"),
           });
           cleanupSplitDraw(false);
           return;
@@ -1313,7 +1314,7 @@ const useAttributeEditorIntegration = ({
           });
         } catch (error) {
           editBus.emit("sketch:split-error", {
-            message: error.message || "Kunde inte dela objektet",
+            message: error.message || i18n.t("sketch.split.failed"),
           });
         }
 
@@ -1350,7 +1351,7 @@ const useAttributeEditorIntegration = ({
       const targetFeature = findAeFeatureById(featureId);
       if (!targetFeature) {
         editBus.emit("sketch:split-multi-error", {
-          message: "Kunde inte hitta objektet att dela upp",
+          message: i18n.t("sketch.explode.notFound"),
         });
         return;
       }
@@ -1358,7 +1359,7 @@ const useAttributeEditorIntegration = ({
       // Check if it's actually a multi-feature
       if (!drawModel.isMultiFeature(targetFeature)) {
         editBus.emit("sketch:split-multi-error", {
-          message: "Objektet är inte en multi-feature",
+          message: i18n.t("sketch.explode.notMulti"),
         });
         return;
       }
@@ -1367,7 +1368,7 @@ const useAttributeEditorIntegration = ({
       const newFeatures = drawModel.splitMultiFeature(targetFeature);
       if (newFeatures.length === 0) {
         editBus.emit("sketch:split-multi-error", {
-          message: "Kunde inte dela upp objektet",
+          message: i18n.t("sketch.explode.failed"),
         });
         return;
       }
@@ -1376,7 +1377,7 @@ const useAttributeEditorIntegration = ({
       const sketchSource = drawModel.getCurrentVectorSource();
       if (!sketchSource) {
         editBus.emit("sketch:split-multi-error", {
-          message: "Kunde inte hitta Sketch-lagret",
+          message: i18n.t("sketch.layerNotFound"),
         });
         return;
       }
@@ -1426,7 +1427,7 @@ const useAttributeEditorIntegration = ({
       const { featureIds } = ev.detail || {};
       if (!featureIds || featureIds.length < 2) {
         editBus.emit("sketch:merge-error", {
-          message: "Minst två objekt krävs för att slå ihop",
+          message: i18n.t("sketch.merge.needTwo"),
         });
         return;
       }
@@ -1438,7 +1439,7 @@ const useAttributeEditorIntegration = ({
 
       if (targetFeatures.length < 2) {
         editBus.emit("sketch:merge-error", {
-          message: "Kunde inte hitta tillräckligt många objekt",
+          message: i18n.t("sketch.merge.notEnough"),
         });
         return;
       }
@@ -1451,8 +1452,7 @@ const useAttributeEditorIntegration = ({
       const mergedFeature = drawModel.mergeFeatures(featuresForMerge);
       if (!mergedFeature) {
         editBus.emit("sketch:merge-error", {
-          message:
-            "Kunde inte slå ihop objekten. Kontrollera att alla objekt har samma geometrityp.",
+          message: i18n.t("sketch.merge.failed"),
         });
         return;
       }
@@ -1461,7 +1461,7 @@ const useAttributeEditorIntegration = ({
       const sketchSource = drawModel.getCurrentVectorSource();
       if (!sketchSource) {
         editBus.emit("sketch:merge-error", {
-          message: "Kunde inte hitta Sketch-lagret",
+          message: i18n.t("sketch.layerNotFound"),
         });
         return;
       }

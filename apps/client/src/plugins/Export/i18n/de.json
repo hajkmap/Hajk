@@ -1,0 +1,15 @@
+{
+  "export": {
+    "createPdf": "PDF erstellen",
+    "description": "Die Karte in andere Formate exportieren",
+    "landscape": "Querformat",
+    "orientation": "Ausrichtung",
+    "otherScale": "Anderer Maßstab",
+    "paperSize": "Papierformat",
+    "pdfFailed": "Das PDF konnte nicht erstellt werden. Versuchen Sie eine niedrigere Auflösung, ein kleineres Gebiet oder weniger Ebenen in der Karte.",
+    "portrait": "Hochformat",
+    "resolution": "Auflösung",
+    "scale": "Maßstab",
+    "title": "Export"
+  }
+}

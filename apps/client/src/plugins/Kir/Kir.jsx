@@ -84,7 +84,6 @@ function Kir(props) {
       custom={{
         disablePadding: true,
         icon: <PluginIcon />,
-        title: "KIR",
         color: null,
         description: "",
         height: "dynamic",

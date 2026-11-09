@@ -6,6 +6,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import HajkToolTip from "components/HajkToolTip";
 
 import Information from "../components/Information";
+import i18n from "src/i18n";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   width: "100%",
@@ -27,10 +28,7 @@ const RecentlyRemovedNotSupported = ({ globalObserver }) => {
   return (
     <Grid container spacing={2}>
       <Grid size={12}>
-        <Information
-          text="Det ser ut som att du har valt att inte tillåta funktionella kakor. På grund av
-        detta så kan du inte se dina senast borttagna objekt. Klicka nedan för att ändra inställningarna."
-        />
+        <Information text={i18n.t("sketch.delete.cookiesRequired")} />
       </Grid>
       <Grid size={12}>
         <Button
@@ -38,7 +36,7 @@ const RecentlyRemovedNotSupported = ({ globalObserver }) => {
           variant="contained"
           onClick={handleChangeCookieSettingsClick}
         >
-          Cookie-inställningar
+          {i18n.t("common.cookieSettings")}
         </Button>
       </Grid>
     </Grid>
@@ -57,7 +55,7 @@ const RemovedFeatureItem = ({ onRestoreClick, title }) => {
           }}
         >
           <Typography variant="button">{title}</Typography>
-          <HajkToolTip title="Klicka för att återställa ritobjektet.">
+          <HajkToolTip title={i18n.t("sketch.delete.restoreHint")}>
             <IconButton size="small" onClick={onRestoreClick}>
               <SettingsBackupRestoreIcon />
             </IconButton>
@@ -105,12 +103,14 @@ const DeleteView = ({
           startIcon={<DeleteIcon />}
           disabled={uiDisabled}
         >
-          Ta bort alla ritobjekt
+          {i18n.t("sketch.delete.deleteAll")}
         </Button>
       </Grid>
       <Grid container>
         <Grid size={12}>
-          <Typography variant="caption">Senast borttagna:</Typography>
+          <Typography variant="caption">
+            {i18n.t("sketch.delete.recentlyDeleted")}
+          </Typography>
         </Grid>
         <Grid size={12}>
           {functionalCookiesOk ? (

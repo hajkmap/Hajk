@@ -28,6 +28,8 @@ import LsRadioButton from "./LsRadioButton";
 import { useMapZoom } from "../LayerSwitcherProvider";
 import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
 import { getIsMobile } from "../LayerSwitcherUtils";
+import { getLabelStyleName } from "../../../utils/labelStyle";
+import i18n from "src/i18n";
 
 const getLayerToggleState = (isToggled, isSemiToggled, isVisibleAtZoom) => {
   if (!isToggled) {
@@ -309,7 +311,10 @@ function LayerItem({
             }}
             className="dragInidcatorIcon"
           >
-            <HajkToolTip placement="left" title="Dra för att ändra ritordning">
+            <HajkToolTip
+              placement="left"
+              title={i18n.t("layerSwitcher.dragToReorder")}
+            >
               <DragIndicatorOutlinedIcon
                 sx={{ pt: "1px" }}
                 fontSize={"small"}
@@ -399,7 +404,7 @@ function LayerItem({
               )}
               {!toggleable && !draggable ? (
                 <LsIconButton size="small">
-                  <HajkToolTip title="Bakgrundskartan ligger låst längst ner i ritordningen">
+                  <HajkToolTip title={i18n.t("layerSwitcher.backgroundLocked")}>
                     <LockOutlinedIcon />
                   </HajkToolTip>
                 </LsIconButton>

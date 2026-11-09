@@ -1,4 +1,5 @@
 import React from "react";
+import i18n from "src/i18n";
 
 function makeRowPreview(row, FIELD_META) {
   const keys = FIELD_META.map((m) => m.key);
@@ -86,7 +87,9 @@ const FormListItem = ({
           <div style={s.listRowTitle}>
             {makeRowPreview(row, FIELD_META)}
             {hasPendingEdits && (
-              <span style={s.labelChanged}>&nbsp;• ändrad</span>
+              <span style={s.labelChanged}>
+                &nbsp;• {i18n.t("attributeEditor.form.changed")}
+              </span>
             )}
           </div>
         </div>

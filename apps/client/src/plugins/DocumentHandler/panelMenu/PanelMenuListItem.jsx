@@ -10,6 +10,7 @@ import ExpandLess from "@mui/icons-material/ExpandLess";
 import PanelList from "./PanelList";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import { visuallyHidden } from "@mui/utils";
+import i18n from "src/i18n";
 
 const StyledListItemIcon = styled(ListItemIcon)(({ theme }) => ({
   minWidth: theme.spacing(3),
@@ -47,12 +48,20 @@ class PanelMenuListItem extends React.PureComponent {
 
     return expanded ? (
       <StyledCollapseIcon>
-        {!title && <span style={visuallyHidden}>Minimera submeny</span>}
+        {!title && (
+          <span style={visuallyHidden}>
+            {i18n.t("documentHandler.collapseSubmenu")}
+          </span>
+        )}
         <ExpandLess />
       </StyledCollapseIcon>
     ) : (
       <StyledCollapseIcon>
-        {!title && <span style={visuallyHidden}>Maximera submeny</span>}
+        {!title && (
+          <span style={visuallyHidden}>
+            {i18n.t("documentHandler.expandSubmenu")}
+          </span>
+        )}
         <ExpandMore />
       </StyledCollapseIcon>
     );

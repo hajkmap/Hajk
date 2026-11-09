@@ -1,0 +1,35 @@
+{
+  "documentHandler": {
+    "chapterLink": "Länk till ett visst kapitel i ett dokument",
+    "collapseSubmenu": "Minimera submeny",
+    "contents": "Innehåll",
+    "couldNotOpenDocument": "Kunde inte öppna dokumentet",
+    "couldNotRenderLink": "Kunde inte visa länken till dokumentet",
+    "documentLink": "Länk till ett dokument",
+    "drawerButtonTitle": "Meny",
+    "drawerTitle": "Översiktsplan",
+    "expandSubmenu": "Maximera submeny",
+    "externalLink": "Länk som öppnas i ett annat fönster",
+    "mapLink": "Länk som applicerar ändringar på kartan",
+    "mapLoading": "Kartan laddar...",
+    "openPrint": "Öppna utskrift",
+    "print": {
+      "attachments": "Bilagor",
+      "createPdf": "Skapa PDF",
+      "creatingPdf": "Din PDF skapas",
+      "linkMissing": "Länk saknas",
+      "mayTakeAWhile": "Det här kan ta en stund, speciellt om du har valt att skriva ut många dokument.",
+      "open": "Öppna",
+      "print": "Skriv ut",
+      "selectAll": "Välj alla dokument",
+      "selectedContent": "Valt innehåll",
+      "settings": "Inställningar"
+    },
+    "printActivePage": "Skriv ut aktiv sida",
+    "scrollToTop": "Scrolla till toppen av dokumentet",
+    "skipToMainMenu": "Till huvudmeny för webbplatsen",
+    "tableOfContents": "Innehållsförteckning",
+    "widgetDescription": "En kort beskrivning som visas i widgeten",
+    "windowTitle": "Dokument"
+  }
+}

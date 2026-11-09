@@ -9,6 +9,7 @@ import LocationModel from "./LocationModel";
 import LocationView from "./LocationView";
 import CustomControlButtonView from "./CustomControlButtonView";
 import LocationPopup from "./LocationPopup";
+import i18n from "src/i18n";
 
 function Location(props) {
   const [snackbarKey, setSnackbarKey] = useState(null);
@@ -63,7 +64,7 @@ function Location(props) {
   const renderControlButton = () => {
     return createPortal(
       <CustomControlButtonView
-        defaultTooltip={`Positionera: Visa min position i kartan`}
+        defaultTooltip={i18n.t("location.controlTooltip")}
         model={model}
       />,
       document.getElementById("plugin-control-buttons")
@@ -76,8 +77,6 @@ function Location(props) {
       type="Location"
       custom={{
         icon: <MyLocationIcon />,
-        title: "Positionera",
-        description: "Visa min position i kartan",
         height: 450,
         width: 430,
         top: undefined,

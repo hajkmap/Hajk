@@ -1,0 +1,311 @@
+{
+  "sketch": {
+    "activities": {
+      "ADD": {
+        "information": "Fügen Sie Objekte hinzu, indem Sie in der Karte zeichnen. Wählen Sie zunächst unten die Art des Objekts, das Sie zeichnen möchten. Beachten Sie, dass der Export nach GPX nur Punkte und Linien unterstützt.",
+        "tooltip": "Neue Objekte hinzufügen."
+      },
+      "DELETE": {
+        "information": "Klicken Sie auf das gezeichnete Objekt, das Sie löschen möchten, oder klicken Sie auf die Schaltfläche unten, um alle gezeichneten Objekte zu löschen.",
+        "tooltip": "Objekte löschen."
+      },
+      "EDIT": {
+        "information": "Stützpunkte bearbeiten (Stützpunkt mit Alt-Klick löschen), Zeichenreihenfolge ändern oder die Farbe gezeichneter Objekte ändern.",
+        "tooltip": "Vorhandene Objekte bearbeiten."
+      },
+      "MOVE": {
+        "information": "Klicken Sie auf das Objekt in der Karte, das Sie verschieben möchten, um den \"Verschiebemodus\" zu aktivieren. Ziehen Sie das Objekt dann an die richtige Stelle.",
+        "tooltip": "Vorhandene Objekte verschieben."
+      },
+      "OGC": {
+        "information": "Hier können Sie eine bearbeitbare Ebene auswählen, die mit einem Kartenserver verbunden ist.",
+        "tooltip": "Eine bearbeitbare Ebene zum Speichern auswählen."
+      },
+      "SAVE": {
+        "information": "Brauchen Sie eine Pause? Speichern Sie, was Sie gezeichnet haben, und machen Sie später weiter. Beachten Sie, dass nur die in der Karte sichtbaren Objekte gespeichert werden.",
+        "tooltip": "Gezeichnete Objekte speichern."
+      },
+      "SETTINGS": {
+        "information": "Hier können Sie die Einstellungen des Werkzeugs ändern.",
+        "tooltip": "Festlegen, ob die Maße der Objekte angezeigt werden usw."
+      },
+      "UPLOAD": {
+        "information": "Gezeichnete Objekte im Format .kml/.gpx/.geojson importieren oder exportieren. Verwenden Sie die Schaltflächen unten oder ziehen Sie eine Datei direkt in die Karte.",
+        "tooltip": "Gezeichnete Objekte herunterladen oder hochladen."
+      }
+    },
+    "buffer": {
+      "buffer": "Puffern",
+      "clickToDraw": "Klicken Sie hier, um Objekte zu zeichnen",
+      "clickToSelect": "Klicken Sie hier, um Objekte auszuwählen",
+      "distance": "Pufferabstand (Meter)",
+      "distanceStep": "Pufferabstand eingeben",
+      "done": "Fertig",
+      "restart": "Neu beginnen",
+      "selectAtLeastOne": "Sie müssen mindestens ein Objekt in der Karte auswählen, um zu puffern",
+      "selectObjects": "Objekte auswählen",
+      "selectStep": "Zu puffernde Objekte auswählen",
+      "turnOff": "Ausschalten"
+    },
+    "delete": {
+      "cookiesRequired": "Offenbar haben Sie funktionale Cookies nicht erlaubt. Daher können Sie Ihre zuletzt gelöschten Objekte nicht sehen. Klicken Sie unten, um die Einstellungen zu ändern.",
+      "deleteAll": "Alle gezeichneten Objekte löschen",
+      "recentlyDeleted": "Zuletzt gelöscht:",
+      "restoreHint": "Klicken Sie, um das gezeichnete Objekt wiederherzustellen."
+    },
+    "deleteButton": "Löschen",
+    "description": "Erstellen Sie Ihre eigenen Geometrien!",
+    "drawingsRemovedServiceSelected": "Gezeichnete Objekte entfernt. Bearbeitbare Ebene ausgewählt.",
+    "drawTypes": {
+      "Arrow": {
+        "label": "Pfeil",
+        "tooltip": "Zeichnen Sie einen Pfeil in der Karte, indem Sie für jeden Stützpunkt einmal klicken; mit einem Doppelklick abschließen."
+      },
+      "Circle": {
+        "label": "Kreis",
+        "tooltip": "Zeichnen Sie einen Kreis in der Karte, indem Sie einmal dort klicken, wo der Kreis beginnen soll, dann auf die gewünschte Größe ziehen und loslassen."
+      },
+      "LineString": {
+        "label": "Linie",
+        "tooltip": "Zeichnen Sie eine Linie in der Karte, indem Sie für jeden Stützpunkt einmal klicken; mit einem Doppelklick abschließen."
+      },
+      "Point": {
+        "label": "Punkt",
+        "tooltip": "Fügen Sie der Karte einen Punkt hinzu, indem Sie an die gewünschte Stelle klicken."
+      },
+      "Polygon": {
+        "label": "Polygon",
+        "tooltip": "Zeichnen Sie ein Polygon in der Karte, indem Sie für jeden Stützpunkt einmal klicken; mit einem Doppelklick abschließen."
+      },
+      "Rectangle": {
+        "label": "Rechteck",
+        "tooltip": "Zeichnen Sie ein Rechteck in der Karte, indem Sie einmal dort klicken, wo das Rechteck beginnen soll, dann auf die gewünschte Größe ziehen und loslassen."
+      },
+      "Select": {
+        "label": "In der Karte auswählen",
+        "tooltip": "Klicken Sie auf ein vorhandenes Objekt in der Karte, um es in die Zeichenebene zu kopieren."
+      },
+      "Text": {
+        "label": "Text",
+        "tooltip": "Fügen Sie der Karte Text hinzu, indem Sie an die gewünschte Stelle klicken."
+      }
+    },
+    "edit": {
+      "allowNodeEditing": "Bearbeiten von Stützpunkten erlauben",
+      "arrange": "Anordnen",
+      "bringForward": "Eine Ebene nach vorne",
+      "bringToFront": "In den Vordergrund",
+      "clickObjectHint": "Klicken Sie auf ein Objekt in der Karte, um sein Aussehen oder seine Zeichenreihenfolge zu ändern.",
+      "disableNodeEditingHint": "Schalten Sie das Bearbeiten von Stützpunkten aus, um Objekte in der Karte leichter auswählen zu können, z. B. zum Ändern der Farbe.",
+      "duplicate": "Duplizieren",
+      "duplicateHint": "Klicken Sie, um das ausgewählte Objekt zu duplizieren.",
+      "enableNodeEditingHint": "Einschalten, um die Form der Objekte in der Karte zu bearbeiten.",
+      "managedByService": "Dieses Objekt wird von einer bearbeitbaren Ebene verwaltet.",
+      "sendBackward": "Eine Ebene nach hinten",
+      "sendToBack": "In den Hintergrund"
+    },
+    "enterText": "Text eingeben",
+    "explode": {
+      "failed": "Das Objekt konnte nicht aufgetrennt werden",
+      "notFound": "Das aufzutrennende Objekt wurde nicht gefunden",
+      "notMulti": "Das Objekt ist kein Multi-Objekt"
+    },
+    "finishDrawing": "Zeichnen beenden",
+    "fixed": {
+      "addSegment": "Segment hinzufügen",
+      "addSegmentHint": "Klicken Sie zuerst in die Karte, um den Startpunkt festzulegen, und dann hier, um jedes Segment hinzuzufügen",
+      "direction": "Richtung (Grad)",
+      "directionHint": "Geben Sie die Richtung in Grad ein. 0° ist Norden, 90° ist Osten, 180° ist Süden, 270° ist Westen",
+      "disableHint": "Klicken Sie, um feste Länge und Richtung auszuschalten",
+      "drawManually": "Manuell zeichnen",
+      "enableHint": "Klicken Sie, um Segmente mit fester Länge und Richtung zu zeichnen",
+      "finishDrawingHint": "Zeichnung abschließen",
+      "length": "Segmentlänge (Meter)",
+      "lengthHint": "Geben Sie die Länge jedes Segments in Metern ein (0,1 - 100000 m)"
+    },
+    "layerNotFound": "Die Zeichenebene wurde nicht gefunden",
+    "merge": {
+      "failed": "Die Objekte konnten nicht zusammengeführt werden. Prüfen Sie, ob alle Objekte denselben Geometrietyp haben.",
+      "needTwo": "Zum Zusammenführen werden mindestens zwei Objekte benötigt",
+      "notEnough": "Es wurden nicht genügend Objekte gefunden"
+    },
+    "move": {
+      "allowFreeMove": "Freies Verschieben erlauben",
+      "direction": "Richtung (Grad)",
+      "directionHint": "Geben Sie die Richtung ein, in die die Objekte verschoben werden sollen. 0 Grad ist genau Norden, 90 Grad genau Osten usw.",
+      "disableFreeMoveHint": "Ausschalten, um das Verschieben der Objekte in der Karte zu verhindern.",
+      "distance": "Entfernung (Meter)",
+      "distanceHint": "Geben Sie ein, um wie viele Meter Sie die Objekte verschieben möchten.",
+      "enableFreeMoveHint": "Einschalten, um das Verschieben der Objekte in der Karte zu erlauben.",
+      "fixedMove": "Feste Verschiebung",
+      "move": "Verschieben",
+      "rotate": "Drehen",
+      "rotateHint": "Geben Sie ein, um wie viel Grad die Objekte gedreht werden sollen."
+    },
+    "multi": {
+      "drawnParts": "Gezeichnete Teile:",
+      "finishAndSave": "Mehrteilige Zeichnung abschließen und Objekt speichern",
+      "finishHint": "Klicken Sie, um die mehrteilige Zeichnung abzuschließen",
+      "startHint": "Klicken Sie, um mehrere Teile zu zeichnen, die ein Objekt bilden (z. B. MultiPolygon)",
+      "title": "Mehrteilige Zeichnung"
+    },
+    "ogc": {
+      "chooseLayer": "Eine bearbeitbare Ebene zum Speichern auswählen",
+      "openAttributeEditor": "Attributeditor öffnen"
+    },
+    "pixels_one": "{{count}} Pixel",
+    "pixels_other": "{{count}} Pixel",
+    "prompts": {
+      "ArrowHelp": "Ein Pfeil wird erstellt, indem Sie für jeden Stützpunkt auf eine Position klicken; mit einem Doppelklick abschließen.",
+      "CircleHelp": "Sie können einen Kreis mit festem Radius durch Klicken erstellen oder ziehen, um den gewünschten Radius zu erhalten.",
+      "DELETEHelp": "Klicken Sie auf ein Objekt, um es aus Ihrer Skizze zu löschen.",
+      "EDITHelp": "Klicken Sie auf ein Objekt, um sein Aussehen oder seine Zeichenreihenfolge zu ändern.",
+      "LineStringHelp": "Erstellen Sie Linien, indem Sie für jeden Stützpunkt auf eine Position klicken; mit einem Doppelklick abschließen.",
+      "MOVEHelp": "Klicken Sie auf ein Objekt, um es zu verschieben.",
+      "MultiDrawHelp": "Zeichnen Sie mehrere getrennte Teile, die ein Objekt bilden (MultiPolygon/MultiLineString/MultiPoint). Klicken Sie auf 'Mehrteilige Zeichnung abschließen', wenn Sie fertig sind.",
+      "OGCHelp": "Hier können Sie eine bearbeitbare Ebene zum Speichern aktivieren.",
+      "PointHelp": "Klicken Sie auf eine Position, um einen Punkt hinzuzufügen.",
+      "PolygonHelp": "Erstellen Sie ein Polygon, indem Sie für jeden Stützpunkt auf eine Position klicken; mit einem Doppelklick abschließen.",
+      "RectangleHelp": "Erstellen Sie ein Rechteck, indem Sie die linke Maustaste gedrückt halten und über ein Gebiet ziehen, bis die gewünschte Größe erreicht ist.",
+      "SAVEHelp": "Hier können Sie einen Arbeitsbereich speichern, um Ihre Arbeit später fortzusetzen. Um einen älteren Arbeitsbereich zu überschreiben, geben Sie denselben Namen ein.",
+      "saveNoFeatures": "Es konnte kein Arbeitsbereich erstellt werden, da keine gezeichneten Objekte gefunden wurden.",
+      "saveOverflow": "Die Objekte konnten nicht gespeichert werden. Der Arbeitsbereich enthält zu viele Objekte.",
+      "saveSuccess": "Der Arbeitsbereich wurde gespeichert.",
+      "SelectHelp": "Klicken Sie auf ein vorhandenes Objekt in der Karte, um es in die Zeichenebene zu kopieren.",
+      "TextHelp": "Klicken Sie auf eine Position, um Text hinzuzufügen."
+    },
+    "save": {
+      "cookiesRequired": "Offenbar haben Sie funktionale Cookies nicht erlaubt. Daher können Sie Ihre gezeichneten Objekte nicht speichern. Klicken Sie unten, um die Einstellungen zu ändern.",
+      "deleteConfirm": "Möchten Sie den Arbeitsbereich wirklich löschen? Dies kann nicht rückgängig gemacht werden.",
+      "deleteHint": "Klicken Sie, um den Arbeitsbereich zu löschen.",
+      "deleteTitle": "Arbeitsbereich löschen",
+      "lastUpdated": "Der Arbeitsbereich wurde zuletzt am {{date}} aktualisiert",
+      "loadHint": "Klicken Sie, um die Objekte zu laden.",
+      "maxReached": "Die maximale Anzahl an Arbeitsbereichen ist gespeichert. Löschen Sie einen oder überschreiben Sie einen, indem Sie einen der Namen aus der Liste unten eingeben.",
+      "minLength": "Zum Erstellen eines Arbeitsbereichs sind mindestens vier Zeichen erforderlich.",
+      "nameHint": "Geben Sie einen Namen ein, damit der Arbeitsbereich später wiedererkannt werden kann.",
+      "nameTaken": "Der Name ist bereits vergeben. Arbeitsbereich \"{{name}}\" ersetzen?",
+      "noneFound": "Es wurden keine gespeicherten Arbeitsbereiche gefunden.",
+      "saved": "Gespeicherte Arbeitsbereiche:",
+      "saveHint": "Klicken Sie, um die gezeichneten Objekte in der Karte zu speichern."
+    },
+    "selectFeaturesToCopy": "Wählen Sie die Objekte aus, die Sie kopieren möchten",
+    "serviceSelectedDrawingsKept_one": "Bearbeitbare Ebene ausgewählt. {{count}} gezeichnetes Objekt bleibt in der Karte.",
+    "serviceSelectedDrawingsKept_other": "Bearbeitbare Ebene ausgewählt. {{count}} gezeichnete Objekte bleiben in der Karte.",
+    "settings": {
+      "areaUnit": "Einheit, Fläche",
+      "areaUnitHelp": "Wählen Sie die Einheit für Flächenmessungen.",
+      "enableTextForLength": "Text auf den Objekten aktivieren, um ihre Länge anzuzeigen",
+      "enableTextForPerimeter": "Text auf den Objekten aktivieren, um ihren Umfang/Radius anzuzeigen.",
+      "helperTextsLabel": "Hilfetexte aktiviert",
+      "helperTextsOff": "Ausschalten, um Hilfetexte auszublenden.",
+      "helperTextsOn": "Einschalten, um Hilfetexte anzuzeigen.",
+      "kinkMarkersLabel": "Geometriefehler anzeigen",
+      "kinkMarkersOff": "Ausschalten, um rote Markierungen an Stellen auszublenden, an denen sich die Geometrie selbst kreuzt. Warnungen zu Selbstüberschneidungen werden immer angezeigt.",
+      "kinkMarkersOn": "Einschalten, um rote Markierungen an Stellen anzuzeigen, an denen sich die Geometrie selbst kreuzt. Warnungen zu Selbstüberschneidungen werden immer angezeigt.",
+      "lengthUnit": "Einheit, Länge",
+      "lengthUnitHelp": "Wählen Sie die Einheit für Längenmessungen.",
+      "measurement": "Messeinstellungen",
+      "pointPrecision": "Messgenauigkeit, Punkte",
+      "pointPrecisionHelp": "Wählen Sie die Genauigkeit für die Koordinaten von Punkten.",
+      "precision": "Messgenauigkeit",
+      "precisionHelp": "Wählen Sie die Genauigkeit der Messwerte.",
+      "showAreaLabel": "Fläche anzeigen",
+      "showAreaOff": "Ausschalten, um die Fläche der Objekte auszublenden.",
+      "showAreaOn": "Einschalten, um die Fläche der Objekte anzuzeigen.",
+      "showLengthLabel": "Länge anzeigen",
+      "showLengthOff": "Ausschalten, um die Länge der Objekte auszublenden.",
+      "showLengthOn": "Einschalten, um die Länge der Objekte anzuzeigen.",
+      "showPerimeterLabel": "Umfang/Radius anzeigen",
+      "showPerimeterOff": "Ausschalten, um den Umfang/Radius der Objekte auszublenden.",
+      "showPerimeterOn": "Einschalten, um den Umfang/Radius der Objekte anzuzeigen.",
+      "showTextLabel": "Text auf den Objekten anzeigen",
+      "showTextOff": "Ausschalten, um Text auf den Objekten auszublenden.",
+      "showTextOn": "Einschalten, um Text auf den Objekten anzuzeigen.",
+      "snapLabel": "Fangen aktiviert",
+      "snapOff": "Fangen ausschalten. Wenn das Fangen eingeschaltet ist, rastet das Zeichenwerkzeug automatisch an nahe gelegenen Punkten und Linien ein.",
+      "snapOn": "Fangen einschalten. Wenn das Fangen eingeschaltet ist, rastet das Zeichenwerkzeug automatisch an nahe gelegenen Punkten und Linien ein.",
+      "snapTolerance": "Fangabstand",
+      "snapToleranceHelp": "Wählen Sie, wie empfindlich das Fangen sein soll. Ein höherer Wert bedeutet, dass das Fangen schon aus größerer Entfernung greift."
+    },
+    "split": {
+      "failed": "Das Objekt konnte nicht geteilt werden",
+      "notFound": "Das zu teilende Objekt wurde nicht gefunden"
+    },
+    "strokeTypes": {
+      "dashed": {
+        "label": "Gestrichelt",
+        "tooltip": "Gestrichelte Linie."
+      },
+      "dotted": {
+        "label": "Gepunktet",
+        "tooltip": "Gepunktete Linie."
+      },
+      "none": {
+        "label": "Keine",
+        "tooltip": "Keine Linie."
+      },
+      "solid": {
+        "label": "Durchgezogen",
+        "tooltip": "Durchgezogene Linie."
+      }
+    },
+    "style": {
+      "appearance": "Aussehen",
+      "background": "Farbe - Hintergrund",
+      "changeHint": "Klicken Sie hier, um {{name}} zu ändern.",
+      "color": "Farbe",
+      "fill": "Füllung",
+      "foreground": "Farbe - Vordergrund",
+      "large": "Groß",
+      "line": "Linie",
+      "lineType": "Linientyp",
+      "medium": "Mittel",
+      "radius": "Radius (m)",
+      "reset": "Aussehen auf die Standardwerte zurücksetzen",
+      "size": "Größe",
+      "small": "Klein",
+      "textSize": "Textgröße",
+      "variant": "Variante",
+      "widthAndColor": "Breite und Farbe"
+    },
+    "title": "Zeichnen",
+    "titleHint": "Geben Sie einen Titel ein, an dem das Objekt erkannt werden kann.",
+    "type": "Typ",
+    "units": {
+      "AUTO": "Automatisch",
+      "HECTARE": "Hektar (ha)",
+      "KM": "Kilometer (km)",
+      "KM2": "Quadratkilometer (km²)",
+      "M": "Meter (m)",
+      "M2": "Quadratmeter (m²)"
+    },
+    "upload": {
+      "chooseFiles": "Dateien auswählen",
+      "chooseFilesHint": "Wählen Sie eine oder mehrere .kml-, .gpx- oder .geojson-Dateien",
+      "exportGeoJson": "Nach GeoJSON exportieren",
+      "exportGeoJsonHint": "Klicken Sie, um alle gezeichneten Objekte in eine .geojson-Datei zu exportieren. GeoJSON unterstützt alle Geometrietypen und behält Stile bei. Kreise werden als Polygone exportiert.",
+      "exportGpx": "Nach GPX exportieren",
+      "exportGpxHint": "Klicken Sie, um alle gezeichneten Objekte in eine .gpx-Datei zu exportieren. GPX unterstützt nur Punkte (Wegpunkte) und Linien (Tracks/Routen). Polygone und andere komplexe Geometrien werden weggelassen.",
+      "exportKml": "Nach KML exportieren",
+      "exportKmlHint": "Klicken Sie, um alle gezeichneten Objekte in eine .kml-Datei zu exportieren. KML unterstützt alle Geometrietypen einschließlich Polygonen, Linien, Punkten und Text.",
+      "hideLabels": "Klicken Sie hier, um die Beschriftungen der Objekte auszublenden.",
+      "hideObjects": "Klicken Sie, um die Objekte in der Karte auszublenden.",
+      "import": "Gezeichnete Objekte importieren",
+      "importFailed": "\"{{fileName}}\" konnte nicht importiert werden. Die Datei ist beschädigt oder hat das falsche Format.",
+      "importHint": "Klicken Sie, um einen Dialog zu öffnen, in dem Sie eine .kml-, .gpx- oder .geojson-Datei von Ihrem Computer auswählen können.",
+      "readError": "Beim Lesen der Dateien ist ein Fehler aufgetreten.",
+      "removeImported": "Klicken Sie, um die importierten Objekte zu entfernen.",
+      "showLabels": "Klicken Sie hier, um die Beschriftungen der Objekte anzuzeigen.",
+      "showObjects": "Klicken Sie, um die Objekte in der Karte anzuzeigen.",
+      "unsupportedFiles": "Hajk unterstützt nur .kml-, .gpx- und .geojson-Dateien. Eine oder mehrere Dateien wurden ignoriert.",
+      "uploadedFiles": "Hochgeladene Dateien"
+    },
+    "validation": {
+      "lineKinks_one": "Die Linie hat {{count}} Selbstüberschneidung. Bitte prüfen und korrigieren Sie die Geometrie.",
+      "lineKinks_other": "Die Linie hat {{count}} Selbstüberschneidungen. Bitte prüfen und korrigieren Sie die Geometrie.",
+      "polygonKinks_one": "Das Polygon hat {{count}} Selbstüberschneidung. Bitte prüfen und korrigieren Sie die Geometrie.",
+      "polygonKinks_other": "Das Polygon hat {{count}} Selbstüberschneidungen. Bitte prüfen und korrigieren Sie die Geometrie."
+    }
+  }
+}

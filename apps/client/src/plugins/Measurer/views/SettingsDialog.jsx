@@ -15,16 +15,28 @@ import BaseDialog from "components/Dialog/BaseDialog";
 import HajkToolTip from "components/HajkToolTip";
 
 import { MEASUREMENT_PRECISIONS } from "../constants";
+import i18n from "src/i18n";
 
+// Getters, so the strings are read when rendering (after i18n is initiated).
 const UI_STRINGS = {
-  dialogTitle: "Inställningar",
-  close: "Stäng",
-  pointPrecisionLabel: "Mätprecision, punkter",
-  pointPrecisionHelp:
-    "Välj med vilken precision koordinaterna på punktmätningar ska visas.",
-  precisionLabel: "Mätprecision, längd/area",
-  precisionHelp:
-    "Välj med vilken precision längd- och areamätningar ska visas.",
+  get dialogTitle() {
+    return i18n.t("measurer.settings.title");
+  },
+  get close() {
+    return i18n.t("common.close");
+  },
+  get pointPrecisionLabel() {
+    return i18n.t("measurer.settings.pointPrecision");
+  },
+  get pointPrecisionHelp() {
+    return i18n.t("measurer.settings.pointPrecisionHelp");
+  },
+  get precisionLabel() {
+    return i18n.t("measurer.settings.precision");
+  },
+  get precisionHelp() {
+    return i18n.t("measurer.settings.precisionHelp");
+  },
 };
 
 function PrecisionSelect({ id, label, helpText, value, onValueChange }) {

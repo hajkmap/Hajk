@@ -3,8 +3,10 @@ import {
   GridToolbarContainer,
   GridToolbarExport,
 } from "@mui/x-data-grid";
+import { useTranslation } from "react-i18next";
 
 const DefaultTable = (props) => {
+  const { t } = useTranslation();
   const { feature } = props;
 
   // Grab the geometry name and all properties from feature
@@ -19,10 +21,10 @@ const DefaultTable = (props) => {
   // "id", not "key", because the DataGrid component requires
   // all rows to have a unique "id" property.
   const columns = [
-    { field: "id", headerName: "Nyckel", width: 150 },
+    { field: "id", headerName: t("common.key"), width: 150 },
     {
       field: "value",
-      headerName: "Värde",
+      headerName: t("common.value"),
       flex: 1,
     },
   ];

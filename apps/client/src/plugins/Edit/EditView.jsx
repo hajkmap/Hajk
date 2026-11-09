@@ -12,6 +12,7 @@ import Select from "@mui/material/Select";
 import SaveIcon from "@mui/icons-material/Save";
 import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
+import i18n from "src/i18n";
 
 class EditView extends React.PureComponent {
   constructor(props) {
@@ -115,17 +116,14 @@ class EditView extends React.PureComponent {
 
   getStatusMessage = (data) => {
     if (!data) {
-      return (
-        <Typography>
-          Uppdateringen lyckades men det upptäcktes inte några ändringar.
-        </Typography>
-      );
+      return <Typography>{i18n.t("edit.status.noChanges")}</Typography>;
     }
     if (data.ExceptionReport) {
       return (
         <Typography>
-          Uppdateringen misslyckades:{" "}
-          {data.ExceptionReport.Exception.ExceptionText.toString()}
+          {i18n.t("edit.status.failed", {
+            message: data.ExceptionReport.Exception.ExceptionText.toString(),
+          })}
         </Typography>
       );
     }
@@ -135,30 +133,29 @@ class EditView extends React.PureComponent {
     ) {
       return (
         <div>
-          <Typography>Uppdateringen lyckades.</Typography>
+          <Typography>{i18n.t("edit.status.succeeded")}</Typography>
           <Typography>
-            Antal skapade objekt:{" "}
-            {data.TransactionResponse.TransactionSummary.totalInserted?.toString() ||
-              0}
+            {i18n.t("edit.status.inserted", {
+              number:
+                data.TransactionResponse.TransactionSummary.totalInserted ?? 0,
+            })}
           </Typography>
           <Typography>
-            Antal borttagna objekt:{" "}
-            {data.TransactionResponse.TransactionSummary.totalDeleted?.toString() ||
-              0}
+            {i18n.t("edit.status.deleted", {
+              number:
+                data.TransactionResponse.TransactionSummary.totalDeleted ?? 0,
+            })}
           </Typography>
           <Typography>
-            Antal uppdaterade objekt:{" "}
-            {data.TransactionResponse.TransactionSummary.totalUpdated?.toString() ||
-              0}
+            {i18n.t("edit.status.updated", {
+              number:
+                data.TransactionResponse.TransactionSummary.totalUpdated ?? 0,
+            })}
           </Typography>
         </div>
       );
     } else {
-      return (
-        <Typography>
-          Status för uppdateringen kunde inte avläsas ur svaret från servern.
-        </Typography>
-      );
+      return <Typography>{i18n.t("edit.status.unknown")}</Typography>;
     }
   };
 
@@ -194,7 +191,7 @@ class EditView extends React.PureComponent {
     return (
       <FormControl variant="standard" error={loadingError} fullWidth>
         <InputLabel variant="standard" id="select-source-label">
-          Datakälla
+          {i18n.t("edit.dataSource")}
         </InputLabel>
         <Select
           id="select-source"
@@ -214,9 +211,7 @@ class EditView extends React.PureComponent {
           })}
         </Select>
         {loadingError && (
-          <FormHelperText>
-            Fel vid laddning av data. Kontakta systemadministratören.
-          </FormHelperText>
+          <FormHelperText>{i18n.t("edit.loadFailed")}</FormHelperText>
         )}
       </FormControl>
     );
@@ -254,7 +249,7 @@ class EditView extends React.PureComponent {
       <>
         <Stepper activeStep={activeStep} orientation="vertical">
           <Step key="1">
-            <StepLabel>Välj datamängd att redigera</StepLabel>
+            <StepLabel>{i18n.t("edit.steps.selectSource")}</StepLabel>
             <StepContent>
               <Grid container spacing={2} direction="row">
                 <Grid size={12}>
@@ -266,8 +261,8 @@ class EditView extends React.PureComponent {
           <Step key="2">
             <StepLabel>
               {activeStep === 1
-                ? `Redigerar ${editSource?.caption}`
-                : `Redigera`}
+                ? i18n.t("edit.steps.editing", { name: editSource?.caption })
+                : i18n.t("edit.steps.edit")}
             </StepLabel>
             <StepContent>
               <Grid container spacing={2} direction="row">
@@ -289,7 +284,7 @@ class EditView extends React.PureComponent {
                         onClick={this.handlePrev}
                         variant="contained"
                       >
-                        Bakåt
+                        {i18n.t("common.back")}
                       </Button>
                     </Grid>
                     <Grid size={6}>
@@ -301,7 +296,7 @@ class EditView extends React.PureComponent {
                         color="primary"
                         onClick={this.onSaveClicked}
                       >
-                        Spara
+                        {i18n.t("common.save")}
                       </Button>
                     </Grid>
                   </>
@@ -310,7 +305,7 @@ class EditView extends React.PureComponent {
             </StepContent>
           </Step>
           <Step key="3">
-            <StepLabel>Klart!</StepLabel>
+            <StepLabel>{i18n.t("edit.steps.done")}</StepLabel>
             <StepContent>
               <Grid container spacing={2} direction="row">
                 <Grid size={12}>
@@ -320,7 +315,7 @@ class EditView extends React.PureComponent {
                     color="primary"
                     onClick={this.handlePrev}
                   >
-                    Fortsätt redigera
+                    {i18n.t("edit.continueEditing")}
                   </Button>
                 </Grid>
               </Grid>

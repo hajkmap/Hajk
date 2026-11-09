@@ -3,6 +3,7 @@ import { styled } from "@mui/material/styles";
 import { ScaleLine } from "ol/control";
 import { Paper } from "@mui/material";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 const Root = styled("div")(({ theme }) => ({
   "& .ol-scale-line": {
@@ -96,8 +97,8 @@ class ScaleLineControl extends React.PureComponent {
 
   renderScaleBadge() {
     return (
-      <HajkToolTip title="Nuvarande skala">
-        <StyledPaper elevation={4}>1:{this.state.scale}</StyledPaper>
+      <HajkToolTip title={i18n.t("controls.currentScale")}>
+        <StyledPaper elevation={4}>{`1:${this.state.scale}`}</StyledPaper>
       </HajkToolTip>
     );
   }

@@ -1,0 +1,413 @@
+{
+  "alert": {
+    "missingMessage": "No message",
+    "title": "Message"
+  },
+  "app": {
+    "drawerContent": "Panel content",
+    "lockDrawer": "Lock the tool panel",
+    "logoAltText": "Logo",
+    "mapTools": "Map tools",
+    "unlockDrawer": "Unlock the tool panel"
+  },
+  "backgroundLayers": {
+    "black": "Black",
+    "legendLink": "Link to legend",
+    "moreInfo": "More information",
+    "osmInfoText": "OpenStreetMap is an open, user-generated map that anyone can contribute to. The content is not quality-assured, reviewed or approved by Lantmäteriet (the Swedish mapping authority).",
+    "osmInfoTitle": "About OpenStreetMap",
+    "osmVector": "OpenStreetMap (vector)",
+    "osmVectorInfoText": "OpenStreetMap is an open, user-generated map that anyone can contribute to. The content is not quality-assured, reviewed or approved by Lantmäteriet (the Swedish mapping authority). This variant is loaded as vector data and therefore stays sharp on high-resolution screens.",
+    "osmVectorInfoTitle": "About OpenStreetMap (vector)",
+    "white": "White"
+  },
+  "card": {
+    "missingDescription": "Description missing",
+    "missingTitle": "Title missing"
+  },
+  "common": {
+    "back": "Back",
+    "backToPreviousView": "Back to previous view",
+    "breadcrumb": "Breadcrumb",
+    "cancel": "Cancel",
+    "clear": "Clear",
+    "close": "Close",
+    "continue": "Continue",
+    "cookieSettings": "Cookie settings",
+    "decimals_one": "{{count}} decimal",
+    "decimals_other": "{{count}} decimals",
+    "delete": "Delete",
+    "descriptionLabel": "Description",
+    "download": "Download",
+    "edit": "Edit",
+    "errorTitle": "Error",
+    "generalSettings": "General settings",
+    "geolocationPermissionDenied": "You need to allow the application to show your position. On computers: most browsers have a lock icon in the address bar that you can click to allow Location.",
+    "help": "Help",
+    "hits_one": "{{count}} hit",
+    "hits_other": "{{count}} hits",
+    "info": "Info",
+    "key": "Key",
+    "legend": "Legend",
+    "loading": "Loading...",
+    "next": "Next",
+    "no": "No",
+    "noDescription": "No description",
+    "noResults": "No results",
+    "ok": "OK",
+    "previous": "Previous",
+    "replace": "Replace",
+    "reset": "Reset",
+    "save": "Save",
+    "settings": "Settings",
+    "titleLabel": "Title",
+    "undo": "Undo",
+    "unnamedPlugin": "Unnamed tool",
+    "value": "Value",
+    "xOfY": "{{current}} of {{total}}",
+    "yes": "Yes"
+  },
+  "confirmServiceSwitch": {
+    "clearDrawings": "Delete drawn objects",
+    "drawingCount_one": "You have {{count}} drawn object in the map that isn't connected to any editable layer.",
+    "drawingCount_other": "You have {{count}} drawn objects in the map that aren't connected to any editable layer.",
+    "keepDrawings": "Keep drawn objects (for reference only)",
+    "note": "<strong>Note:</strong> Drawn objects and editable layers are separate systems. If you keep the drawn objects, they'll stay in the map but can't be saved together with the editable layer.",
+    "question": "What do you want to do?",
+    "selectingService": "You're about to select the editable layer <strong>{{name}}</strong>.",
+    "title": "Drawn objects in the map"
+  },
+  "controls": {
+    "activeMap": "Active map",
+    "changeLanguage": "Change language",
+    "clearMap": "Clear the map",
+    "currentMap": "Current map: {{title}}",
+    "currentScale": "Current scale",
+    "externalLinksTitle": "Open coordinate in external application",
+    "hideAllLayers": "Hide all active layers",
+    "informationTitle": "About the map",
+    "presetDialogText": "All visible layers in the map will now be hidden. The quick access predefined layers will be shown instead.",
+    "presetDialogTitle": "Show quick access",
+    "presetInvalidLink": "Unfortunately, the link to this place is invalid. Please contact the administrator of the map service to fix it.",
+    "presetTitle": "Quick access",
+    "recentlyUsedPlugins": "Recently used tools",
+    "resetMap": "Reset the map to its initial state",
+    "resetRotation": "Reset rotation",
+    "showCookieNotice": "Show cookie notice",
+    "switchMap": "Switch map",
+    "toggleAttribution": "Show/hide copyright information for map data",
+    "toggleTheme": "Switch theme",
+    "toggleThemeTooltip": "Switch between dark and light theme",
+    "untitledMap": "Untitled map",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out"
+  },
+  "cookieNotice": {
+    "allowAll": "Allow all",
+    "allowSelected": "Allow selected",
+    "functional": "Functional",
+    "message": "We use necessary cookies to make the website work well for you. We also use functional cookies to give you the best possible experience, if you accept them.",
+    "moreInfo": "More information about cookies",
+    "necessary": "Necessary",
+    "thirdParty": "Third party"
+  },
+  "editing": {
+    "editingService": "Editing {{name}}",
+    "noService": "None"
+  },
+  "featureInfo": {
+    "tableLabel": "Table with feature properties"
+  },
+  "introduction": {
+    "buttonAbstract": "Open guided tour",
+    "buttonTitle": "Introduction guide",
+    "chooseIntroduction": "Choose introduction",
+    "done": "Finish",
+    "fullIntroduction": "Full introduction",
+    "layerSearchExamples": [
+      "Beaches",
+      "Playgrounds",
+      "Schools",
+      "Sights"
+    ],
+    "newIn": "New in {{title}}",
+    "steps": {
+      "actionsMenu": {
+        "intro": "<b>Hide all active layers:</b> turns off all layers in the map. <br><br> <b>Scroll to top:</b> jumps to the start of the layer list. <br><br> <b>Scroll to bottom:</b> jumps to the end of the layer list.",
+        "title": "Menu functions"
+      },
+      "actionsMenuButton": {
+        "intro": "Click the menu button (the three dots). <br><br> <b>The menu lets you:</b> hide all active layers, jump to the top of the layer list or jump to the bottom of the layer list.",
+        "title": "Menu next to the search field"
+      },
+      "documentHandler": {
+        "intro": "The document handler shows and manages texts connected to the map. The documents are standalone and can be reused in several maps.<br><br>With the document handler you can: <ul><li>Show detailed texts connected to map bookmarks.</li><li>Combine text and map by adding map links that correspond to layers in the map.</li></ul>",
+        "title": "Document handler"
+      },
+      "done": {
+        "intro": "You've now completed the whole introduction. Want to go another round?<br><br>Click the button in the map controls to start over.",
+        "title": "Introduction completed 🎉"
+      },
+      "drawOrder": {
+        "intro": "Click the Draw order tab to see and change the order of the layers.",
+        "title": "Draw order"
+      },
+      "editFavorites": {
+        "intro": "The button opens a view where you can manage saved favorites.",
+        "title": "Edit favorites"
+      },
+      "favorites": {
+        "intro": "Click the favorites button. <br><br> Here you can save, edit and load favorites.{{note}}",
+        "noFavorites": "<br><br><i>There are no favorites right now. Add a favorite to enable this part of the guide.</i>",
+        "title": "Favorites"
+      },
+      "favoritesList": {
+        "intro": "Your saved favorites are shown here. Click a favorite to replace the current layers with it.",
+        "title": "Favorites list"
+      },
+      "favoritesMenu": {
+        "intro": "- <b>Save to favorites:</b> saves a group of layers as a favorite. You can set a title and description. <br><br> - <b>Edit favorites:</b> manage your saved favorites. <br><br> - <b>Load favorite:</b> loads the selected favorite. All active layers are replaced with the favorite's layers.",
+        "title": "Favorites menu"
+      },
+      "favoritesOptions": {
+        "intro": "<b>In the menu you can:</b> show information about the favorite, edit it, delete it or export it as a .json file.",
+        "title": "Favorite options"
+      },
+      "favoritesOptionsMenu": {
+        "intro": "<b>Edit:</b> change title and description <br><br> <b>Delete:</b> removes the favorite from the list <br><br> <b>Export:</b> saves the favorite as a .json file",
+        "title": "Favorite options menu"
+      },
+      "hajk4": {
+        "intro": "This introduction shows how the new {{title}} works. <br><br>It illustrates the changes that came with Hajk 4. <br></br> <i>Note that you can't do anything else in the application, such as clicking buttons or using other features, during the introduction.</i> <br><br> Come along!",
+        "title": "Hajk 4"
+      },
+      "importFavorites": {
+        "intro": "Click to import favorites from a .json file.",
+        "title": "Import favorites"
+      },
+      "layerDetails": {
+        "intro": "Click the button to show more information about the layer.",
+        "title": "More information"
+      },
+      "layerGroup": {
+        "intro": "The arrow shows that this is a layer group. Click to see the layers in it. <br><br> Note that layer groups in <b>bold</b> contain active layers.",
+        "title": "Layer group"
+      },
+      "layerInfo": {
+        "intro": "Any information connected to the layer is shown here.",
+        "title": "Layer information"
+      },
+      "layerList": {
+        "intro": "The layer list shows all layers available in the map. <br><br>Here you can: <ul><li>search for layers</li><li>turn layers on or off</li><li>see information about each layer</li></ul>",
+        "title": "Layer list"
+      },
+      "layerSearch": {
+        "intro": "Type in the field to search for layers.<br><br>The results are shown in the layer list below.",
+        "title": "Search layers"
+      },
+      "legend": {
+        "intro": "The button expands a section with the legend. <br><br> Click to show or hide it.",
+        "title": "Legend"
+      },
+      "lockDrawer": {
+        "intro": "Click the button to lock the side menu in place.",
+        "title": "Lock the side menu"
+      },
+      "mapControls": {
+        "intro": "On the far right of the screen are control buttons that you can use to navigate the map.",
+        "title": "Map controls"
+      },
+      "mapTools": {
+        "intro": "The map tools have features that help you navigate the map.<br><br>This is where the tools placed in the side menu are shown.<br><br>Administrators can change where the tools are placed.",
+        "title": "Map tools"
+      },
+      "opacity": {
+        "intro": "Use the slider to change the layer's opacity.",
+        "title": "Opacity"
+      },
+      "quickAccess": {
+        "intro": "Layers saved for quick access are listed and managed here.",
+        "title": "Quick access"
+      },
+      "quickAccessButton": {
+        "intro": "<b>Add to quick access:</b> the layer is added to the quick access menu under the Map layers tab. <br><br> <b>Remove from quick access:</b> the layer is removed from the quick access menu under the Map layers tab.",
+        "title": "Quick access button"
+      },
+      "quickAccessMenu": {
+        "intro": "<b>Add active layers:</b> adds all active layers to quick access. <br><br> <b>Clear everything:</b> removes all layers from quick access.",
+        "title": "Quick access options"
+      },
+      "quickAccessMenuButton": {
+        "intro": "Click the menu button (the three dots) in quick access. <br><br> <b>The menu lets you:</b> <br> - add active layers <br> - clear everything",
+        "title": "Quick access menu"
+      },
+      "searchBar": {
+        "intro": "The search tool helps you quickly find the right place in the map.",
+        "title": "Search box"
+      },
+      "searchOptions": {
+        "intro": "Here you'll find more advanced search options.",
+        "title": "More search options"
+      },
+      "searchToolsMenu": {
+        "intro": "Here you can choose between different search tools for your search.<br><br>You can also click <b>Search settings</b> to open a separate menu.",
+        "title": "Search tools menu"
+      },
+      "systemLayerList": {
+        "intro": "Here you can see and change the order of system layers. <br><br> Drag and drop layers to change the order.",
+        "title": "System layer list"
+      },
+      "systemLayers": {
+        "intro": "Click to show system layers in the layer list below.<br><br>System layers are layers created by tools, for example the Sketch tool.",
+        "title": "Show system layers"
+      },
+      "tabs": {
+        "drawOrder": "- <b>Draw order:</b> change the draw order of active layers in the map",
+        "intro": "Click here to switch between views: <br><br> - <b>Map layers:</b> shows the list of available layers <br><br/> - <b>Background:</b> shows all available background layers <br><br/>{{drawOrder}}",
+        "title": "Tabs in {{title}}"
+      },
+      "themeList": {
+        "intro": "Here you see the themes available in the map. <br><br> Click a theme to activate all its layers. <br><br> You can also search for themes in the search field.",
+        "title": "Theme list"
+      },
+      "themes": {
+        "intro": "Click the button to show themes. <br> Themes are predefined groups of layers created by administrators.{{note}}",
+        "noThemes": "<br><br><i>No themes are available. Ask an administrator to create themes to use this feature.</i>",
+        "title": "Themes"
+      },
+      "toggleLayer": {
+        "intro": "Click the box to turn a layer on or off. A layer name in <b>bold</b> means that the layer is active.",
+        "title": "Turn layers on or off"
+      },
+      "toolPanel": {
+        "documentHandlerIntro": "<br /><br /><b>{{name}}:</b> is a tool for showing larger amounts of text in Hajk. Click the button to show the side menu.",
+        "intro": "<b>{{name}}:</b> here you'll find features and tools that help you interact with the map.{{documentHandler}}",
+        "title": "Tool panel"
+      },
+      "welcome": {
+        "intro": "This short guide shows you around the application. It gives an overview of the basic features and of what's new in Hajk 4. <br><br>Note that you can't do anything else in the application, such as clicking buttons or using other features, during the introduction. <br><br>👉 Come along!",
+        "title": "Welcome"
+      }
+    }
+  },
+  "mapClickViewer": {
+    "keyboardHint": "Tip: you can browse the results with the ← and → keys on your keyboard",
+    "overview": "Overview"
+  },
+  "search": {
+    "clearSearch": "Clear search",
+    "defaultHitName": "Search result",
+    "doSearch": "Search",
+    "drawCircleHint": "Press in the map where you want the center point, then drag outwards and release.",
+    "drawPolygonHint": "Press once in the map for each node of the polygon. Run the search by pressing the last node once more.",
+    "exportName": "Search export",
+    "extentSearchFailed": "A problem occurred when searching the area. Please contact the system administrator.",
+    "fetchFailed": "Note: Couldn't fetch data from: {{sources}}",
+    "hideResultList": "Hide list of search results",
+    "hideResultsInMap": "Hide search results in the map",
+    "inputLabel": "Search the website's content",
+    "missingDisplayFields": "Display fields missing",
+    "missingName": "Name missing",
+    "moreTools": "More search tools and settings",
+    "openMoreSettings": "Open dialog with more settings",
+    "placeholder": "Search",
+    "results": {
+      "addToSelection": "Add to selection",
+      "backToAll": "Back to all search results",
+      "clear": "Clear",
+      "clearFilter": "Clear the filter",
+      "clearSelected": "Clear all selected objects",
+      "download": "Download",
+      "downloadExcel": "Download as Excel",
+      "downloadFeatures": "Download the objects",
+      "downloadKml": "Download as KML",
+      "filter": "Filter",
+      "filterActive": "The filter is active",
+      "filterFieldLabel": "Text field for filtering the results",
+      "filterResult": "Filter the results",
+      "filterResults": "Filter the search results",
+      "hideTools": "Hide tools",
+      "maxHitsReached": "The maximum number of search hits has been reached. Refine your search to make sure that no important information is missed.",
+      "noResults": "The search returned no results.",
+      "preview": "Preview",
+      "removeFromSelection": "Remove from selection",
+      "showingResults_one": "Showing {{count}} result",
+      "showingResults_other": "Showing {{count}} results",
+      "showNextFeature": "Show next object in the result list",
+      "showPreviousFeature": "Show previous object in the result list",
+      "showTools": "Show tools",
+      "sort": "Sort",
+      "sortAtoZ": "alphabetical ascending",
+      "sortNumHits": "number of hits",
+      "sortTooltip": "Sort the results, currently sorted by {{strategy}}",
+      "sortZtoA": "alphabetical descending",
+      "title": "Search results",
+      "userSelected": "Selected objects"
+    },
+    "searchingInArea": "Searching in the area",
+    "searchingWithObject": "Searching with objects",
+    "selectHint": "Press the area in the map that you want to search. Hold CTRL to select several areas.",
+    "settings": {
+      "activeSpatialFilter": "Require the whole object to be within the search area",
+      "activeSpatialFilterTooltip": "If active, the whole object (e.g. a property) must fit within the search area to be included in the result. If inactive, it's enough that a small part of the object is within, or touches, the search area.",
+      "caseSensitive": "Case sensitive",
+      "caseSensitiveTooltip": "If active, a search for 'a' doesn't match 'A'. Turn off to search regardless of upper/lower case.",
+      "display": "Display of results",
+      "general": "General search settings",
+      "labelOnHighlight": "Show text label in the map",
+      "labelOnHighlightTooltip": "If active, a label is shown in the map next to the highlighted search result",
+      "limitSources": "Limit search sources",
+      "limitSourcesTooltip": "Turn on to choose which data sources to search. If off, all available search sources are searched.",
+      "spatial": "Spatial search settings",
+      "text": "Text search settings",
+      "title": "Search settings",
+      "visibleLayersOnly": "Search visible layers only",
+      "visibleLayersOnlyTooltip": "If active, the search only covers layers that are visible and that the system administrator has set up for searching.",
+      "wildcardAfter": "Wildcard after",
+      "wildcardAfterTooltip": "If active, a search for 'road' also matches e.g. 'roads'.",
+      "wildcardBefore": "Wildcard before",
+      "wildcardBeforeTooltip": "If active, a search for 'road' also matches e.g. 'railroad'."
+    },
+    "showResultList": "Show list of search results",
+    "showResultsInMap": "Show search results in the map",
+    "tools": {
+      "extent": "Search within view",
+      "extentTooltip": "Search the entire area shown in the map.",
+      "polygon": "Search with polygon",
+      "polygonTooltip": "Search an area by drawing a polygon.",
+      "radius": "Search with radius",
+      "radiusTooltip": "Search an area by drawing a circle",
+      "select": "Search with objects",
+      "selectTooltip": "Search by selecting one or more areas in the map.",
+      "settingsTooltip": "Change the search settings."
+    },
+    "visibleLayersOnly": "{{placeholder}} (visible layers only)"
+  },
+  "snackbar": {
+    "layerNotVisibleAtZoom": "The layer '{{layer}}' isn't visible at the current zoom level.",
+    "layersNotVisibleAtZoom_one": "The layer '{{layer}}' and {{count}} other layer aren't visible at the current zoom level.",
+    "layersNotVisibleAtZoom_other": "The layer '{{layer}}' and {{count}} other layers aren't visible at the current zoom level."
+  },
+  "startup": {
+    "accessDeniedMessage": "You don't have access to this map.",
+    "accessDeniedTitle": "Access denied",
+    "errorMessage": "The application failed to load. You can try to reset the application by pressing the button below. If the problem persists, please contact your system administrator.",
+    "errorTitle": "An error has occurred",
+    "notFoundMessage": "The map you're trying to open doesn't exist.",
+    "notFoundTitle": "Map not found",
+    "reloadButton": "Reset the application"
+  },
+  "transformer": {
+    "lineNotCrossed": "The line couldn't be split - the cutting line must cross the line",
+    "polygonNotCrossedTwice": "The cutting line must cross the polygon in at least two places",
+    "polygonNotFullySplit": "The cutting line didn't split the polygon completely - make sure the line crosses the whole polygon",
+    "polygonSplitFailed": "Couldn't split the polygon",
+    "unexpectedSplitResult": "Unexpected result when splitting the polygon",
+    "unsupportedGeometry": "Geometry type {{geomType}} can't be split"
+  },
+  "window": {
+    "close": "Close window",
+    "maximize": "Maximize window",
+    "minimize": "Minimize window"
+  }
+}

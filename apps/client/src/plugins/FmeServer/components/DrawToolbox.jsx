@@ -6,34 +6,33 @@ import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import TouchAppIcon from "@mui/icons-material/TouchApp";
 import RotateLeftIcon from "@mui/icons-material/RotateLeft";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 const DrawToolbox = (props) => {
   const drawButtons = [
     {
       type: "Polygon", // Open-layers does not like all caps!
-      tooltip:
-        "Rita en yta i kartan genom att klicka en gång per nod, avsluta med ett dubbelklick.",
+      tooltip: i18n.t("fmeServer.draw.polygon"),
       icon: <EditIcon />,
     },
     {
       type: "Rectangle",
-      tooltip: "Rita en rektangel i kartan.",
+      tooltip: i18n.t("fmeServer.draw.rectangle"),
       icon: <Crop54Icon />,
     },
     {
       type: "Circle",
-      tooltip: "Rita en cirkel i kartan.",
+      tooltip: i18n.t("fmeServer.draw.circle"),
       icon: <RadioButtonUncheckedIcon />,
     },
     {
       type: "Select",
-      tooltip:
-        "Välj från befintliga objekt i kartan. Håll ner Ctrl på Windows eller Cmd (⌘) på Mac för att välja flera objekt.",
+      tooltip: i18n.t("fmeServer.draw.select"),
       icon: <TouchAppIcon />,
     },
     {
       type: "Reset",
-      tooltip: "Blev du inte nöjd? Ta bort alla objekt från kartan.",
+      tooltip: i18n.t("fmeServer.draw.reset"),
       icon: <RotateLeftIcon />,
     },
   ];

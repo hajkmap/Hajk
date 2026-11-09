@@ -2,6 +2,7 @@ import React, { useState } from "react";
 
 import { Box, Button, Divider, Typography } from "@mui/material";
 import HajkToolTip from "components/HajkToolTip";
+import i18n from "src/i18n";
 
 import DigitalPlanItem from "./DigitalPlanItem";
 import ReportDialog from "./ReportDialog";
@@ -45,7 +46,7 @@ function DigitalPlan({
           <HajkToolTip
             title={
               showTooltips
-                ? "Generera en rapport för de valda planbestämmelserna"
+                ? i18n.t("propertyChecker.generatePlanReportTooltip")
                 : ""
             }
           >
@@ -62,7 +63,7 @@ function DigitalPlan({
                 }
                 onClick={() => setReportDialogVisible(true)}
               >
-                Generera rapport
+                {i18n.t("propertyChecker.generateReport")}
               </Button>
             </span>
           </HajkToolTip>

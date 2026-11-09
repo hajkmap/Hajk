@@ -1,0 +1,43 @@
+{
+  "geosuiteExport": {
+    "boreholes": {
+      "deliveryInformation": "Lieferinformationen",
+      "referenceSystem": "Bezugssystem",
+      "title": "Bohrdaten im GeoSuite-Format"
+    },
+    "creatingZip": "ZIP-Datei wird erstellt...",
+    "deliveryInfo": "Projekt: {{project}}\nDokument: {{document}}",
+    "deliveryInfoFileName": "Lieferinformationen.txt",
+    "description": "Daten innerhalb eines ausgewählten Gebiets abrufen",
+    "documents": {
+      "title": "Geotechnische Untersuchungen"
+    },
+    "done": "Fertig",
+    "email": "E-Mail-Adresse",
+    "entireProject": " Gesamtes Projekt",
+    "entireProjectCount": "Gesamtes Projekt ({{number}})",
+    "fetchingResults": "Ergebnisse werden abgerufen...",
+    "finish": "Abschließen",
+    "nextStep": "Weiter zum nächsten Schritt",
+    "noResultsSelectNewArea": "Keine Ergebnisse. Gehen Sie zurück und wählen Sie ein neues Gebiet aus.",
+    "order": "Bestellen",
+    "previousStep": "Zurück zum vorherigen Schritt",
+    "projectExportOptions": "Exportoptionen des Projekts anzeigen.",
+    "projectId": "Id: {{id}}",
+    "selectAll": "Alle auswählen",
+    "selectMore": "Weitere auswählen",
+    "selectMoreProducts": "Weitere Produkte auswählen",
+    "startOver": "Neu beginnen",
+    "steps": {
+      "confirmation": "Bestätigung",
+      "delivery": "Lieferoptionen",
+      "selectArea": "Gebiet auswählen",
+      "selectProduct": "Produkt auswählen"
+    },
+    "termsOfUse": "Nutzungsbedingungen",
+    "title": "Daten abrufen",
+    "withinArea": "Innerhalb der Auswahl",
+    "withinAreaCount": "Innerhalb der Auswahl ({{number}})",
+    "yourEmail": "Ihre E-Mail-Adresse"
+  }
+}

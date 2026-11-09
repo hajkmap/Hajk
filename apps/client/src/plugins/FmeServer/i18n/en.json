@@ -1,0 +1,43 @@
+{
+  "fmeServer": {
+    "areaTooLarge": "The drawn area is too large. Remove it and try again to continue with the order! The drawn area is {{drawnArea}} m², and the maximum allowed area is {{allowedArea}} m²",
+    "description": "Order jobs from FME Server.",
+    "draw": {
+      "circle": "Draw a circle in the map.",
+      "polygon": "Draw an area in the map by clicking once per node, finish with a double click.",
+      "rectangle": "Draw a rectangle in the map.",
+      "reset": "Not happy? Remove all features from the map.",
+      "select": "Select from existing features in the map. Hold down Ctrl on Windows or Cmd (⌘) on Mac to select multiple features."
+    },
+    "drawInstructions": "Choose a drawing tool below to draw the extent of the order.",
+    "groupDisplayName": "Group",
+    "maxFeaturesExceeded": "This workspace only allows one geometry. The previously drawn geometry was removed.",
+    "noGeometryNeeded": "This product doesn't require a geometry! You can continue to the next step.",
+    "noParameters": "There are no published parameters to render! You can continue directly to the next step!",
+    "notConfigured": "The tool is misconfigured, contact the system administrator.",
+    "openProductInfo": "Open link to product information.",
+    "order": {
+      "email": "Email",
+      "failed": "Your order is complete! Unfortunately FME couldn't complete the order. Contact the system administrator.",
+      "processing": "Your order is being processed...",
+      "ready": "The order is ready to be sent! Click below to send it.",
+      "readyWithEmail": "The order is ready to be sent! Enter your email and then click the order button.",
+      "succeeded": "Your order is complete! The result has been sent to your email!"
+    },
+    "orderButton": "Order!",
+    "parametersFailed": "The product's parameters couldn't be fetched. Contact the system administrator.",
+    "parametersLoading": "Trying to fetch parameters...",
+    "parametersNotRendered": "Note that some published parameters couldn't be rendered! The order may not be possible to complete.",
+    "product": "Product",
+    "productHelp": "Not sure how the product works? Click the question mark for more information.",
+    "startOver": "Start over!",
+    "steps": {
+      "order": "Order",
+      "parameters": "Enter parameters",
+      "selectExtent": "Select extent",
+      "selectGroup": "Select {{group}}",
+      "selectProduct": "Select product"
+    },
+    "title": "FME Server"
+  }
+}

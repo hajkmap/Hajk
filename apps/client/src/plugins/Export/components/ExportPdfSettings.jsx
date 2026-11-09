@@ -8,6 +8,7 @@ import ArrowDownward from "@mui/icons-material/ArrowDownward";
 import PictureAsPdf from "@mui/icons-material/PictureAsPdf";
 
 import { getCenter } from "ol/extent";
+import i18n from "src/i18n";
 
 const StyledFormControl = styled(FormControl)(({ theme }) => ({
   marginBottom: theme.spacing(2),
@@ -240,12 +241,9 @@ class ExportPdfSettings extends React.PureComponent {
       if (pdfUrl.trimEnd().substr(-4) === ".pdf") {
         newState["url"] = pdfUrl;
       } else {
-        this.props.enqueueSnackbar(
-          "Utskriften kunde inte skapas. Prova med lägre upplösning, mindre område eller färre lager i kartan.",
-          {
-            variant: "error",
-          }
-        );
+        this.props.enqueueSnackbar(i18n.t("export.pdfFailed"), {
+          variant: "error",
+        });
       }
 
       this.setState(newState);
@@ -257,8 +255,7 @@ class ExportPdfSettings extends React.PureComponent {
 
     const scalesOptions = scales.map((s, i) => (
       <option key={i} value={s}>
-        1:
-        {s}
+        {`1:${s}`}
       </option>
     ));
 
@@ -320,7 +317,7 @@ class ExportPdfSettings extends React.PureComponent {
         <Grid size={12}>
           <StyledFormControl fullWidth>
             <InputLabel variant="standard" htmlFor="paper-size-native-helper">
-              Pappersstorlek
+              {i18n.t("export.paperSize")}
             </InputLabel>
             <NativeSelect
               onChange={this.setFormat}
@@ -334,7 +331,7 @@ class ExportPdfSettings extends React.PureComponent {
         <Grid size={12}>
           <StyledFormControl fullWidth>
             <InputLabel variant="standard" htmlFor="orientation-native-helper">
-              Orientering
+              {i18n.t("export.orientation")}
             </InputLabel>
             <NativeSelect
               onChange={this.setOrientation}
@@ -343,15 +340,15 @@ class ExportPdfSettings extends React.PureComponent {
                 <Input name="orientation" id="orientation-native-helper" />
               }
             >
-              <option value="P">stående</option>
-              <option value="L">liggande</option>
+              <option value="P">{i18n.t("export.portrait")}</option>
+              <option value="L">{i18n.t("export.landscape")}</option>
             </NativeSelect>
           </StyledFormControl>
         </Grid>
         <Grid size={12}>
           <StyledFormControl fullWidth>
             <InputLabel variant="standard" htmlFor="scale-native-helper">
-              Skala
+              {i18n.t("export.scale")}
             </InputLabel>
             <NativeSelect
               onChange={this.setScale}
@@ -360,7 +357,7 @@ class ExportPdfSettings extends React.PureComponent {
             >
               {scalesOptions}
               <option key={"other"} value={"other"}>
-                Annan skala
+                {i18n.t("export.otherScale")}
               </option>
             </NativeSelect>
           </StyledFormControl>
@@ -379,7 +376,7 @@ class ExportPdfSettings extends React.PureComponent {
         <Grid size={12}>
           <StyledFormControl fullWidth>
             <InputLabel variant="standard" htmlFor="resolution-native-helper">
-              Upplösning
+              {i18n.t("export.resolution")}
             </InputLabel>
             <NativeSelect
               value={this.state.selectResolution}
@@ -397,7 +394,8 @@ class ExportPdfSettings extends React.PureComponent {
             fullWidth={true}
             onClick={this.exportPDF}
           >
-            <PictureAsPdf sx={{ marginRight: 1 }} /> Skapa PDF
+            <PictureAsPdf sx={{ marginRight: 1 }} />{" "}
+            {i18n.t("export.createPdf")}
           </Button>
         </StyledFormControl>
         {this.state.url && (
@@ -408,7 +406,8 @@ class ExportPdfSettings extends React.PureComponent {
               target="_blank"
               href={this.state.url || null}
             >
-              <ArrowDownward sx={{ marginRight: 1 }} /> Ladda ner
+              <ArrowDownward sx={{ marginRight: 1 }} />{" "}
+              {i18n.t("common.download")}
             </Button>
           </StyledFormControl>
         )}

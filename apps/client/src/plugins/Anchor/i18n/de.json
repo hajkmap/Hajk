@@ -1,0 +1,17 @@
+{
+  "anchor": {
+    "copyFailed": "Kopieren in die Zwischenablage fehlgeschlagen.",
+    "copyLink": "Link kopieren",
+    "copyLinkTooltip": "Link in die Zwischenablage kopieren",
+    "copySucceeded": "In die Zwischenablage kopiert!",
+    "description": "Einen Link mit den sichtbaren Ebenen, der aktuellen Zoomstufe und dem Kartenausschnitt erstellen",
+    "intro": "Erstellen Sie einen Link mit den sichtbaren Ebenen, der aktuellen Zoomstufe und dem Kartenausschnitt.",
+    "linkToCleanMap": "Link zur Karte ohne Werkzeuge usw. erstellen",
+    "linkToMap": "Link zur Karte erstellen",
+    "linkType": "Linktyp",
+    "openLink": "Link öffnen",
+    "openLinkTooltip": "Link in neuem Fenster öffnen",
+    "qrCode": "QR-Code",
+    "title": "Teilen"
+  }
+}

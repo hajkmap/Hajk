@@ -1,0 +1,11 @@
+{
+  "informative": {
+    "description": "Read more about what is planned in the municipality",
+    "loadFailed": "Loading the Informative plugin failed. The plugin seems to be misconfigured. Please contact the system administrator.",
+    "map": "Map",
+    "print": "Print",
+    "printFailed": "Printing isn't possible right now, please try again later",
+    "tableOfContents": "Table of contents",
+    "title": "Comprehensive plan"
+  }
+}

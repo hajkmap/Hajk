@@ -1,0 +1,21 @@
+{
+  "feedback": {
+    "description": "Send us your feedback",
+    "errors": {
+      "captcha": "Verification failed. Verify again and resend.",
+      "generic": "Sending failed. Please try again later.",
+      "invalid": "The message couldn't be received. Check the text and try again.",
+      "network": "Couldn't reach the server. Check your connection and try again.",
+      "notEnabled": "This feature isn't enabled.",
+      "tooMany": "You've sent too many messages. Please wait a while and try again."
+    },
+    "instructionText": "Do you have comments on the map or its content? Write them here.",
+    "messageLabel": "Message",
+    "privacyNotice": "Don't include any personal data. A link to the map as you see it right now is included.",
+    "send": "Send",
+    "sendAgain": "Send another",
+    "sending": "Sending…",
+    "thankYouText": "Thank you for your feedback!",
+    "title": "Feedback"
+  }
+}

@@ -13,6 +13,7 @@ import {
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 
 import { hfetch } from "utils/FetchWrapper";
+import i18n from "src/i18n";
 
 function VectorFilter({ layer }) {
   const [filterAttribute, setFilterAttribute] = useState("");
@@ -176,23 +177,23 @@ function VectorFilter({ layer }) {
               sx={{ flexGrow: 1, flexBasis: "25%" }}
               variant="subtitle2"
             >
-              Attribut
+              {i18n.t("layerSwitcher.vf.attribute")}
             </Typography>
             <Select
               value={filterAttribute}
               onChange={(e) => handleChange(e, "attribute")}
-              placeholder="Välj attribut"
+              placeholder={i18n.t("layerSwitcher.vf.chooseAttribute")}
               size="small"
               displayEmpty
               fullWidth
               inputProps={{
                 name: "filterAttribute",
-                placeholder: "Välj attributet",
+                placeholder: i18n.t("layerSwitcher.vf.chooseTheAttribute"),
                 id: "attribute",
               }}
             >
               <MenuItem key={-1} value={""}>
-                Välj attribut
+                {i18n.t("layerSwitcher.vf.chooseAttribute")}
               </MenuItem>
               {layerProperties.map((property, i) => {
                 return (
@@ -215,7 +216,7 @@ function VectorFilter({ layer }) {
               sx={{ flexGrow: 1, flexBasis: "25%" }}
               variant="subtitle2"
             >
-              Operator
+              {i18n.t("layerSwitcher.vf.operator")}
             </Typography>
             <Select
               value={filterComparer}
@@ -228,11 +229,13 @@ function VectorFilter({ layer }) {
                 id: "comparer",
               }}
             >
-              <MenuItem value={""}>Välj operator</MenuItem>
-              <MenuItem value="gt">Större än</MenuItem>
-              <MenuItem value="lt">Mindre än</MenuItem>
-              <MenuItem value="eq">Lika med</MenuItem>
-              <MenuItem value="not">Skilt från</MenuItem>
+              <MenuItem value={""}>
+                {i18n.t("layerSwitcher.vf.chooseOperator")}
+              </MenuItem>
+              <MenuItem value="gt">{i18n.t("layerSwitcher.vf.gt")}</MenuItem>
+              <MenuItem value="lt">{i18n.t("layerSwitcher.vf.lt")}</MenuItem>
+              <MenuItem value="eq">{i18n.t("layerSwitcher.vf.eq")}</MenuItem>
+              <MenuItem value="not">{i18n.t("layerSwitcher.vf.not")}</MenuItem>
             </Select>
           </Stack>
           <Stack
@@ -247,17 +250,17 @@ function VectorFilter({ layer }) {
               sx={{ flexGrow: 1, flexBasis: "25%" }}
               variant="subtitle2"
             >
-              Värde
+              {i18n.t("common.value")}
             </Typography>
             <Input
               value={filterValue}
               onChange={(e) => handleChange(e, "value")}
-              placeholder="Filtervärde"
+              placeholder={i18n.t("layerSwitcher.vf.valuePlaceholder")}
               fullWidth
               size="small"
               inputProps={{
                 name: "filterValue",
-                "aria-label": "Värde",
+                "aria-label": i18n.t("common.value"),
               }}
             />
           </Stack>
@@ -269,14 +272,14 @@ function VectorFilter({ layer }) {
               pt: 2,
             }}
           >
-            <Button onClick={resetFilter}>Återställ</Button>
+            <Button onClick={resetFilter}>{i18n.t("common.reset")}</Button>
             <Button
               variant="contained"
               color="primary"
               onClick={setFilter}
               disabled={!enableActivateButton()}
             >
-              Aktivera
+              {i18n.t("layerSwitcher.vf.activate")}
             </Button>
           </Stack>
         </>

@@ -8,6 +8,7 @@ import { Select, Modify, Draw, Translate } from "ol/interaction";
 import { never } from "ol/events/condition";
 import X2JS from "x2js";
 import { hfetch } from "../../utils/FetchWrapper";
+import i18n from "src/i18n";
 
 class EditModel {
   constructor(settings) {
@@ -340,7 +341,7 @@ class EditModel {
     try {
       features = format.readFeatures(data);
     } catch (_e) {
-      alert("Fel: data kan inte läsas in. Kontrollera koordinatsystem.");
+      alert(i18n.t("edit.readFailed"));
     }
 
     // Make sure we have a name for geometry column. If there are features already,

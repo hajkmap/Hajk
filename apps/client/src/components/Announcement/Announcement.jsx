@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import { useSnackbar } from "notistack";
+import { useTranslation } from "react-i18next";
 
 import { IconButton, Link, Typography } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
@@ -37,6 +38,7 @@ import {
 
 function Announcement({ announcements = [], currentMap }) {
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+  const { t } = useTranslation();
 
   /**
    * Runs once. Filters the supplied announcements according to some conditions:
@@ -138,7 +140,7 @@ function Announcement({ announcements = [], currentMap }) {
         return (
           <IconButton
             size="small"
-            aria-label="close"
+            aria-label={t("common.close")}
             color="inherit"
             onClick={() => closeSnackbar(key)}
           >
@@ -204,7 +206,7 @@ function Announcement({ announcements = [], currentMap }) {
     // Filtering is done, now let's invoke render for those
     // items that made it this far.
     filtered.forEach((f) => renderSnackbar(f));
-  }, [announcements, currentMap, enqueueSnackbar, closeSnackbar]);
+  }, [announcements, currentMap, enqueueSnackbar, closeSnackbar, t]);
 
   // Finally, React's render _must_ return something…
   return null;

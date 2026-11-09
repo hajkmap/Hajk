@@ -1,0 +1,17 @@
+{
+  "buffer": {
+    "buffer": "Puffern",
+    "description": "Einen Puffer um ausgewählte Objekte in der Karte erstellen",
+    "distanceLabel": "Pufferabstand (in Metern)",
+    "selectAtLeastOne": "Sie müssen mindestens ein Objekt in der Karte auswählen, um einen Puffer zu erstellen",
+    "selectFeatures": "Objekte auswählen",
+    "selectMultiple": "Mehrere Objekte auswählen",
+    "startOver": "Neu beginnen",
+    "steps": {
+      "distance": "Pufferabstand eingeben",
+      "done": "Fertig",
+      "select": "Zu puffernde Objekte auswählen"
+    },
+    "title": "Puffer"
+  }
+}

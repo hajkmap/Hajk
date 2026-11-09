@@ -1,6 +1,7 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import BaseDialog from "components/Dialog/BaseDialog";
+import { useTranslation } from "react-i18next";
 import {
   Button,
   Checkbox,
@@ -34,6 +35,8 @@ export default function SelectFeaturesDialog({
   drawModel,
   dialogTitle,
 }) {
+  const { t } = useTranslation();
+
   // Let's keep everything in one state here since all properties are
   // changing at the same time (almost).
   const [state, setState] = React.useState({
@@ -175,9 +178,9 @@ export default function SelectFeaturesDialog({
           disabled={state.selectedFeatureIndexes.length === 0}
           onClick={handleConfirm}
         >
-          OK
+          {t("common.ok")}
         </Button>
-        <Button onClick={handleAbort}>Avbryt</Button>
+        <Button onClick={handleAbort}>{t("common.cancel")}</Button>
       </DialogActions>
     </BaseDialog>,
     document.getElementById("map")

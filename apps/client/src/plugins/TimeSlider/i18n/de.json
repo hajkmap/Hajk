@@ -1,0 +1,50 @@
+{
+  "timeSlider": {
+    "description": "Informationen für verschiedene Zeiträume anzeigen",
+    "player": {
+      "backward": "Schritt zurück",
+      "backwardDisabled": "Sie können nicht zurückspringen, während die Wiedergabe läuft.",
+      "forward": "Schritt vor",
+      "forwardDisabled": "Sie können nicht vorspringen, während die Wiedergabe läuft.",
+      "reset": "Zeitleiste zurücksetzen",
+      "start": "Zeitleiste starten",
+      "stop": "Zeitleiste anhalten"
+    },
+    "print": {
+      "dialogText": "Das kann eine Weile dauern, besonders wenn viele Bilder erstellt werden.",
+      "dialogTitle": "Ihre Bilder werden erstellt",
+      "disabledTooltip": "Mit den aktuellen Einstellungen würden zu viele Bilder gedruckt. Verkürzen Sie den Datumsbereich oder ändern Sie die Auflösung.",
+      "enabledTooltip": "Druck starten",
+      "info_one": "Beim Drucken wird für jeden \"Schritt\" der Zeitleiste ein Bild erstellt. Die aktuellen Einstellungen ergeben {{count}} Bild.",
+      "info_other": "Beim Drucken wird für jeden \"Schritt\" der Zeitleiste ein Bild erstellt. Die aktuellen Einstellungen ergeben {{count}} Bilder.",
+      "print": "Drucken",
+      "range": "Druckbereich",
+      "scale": "Maßstab",
+      "selectRange": "Druckbereich auswählen:"
+    },
+    "resolution": "Auflösung",
+    "resolutions": {
+      "days": "Tag",
+      "months": "Monat",
+      "quarters": "Quartal",
+      "years": "Jahr"
+    },
+    "settings": {
+      "dateMissing": "Das Start- oder Enddatum der Ebene fehlt!",
+      "hideLayer": "Ebene ausblenden",
+      "layerOk": "Die Ebene sieht gut aus!",
+      "layerStatus": "Ebenenstatus: ",
+      "noLayers": "Es wurden keine Zeitleistenebenen gefunden. Wenden Sie sich an den Systemadministrator.",
+      "resolutionHelp": "Auflösung der Zeitleiste ändern",
+      "settings": "Einstellungen: ",
+      "showLayer": "Ebene anzeigen",
+      "speedFast": "Schnell (2 Hz)",
+      "speedHelp": "Geschwindigkeit der Zeitleiste ändern",
+      "speedMedium": "Mittel (1 Hz)",
+      "speedSlow": "Langsam (0,5 Hz)",
+      "startEqualsEnd": "Start- und Enddatum der Ebene sind gleich!"
+    },
+    "settingsTitle": "Einstellungen der Zeitleiste",
+    "title": "Zeitleiste"
+  }
+}
