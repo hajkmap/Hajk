@@ -15,7 +15,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Client: InfoDialog - because this plugin now internally uses the LocalStorageHelper, existing settings already stored in user's LocalStorage under the old key will not be respected. In practice this means user will (once again) see any dialog where `visibleAtStart` and `showOnlyOnce` are set to `true`. This will happen once only. After this render, the `alreadyShown` value is written using the LocalStorageHelper and is respected in future renders.
 - Client: Fixed an issue where WMS feature parsing missed reprojection for GeoJSON and GML responses. See [#1889](https://github.com/hajkmap/Hajk/issues/1889) for description. _Note: this isn't breaking per-se, but given the sensitive nature of this change, it must be tested rigorously._
 - Backend: All `/api/v2` controllers now respond through `handleStandardResponse`, so every endpoint returns JSON, errors included (`{ error, details? }` with a proper status code). Informative create/save/delete now respond with `{ message }` instead of plain text, FIR reports with `{ url }` instead of a plain-text URL, and settings errors are no longer `text/plain`. Admin and Client have been updated accordingly; custom integrations parsing these responses as text need to be adjusted.
-- Docker: The official `ghcr.io/hajkmap/hajk` image now runs as the unprivileged `node` user (uid 1000) instead of root. Only `/usr/app/App_Data` and `/usr/app/logs` are writable by that user. **Upgrade note:** a volume created by an older, root-run container holds root-owned files, so the Backend can't save maps, layers, documents or feedback to it. Give the files to uid 1000 once before starting the new image, e.g. `docker run --rm -v hajk-appdata:/data alpine chown -R 1000:1000 /data` (for a bind mount, `sudo chown -R 1000:1000 /path/to/App_Data`). The same goes for a mounted `logs` directory, and for `FIR_TEMP_OUTPUT_DIR` or `INFORMATIVE_CUSTOM_UPLOAD_DIR_ABSOLUTE_PATH` if they point outside `App_Data`.
+- Docker: The official `ghcr.io/hajkmap/hajk` image now runs as the unprivileged `node` user (uid 1000) instead of root. Only `/usr/app/App_Data` and `/usr/app/logs` are writable by that user. **Upgrade note:** a volume or directory written by an older, root-run container holds root-owned files, so the Backend can't save maps, layers, documents or feedback to it. Give the files to uid 1000 once, before starting the new image, using the line that matches your setup (with your own volume name or path):
+
+  ```bash
+  # Named volume
+  docker run --rm -v hajk-appdata:/usr/app/App_Data alpine chown -R 1000:1000 /usr/app/App_Data
+
+  # Bind-mounted App_Data directory on the host
+  sudo chown -R 1000:1000 /path/to/App_Data
+  ```
+
+  The same goes for a mounted `logs` directory, and for `FIR_TEMP_OUTPUT_DIR` or `INFORMATIVE_CUSTOM_UPLOAD_DIR_ABSOLUTE_PATH` if they point outside `App_Data`.
 
 ### Added
 

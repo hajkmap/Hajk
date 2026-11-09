@@ -31,13 +31,20 @@ Hajk is now available on <http://localhost:3002>, and Admin on <http://localhost
 
 - **Configuration** is read from `/usr/app/.env` in the container, which contains the defaults from [`apps/backend/.env.example`](../apps/backend/.env.example). Mount your own `.env` there, or set the settings as environment variables.
 - **Maps, layers and other data** are stored in `/usr/app/App_Data`. Mount a volume there, as above, so they survive when the container is replaced.
-- **Hajk runs as a non-root user**, `node` (uid 1000). It can write only to `/usr/app/App_Data` and `/usr/app/logs`. A new named volume gets the right owner automatically. A bind mount, or a volume created by an older image (which ran as root), must be owned by uid 1000:
+- **Hajk runs as a non-root user**, `node` (uid 1000). It can write only to `/usr/app/App_Data` and `/usr/app/logs`. A new named volume gets the right owner automatically.
 
-  ```bash
-  docker run --rm -v hajk-appdata:/data alpine chown -R 1000:1000 /data
-  ```
-
-  If you set `FIR_TEMP_OUTPUT_DIR` or `INFORMATIVE_CUSTOM_UPLOAD_DIR_ABSOLUTE_PATH` to a directory outside `App_Data`, that directory must be writable by uid 1000 too.
+> [!IMPORTANT]
+> **Upgrading from an older image?** Older images ran as root, so the files they wrote are owned by root, and Hajk can no longer save maps, layers, documents or feedback to them. Give them to uid 1000 once, before you start the new image. Use the line that matches how you store `App_Data`, with your own volume name or path:
+>
+> ```bash
+> # Named volume
+> docker run --rm -v hajk-appdata:/usr/app/App_Data alpine chown -R 1000:1000 /usr/app/App_Data
+>
+> # Bind-mounted App_Data directory on the host
+> sudo chown -R 1000:1000 /path/to/App_Data
+> ```
+>
+> If you set `FIR_TEMP_OUTPUT_DIR` or `INFORMATIVE_CUSTOM_UPLOAD_DIR_ABSOLUTE_PATH` to a directory outside `App_Data`, that directory must be writable by uid 1000 too.
 
 > [!WARNING]
 > With the default settings, anyone who can reach the container can use Admin and change the maps. Read [How do we harden our installation?](../docs/security-faq.md#how-do-we-harden-our-installation) before you expose Hajk to anyone else.
