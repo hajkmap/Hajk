@@ -62,16 +62,29 @@ COPY --from=buildimage /tmp/build/backend/dist ./
 # they'll be mounted when running anyway, but if someone forgets
 # that, it's good to have them around so we get running with the defaults. 
 COPY /apps/backend/.env.example ./.env
-COPY /apps/backend/App_Data ./App_Data
+# App_Data is where the Backend writes at runtime (maps, layers, documents,
+# uploads, feedback), so it must be owned by the user that runs the app.
+COPY --chown=node:node /apps/backend/App_Data ./App_Data
 COPY /apps/backend/static ./static
 
-# We have to clean up the layers.json file so that we don't try to access the backend on localhost
-RUN sed -i 's|http://localhost:3002||g' ./App_Data/layers.json
+# We have to clean up the layers.json file so that we don't try to access the backend on localhost.
+# sed -i replaces the file, so give it back to node afterwards. Also create the
+# log directory (the Backend writes to logs/ relative to /usr/app) owned by node.
+RUN sed -i 's|http://localhost:3002||g' ./App_Data/layers.json \
+  && chown node:node ./App_Data/layers.json \
+  && mkdir ./logs \
+  && chown node:node ./logs
 
 # Move the built Client and Admin dirs into static
 COPY --from=buildimage /tmp/build/client/build ./static/client
 COPY --from=buildimage /tmp/build/admin/build ./static/admin
 # --- FINAL ASSEMBLY END --- #
+
+# Run as the unprivileged "node" user (uid 1000) that comes with the official
+# Node.js image. Everything except App_Data and logs stays owned by root, so
+# the app can't modify its own code. Port 3002 needs no extra privileges.
+USER node
+EXPOSE 3002
 
 # Go!
 CMD ["node", "index.js"]
