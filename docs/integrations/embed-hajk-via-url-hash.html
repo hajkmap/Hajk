@@ -1,0 +1,686 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Embedding Hajk via the URL hash</title>
+    <style>
+      :root {
+        --text: #2c2c2a;
+        --muted: #5f5e5a;
+        --line: #d3d1c7;
+        --bg: #fff;
+        --code: #f1efe8;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font:
+          16px/1.6 -apple-system,
+          BlinkMacSystemFont,
+          "Helvetica Neue",
+          Helvetica,
+          Arial,
+          sans-serif;
+      }
+      main {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 32px 16px 64px;
+      }
+      h1 {
+        font-size: 26px;
+        font-weight: 600;
+        margin: 0 0 4px;
+      }
+      h2 {
+        font-size: 19px;
+        font-weight: 600;
+        margin: 40px 0 8px;
+      }
+      p.lead {
+        color: var(--muted);
+        margin: 0 0 24px;
+      }
+      figure {
+        margin: 0 0 8px;
+      }
+      figure svg {
+        display: block;
+        width: 100%;
+        height: auto;
+        max-height: 88vh;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 8px 0 4px;
+        font-size: 15px;
+      }
+      th,
+      td {
+        text-align: left;
+        vertical-align: top;
+        padding: 8px 10px;
+        border-bottom: 1px solid var(--line);
+      }
+      th {
+        font-weight: 600;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      td:first-child {
+        white-space: nowrap;
+        width: 1%;
+      }
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.9em;
+        background: var(--code);
+        padding: 1px 5px;
+        border-radius: 4px;
+      }
+      .tag {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        margin-right: 6px;
+        vertical-align: baseline;
+      }
+      .live {
+        background: #e1f5ee;
+        border: 1px solid #0f6e56;
+      }
+      .start {
+        background: #f1efe8;
+        border: 1px solid #5f5e5a;
+      }
+      .origin {
+        background: #faeeda;
+        border: 1px solid #854f0b;
+      }
+      ul {
+        padding-left: 20px;
+      }
+      li {
+        margin: 6px 0;
+      }
+      pre {
+        background: var(--code);
+        padding: 12px 14px;
+        border-radius: 8px;
+        overflow-x: auto;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+      pre code {
+        background: none;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Embedding Hajk via the URL hash</h1>
+      <p class="lead">
+        The host app shows Hajk in an <code>&lt;iframe&gt;</code> and controls
+        the map by changing the hash part of the iframe's address.
+      </p>
+
+      <figure>
+        <svg
+          viewBox="36 20 608 576"
+          role="img"
+          aria-label="The host app writes hash parameters to Hajk in an iframe. Reading them back requires the same origin."
+          font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif"
+        >
+          <defs>
+            <marker
+              id="eg"
+              viewBox="0 0 10 10"
+              refX="8"
+              refY="5"
+              markerWidth="6"
+              markerHeight="6"
+              orient="auto"
+            >
+              <path
+                d="M2 1L8 5L2 9"
+                fill="none"
+                stroke="#73726C"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </marker>
+            <marker
+              id="ea"
+              viewBox="0 0 10 10"
+              refX="8"
+              refY="5"
+              markerWidth="6"
+              markerHeight="6"
+              orient="auto"
+            >
+              <path
+                d="M2 1L8 5L2 9"
+                fill="none"
+                stroke="#BA7517"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </marker>
+            <style>
+              .t {
+                font-size: 14px;
+                font-weight: 600;
+              }
+              .s {
+                font-size: 12px;
+              }
+            </style>
+          </defs>
+          <rect
+            x="40"
+            y="40"
+            width="600"
+            height="540"
+            rx="16"
+            fill="#FAECE7"
+            stroke="#993C1D"
+            stroke-width="0.75"
+          />
+          <text class="t" x="60" y="64" fill="#712B13">Host app</text>
+          <rect
+            x="80"
+            y="80"
+            width="520"
+            height="56"
+            rx="8"
+            fill="#F1EFE8"
+            stroke="#5F5E5A"
+            stroke-width="0.75"
+          />
+          <text class="t" x="340" y="103" text-anchor="middle" fill="#444441">
+            Host app code
+          </text>
+          <text class="s" x="340" y="122" text-anchor="middle" fill="#5F5E5A">
+            Sets the iframe's src with hash parameters
+          </text>
+          <line
+            x1="160"
+            y1="140"
+            x2="160"
+            y2="266"
+            stroke="#73726C"
+            stroke-width="1.5"
+            marker-end="url(#eg)"
+          />
+          <text class="s" x="176" y="180" fill="#5F5E5A">
+            Write: #m=…&amp;z=8&amp;l=…&amp;p=…
+          </text>
+          <text class="s" x="176" y="198" fill="#5F5E5A">
+            Works across origins
+          </text>
+          <line
+            x1="520"
+            y1="266"
+            x2="520"
+            y2="140"
+            stroke="#BA7517"
+            stroke-width="1.5"
+            stroke-dasharray="5 4"
+            marker-end="url(#ea)"
+          />
+          <text class="s" x="504" y="224" text-anchor="end" fill="#5F5E5A">
+            Read back Hajk's state
+          </text>
+          <rect
+            x="334"
+            y="234"
+            width="170"
+            height="26"
+            rx="13"
+            fill="#FAEEDA"
+            stroke="#854F0B"
+            stroke-width="0.75"
+          />
+          <text class="t" x="419" y="252" text-anchor="middle" fill="#633806">
+            Requires same origin
+          </text>
+          <rect
+            x="80"
+            y="270"
+            width="520"
+            height="290"
+            rx="8"
+            fill="#EEEDFE"
+            stroke="#534AB7"
+            stroke-width="0.75"
+          />
+          <text class="t" x="340" y="297" text-anchor="middle" fill="#3C3489">
+            Hajk in an &lt;iframe&gt;
+          </text>
+          <text class="s" x="100" y="320" fill="#534AB7">
+            Live: Hajk reacts as soon as the hash changes
+          </text>
+          <g>
+            <rect
+              x="100"
+              y="330"
+              width="110"
+              height="48"
+              rx="6"
+              fill="#E1F5EE"
+              stroke="#0F6E56"
+              stroke-width="0.75"
+            />
+            <text class="t" x="155" y="351" text-anchor="middle" fill="#085041">
+              m
+            </text>
+            <text class="s" x="155" y="368" text-anchor="middle" fill="#0F6E56">
+              Map (reloads)
+            </text>
+            <rect
+              x="223"
+              y="330"
+              width="110"
+              height="48"
+              rx="6"
+              fill="#E1F5EE"
+              stroke="#0F6E56"
+              stroke-width="0.75"
+            />
+            <text class="t" x="278" y="351" text-anchor="middle" fill="#085041">
+              x · y
+            </text>
+            <text class="s" x="278" y="368" text-anchor="middle" fill="#0F6E56">
+              Center
+            </text>
+            <rect
+              x="346"
+              y="330"
+              width="110"
+              height="48"
+              rx="6"
+              fill="#E1F5EE"
+              stroke="#0F6E56"
+              stroke-width="0.75"
+            />
+            <text class="t" x="401" y="351" text-anchor="middle" fill="#085041">
+              z
+            </text>
+            <text class="s" x="401" y="368" text-anchor="middle" fill="#0F6E56">
+              Zoom level
+            </text>
+            <rect
+              x="469"
+              y="330"
+              width="110"
+              height="48"
+              rx="6"
+              fill="#E1F5EE"
+              stroke="#0F6E56"
+              stroke-width="0.75"
+            />
+            <text class="t" x="524" y="351" text-anchor="middle" fill="#085041">
+              l
+            </text>
+            <text class="s" x="524" y="368" text-anchor="middle" fill="#0F6E56">
+              Visible layers
+            </text>
+            <rect
+              x="100"
+              y="388"
+              width="110"
+              height="48"
+              rx="6"
+              fill="#E1F5EE"
+              stroke="#0F6E56"
+              stroke-width="0.75"
+            />
+            <text class="t" x="155" y="409" text-anchor="middle" fill="#085041">
+              gl
+            </text>
+            <text class="s" x="155" y="426" text-anchor="middle" fill="#0F6E56">
+              Sublayers
+            </text>
+            <rect
+              x="223"
+              y="388"
+              width="110"
+              height="48"
+              rx="6"
+              fill="#E1F5EE"
+              stroke="#0F6E56"
+              stroke-width="0.75"
+            />
+            <text class="t" x="278" y="409" text-anchor="middle" fill="#085041">
+              p
+            </text>
+            <text class="s" x="278" y="426" text-anchor="middle" fill="#0F6E56">
+              Open tools
+            </text>
+            <rect
+              x="346"
+              y="388"
+              width="110"
+              height="48"
+              rx="6"
+              fill="#E1F5EE"
+              stroke="#0F6E56"
+              stroke-width="0.75"
+            />
+            <text class="t" x="401" y="409" text-anchor="middle" fill="#085041">
+              q
+            </text>
+            <text class="s" x="401" y="426" text-anchor="middle" fill="#0F6E56">
+              Search
+            </text>
+            <rect
+              x="100"
+              y="472"
+              width="110"
+              height="48"
+              rx="6"
+              fill="#F1EFE8"
+              stroke="#5F5E5A"
+              stroke-width="0.75"
+            />
+            <text class="t" x="155" y="493" text-anchor="middle" fill="#444441">
+              s
+            </text>
+            <text class="s" x="155" y="510" text-anchor="middle" fill="#5F5E5A">
+              Search sources
+            </text>
+            <rect
+              x="223"
+              y="472"
+              width="110"
+              height="48"
+              rx="6"
+              fill="#F1EFE8"
+              stroke="#5F5E5A"
+              stroke-width="0.75"
+            />
+            <text class="t" x="278" y="493" text-anchor="middle" fill="#444441">
+              f
+            </text>
+            <text class="s" x="278" y="510" text-anchor="middle" fill="#5F5E5A">
+              CQL filter
+            </text>
+            <rect
+              x="346"
+              y="472"
+              width="110"
+              height="48"
+              rx="6"
+              fill="#F1EFE8"
+              stroke="#5F5E5A"
+              stroke-width="0.75"
+            />
+            <text class="t" x="401" y="493" text-anchor="middle" fill="#444441">
+              clean
+            </text>
+            <text class="s" x="401" y="510" text-anchor="middle" fill="#5F5E5A">
+              Map only, no UI
+            </text>
+            <rect
+              x="469"
+              y="472"
+              width="110"
+              height="48"
+              rx="6"
+              fill="#F1EFE8"
+              stroke="#5F5E5A"
+              stroke-width="0.75"
+            />
+            <text class="t" x="524" y="493" text-anchor="middle" fill="#444441">
+              q_pc
+            </text>
+            <text class="s" x="524" y="510" text-anchor="middle" fill="#5F5E5A">
+              Property
+            </text>
+          </g>
+          <text class="s" x="100" y="462" fill="#534AB7">
+            Start only: read when Hajk loads
+          </text>
+          <text class="s" x="100" y="544" fill="#534AB7">
+            Live mode requires enableAppStateInHash (map setting or URL)
+          </text>
+        </svg>
+      </figure>
+
+      <h2>How it works</h2>
+      <p>
+        Hajk keeps the map's state in the hash part of the address, i.e.
+        everything after the <code>#</code>. The host app controls the map by
+        changing that hash in the iframe's <code>src</code>. Hajk detects the
+        change and updates the map without reloading the page. For example:
+      </p>
+      <pre><code>// Send the state the map should have
+function setMapState(params) {
+  const iframe = document.getElementById("hajk");
+  const url = new URL(iframe.src);
+  url.hash = new URLSearchParams(params).toString();
+  iframe.src = url.toString();
+}
+
+setMapState({
+  m: "map_1",                                       // always include the current map
+  z: "8",
+  l: "background_layer_id,properties,detailed_plans" // full list of visible layers
+});                                                 // Hajk zooms and shows the layers</code></pre>
+      <p>Things to keep in mind:</p>
+      <ul>
+        <li>
+          <strong>Always include <code>m</code></strong> (unless it is already
+          in the query string, <code>?m=…</code>). If the hash has no
+          <code>m</code>, Hajk treats it as a map change and reloads on every
+          update.
+        </li>
+        <li>
+          <strong>Send only the parameters that should change.</strong> Hajk
+          compares each parameter with its current state and applies any that
+          differ, so stale values, e.g.
+          old <code>x</code>/<code>y</code> copied from the initial
+          <code>src</code>, will undo what the user has done since.
+        </li>
+        <li>
+          Reading <code>iframe.src</code> gives the address
+          the host app last set, not Hajk's current state. See
+          <a href="#read-back">Reading back</a> below.
+        </li>
+      </ul>
+
+      <h2>
+        <span class="tag live"></span>Live: Hajk reacts as soon as the hash
+        changes
+      </h2>
+      <table>
+        <tr>
+          <th>Param</th>
+          <th>Controls</th>
+          <th>Format and notes</th>
+        </tr>
+        <tr>
+          <td><code>m</code></td>
+          <td>Which map is shown</td>
+          <td>
+            The map's name in Hajk. Changing it reloads all of Hajk; the other
+            parameters in the hash are then applied as on a fresh start.
+          </td>
+        </tr>
+        <tr>
+          <td><code>x</code>, <code>y</code></td>
+          <td>Map center</td>
+          <td>
+            Coordinates in the map's projection, e.g. SWEREF 99. Always set
+            both. The map pans smoothly to the point.
+          </td>
+        </tr>
+        <tr>
+          <td><code>z</code></td>
+          <td>Zoom level</td>
+          <td>Integer (decimals are rounded). The map zooms smoothly to the level.</td>
+        </tr>
+        <tr>
+          <td><code>l</code></td>
+          <td>Visible layers</td>
+          <td>
+            Comma-separated layer ids. The list is the <em>complete</em> set of
+            visible layers: layers not in the list are hidden, including the
+            background layer. The suffix <code>_l</code>, e.g.
+            <code>abc123_l</code>, turns on labels for the layer (if it has a
+            label style). An empty <code>l=</code> is ignored and does not hide
+            anything.
+          </td>
+        </tr>
+        <tr>
+          <td><code>gl</code></td>
+          <td>Sublayers in group layers</td>
+          <td>
+            JSON stating which sublayers are visible in a group layer, e.g.
+            <code>{"groupLayerId":"sub1,sub2"}</code>. Only needed when part of
+            the group is visible; a group in <code>l</code> without an entry in
+            <code>gl</code> shows all its sublayers.
+          </td>
+        </tr>
+        <tr>
+          <td><code>p</code></td>
+          <td>Open/close tools</td>
+          <td>
+            Comma-separated tool names in lower case, e.g.
+            <code>layerswitcher,search</code>. Tools not in the list are closed;
+            an empty string (<code>p=</code>) closes all tools. Anchor and Print
+            are never controlled by <code>p</code>.
+          </td>
+        </tr>
+        <tr>
+          <td><code>q</code></td>
+          <td>Search phrase</td>
+          <td>
+            Fills in the search box and runs the search, using the search
+            sources from <code>s</code> as they were at start.
+          </td>
+        </tr>
+      </table>
+
+      <h2>
+        <span class="tag start"></span>Start only: read when Hajk loads
+      </h2>
+      <p>
+        Changing these after Hajk has loaded has no effect. To apply a new value, the host app must also reload the iframe (or change <code>m</code>, which
+        reloads Hajk).
+      </p>
+      <table>
+        <tr>
+          <th>Param</th>
+          <th>Controls</th>
+          <th>Format and notes</th>
+        </tr>
+        <tr>
+          <td><code>s</code></td>
+          <td>Search sources</td>
+          <td>
+            Which search sources the search in <code>q</code> uses. It cannot
+            be changed at runtime yet, so a live change of <code>q</code> uses
+            the search sources that applied at start.
+          </td>
+        </tr>
+        <tr>
+          <td><code>f</code></td>
+          <td>CQL filter per layer</td>
+          <td>
+            URL-encoded JSON with layer id as key and CQL filter as value. Only
+            features in the layer that match the filter are shown. Requires a
+            WMS server that supports the <code>CQL_FILTER</code> vendor
+            parameter, e.g. GeoServer.
+          </td>
+        </tr>
+        <tr>
+          <td><code>clean</code></td>
+          <td>Map without UI</td>
+          <td>
+            Hides tools, menus and other UI so only the map is visible. Useful
+            when the host app provides all the UI itself. <code>clean=false</code>
+            and <code>clean=0</code> turn it off.
+          </td>
+        </tr>
+        <tr>
+          <td><code>q_pc</code></td>
+          <td>Property selection</td>
+          <td>
+            Property designation that the PropertyChecker tool looks up and
+            highlights, with an address as fallback if address lookup is
+            configured. Requires both PropertyChecker and the Search tool to be
+            configured.
+          </td>
+        </tr>
+      </table>
+
+      <h2>Prerequisite: live mode must be enabled</h2>
+      <p>
+        Without live mode Hajk reads the hash only when the map loads, and does
+        not write its state back either. Live mode is enabled in one of two
+        ways:
+      </p>
+      <ul>
+        <li>
+          the <code>enableAppStateInHash</code> setting on the map in Hajk
+          Admin, or
+        </li>
+        <li>
+          the <code>enableAppStateInHash</code> parameter in the address, for a
+          single embedding. Put it in the query string
+          (<code>?enableAppStateInHash</code>), not the hash: Hajk rewrites the
+          hash and would drop it, so live mode would be lost after a map change
+          (<code>m</code>) reloads Hajk.
+        </li>
+      </ul>
+      <p>
+        By default every state change Hajk writes adds a browser history entry,
+        so the Back button of the page hosting the iframe steps through map
+        states. Enable <code>replaceAppStateInHash</code> on the map in Hajk
+        Admin to replace the entry instead.
+      </p>
+
+      <h2 id="read-back">
+        <span class="tag origin"></span>Reading back requires the same origin
+      </h2>
+      <p>
+        When the user pans, zooms or toggles layers, Hajk writes its new state
+        to the hash (shortly after the change, not instantly). If the host app
+        wants to follow it, e.g. to save the state or sync it with something
+        else in the app, it must be able to read the iframe's address.
+      </p>
+      <p>
+        The browser only allows that when the host app and Hajk have
+        <strong>the same origin</strong>, i.e. the same protocol, domain and
+        port. One way to achieve this is to put Hajk behind the same reverse
+        proxy as the host app, e.g. <code>https://app.example.com/map/</code>.
+      </p>
+      <ul>
+        <li>
+          <strong>Different origins:</strong> the host app can write to Hajk but
+          not read back. That is enough when it only needs to control the
+          map.
+        </li>
+        <li>
+          <strong>Same origin:</strong> both directions work, and the host app can
+          listen for <code>hashchange</code> on
+          <code>iframe.contentWindow</code> and read
+          <code>iframe.contentWindow.location.hash</code>. Re-attach the
+          listener on the iframe's <code>load</code> event, since a map change
+          reloads Hajk.
+        </li>
+      </ul>
+    </main>
+  </body>
+</html>
