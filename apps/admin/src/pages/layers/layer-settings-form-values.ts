@@ -3,6 +3,7 @@ import type { Layer } from "../../api/layers";
 import type { EditableFieldConfig } from "./types/editing-layer";
 import { editingOptionsFrom } from "./types/editing-layer";
 import { toDateTimeLocal } from "../../lib/availability";
+import { sublayersInfoFrom } from "./feature-info/infoclick-target";
 
 /** Geometry field from searchSettings (search) or top-level scalar (editing). */
 export function getLayerGeometryField(layer: Layer): string {
@@ -111,6 +112,7 @@ export function buildLayerSettingsFormValues(
       ...editingOptionsFrom(layerOptions),
       editableFields: savedEditableFields,
       nonEditableFields: savedNonEditableFields,
+      layersInfo: sublayersInfoFrom(layerOptions, layer.selectedLayers ?? []),
     },
   };
 }

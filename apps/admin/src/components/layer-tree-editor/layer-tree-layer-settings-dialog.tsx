@@ -84,10 +84,12 @@ export default function LayerTreeLayerSettingsDialog({
         multiline
         minRows={4}
         label={t("layerTree.settings.infobox")}
+        helperText={t("layerTree.settings.infoboxHelp")}
         value={values.infobox}
         onChange={(event) =>
           setValues((current) => ({ ...current, infobox: event.target.value }))
         }
+        slotProps={{ htmlInput: { spellCheck: false } }}
         sx={{ mt: 2 }}
       />
     </DialogWrapper>

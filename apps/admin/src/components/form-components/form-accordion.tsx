@@ -20,6 +20,7 @@ interface FormAccordionProps {
   titleDetail?: string;
   children?: React.ReactNode;
   defaultExpanded?: boolean;
+  bordered?: boolean;
 }
 
 export default function FormAccordion({
@@ -27,6 +28,7 @@ export default function FormAccordion({
   titleDetail,
   children,
   defaultExpanded = false,
+  bordered = false,
 }: FormAccordionProps) {
   const [expanded, setExpanded] = useState(defaultExpanded);
   const searching = useSettingsSearchTerm() !== null;
@@ -69,6 +71,7 @@ export default function FormAccordion({
     <Accordion
       ref={rootRef}
       disableGutters
+      {...(bordered ? { "data-bordered": "" } : {})}
       expanded={expanded}
       onChange={handleAccordionChange}
       {...(searching
@@ -76,8 +79,16 @@ export default function FormAccordion({
         : {})}
       sx={{
         width: "100%",
-        marginBottom: "24px !important",
+        marginBottom: bordered ? 0 : "24px !important",
         backgroundColor: "none",
+        ...(bordered && {
+          border: 1,
+          borderColor: "divider",
+          borderRadius: 1,
+          boxShadow: "none",
+          overflow: "hidden",
+          "&:before": { display: "none" },
+        }),
       }}
     >
       <AccordionSummary

@@ -9,7 +9,7 @@ export function GlobalStylesComponent({ mode }: { mode: PaletteMode }) {
   return (
     <GlobalStyles
       styles={{
-        ".form-container .MuiPaper-root:not(.MuiAlert-root)": {
+        ".form-container .MuiPaper-root:not(.MuiAlert-root):not([data-bordered])": {
           "&:before": {
             display: "none", // Hide the fake top border on Accordion
           },
@@ -19,7 +19,7 @@ export function GlobalStylesComponent({ mode }: { mode: PaletteMode }) {
           boxShadow: "none",
           borderRadius: "8px", // Default is 4px
         },
-        ".form-container .MuiAccordion-root": {
+        ".form-container .MuiAccordion-root:not([data-bordered])": {
           border: 0,
           boxShadow: "none",
           borderRadius: "8px", // Default is 4px

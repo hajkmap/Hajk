@@ -83,6 +83,7 @@ function LayerFormDialogBody({
 
         <TextField
           label={t("layerTree.settings.infobox")}
+          helperText={t("layerTree.settings.infoboxHelp")}
           value={values.layerInfoBox}
           onChange={(event) => {
             setValues((current) => ({

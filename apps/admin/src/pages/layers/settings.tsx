@@ -7,7 +7,6 @@ import {
 } from "react-router";
 import Page from "../../layouts/root/components/page";
 import { useTranslation } from "react-i18next";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   TextField,
   useTheme,
@@ -65,7 +64,23 @@ import { useRoles } from "../../api/users";
 import { HttpError } from "../../lib/http-error";
 import FormContainer from "../../components/form-components/form-container";
 import FormPanel from "../../components/form-components/form-panel";
-import LayerInfoClickModal from "./components/layer-infoclick-modal";
+import FormAccordion from "../../components/form-components/form-accordion";
+import LayerInfoClickModal, {
+  type LayerInfoClickModalValues,
+} from "./components/layer-infoclick-modal";
+import FeatureInfoDesigner from "./feature-info/feature-info-designer";
+import {
+  hasBlockingIssues,
+  validateTemplate,
+} from "./feature-info/template-validation";
+import {
+  infoClickTargetFor,
+  sublayersInfoFrom,
+  toLayersInfoArray,
+  type SublayerInfo,
+  type SublayersInfo,
+} from "./feature-info/infoclick-target";
+import SublayerInfoClickSettings from "./feature-info/sublayer-infoclick-settings";
 import EditingLayerSettings from "./components/editing-layer-settings";
 import {
   defaultEditingOptions,
@@ -83,7 +98,6 @@ import {
 } from "./layer-category";
 import {
   buildLayerSettingsFormValues,
-  getLayerGeometryField,
   resolveGeometryFieldFromPayload,
 } from "./layer-settings-form-values";
 import {
@@ -161,7 +175,6 @@ export default function LayerSettings() {
     isPending: isDeletingLayer,
     isSuccess: isLayerDeleted,
   } = useDeleteLayer(layer?.serviceId ?? fromService ?? "");
-  const queryClient = useQueryClient();
   const { palette } = useTheme();
   const { data: services } = useServices();
   const { data: roles } = useRoles();
@@ -338,6 +351,19 @@ export default function LayerSettings() {
     [layer, roleOnLayer?.roleId],
   );
 
+  const savedInfoboxDefinition = layer?.infoClickSettings?.definition ?? "";
+  const savedSublayersInfo = useMemo(
+    () =>
+      layer
+        ? sublayersInfoFrom(layer.options, layer.selectedLayers ?? [])
+        : {},
+    [layer],
+  );
+  const sublayersInfoChanged = (current: SublayersInfo | undefined) =>
+    current !== undefined &&
+    JSON.stringify(current) !== JSON.stringify(savedSublayersInfo);
+  const infoClickTarget = infoClickTargetFor(service?.type);
+
   const layerEditingDefaults = useMemo(() => {
     if (!layer) return null;
     const opts =
@@ -399,6 +425,10 @@ export default function LayerSettings() {
   const watchSingleTile = useWatch({ control, name: "singleTile" }) as
     | boolean
     | undefined;
+  const watchPrimaryDisplayFields = useWatch({
+    control,
+    name: "searchSettings.primaryDisplayFields",
+  }) as string | undefined;
   // Saving waits until "Tillgänglig till" lies after "Tillgänglig från".
   const [watchVisible, watchVisibleFrom, watchVisibleUntil] = useWatch({
     control,
@@ -469,6 +499,11 @@ export default function LayerSettings() {
     [selectedRowsData],
   );
 
+  const infoboxTypeNames = useMemo(() => {
+    const selected = (selectedRowObjects ?? []).filter(Boolean);
+    return selected.length > 0 ? selected : (layer?.selectedLayers ?? []);
+  }, [selectedRowObjects, layer?.selectedLayers]);
+
   const selectedLayersDirty = useMemo(() => {
     if (selectGridId === undefined) return false;
     const saved = [...(layer?.selectedLayers ?? [])].sort();
@@ -491,225 +526,50 @@ export default function LayerSettings() {
     setSelectedInfoClickLayer("");
   };
 
-  const handleSaveLayerInfoClick = async (data: {
-    caption?: string;
-    legendUrl?: string;
-    legendIcon?: string;
-    style?: string;
-    queryable?: boolean;
-    infoclickIcon?: string;
-    searchDisplayName?: string;
-    secondaryLabelFields?: string;
-    searchShortDisplayName?: string;
-    searchUrl?: string;
-    searchPropertyName?: string;
-    searchOutputFormat?: string;
-    searchGeometryField?: string;
-    definition?: string;
-    format: string;
-    sortProperty?: string;
-    sortMethod: string;
-    sortDescending: boolean;
-  }) => {
-    // Store per-layer-instance settings in layer.options.layersInfo
-    if (!layer) return;
-
-    // Get existing layersInfo from options or initialize empty object
-    const existingLayersInfo =
-      (layer.options?.layersInfo as Record<
-        string,
-        {
-          caption?: string;
-          legendUrl?: string;
-          legendIcon?: string;
-          style?: string;
-          queryable?: boolean;
-          infoclickIcon?: string;
-          searchDisplayName?: string;
-          secondaryLabelFields?: string;
-          searchShortDisplayName?: string;
-          searchUrl?: string;
-          searchPropertyName?: string;
-          searchOutputFormat?: string;
-          searchGeometryField?: string;
-          definition?: string;
-          format?: string;
-          sortProperty?: string;
-          sortMethod?: string;
-          sortDescending?: boolean;
-        }
-      >) ?? {};
-
-    // Update only the selected layer's settings
-    // Merge with existing settings for this layer instance to preserve unchanged fields
-    const existingLayerInstanceSettings =
-      existingLayersInfo[selectedInfoClickLayer] ?? {};
-
-    // Only include fields that have actual values (not empty strings or undefined)
-    const layerInstanceData: Record<string, unknown> = {
-      ...existingLayerInstanceSettings,
+  const handleApplyLayerInfoClick = ({
+    legendUrl,
+    hasLabelStyle = false,
+    ...data
+  }: LayerInfoClickModalValues) => {
+    if (!selectedInfoClickLayer) return;
+    // Keep the template and infoclick switch already in the form. The layer is
+    // saved later, from the main Save button, which compares with the baseline.
+    const current =
+      (getValues("options.layersInfo") as SublayersInfo | undefined) ??
+      savedSublayersInfo;
+    const baseline = savedSublayersInfo[selectedInfoClickLayer];
+    const row: Record<string, unknown> = {
+      ...(current[selectedInfoClickLayer] ??
+        baseline ?? { definition: "", queryable: false }),
     };
-
-    // Update fields that were provided (including falsy values like false for booleans)
-    if (data.caption !== undefined)
-      layerInstanceData.caption = data.caption || undefined;
-    if (data.legendUrl !== undefined)
-      layerInstanceData.legendUrl = data.legendUrl || undefined;
-    if (data.legendIcon !== undefined)
-      layerInstanceData.legendIcon = data.legendIcon || undefined;
-    if (data.style !== undefined)
-      layerInstanceData.style = data.style || undefined;
-    if (data.queryable !== undefined)
-      layerInstanceData.queryable = data.queryable;
-    if (data.infoclickIcon !== undefined)
-      layerInstanceData.infoclickIcon = data.infoclickIcon || undefined;
-    if (data.searchDisplayName !== undefined)
-      layerInstanceData.searchDisplayName = data.searchDisplayName || undefined;
-    if (data.secondaryLabelFields !== undefined)
-      layerInstanceData.secondaryLabelFields =
-        data.secondaryLabelFields || undefined;
-    if (data.searchShortDisplayName !== undefined)
-      layerInstanceData.searchShortDisplayName =
-        data.searchShortDisplayName || undefined;
-    if (data.searchUrl !== undefined)
-      layerInstanceData.searchUrl = data.searchUrl || undefined;
-    if (data.searchPropertyName !== undefined)
-      layerInstanceData.searchPropertyName =
-        data.searchPropertyName || undefined;
-    if (data.searchOutputFormat !== undefined)
-      layerInstanceData.searchOutputFormat =
-        data.searchOutputFormat || undefined;
-    if (data.searchGeometryField !== undefined)
-      layerInstanceData.searchGeometryField =
-        data.searchGeometryField || undefined;
-    if (data.definition !== undefined)
-      layerInstanceData.definition = data.definition || undefined;
-    if (data.format !== undefined) layerInstanceData.format = data.format;
-    if (data.sortProperty !== undefined)
-      layerInstanceData.sortProperty = data.sortProperty || undefined;
-    if (data.sortMethod !== undefined)
-      layerInstanceData.sortMethod = data.sortMethod;
-    if (data.sortDescending !== undefined)
-      layerInstanceData.sortDescending = data.sortDescending;
-
-    const updatedLayersInfo = {
-      ...existingLayersInfo,
-      [selectedInfoClickLayer]: layerInstanceData,
+    const fields: Record<string, string | undefined> = {
+      ...data,
+      legend: legendUrl,
     };
-
-    // Merge with existing options to preserve all other fields
-    const existingOptions: Record<string, unknown> =
-      layer.options &&
-      typeof layer.options === "object" &&
-      !Array.isArray(layer.options)
-        ? layer.options
-        : {};
-    const mergedOptions: Record<string, unknown> = {
-      ...existingOptions,
-      layersInfo: updatedLayersInfo,
-      keyword: existingOptions.keyword ?? "",
-      category: existingOptions.category ?? "",
-      layerDisplayDescription: existingOptions.layerDisplayDescription ?? "",
-      geoWebCache: existingOptions.geoWebCache ?? false,
-      showAttributeTableButton:
-        existingOptions.showAttributeTableButton ?? false,
-    };
-
-    const currentValues = {
-      name: layer.name ?? "",
-      serviceId: layer.serviceId ?? "",
-      selectedLayers: layer.selectedLayers ?? [],
-      internalName: layer.internalName ?? "",
-      description: layer.description ?? "",
-      hidpi: layer.hidpi ?? false,
-      tiled: layer.tiled ?? false,
-      singleTile: layer.singleTile ?? false,
-      customRatio: layer.customRatio,
-      timeSliderVisible: layer.timeSliderVisible ?? false,
-      timeSliderStart: layer.timeSliderStart ?? "",
-      timeSliderEnd: layer.timeSliderEnd ?? "",
-      hideExpandArrow: layer.hideExpandArrow ?? false,
-      zIndex: layer.zIndex ?? 0,
-      style: layer.style ?? "",
-      opacity: layer.opacity,
-      minZoom: layer.minZoom,
-      maxZoom: layer.maxZoom,
-      minMaxZoomAlertOnToggleOnly: layer.minMaxZoomAlertOnToggleOnly ?? false,
-      infoClickActive: layer.infoClickActive ?? false,
-      showMetadata: layer.showMetadata ?? false,
-      legendUrl: layer.legendUrl ?? "",
-      legendIconUrl: layer.legendIconUrl ?? "",
-      legendOptions: layer.legendOptions ?? "",
-      options: mergedOptions,
-      metadata: {
-        title: layer.metadata?.title ?? "",
-        description: layer.metadata?.description ?? "",
-        owner: layer.metadata?.owner ?? "",
-        url: layer.metadata?.url ?? "",
-        urlTitle: layer.metadata?.urlTitle ?? "",
-        attribution: layer.metadata?.attribution ?? "",
-      },
-      searchSettings: {
-        active: layer.searchSettings?.active ?? false,
-        url: layer.searchSettings?.url ?? "",
-        searchFields: layer.searchSettings?.searchFields ?? [],
-        outputFormat: layer.searchSettings?.outputFormat ?? "",
-        geometryField: getLayerGeometryField(layer),
-        primaryDisplayFields: layer.searchSettings?.primaryDisplayFields ?? [],
-        secondaryDisplayFields:
-          layer.searchSettings?.secondaryDisplayFields ?? [],
-        shortDisplayFields: layer.searchSettings?.shortDisplayFields ?? [],
-      },
-      infoClickSettings: {
-        definition: layer.infoClickSettings?.definition,
-        icon: layer.infoClickSettings?.icon,
-        format: layer.infoClickSettings?.format ?? "application/json",
-        sortProperty: layer.infoClickSettings?.sortProperty,
-        sortMethod: layer.infoClickSettings?.sortMethod ?? "text",
-        sortDescending: layer.infoClickSettings?.sortDescending ?? false,
-      },
-    };
-
-    try {
-      await handleUpdateLayer(currentValues);
-      // Manually update the query cache to ensure layersInfo is included
-      // The API response might not include the full nested options structure
-      queryClient.setQueryData(
-        ["layers", layer.id],
-        (oldData: typeof layer) => {
-          if (!oldData) return oldData;
-          return {
-            ...oldData,
-            options: {
-              ...oldData.options,
-              layersInfo: updatedLayersInfo,
-            },
-          };
-        },
-      );
-      toast.success(
-        t("layers.updateLayerInfoClickSuccess", {
-          layerName: selectedInfoClickLayer,
-        }),
-        {
-          position: "bottom-left",
-          theme: palette.mode,
-          hideProgressBar: true,
-        },
-      );
-    } catch (error) {
-      console.error("Failed to update layer infoclick settings:", error);
-      toast.error(
-        t("layers.updateLayerInfoClickFailed", {
-          layerName: selectedInfoClickLayer,
-        }),
-        {
-          position: "bottom-left",
-          theme: palette.mode,
-          hideProgressBar: true,
-        },
-      );
+    for (const [key, value] of Object.entries(fields)) {
+      const text = value ?? "";
+      // Keep an empty string when the saved row has the key, so clearing a
+      // field differs from the baseline and an untouched empty field does not.
+      if (text !== "" || (baseline !== undefined && key in baseline)) {
+        row[key] = text;
+      } else {
+        delete row[key];
+      }
     }
+    // The map shows the label button for this sublayer only when this is true.
+    if (
+      hasLabelStyle ||
+      (baseline !== undefined && "hasLabelStyle" in baseline)
+    ) {
+      row.hasLabelStyle = hasLabelStyle;
+    } else {
+      delete row.hasLabelStyle;
+    }
+    setValue(
+      "options.layersInfo",
+      { ...current, [selectedInfoClickLayer]: row as SublayerInfo },
+      { shouldDirty: true, shouldValidate: true },
+    );
   };
 
   const handleUpdateDpiList = (
@@ -758,21 +618,13 @@ export default function LayerSettings() {
 
       // Use layersInfo from newOptions if provided, otherwise preserve from existingOptions
       const layersInfoToUse =
-        newOptions.layersInfo &&
-        typeof newOptions.layersInfo === "object" &&
-        !Array.isArray(newOptions.layersInfo)
-          ? newOptions.layersInfo
-          : existingOptions.layersInfo &&
-              typeof existingOptions.layersInfo === "object" &&
-              !Array.isArray(existingOptions.layersInfo)
-            ? existingOptions.layersInfo
-            : undefined;
+        newOptions.layersInfo ?? existingOptions.layersInfo;
 
       const updatedOptions: Record<string, unknown> = {
         ...existingOptions,
         ...newOptions,
         // Use the appropriate layersInfo (new takes precedence)
-        ...(layersInfoToUse && { layersInfo: layersInfoToUse }),
+        ...(layersInfoToUse !== undefined && { layersInfo: layersInfoToUse }),
         // Override with new values if provided
         keyword: newOptions.keyword ?? existingOptions.keyword,
         category: newOptions.category ?? existingOptions.category,
@@ -1056,11 +908,37 @@ export default function LayerSettings() {
                     editableFields: editingEditableFields,
                     nonEditableFields: editingNonEditableFields,
                   }),
+                  // The backend replaces options keys whole, so only send the
+                  // per-layer settings when they or the selected layers changed.
+                  ...((sublayersInfoChanged(
+                    (data.options as { layersInfo?: SublayersInfo })?.layersInfo,
+                  ) ||
+                    selectedLayersDirty) && {
+                    layersInfo: toLayersInfoArray(
+                      (data.options as { layersInfo?: SublayersInfo })
+                        ?.layersInfo ?? savedSublayersInfo,
+                      (selectedRowObjects ?? layer?.selectedLayers ?? []).filter(
+                        Boolean,
+                      ),
+                    ),
+                  }),
                 },
                 selectedLayers: selectedRowObjects,
               });
 
               void handleUpdateLayer(normalized);
+            }, (invalid) => {
+              const invalidOptions = invalid.options as
+                | Record<string, unknown>
+                | undefined;
+              if (invalid.infoClickSettings || invalidOptions?.layersInfo) {
+                setActiveTab("infoclick");
+                toast.error(t("layers.featureInfo.saveBlocked"), {
+                  position: "bottom-left",
+                  theme: palette.mode,
+                  hideProgressBar: true,
+                });
+              }
             })(e);
           }}
           formRef={formRef}
@@ -2277,7 +2155,6 @@ export default function LayerSettings() {
                   "format",
                 ]}
                 fields={[
-                  "infoClickActive",
                   "infoClickSettings.definition",
                   "infoClickSettings.icon",
                   "infoClickSettings.sortProperty",
@@ -2288,56 +2165,99 @@ export default function LayerSettings() {
                 searchTerm={settingsSearchTerm}
               >
                 <FormPanel title={t("common.infoclick")}>
+                  {infoClickTarget === undefined ? (
+                    serviceLoading && <CircularProgress size={24} />
+                  ) : infoClickTarget === "unsupported" ? (
+                    <Alert severity="info">
+                      {t("layers.featureInfo.unsupported", {
+                        type: service?.type ?? "",
+                      })}
+                    </Alert>
+                  ) : (
                   <FormFieldGrid>
-                    <SettingsSearchField
-                      labelKeys={["common.infoclick"]}
-                      fields={["infoClickActive"]}
-                      synonyms={["infoklick", "active"]}
-                      searchTerm={settingsSearchTerm}
-                      allValues={showSettingsSearchUi ? getValues() : undefined}
-                    >
-                      <FormFieldRow>
-                        <FormGroup>
+                    <FormFieldRow fullWidth>
+                      <Alert severity="info" variant="outlined">
+                        {t(
+                          infoClickTarget === "sublayers"
+                            ? "layers.featureInfo.howItWorksWms"
+                            : "layers.featureInfo.howItWorksVector",
+                        )}
+                      </Alert>
+                    </FormFieldRow>
+                    {infoClickTarget === "sublayers" && (
+                      <SettingsSearchField
+                        labelKeys={["layers.infobox", "common.infoclick"]}
+                        fields={["options.layersInfo"]}
+                        synonyms={["infoklick", "inforuta", "mall"]}
+                        searchTerm={settingsSearchTerm}
+                        allValues={showSettingsSearchUi ? getValues() : undefined}
+                      >
+                        <FormFieldRow fullWidth>
                           <Controller
-                            name="infoClickActive"
+                            name="options.layersInfo"
                             control={control}
+                            rules={{
+                              validate: (value: SublayersInfo | undefined) =>
+                                Object.entries(value ?? {}).every(
+                                  ([name, info]) =>
+                                    info.definition ===
+                                      (savedSublayersInfo[name]?.definition ?? "") ||
+                                    !hasBlockingIssues(validateTemplate(info.definition)),
+                                ),
+                            }}
                             render={({ field }) => (
-                              <FormControlLabel
-                                control={
-                                  <Checkbox
-                                    checked={Boolean(field.value as boolean)}
-                                    onChange={(e) =>
-                                      field.onChange(e.target.checked)
-                                    }
-                                  />
-                                }
-                                label={fieldLabel(
-                                  "common.infoclick",
-                                  "layers.help.infoClickActive",
-                                )}
+                              <SublayerInfoClickSettings
+                                value={(field.value as SublayersInfo | undefined) ?? {}}
+                                onChange={field.onChange}
+                                sublayers={infoboxTypeNames}
+                                serviceUrl={service?.url ?? ""}
+                                layerName={layer?.name ?? ""}
+                                unusedLayerTemplate={savedInfoboxDefinition}
+                                onOpenSublayerSettings={handleLayerClick}
                               />
                             )}
                           />
-                        </FormGroup>
-                      </FormFieldRow>
-                    </SettingsSearchField>
+                        </FormFieldRow>
+                      </SettingsSearchField>
+                    )}
+                    {infoClickTarget === "layer" && (
                     <SettingsSearchField
                       labelKeys={["layers.infobox"]}
                       fields={["infoClickSettings.definition"]}
                       searchTerm={settingsSearchTerm}
                       allValues={showSettingsSearchUi ? getValues() : undefined}
                     >
-                      <FormFieldRow>
-                        <TextFieldWithHelp
-                          labelKey="layers.infobox"
-                          helpKey="layers.help.infobox"
-                          fullWidth
-                          multiline
-                          rows={3}
-                          {...register("infoClickSettings.definition")}
+                      <FormFieldRow fullWidth>
+                        <FieldLabelAbove
+                          htmlFor="infoClickSettings.definition"
+                          label={t("layers.infobox")}
+                          help={t("layers.help.infobox")}
+                        />
+                        <Controller
+                          name="infoClickSettings.definition"
+                          control={control}
+                          rules={{
+                            // Templates saved before these checks existed stay saveable as they are.
+                            validate: (value: string | undefined) =>
+                              (value ?? "") === savedInfoboxDefinition ||
+                              !hasBlockingIssues(validateTemplate(value ?? "")),
+                          }}
+                          render={({ field }) => (
+                            <FeatureInfoDesigner
+                              inputId="infoClickSettings.definition"
+                              value={(field.value as string | undefined) ?? ""}
+                              onChange={field.onChange}
+                              serviceUrl={service?.url ?? ""}
+                              typeNames={infoboxTypeNames}
+                              caption={layer?.name ?? ""}
+                              displayFields={watchPrimaryDisplayFields ?? ""}
+                            />
+                          )}
                         />
                       </FormFieldRow>
                     </SettingsSearchField>
+                    )}
+                    {infoClickTarget === "layer" && (
                     <SettingsSearchField
                       labelKeys={["layers.infoClickIcon"]}
                       fields={["infoClickSettings.icon"]}
@@ -2354,6 +2274,13 @@ export default function LayerSettings() {
                         />
                       </FormFieldRow>
                     </SettingsSearchField>
+                    )}
+                    <FormAccordion
+                      title={t("layers.featureInfo.formatAndSort")}
+                      bordered
+                    >
+                    <FormFieldGrid>
+                    {infoClickTarget === "sublayers" && (
                     <SettingsSearchField
                       labelKeys={["layers.infoClickFormat"]}
                       fields={["infoClickSettings.format"]}
@@ -2384,6 +2311,7 @@ export default function LayerSettings() {
                         />
                       </FormFieldRow>
                     </SettingsSearchField>
+                    )}
                     <SettingsSearchField
                       labelKeys={["layers.sortByAttribute"]}
                       fields={["infoClickSettings.sortProperty"]}
@@ -2427,7 +2355,42 @@ export default function LayerSettings() {
                         />
                       </FormFieldRow>
                     </SettingsSearchField>
+                    <SettingsSearchField
+                      labelKeys={["layers.sortDescending"]}
+                      fields={["infoClickSettings.sortDescending"]}
+                      synonyms={["sortering", "sort"]}
+                      searchTerm={settingsSearchTerm}
+                      allValues={showSettingsSearchUi ? getValues() : undefined}
+                    >
+                      <FormFieldRow>
+                        <FormGroup>
+                          <Controller
+                            name="infoClickSettings.sortDescending"
+                            control={control}
+                            render={({ field }) => (
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    checked={Boolean(field.value as boolean)}
+                                    onChange={(e) =>
+                                      field.onChange(e.target.checked)
+                                    }
+                                  />
+                                }
+                                label={fieldLabel(
+                                  "layers.sortDescending",
+                                  "layers.help.sortDescending",
+                                )}
+                              />
+                            )}
+                          />
+                        </FormGroup>
+                      </FormFieldRow>
+                    </SettingsSearchField>
+                    </FormFieldGrid>
+                    </FormAccordion>
                   </FormFieldGrid>
+                  )}
                 </FormPanel>
               </SearchablePanel>
             )}
@@ -2823,105 +2786,33 @@ export default function LayerSettings() {
         open={openInfoClickModal}
         layerName={selectedInfoClickLayer}
         onClose={handleCloseModal}
-        onSave={(data) => {
-          void handleSaveLayerInfoClick(data);
-        }}
+        onSave={handleApplyLayerInfoClick}
         initialValues={(() => {
-          // Get per-layer-instance settings from options.layersInfo, fallback to main layer settings
-          const layersInfo =
-            (layer?.options?.layersInfo as Record<
-              string,
-              {
-                caption?: string;
-                legendUrl?: string;
-                legendIcon?: string;
-                style?: string;
-                queryable?: boolean;
-                infoclickIcon?: string;
-                searchDisplayName?: string;
-                secondaryLabelFields?: string;
-                searchShortDisplayName?: string;
-                searchUrl?: string;
-                searchPropertyName?: string;
-                searchOutputFormat?: string;
-                searchGeometryField?: string;
-                definition?: string;
-                format?: string;
-                sortProperty?: string;
-                sortMethod?: string;
-                sortDescending?: boolean;
-              }
-            >) ?? {};
-          const layerInstanceSettings =
-            selectedInfoClickLayer && layersInfo[selectedInfoClickLayer]
-              ? layersInfo[selectedInfoClickLayer]
-              : {};
-
+          // The form holds edits that are not saved yet, so reopen from it.
+          const current =
+            (getValues("options.layersInfo") as SublayersInfo | undefined) ??
+            savedSublayersInfo;
+          const row: Record<string, unknown> =
+            current[selectedInfoClickLayer] ?? {};
+          const text = (key: string) =>
+            typeof row[key] === "string" ? row[key] : "";
           return {
-            caption: layerInstanceSettings.caption ?? "",
-            legendUrl:
-              layerInstanceSettings.legendUrl ?? layer?.legendUrl ?? "",
-            legendIcon:
-              layerInstanceSettings.legendIcon ?? layer?.legendIconUrl ?? "",
-            style: layerInstanceSettings.style ?? layer?.style ?? "",
-            queryable:
-              layerInstanceSettings.queryable ??
-              layer?.infoClickActive ??
-              false,
-            infoclickIcon:
-              layerInstanceSettings.infoclickIcon ??
-              layer?.infoClickSettings?.icon ??
-              "",
-            searchDisplayName:
-              layerInstanceSettings.searchDisplayName ??
-              layer?.searchSettings?.primaryDisplayFields?.join(", ") ??
-              "",
-            secondaryLabelFields:
-              layerInstanceSettings.secondaryLabelFields ??
-              layer?.searchSettings?.secondaryDisplayFields?.join(", ") ??
-              "",
-            searchShortDisplayName:
-              layerInstanceSettings.searchShortDisplayName ??
-              layer?.searchSettings?.shortDisplayFields?.join(", ") ??
-              "",
-            searchUrl:
-              layerInstanceSettings.searchUrl ??
-              layer?.searchSettings?.url ??
-              "",
-            searchPropertyName:
-              layerInstanceSettings.searchPropertyName ??
-              layer?.searchSettings?.searchFields?.join(", ") ??
-              "",
-            searchOutputFormat:
-              layerInstanceSettings.searchOutputFormat ??
-              layer?.searchSettings?.outputFormat ??
-              "",
-            searchGeometryField:
-              layerInstanceSettings.searchGeometryField ??
-              getLayerGeometryField(layer) ??
-              "",
-            definition:
-              layerInstanceSettings.definition ??
-              layer?.infoClickSettings?.definition ??
-              "",
-            format:
-              layerInstanceSettings.format ??
-              layer?.infoClickSettings?.format ??
-              "application/json",
-            sortProperty:
-              layerInstanceSettings.sortProperty ??
-              layer?.infoClickSettings?.sortProperty ??
-              "",
-            sortMethod:
-              layerInstanceSettings.sortMethod ??
-              layer?.infoClickSettings?.sortMethod ??
-              "text",
-            sortDescending:
-              layerInstanceSettings.sortDescending ??
-              layer?.infoClickSettings?.sortDescending ??
-              false,
+            caption: text("caption"),
+            legendUrl: text("legend"),
+            legendIcon: text("legendIcon"),
+            style: text("style"),
+            hasLabelStyle: row.hasLabelStyle === true,
+            infoclickIcon: text("infoclickIcon"),
+            searchDisplayName: text("searchDisplayName"),
+            secondaryLabelFields: text("secondaryLabelFields"),
+            searchShortDisplayName: text("searchShortDisplayName"),
+            searchUrl: text("searchUrl"),
+            searchPropertyName: text("searchPropertyName"),
+            searchOutputFormat: text("searchOutputFormat"),
+            searchGeometryField: text("searchGeometryField"),
           };
         })()}
+        serviceUrl={service?.url ?? ""}
         availableStyles={
           selectedInfoClickLayer && getCapStyles[selectedInfoClickLayer]
             ? getCapStyles[selectedInfoClickLayer]
