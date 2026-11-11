@@ -43,7 +43,7 @@ flowchart RL
     master["master"] -- "merge forward" --> release["release/4.4"] -- "merge forward" --> develop["develop"]
 ```
 
-This keeps `master` free from release candidates and unfinished work, so `master` and the `nightly-master` image always contain the latest final release.
+This keeps `master` free from release candidates and unfinished work, so `master` always contains the latest final release.
 
 ### Where should a fix go?
 
@@ -126,7 +126,7 @@ The workflow runs automatically, see [What the release workflow does](#what-the-
    - Tick **Create a discussion for this release**. This creates a discussion thread for the release candidate, linked from the release, where testers report problems.
    - Optionally, click **Generate release notes** to add the pull requests and contributors below the notes.
    - Click **Publish release**.
-8. **Ask for testing.** Let the organisations running Hajk know that the release candidate is out, and ask them to report problems in its discussion thread.
+8. **Ask for testing.** Let the organisations running Hajk know that the release candidate is out, and ask them to report problems in its discussion thread. Remind them that the oldest nightly image (`nightly-4.2`) is removed when 4.4.0 is published, see [Nightly images](#nightly-images).
 
 #### Fixing problems found in testing
 
@@ -179,7 +179,7 @@ Repeat steps 3–8 of [First release candidate](#first-release-candidate) with t
    - CHANGELOG: keep `develop`'s new **Unreleased** entries above the released versions, and let the `[unreleased]` compare link start from `v4.4.0`.
    - `package.json`: keep `4.4.0`, or the higher version `develop` already has.
 8. **Delete the `release/4.4` branch.**
-9. **Update the [roadmap](../ROADMAP.md)** if the release completes items on it, and announce the release.
+9. **Update the [roadmap](../ROADMAP.md)** if the release completes items on it, and announce the release. Mention that `nightly-4.4` now exists and that `nightly-4.2` has been removed, see [Nightly images](#nightly-images).
 
 ### Creating a patch release
 
@@ -240,6 +240,20 @@ Pushing a tag that starts with `v` runs the [release workflow](../.github/workfl
 3. **Creates a draft release** on the [releases page](https://github.com/hajkmap/Hajk/releases). It takes the release notes from the version's section in the CHANGELOG, and attaches the `nodejs` and `simple` zip packages built by [`scripts/create-release.mjs`](../scripts/create-release.mjs) after a clean install of the dependencies. Release candidates are marked as pre-releases.
 
 The release is not public until you publish the draft. With immutable releases, files cannot be added to a release once it is published, which is why the workflow attaches the packages while it is a draft.
+
+### Nightly images
+
+The [nightly releases workflow](../.github/workflows/nightly-releases.yml) needs no action from you. Every night it:
+
+1. **Finds the two latest minor versions** among the published releases, and the latest patch release of each, for example `v4.3.1` and `v4.2.0`. Drafts and release candidates are ignored, so a release gets its nightly image the night after you publish it.
+2. **Rebuilds those releases** from their tags on a fresh base image, and publishes them as `nightly-4.3` and `nightly-4.2`. The release tags `4.3.1`, `4.3`, `4` and `latest` are not touched.
+3. **Removes the nightly tags of older versions**, so that pulling them fails instead of returning an image that is no longer updated.
+
+The nightly images are built from release tags, never from `master`, so fixes waiting on `master` for a patch release are not in them. The image is built with the Dockerfile of the release. To change how an already released version is built, make a patch release.
+
+Scheduled workflows run from the default branch, `master`. A change to the nightly workflows on `develop` therefore has no effect until it reaches `master` with a release.
+
+The [`nightly-develop`](../.github/workflows/nightly-develop.yml) image is built from the `develop` branch every night.
 
 ### If the workflow fails
 

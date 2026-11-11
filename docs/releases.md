@@ -21,13 +21,13 @@ flowchart LR
 
 ## Which version should we run?
 
-| What you can run                 | What it is for                                                |        Use in production?         |
-| -------------------------------- | ------------------------------------------------------------- | :-------------------------------: |
-| Latest release (`4.3.1`)         | Everyone                                                      |                Yes                |
-| Release candidate (`4.4.0-rc.1`) | Testing the next release in a test environment                |                No                 |
-| Nightly build of `master`        | The latest release, rebuilt every night on a fresh base image | Yes, see [below](#nightly-builds) |
-| Nightly build of `develop`       | Trying out upcoming features and reporting problems           |                No                 |
-| An older release (`4.2.0`)       | Nothing. Upgrade to the latest release                        |                No                 |
+| What you can run                           | What it is for                                                                               |        Use in production?         |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------- | :-------------------------------: |
+| Latest release (`4.3.1`)                   | Everyone                                                                                     |                Yes                |
+| Release candidate (`4.4.0-rc.1`)           | Testing the next release in a test environment                                               |                No                 |
+| Nightly build of a release (`nightly-4.3`) | A release of one of the two latest minor versions, rebuilt every night on a fresh base image | Yes, see [below](#nightly-builds) |
+| Nightly build of `develop`                 | Trying out upcoming features and reporting problems                                          |                No                 |
+| An older release (`4.2.0`)                 | Nothing. Upgrade to the latest release                                                       |                No                 |
 
 Older releases, such as 4.2.x after 4.3.0 is out, are not patched. If you run an older release, the fix is to upgrade. See [Supported versions](../SECURITY.md#supported-versions) in SECURITY.md.
 
@@ -74,22 +74,22 @@ Two official Docker images are published on the GitHub Container Registry, match
 
 Both run on `linux/amd64` and `linux/arm64`, and get the same tags. How to run them is described in the [Docker README](../Docker/README.md).
 
-| Tag               | Contains                                  | Updated                                 |
-| ----------------- | ----------------------------------------- | --------------------------------------- |
-| `4.3`             | The latest patch release of 4.3           | At each patch release (4.3.1, 4.3.2, …) |
-| `4.3.1`           | Exactly that release                      | Never                                   |
-| `4`               | The latest release of 4                   | At each 4.x release                     |
-| `latest`          | The latest release                        | At each release                         |
-| `4.4.0-rc.1`      | Exactly that release candidate            | Never                                   |
-| `nightly-master`  | The latest release, on a fresh base image | Every night                             |
-| `nightly-develop` | The ongoing development                   | Every night                             |
+| Tag               | Contains                                               | Updated                                                        |
+| ----------------- | ------------------------------------------------------ | -------------------------------------------------------------- |
+| `4.3`             | The latest patch release of 4.3                        | At each patch release (4.3.1, 4.3.2, …)                        |
+| `4.3.1`           | Exactly that release                                   | Never                                                          |
+| `4`               | The latest release of 4                                | At each 4.x release                                            |
+| `latest`          | The latest release                                     | At each release                                                |
+| `4.4.0-rc.1`      | Exactly that release candidate                         | Never                                                          |
+| `nightly-4.3`     | The latest patch release of 4.3, on a fresh base image | Every night, while 4.3 is one of the two latest minor versions |
+| `nightly-develop` | The ongoing development                                | Every night                                                    |
 
 > [!IMPORTANT]
 > In production, use the tag of your minor version, such as `ghcr.io/hajkmap/hajk:4.3`. It is moved to each new patch release, so pulling the image again gives you security fixes, but never new features or breaking changes. Avoid `4` and `latest`, which move to new minor and major releases without warning.
 >
 > Patch releases are only made for the latest release. When 4.4.0 is out, `4.3` gets no more fixes, so plan the upgrade to `4.4`.
 >
-> A release tag does not get Node.js or operating system updates between releases. If you need those, use [`nightly-master`](#nightly-builds) instead.
+> A release tag does not get Node.js or operating system updates between releases. If you need those, use the nightly build of your minor version, such as [`nightly-4.3`](#nightly-builds), instead.
 
 If you need full control over when anything changes, pin an exact version such as `4.3.1` instead, and follow the releases so you can upgrade when a patch release is published.
 
@@ -99,8 +99,22 @@ Release candidates never get the `latest`, `4` or `4.3` tags. Each image records
 
 A release image is built once and never rebuilt. The base image under it, with Node.js and the operating system packages, gets security updates over time that the release image does not pick up. The nightly builds fill that gap:
 
-- **`nightly-master`** is the latest release, rebuilt every night on a fresh base image. Use it if you want those updates without waiting for the next Hajk release. Shortly before a patch release, it can also contain the fix that is about to be released.
+- **`nightly-4.3`** is the latest patch release of 4.3, rebuilt every night on a fresh base image. Use it if you want those updates without waiting for the next Hajk release. The Hajk code in it is exactly that of the release, so it only changes when a patch release of 4.3 is published. It never moves to 4.4.
 - **`nightly-develop`** contains everything merged for the next release. It changes constantly, is not tested as a release, and may break.
+
+Nightly builds are made for the **two latest minor versions**. With 4.3 as the latest release, these are `nightly-4.3` and `nightly-4.2`.
+
+| When               | `nightly-4.2`                    | `nightly-4.3`                    | `nightly-4.4`         |
+| ------------------ | -------------------------------- | -------------------------------- | --------------------- |
+| 4.3 is the latest  | Rebuilt, base image updates only | Rebuilt, and gets 4.3 patches    |                       |
+| 4.4.0 is published | **Removed**                      | Rebuilt, base image updates only | Rebuilt, gets patches |
+
+> [!IMPORTANT]
+> The nightly build of the previous minor version gives you time to upgrade. It is not a supported version. It gets base image updates, but no fixes to Hajk itself, since [only the latest release is patched](../SECURITY.md#supported-versions).
+>
+> When a new minor or major release is published, the oldest nightly tag is **removed**, and pulling it fails. Running containers are not affected, but they can no longer be recreated from that tag. If you run `nightly-4.2`, upgrade to `nightly-4.3` before 4.4.0 is released. Release candidates of 4.4.0 are your warning that this is about to happen. See [Getting notified](#getting-notified).
+
+A nightly build uses the Node.js major version that its release was made with. It gets the updates of that version, but does not move to a newer major version of Node.js.
 
 Whichever image you run, keeping the server, the container runtime and the rest of your installation up to date is your organisation's responsibility. See the [Security FAQ](security-faq.md).
 
