@@ -43,7 +43,7 @@ jobs:
 
       - name: Pick versions and images
         id: versions
-        run: .github/scripts/nightly-release-matrix.sh < "$RUNNER_TEMP/releases.txt" >> "$GITHUB_OUTPUT"
+        run: bash .github/scripts/nightly-release-matrix.sh <"$RUNNER_TEMP/releases.txt" >> "$GITHUB_OUTPUT"
 
   build:
     name: ${{ matrix.image }} ${{ matrix.minor }}
