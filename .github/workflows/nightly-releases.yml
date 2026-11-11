@@ -1,0 +1,84 @@
+name: Nightly images (releases)
+
+# Rebuilds the latest patch release of the two latest minor versions every night, as nightly-X.Y, so they pick up
+# base image patches (Node.js and operating system packages). The Hajk code is that of the release tag, not of a branch.
+# See docs/releases.md#nightly-builds.
+on:
+  schedule:
+    - cron: "30 2 * * *"
+  workflow_dispatch:
+    inputs:
+      dry-run-removal:
+        description: Only log which outdated nightly tags would be removed
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nightly-releases
+  cancel-in-progress: true
+
+jobs:
+  # Picks the versions to build from the published releases, so that a tag whose draft release is not yet published is left alone.
+  resolve:
+    name: Find the two latest minor versions
+    if: github.repository == 'hajkmap/Hajk'
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.versions.outputs.matrix }}
+      keep: ${{ steps.versions.outputs.keep }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: List published releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release list --exclude-drafts --exclude-pre-releases --limit 100 \
+            --json tagName --jq '.[].tagName' > "$RUNNER_TEMP/releases.txt"
+
+      - name: Pick versions and images
+        id: versions
+        run: .github/scripts/nightly-release-matrix.sh < "$RUNNER_TEMP/releases.txt" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: ${{ matrix.image }} ${{ matrix.minor }}
+    needs: resolve
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.resolve.outputs.matrix) }}
+    uses: ./.github/workflows/build-image.yml
+    with:
+      image: ${{ matrix.image }}
+      dockerfile: ${{ matrix.dockerfile }}
+      ref: ${{ matrix.ref }}
+      tags: type=raw,value=nightly-${{ matrix.minor }}
+      description: ${{ matrix.title }} ${{ matrix.minor }} (${{ matrix.ref }}), rebuilt every night to pick up base image patches. Gets no new Hajk features or fixes other than patch releases of ${{ matrix.minor }}.
+      artifact-suffix: -${{ matrix.minor }}
+
+  # A minor version that is no longer one of the two latest gets no more nightly builds. Its tag is removed, so that
+  # pulling it fails instead of silently returning an image that is no longer updated.
+  remove-outdated:
+    name: Remove outdated nightly tags
+    needs: [resolve, build]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+
+    steps:
+      - name: Delete nightly tags of older versions
+        uses: dataaxiom/ghcr-cleanup-action@d52806a0dc70b430571a37da1fde39733ffd640f # v1.2.2
+        with:
+          package: hajk,hajk-simple
+          delete-tags: nightly-*
+          exclude-tags: ${{ needs.resolve.outputs.keep }}
+          validate: true
+          dry-run: ${{ inputs.dry-run-removal || false }}
