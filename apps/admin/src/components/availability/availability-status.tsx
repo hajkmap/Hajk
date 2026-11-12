@@ -11,7 +11,7 @@ import {
 } from "../../lib/availability";
 
 /**
- * Whether users get the map, the layer or the service now, as the
+ * Whether users get the map, the layer, the service or the group now, as the
  * availability fields (options.visible, options.visibleFrom,
  * options.visibleUntil) are filled in. A layer passes its service: while
  * users don't get the service, they don't get the layer either.

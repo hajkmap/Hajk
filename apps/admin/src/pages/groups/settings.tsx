@@ -19,6 +19,7 @@ import { Trans, useTranslation } from "react-i18next";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
 import Page from "../../layouts/root/components/page";
 import { GroupType, GroupUpdateInput } from "../../api/groups";
+import type { Group } from "../../api/groups";
 import FormActionPanel, {
   CollapsibleWarning,
 } from "../../components/form-action-panel";
@@ -46,7 +47,15 @@ import {
   FieldLabelAbove,
   InlineLabelWithHelp,
   SelectWithHelp,
+  TextFieldWithHelp,
 } from "../../components/form-components/field-label-with-help";
+import AvailabilityStatus from "../../components/availability/availability-status";
+import {
+  availabilityOf,
+  fromDateTimeLocal,
+  hasValidPeriod,
+  toDateTimeLocal,
+} from "../../lib/availability";
 import {
   getDeleteGroupErrorMessage,
   getUpdateGroupErrorMessage,
@@ -62,6 +71,22 @@ import LayerTreeEditor, {
 
 const EMPTY_MAPS: Map[] = [];
 const EMPTY_ROLES: Role[] = [];
+
+/** The form's values for the group as saved. */
+function formValuesOf(group: Group): FieldValues {
+  return {
+    name: group.name ?? "",
+    internalName: group.internalName ?? "",
+    type: group.type ?? GroupType.LAYER,
+    locked: group.locked ?? false,
+    roleIds: group.restrictedToRoles?.map((role) => role.roleId) ?? [],
+    options: {
+      visible: group.options?.visible !== "false",
+      visibleFrom: toDateTimeLocal(group.options?.visibleFrom),
+      visibleUntil: toDateTimeLocal(group.options?.visibleUntil),
+    },
+  };
+}
 
 function GroupSettings() {
   const formRef = useRef<HTMLFormElement | null>(null);
@@ -127,18 +152,22 @@ function GroupSettings() {
   useEffect(() => {
     if (!group) return;
 
-    reset(
-      {
-        name: group.name ?? "",
-        internalName: group.internalName ?? "",
-        type: group.type ?? GroupType.LAYER,
-        locked: group.locked ?? false,
-        roleIds: group.restrictedToRoles?.map((role) => role.roleId) ?? [],
-      },
-      { keepDirty: false },
-    );
+    reset(formValuesOf(group), { keepDirty: false });
     clearErrors();
   }, [group, reset, clearErrors]);
+
+  // Saving waits until "Tillgänglig till" lies after "Tillgänglig från".
+  const [watchVisible, watchVisibleFrom, watchVisibleUntil] = useWatch({
+    control,
+    name: ["options.visible", "options.visibleFrom", "options.visibleUntil"],
+  }) as [unknown, unknown, unknown];
+  const availabilityPeriodValid = hasValidPeriod(
+    availabilityOf({
+      visible: watchVisible,
+      visibleFrom: watchVisibleFrom,
+      visibleUntil: watchVisibleUntil,
+    }),
+  );
 
   /** Saves the layer tree when it has changes; tells why when it can't. */
   const saveLayerTreeIfDirty = async () => {
@@ -178,6 +207,7 @@ function GroupSettings() {
     groupData: GroupUpdateInput,
     roleIds: string[] = selectedRoleIds,
   ) => {
+    if (!availabilityPeriodValid) return;
     try {
       const groupIdValue = group?.id ?? "";
       const metadataPayload: GroupUpdateInput = {
@@ -185,6 +215,13 @@ function GroupSettings() {
         internalName: groupData.internalName?.trim(),
         type: groupData.type,
         locked: groupData.locked ?? false,
+        options: {
+          ...group?.options,
+          // Only an unticked box makes the group unavailable.
+          visible: groupData.options?.visible === false ? "false" : "true",
+          visibleFrom: fromDateTimeLocal(groupData.options?.visibleFrom),
+          visibleUntil: fromDateTimeLocal(groupData.options?.visibleUntil),
+        },
         restrictedToRoles: roleIds.map((roleId) => ({ roleId })),
       };
       const updatedGroup = await updateGroup({
@@ -196,17 +233,7 @@ function GroupSettings() {
         theme: palette.mode,
         hideProgressBar: true,
       });
-      reset(
-        {
-          name: updatedGroup.name ?? "",
-          internalName: updatedGroup.internalName ?? "",
-          type: updatedGroup.type ?? GroupType.LAYER,
-          locked: updatedGroup.locked ?? false,
-          roleIds:
-            updatedGroup.restrictedToRoles?.map((role) => role.roleId) ?? [],
-        },
-        { keepDirty: false },
-      );
+      reset(formValuesOf(updatedGroup), { keepDirty: false });
       await saveLayerTreeIfDirty();
     } catch (error) {
       console.error("Failed to update group:", error);
@@ -261,6 +288,7 @@ function GroupSettings() {
         internalName: data.internalName as string | undefined,
         type: data.type as GroupType | undefined,
         locked: (data.locked as boolean | undefined) ?? false,
+        options: data.options as Record<string, unknown> | undefined,
       };
       const roleIds = Array.isArray(data.roleIds)
         ? (data.roleIds as string[])
@@ -294,7 +322,7 @@ function GroupSettings() {
         createdDate={group?.createdDate}
         lastSavedBy={group?.lastSavedBy}
         lastSavedDate={group?.lastSavedDate}
-        isDirty={isDirty || layerTreeDirty}
+        isDirty={(isDirty || layerTreeDirty) && availabilityPeriodValid}
         warning={
           <Box sx={{ mt: 1 }}>
             <CollapsibleWarning>
@@ -376,20 +404,72 @@ function GroupSettings() {
               </FormFieldRow>
             </FormFieldGrid>
           </FormPanel>
+          {/* Only a layer group reaches users, in the maps' layer trees. */}
           {group.type !== GroupType.SEARCH ? (
-            <FormPanel title={t("layerTree.title")}>
-              <LayerTreeEditor
-                mode="group"
-                ownerId={group.id}
-                draft={layerTreeDraft}
-                onDraftChange={setLayerTreeDraft}
-                presence={
-                  presenceResource
-                    ? { resource: presenceResource, data: presence }
-                    : undefined
-                }
-              />
-            </FormPanel>
+            <>
+              <FormPanel title={t("groups.availability")}>
+                <FormFieldGrid columns={2}>
+                  <FormFieldRow fullWidth>
+                    <Controller
+                      name="options.visible"
+                      control={control}
+                      render={({ field }) => (
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={Boolean(field.value)}
+                              onChange={(event) =>
+                                field.onChange(event.target.checked)
+                              }
+                            />
+                          }
+                          label={
+                            <InlineLabelWithHelp
+                              label={t("groups.available")}
+                              help={t("groups.help.available")}
+                            />
+                          }
+                        />
+                      )}
+                    />
+                  </FormFieldRow>
+                  <FormFieldRow>
+                    <TextFieldWithHelp
+                      labelKey="groups.availableFrom"
+                      helpKey="groups.help.availableFrom"
+                      type="datetime-local"
+                      fullWidth
+                      {...register("options.visibleFrom")}
+                    />
+                  </FormFieldRow>
+                  <FormFieldRow>
+                    <TextFieldWithHelp
+                      labelKey="groups.availableUntil"
+                      helpKey="groups.help.availableUntil"
+                      type="datetime-local"
+                      fullWidth
+                      {...register("options.visibleUntil")}
+                    />
+                  </FormFieldRow>
+                  <FormFieldRow fullWidth>
+                    <AvailabilityStatus control={control} />
+                  </FormFieldRow>
+                </FormFieldGrid>
+              </FormPanel>
+              <FormPanel title={t("layerTree.title")}>
+                <LayerTreeEditor
+                  mode="group"
+                  ownerId={group.id}
+                  draft={layerTreeDraft}
+                  onDraftChange={setLayerTreeDraft}
+                  presence={
+                    presenceResource
+                      ? { resource: presenceResource, data: presence }
+                      : undefined
+                  }
+                />
+              </FormPanel>
+            </>
           ) : null}
           <FormPanel title={t("groups.rolesAndLocking")}>
             <FormFieldGrid>

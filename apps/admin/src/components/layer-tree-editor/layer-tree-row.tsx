@@ -79,7 +79,10 @@ interface LayerTreeRowProps {
   onEditSettings?: () => void;
   /** In the move zone: it stays here until it is dropped from the zone. */
   inMoveZone?: boolean;
-  /** A layer's own options, for marking it when users don't get it now. */
+  /**
+   * The layer's or the group's own options, for marking it when users don't
+   * get it now.
+   */
   availability?: Record<string, unknown>;
   /** The options of the layer's service: users don't get the layer without it. */
   serviceAvailability?: Record<string, unknown>;

@@ -12,7 +12,7 @@ import {
   type MapGroupSettings,
   type MapLayerSettings,
 } from "../services/map-layer-tree-settings.ts";
-import { onlyAvailableLayers } from "./availability.ts";
+import { isAvailable, onlyAvailableLayers } from "./availability.ts";
 import type { DisplayLayerPlacement } from "./build-legacy-layers-config.ts";
 
 const logger = log4js.getLogger("util.build-client-layer-tree");
@@ -116,31 +116,47 @@ export async function buildClientLayerTreeForMap(
   });
 
   // Layer definitions for every layer in the tree (deleted ones, and those not
-  // available to users now, are left out).
+  // available to users now, are left out), and the groups in it available to
+  // users now.
   const layerIds = new Set<string>();
-  const collectLayerIds = (nodes: LayerTreeNode[]) => {
+  const groupIds = new Set<string>();
+  const collectIds = (nodes: LayerTreeNode[]) => {
     for (const node of nodes) {
       if (node.hidden) continue;
-      if (node.type === "layer") layerIds.add(node.id);
-      else collectLayerIds(node.items);
+      if (node.type === "layer") {
+        layerIds.add(node.id);
+      } else {
+        groupIds.add(node.id);
+        collectIds(node.items);
+      }
     }
   };
-  collectLayerIds(items);
+  collectIds(items);
+  const [layersInTree, groupsInTree] = await Promise.all([
+    prisma.displayLayer.findMany({
+      where: {
+        id: { in: [...layerIds] },
+        deletedAt: null,
+        service: { deletedAt: null },
+      },
+      include: {
+        service: { include: { projection: true } },
+        metadata: true,
+        infoClickSettings: true,
+      },
+    }),
+    prisma.group.findMany({
+      where: { id: { in: [...groupIds] } },
+      select: { id: true, options: true },
+    }),
+  ]);
   const displayLayers = new Map(
-    onlyAvailableLayers(
-      await prisma.displayLayer.findMany({
-        where: {
-          id: { in: [...layerIds] },
-          deletedAt: null,
-          service: { deletedAt: null },
-        },
-        include: {
-          service: { include: { projection: true } },
-          metadata: true,
-          infoClickSettings: true,
-        },
-      })
-    ).map((layer) => [layer.id, layer])
+    onlyAvailableLayers(layersInTree).map((layer) => [layer.id, layer])
+  );
+  const availableGroupIds = new Set(
+    groupsInTree
+      .filter((group) => isAvailable(group.options))
+      .map((group) => group.id)
   );
 
   // A layer or group placed more than once on the map gets its own id per
@@ -176,6 +192,8 @@ export async function buildClientLayerTreeForMap(
       );
       return null;
     }
+    // Not available to users now: left out with everything in it.
+    if (!availableGroupIds.has(node.id)) return null;
     const groupClientId = clientId(node.id, parentClientId);
     const layers: ClientLayerSwitcherLayerRef[] = [];
     const groups: ClientLayerSwitcherGroupNode[] = [];

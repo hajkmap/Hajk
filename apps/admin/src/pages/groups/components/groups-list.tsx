@@ -4,6 +4,7 @@ import Grid from "@mui/material/Grid";
 import {
   Autocomplete,
   Alert,
+  Box,
   Button,
   CircularProgress,
   TextField,
@@ -36,10 +37,16 @@ import type { Layer } from "../../../api/layers";
 import DialogWrapper from "../../../components/flexible-dialog";
 import CreateButton from "../../../components/create-button";
 import {
+  ListFilterField,
   ListFilterRow,
   ListFilterSearch,
   ListSearchField,
 } from "../../../components/form-components/list-filter-row";
+import AvailabilityChip from "../../../components/availability/availability-chip";
+import {
+  isAvailableNow,
+  type AvailabilityFilter,
+} from "../../../lib/availability";
 import { SquareSpinnerComponent } from "../../../components/progress/square-progress";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { toast } from "react-toastify";
@@ -71,6 +78,14 @@ interface GroupsListProps {
   baseRoute: string;
 }
 
+/**
+ * Whether users go without the group now. Only a layer group reaches them, in
+ * the maps' layer trees, so only a layer group can be unavailable.
+ */
+function isUnavailableNow(group: Group): boolean {
+  return group.type === GroupType.LAYER && !isAvailableNow(group.options);
+}
+
 export default function GroupsList({
   filterGroups,
   showCreateButton = true,
@@ -90,6 +105,8 @@ export default function GroupsList({
   const { palette } = useTheme();
 
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [availabilityFilter, setAvailabilityFilter] =
+    useState<AvailabilityFilter>("");
   const [open, setOpen] = useState<boolean>(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
@@ -178,8 +195,14 @@ export default function GroupsList({
       return combinedText.includes(searchTerm.toLowerCase());
     };
 
-    return typeFilteredGroups.filter(searchFilter);
-  }, [groups, searchTerm, filterGroups]);
+    const availabilityMatches = (group: Group) =>
+      !availabilityFilter ||
+      isUnavailableNow(group) === (availabilityFilter === "unavailable");
+
+    return typeFilteredGroups.filter(
+      (group) => searchFilter(group) && availabilityMatches(group),
+    );
+  }, [groups, searchTerm, availabilityFilter, filterGroups]);
 
   const defaultValues: GroupCreateForm = {
     name: "",
@@ -388,6 +411,27 @@ export default function GroupsList({
                 onSearch={setSearchTerm}
               />
             </ListFilterSearch>
+            <ListFilterField>
+              <FormControl fullWidth variant="outlined">
+                <InputLabel id="groups-availability-filter-label">
+                  {t("groups.availability")}
+                </InputLabel>
+                <Select
+                  labelId="groups-availability-filter-label"
+                  label={t("groups.availability")}
+                  value={availabilityFilter}
+                  onChange={(e) => setAvailabilityFilter(e.target.value)}
+                >
+                  <MenuItem value="">{t("common.all")}</MenuItem>
+                  <MenuItem value="available">
+                    {t("availability.filter.available")}
+                  </MenuItem>
+                  <MenuItem value="unavailable">
+                    {t("availability.filter.unavailable")}
+                  </MenuItem>
+                </Select>
+              </FormControl>
+            </ListFilterField>
           </ListFilterRow>
 
           <Grid size={12}>
@@ -412,21 +456,36 @@ export default function GroupsList({
                 {
                   field: "name",
                   headerName: t("common.name"),
-                  flex: 0.4,
+                  flex: 1,
+                  minWidth: 300,
                   // Point at a group to see where it belongs.
                   renderCell: (params: GridRenderCellParams<Group>) => (
-                    <LayerTreeItemTooltip
-                      name={params.row.name}
-                      details={getDetails("group", params.row.id)}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        minWidth: 0,
+                      }}
                     >
-                      <span>{params.row.name}</span>
-                    </LayerTreeItemTooltip>
+                      <LayerTreeItemTooltip
+                        name={params.row.name}
+                        details={getDetails("group", params.row.id)}
+                      >
+                        <Typography variant="body2" noWrap>
+                          {params.row.name}
+                        </Typography>
+                      </LayerTreeItemTooltip>
+                      {params.row.type === GroupType.LAYER ? (
+                        <AvailabilityChip options={params.row.options} />
+                      ) : null}
+                    </Box>
                   ),
                 },
                 {
                   field: "type",
                   headerName: t("groups.type"),
-                  flex: 0.35,
+                  width: 150,
                   valueFormatter: (value: GroupType) => {
                     const key = Object.keys(GroupType).find(
                       (enumKey) =>
@@ -438,7 +497,7 @@ export default function GroupsList({
                 {
                   field: "composition",
                   headerName: t("groups.layers"),
-                  flex: 0.2,
+                  width: 120,
                   sortable: false,
                   filterable: false,
                   align: "left",
@@ -458,11 +517,12 @@ export default function GroupsList({
                 {
                   field: "internalName",
                   headerName: t("groups.internalName"),
-                  flex: 0.25,
+                  flex: 0.5,
+                  minWidth: 120,
                 },
                 {
                   field: "lastSavedDate",
-                  flex: 0.3,
+                  width: 160,
                   headerName: t("common.lastSaved"),
                   valueFormatter: (value: string) =>
                     value ? new Date(value).toLocaleDateString("sv-SE") : "–",

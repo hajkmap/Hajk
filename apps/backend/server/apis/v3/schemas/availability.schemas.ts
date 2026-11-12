@@ -6,8 +6,8 @@ const dateTimeOrEmpty = z.union([
 ]);
 
 /**
- * The options of a map, a layer or a service. They are free-form, but the
- * ones that decide whether the client's users get it are checked, see
+ * The options of a map, a layer, a service or a group. They are free-form,
+ * but the ones that decide whether the client's users get it are checked, see
  * utils/availability.ts.
  */
 export const AvailabilityOptionsSchema = z

@@ -6,6 +6,7 @@ export interface Group {
   name: string;
   internalName?: string;
   type: GroupType;
+  options: Record<string, unknown>;
   restrictedToRoles?: GroupRole[];
   createdBy?: string;
   createdDate?: string;
@@ -47,6 +48,7 @@ export interface GroupUpdateInput {
   internalName?: string;
   type?: GroupType;
   locked?: boolean;
+  options?: Record<string, unknown>;
   restrictedToRoles?: GroupRoleUpdateInput[];
 }
 

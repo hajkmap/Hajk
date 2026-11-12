@@ -12,10 +12,10 @@ function timeOf(value: Prisma.JsonValue | undefined): number | null {
 }
 
 /**
- * Whether a map, a layer or a service is available to the client's users at
- * `now`, from its options: `visible` ("false" withholds it) and the optional
- * period from `visibleFrom` to `visibleUntil` (ISO date-times; unavailable
- * from `visibleUntil` on). Admin sees everything regardless.
+ * Whether a map, a layer, a service or a group is available to the client's
+ * users at `now`, from its options: `visible` ("false" withholds it) and the
+ * optional period from `visibleFrom` to `visibleUntil` (ISO date-times;
+ * unavailable from `visibleUntil` on). Admin sees everything regardless.
  */
 export function isAvailable(
   options: Prisma.JsonValue,

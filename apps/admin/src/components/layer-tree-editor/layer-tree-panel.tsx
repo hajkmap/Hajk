@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 
+import { useGroups } from "../../api/groups";
 import { getGroupTree } from "../../api/layer-tree";
 import { useLayers } from "../../api/layers";
 import { useServices } from "../../api/services";
@@ -125,13 +126,18 @@ export default function LayerTreePanel({
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const getDetails = useItemDetails();
-  // The layers' and their services' options, read for whether users get each
-  // layer now.
+  // The options of the layers, their services and the groups, read for
+  // whether users get each layer and group now.
   const { data: layers } = useLayers();
   const { data: services } = useServices();
+  const { data: groups } = useGroups();
   const layerOptionsById = useMemo(
     () => new Map((layers ?? []).map((layer) => [layer.id, layer.options])),
     [layers],
+  );
+  const groupOptionsById = useMemo(
+    () => new Map((groups ?? []).map((group) => [group.id, group.options])),
+    [groups],
   );
   const serviceOptionsByLayerId = useMemo(() => {
     const byService = new Map(
@@ -636,7 +642,7 @@ export default function LayerTreePanel({
                   availability={
                     kind === "layer"
                       ? layerOptionsById.get(flatNode.data.sourceId)
-                      : undefined
+                      : groupOptionsById.get(flatNode.data.sourceId)
                   }
                   serviceAvailability={
                     kind === "layer"

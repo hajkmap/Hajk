@@ -290,6 +290,8 @@ model Group {
   treeSavedAt       DateTime?           @db.Timestamptz(3)
   treeSavedBy       String?
   deletedAt         DateTime?           @db.Timestamptz(3)
+  /// visible, visibleFrom and visibleUntil decide, as on maps, layers and services, whether the client's users get the group in the layer tree, with everything in it.
+  options           Json                @default("{}")
   /// A search group's layers. A layer group's content is in `items`.
   layers            LayerInstance[]
   restrictedToRoles RoleOnGroup[]
