@@ -145,6 +145,7 @@ export default function ServiceSettings() {
     workspaces: getCapWorkspaces,
     isError: layersError,
     isLoading: layersLoading,
+    isSlow: layersSlow,
     refetch: refetchLayers,
   } = useServiceCapabilities({
     baseUrl: service?.url ?? "",
@@ -980,6 +981,7 @@ export default function ServiceSettings() {
                 serviceType={service.type}
                 isError={layersError}
                 isLoading={layersLoading}
+                isSlow={layersSlow}
                 onRetry={() => void refetchLayers()}
               />
               <ServiceUsagePanel serviceId={service.id} />

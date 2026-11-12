@@ -28,6 +28,7 @@ import {
   ListFilterRow,
 } from "../../../components/form-components/list-filter-row";
 import { cellTooltipSlotProps } from "../../../components/cell-tooltip";
+import SlowServiceNotice from "../../../components/slow-service-notice";
 
 export interface CapabilityRow {
   id: number;
@@ -50,6 +51,8 @@ interface CreateLayerGrid {
   isLoading: boolean;
   isFetching: boolean;
   isError: boolean;
+  /** The service has been slow to answer, and its answer is still awaited. */
+  isSlow: boolean;
   onRetry: () => void;
 
   rows: CapabilityRow[];
@@ -68,6 +71,7 @@ export function CreateLayerGrid({
   isLoading,
   isFetching,
   isError,
+  isSlow,
   onRetry,
   rows,
   onClose,
@@ -241,7 +245,9 @@ export function CreateLayerGrid({
         </Stack>
       )}
 
-      {isError ? (
+      {isSlow ? (
+        <SlowServiceNotice />
+      ) : isError ? (
         <Box sx={{ textAlign: "center", py: 2 }}>
           {!isFetching && (
             <Typography color="error" sx={{ mb: 2 }}>

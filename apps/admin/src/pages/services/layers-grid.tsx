@@ -24,6 +24,7 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
 import CircularProgress from "../../components/progress/circular-progress";
+import SlowServiceNotice from "../../components/slow-service-notice";
 import { cellTooltipSlotProps } from "../../components/cell-tooltip";
 import { toast } from "react-toastify";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
@@ -93,6 +94,7 @@ function LayersGrid({
   serviceType,
   isError,
   isLoading,
+  isSlow,
   onRetry,
 }: LayersGridProps) {
   const { t } = useTranslation();
@@ -547,7 +549,9 @@ function LayersGrid({
             </IconButton>
           </Box>
 
-          {isLoading ? (
+          {isSlow ? (
+            <SlowServiceNotice />
+          ) : isLoading ? (
             <CircularProgress
               color="primary"
               size={40}

@@ -222,6 +222,7 @@
     "services.affectedLayers": "Om du byter url kan det leda till att andra inställningar slutar att fungera. Ändringen kommer att <strong>påverka {{count}} lager.</strong>",
     "services.settingsWarning": "Den här tjänsten används av <strong>{{count}} Hajk-lager</strong>. Ändringar av URL eller typ kan göra att kartlager slutar fungera i alla kartor som använder dem.",
     "services.loadingLayers": "Laddar lager...",
+    "services.slowAnswer": "Tjänsten svarar långsamt. Väntar fortfarande på svaret.",
     "services.workspace": "Arbetsområde",
     "services.imageFormats": "Bildformat",
     "services.publishLayer": "Publicera ditt första lager",

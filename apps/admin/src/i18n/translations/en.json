@@ -224,6 +224,7 @@
     "services.affectedLayers": "If you change the url, it may cause other settings to stop working. The change will <strong>affect {{count}} layers.</strong>",
     "services.settingsWarning": "This service is used by <strong>{{count}} Hajk layers</strong>. Changes to the URL or type may cause map layers to stop working in all maps that use them.",
     "services.loadingLayers": "Loading layers...",
+    "services.slowAnswer": "The service is slow to answer. Still waiting for it.",
     "services.imageFormats": "Image formats",
     "services.publishLayer": "Publish your first layer",
     "services.publishLayerAction": "Publish layer",

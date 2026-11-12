@@ -219,6 +219,8 @@ export const getAllProjections = async (): Promise<Projection[]> => {
 
 /** Aligns with backend default when config has no projection (see services.service.ts). */
 const CREATE_SERVICE_PROJECTION_FALLBACK = "EPSG:3006";
+/** How long creating a service waits for its capabilities: they only pre-fill optional metadata. */
+const CREATE_SERVICE_CAPABILITIES_TIMEOUT_MS = 10000;
 const CAPABILITIES_SERVICE_TYPE_BY_SERVICE_TYPE: Partial<
   Record<string, string>
 > = {
@@ -278,7 +280,11 @@ async function enrichCreateServicePayloadWithCapabilities(
   }
 
   try {
-    const capabilities = await fetchCapabilities(url, serviceType);
+    const capabilities = await fetchCapabilities(
+      url,
+      serviceType,
+      AbortSignal.timeout(CREATE_SERVICE_CAPABILITIES_TIMEOUT_MS),
+    );
     const currentMetadata =
       typeof payload.metadata === "object" && payload.metadata !== null
         ? (payload.metadata as Record<string, unknown>)
@@ -532,13 +538,18 @@ const parseCapabilitiesFromXML = (
   };
 };
 
+/**
+ * Fetches GetCapabilities from the service itself. A slow answer is waited
+ * for; `signal` is how the caller stops waiting.
+ */
 export const fetchCapabilities = async (
   baseUrl: string,
   type = "WMS",
+  signal?: AbortSignal,
 ): Promise<ServiceCapabilities> => {
   const response = await fetch(
     `${baseUrl}?SERVICE=${type}&REQUEST=GetCapabilities`,
-    { signal: AbortSignal.timeout(10000) },
+    { signal },
   );
 
   if (!response.ok) {

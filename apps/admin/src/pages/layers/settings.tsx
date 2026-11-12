@@ -319,6 +319,7 @@ export default function LayerSettings() {
     styles: getCapStyles,
     isError: capabilitiesError,
     isLoading: capabilitiesLoading,
+    isSlow: capabilitiesSlow,
     refetch: refetchCapabilities,
   } = useServiceCapabilities({
     baseUrl: service?.url ?? "",
@@ -2764,6 +2765,7 @@ export default function LayerSettings() {
               <AvailableLayersGrid
                 isLoading={serviceLoading || capabilitiesLoading}
                 isError={capabilitiesError}
+                isSlow={capabilitiesSlow}
                 onRetry={() => void refetchCapabilities()}
                 getCapLayers={getCapLayers}
                 selectedLayers={layer?.selectedLayers ?? []}

@@ -17,6 +17,7 @@ import {
 } from "@mui/x-data-grid";
 import useAppStateStore from "../../store/use-app-state-store";
 import { cellTooltipSlotProps } from "../../components/cell-tooltip";
+import SlowServiceNotice from "../../components/slow-service-notice";
 import { GRID_SWEDISH_LOCALE_TEXT } from "../../i18n/translations/datagrid/sv";
 import { useTranslation } from "react-i18next";
 import SearchIcon from "@mui/icons-material/Search";
@@ -31,6 +32,7 @@ import {
 function AvailableLayersGrid({
   isLoading,
   isError,
+  isSlow = false,
   onRetry,
   getCapLayers,
   selectedLayers,
@@ -46,6 +48,8 @@ function AvailableLayersGrid({
 }: {
   isLoading: boolean;
   isError?: boolean;
+  /** The service has been slow to answer, and its answer is still awaited. */
+  isSlow?: boolean;
   onRetry?: () => void;
   getCapLayers: string[];
   selectedLayers: string[];
@@ -153,7 +157,9 @@ function AvailableLayersGrid({
         {t("layers.availableLayers")}
       </Typography>
 
-      {isError ? (
+      {isSlow ? (
+        <SlowServiceNotice />
+      ) : isError ? (
         <Box sx={{ textAlign: "center", py: 4 }}>
           <Typography color="error" sx={{ mb: 2 }}>
             {t("layers.errorLoadingCapabilities")}

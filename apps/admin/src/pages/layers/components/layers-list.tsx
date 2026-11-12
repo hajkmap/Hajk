@@ -397,6 +397,7 @@ export default function LayersList({
     isError: capabilitiesError,
     isLoading: capabilitiesLoading,
     isFetching: capabilitiesFetching,
+    isSlow: capabilitiesSlow,
     refetch: refetchCapabilities,
   } = useServiceCapabilities({
     baseUrl: selectedService?.url ?? "",
@@ -681,6 +682,7 @@ export default function LayersList({
                 isLoading={capabilitiesLoading}
                 isFetching={Boolean(capabilitiesFetching)}
                 isError={capabilitiesError}
+                isSlow={capabilitiesSlow}
                 onRetry={() => void refetchCapabilities()}
                 rows={filteredCapabilityLayers}
                 onClose={handleClose}

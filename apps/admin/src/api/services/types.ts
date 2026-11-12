@@ -126,6 +126,8 @@ export interface LayersGridProps {
   serviceType?: string;
   isError: boolean;
   isLoading: boolean;
+  /** The service has been slow to answer, and its answer is still awaited. */
+  isSlow: boolean;
   onRetry?: () => void;
 }
 export interface UseServiceCapabilitiesProps {
