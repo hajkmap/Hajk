@@ -15,7 +15,10 @@ import {
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useTranslation } from "react-i18next";
-import type { SampleFeature } from "../../../api/services/get-feature-sample";
+import {
+  SAMPLE_FEATURE_LIMIT,
+  type SampleFeature,
+} from "../../../api/services/get-feature-sample";
 import { sampleFeatureLabel } from "./sample-label";
 import type { FeatureProperties, TemplateOptions } from "./template-engine";
 
@@ -89,7 +92,7 @@ export default function FeatureInfoSamplePicker({
           }}
         >
           <MenuItem value={EXAMPLE_SAMPLE_ID}>{t("layers.featureInfo.exampleData")}</MenuItem>
-          {(samples ?? []).map((sample, index) => {
+          {(samples ?? []).slice(0, SAMPLE_FEATURE_LIMIT).map((sample, index) => {
             const label = sampleFeatureLabel(sample.properties, displayFields);
             return (
               <MenuItem key={sample.id} value={sample.id}>
@@ -152,22 +155,9 @@ export default function FeatureInfoSamplePicker({
         />
       )}
       <Box sx={{ display: "flex", flexWrap: "wrap", columnGap: 2 }}>
-        <Tooltip title={t("layers.featureInfo.allowHtmlHelp")}>
-          <FormControlLabel
-            control={
-              <Switch
-                size="small"
-                checked={options.allowDangerousHtml ?? true}
-                onChange={(e) =>
-                  onOptionsChange({ ...options, allowDangerousHtml: e.target.checked })
-                }
-              />
-            }
-            label={<Typography variant="body2">{t("layers.featureInfo.allowHtml")}</Typography>}
-          />
-        </Tooltip>
         <Tooltip title={t("layers.featureInfo.newPlaceholderMatchingHelp")}>
           <FormControlLabel
+            sx={{ ml:1 }}
             control={
               <Switch
                 size="small"

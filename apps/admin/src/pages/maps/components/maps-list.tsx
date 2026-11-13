@@ -323,6 +323,10 @@ export default function MapsList({
               customSx={{
                 height: "calc(100vh - 320px)", minHeight: 420,
                 ...ICON_COUNT_COLUMN_HEADER_SX,
+                "& .MuiDataGrid-columnHeader[data-field='lastSavedDate'], & .MuiDataGrid-cell[data-field='lastSavedDate']":
+                  {
+                    paddingLeft: "24px",
+                  },
               }}
               onRowClick={({ row }) => {
                 if (row.id != null) {
@@ -334,7 +338,7 @@ export default function MapsList({
               columns={[
                 {
                   field: "name",
-                  flex: 0.45,
+                  flex: 0.3,
                   headerName: t("common.name"),
                   renderCell: (params: GridRenderCellParams<MapRecord>) => {
                     const title = params.row.options?.title;
@@ -450,14 +454,29 @@ export default function MapsList({
                         sx={{ height: 26 }}
                       />
                     ) : (
-                      <Typography variant="body2" color="text.disabled">
-                        –
-                      </Typography>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          height: "100%",
+                          width: "100%",
+                        }}
+                      >
+                        <Typography
+                          component="span"
+                          variant="body2"
+                          color="text.disabled"
+                          sx={{ lineHeight: 1 }}
+                        >
+                          –
+                        </Typography>
+                      </Box>
                     ),
                 },
                 {
                   field: "lastSavedDate",
-                  flex: 0.15,
+                  flex: 0.2,
                   headerName: t("common.lastSaved"),
                   valueFormatter: (value: string) =>
                     value ? new Date(value).toLocaleDateString("sv-SE") : "–",

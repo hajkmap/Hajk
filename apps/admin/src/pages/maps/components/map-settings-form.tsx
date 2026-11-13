@@ -855,8 +855,10 @@ export default function MapSettingsForm({
                           pl: 4,
                           pr: 1,
                           pb: 1,
-                          width: "fit-content",
+                          width: "100%",
                           maxWidth: "100%",
+                          minWidth: 0,
+                          boxSizing: "border-box",
                           borderRadius: 1,
                           "&[data-highlighted='true']": {
                             bgcolor: (theme) =>
@@ -869,30 +871,51 @@ export default function MapSettingsForm({
                         <Controller
                           name="options.mapSelectorStyle"
                           control={control}
-                          render={({ field }) => (
-                            <SelectWithHelp
-                              labelKey="map.mapSelectorStyle"
-                              helpKey="map.mapSelectorStyleHelp"
-                              fullWidth={false}
-                              {...field}
-                              value={
-                                field.value === "dropdown"
-                                  ? "dropdown"
-                                  : "button"
-                              }
-                              onChange={(event) =>
-                                field.onChange(event.target.value)
-                              }
-                              sx={{ minWidth: 220, maxWidth: "100%" }}
-                            >
-                              <MenuItem value="button">
-                                {t("map.mapSelectorStyleButton")}
-                              </MenuItem>
-                              <MenuItem value="dropdown">
-                                {t("map.mapSelectorStyleDropdown")}
-                              </MenuItem>
-                            </SelectWithHelp>
-                          )}
+                          render={({ field }) => {
+                            const styleValue =
+                              field.value === "dropdown"
+                                ? "dropdown"
+                                : "button";
+                            const styleLabel = t(
+                              styleValue === "dropdown"
+                                ? "map.mapSelectorStyleDropdown"
+                                : "map.mapSelectorStyleButton",
+                            );
+                            return (
+                              <SelectWithHelp
+                                labelKey="map.mapSelectorStyle"
+                                helpKey="map.mapSelectorStyleHelp"
+                                fullWidth
+                                {...field}
+                                value={styleValue}
+                                onChange={(event) =>
+                                  field.onChange(event.target.value)
+                                }
+                                title={styleLabel}
+                                sx={{
+                                  minWidth: 0,
+                                  maxWidth: "100%",
+                                  "& .MuiSelect-select": {
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  },
+                                }}
+                              >
+                                <MenuItem
+                                  value="button"
+                                  sx={{ whiteSpace: "normal" }}
+                                >
+                                  {t("map.mapSelectorStyleButton")}
+                                </MenuItem>
+                                <MenuItem
+                                  value="dropdown"
+                                  sx={{ whiteSpace: "normal" }}
+                                >
+                                  {t("map.mapSelectorStyleDropdown")}
+                                </MenuItem>
+                              </SelectWithHelp>
+                            );
+                          }}
                         />
                       </Box>
                     ) : null}

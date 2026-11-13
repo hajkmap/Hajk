@@ -1,11 +1,27 @@
 import type { DescribeFeatureProperty } from "../../../api/services/describe-feature-type";
 import type { FeatureProperties } from "./template-engine";
 import { attributeOfPlaceholder } from "./template-validation";
+import { DOCUMENT_HANDLER_PLUGIN, EXAMPLE_DOCUMENT_LINK } from "./document-link";
 
 export const isGeometryAttribute = (attribute: DescribeFeatureProperty) =>
   /PropertyType$|^Geometry$/i.test(attribute.localType);
 
-const exampleValue = (attribute: DescribeFeatureProperty): string => {
+export const isTextAttribute = (attribute: DescribeFeatureProperty) =>
+  attribute.localType === "" || /string|char|text/i.test(attribute.localType);
+
+/** Attributes the template hands to the document handler. */
+const documentLinkAttributes = (template: string) =>
+  new Set(
+    [...template.matchAll(/{([^{}@]+)@@([^{}@]+)}/g)]
+      .filter((match) => match[2] === DOCUMENT_HANDLER_PLUGIN)
+      .map((match) => match[1]),
+  );
+
+const exampleValue = (
+  attribute: DescribeFeatureProperty,
+  documentLinks: Set<string>,
+): string => {
+  if (documentLinks.has(attribute.name)) return EXAMPLE_DOCUMENT_LINK;
   const type = attribute.localType.toLowerCase();
   if (/int|long|short/.test(type)) return "42";
   if (/double|decimal|float|number/.test(type)) return "1234.56";
@@ -23,11 +39,12 @@ export function buildExampleProperties(
   attributes: DescribeFeatureProperty[] | undefined,
   template: string,
 ): FeatureProperties {
+  const documentLinks = documentLinkAttributes(template);
   if (attributes && attributes.length > 0) {
     return Object.fromEntries(
       attributes
         .filter((attribute) => !isGeometryAttribute(attribute))
-        .map((attribute) => [attribute.name, exampleValue(attribute)]),
+        .map((attribute) => [attribute.name, exampleValue(attribute, documentLinks)]),
     );
   }
   const names = new Set<string>();
@@ -36,7 +53,10 @@ export function buildExampleProperties(
     if (name && !name.includes(":") && !/^\d+$/.test(name)) names.add(name);
   }
   return Object.fromEntries(
-    [...names].map((name) => [name, `Exempel ${name}`]),
+    [...names].map((name) => [
+      name,
+      documentLinks.has(name) ? EXAMPLE_DOCUMENT_LINK : `Exempel ${name}`,
+    ]),
   );
 }
 

@@ -5,6 +5,8 @@ import {
   placeholderRegex,
   type TemplateOptions,
 } from "./template-engine";
+import { DOCUMENT_HANDLER_PLUGIN, KNOWN_PLUGINS } from "./document-link";
+import { checkSyntax } from "./template-syntax";
 
 export type IssueSeverity = "error" | "warning" | "info";
 
@@ -61,6 +63,7 @@ function checkPlaceholders(
     ? [...context.attributes, ...CLICK_ATTRIBUTES]
     : undefined;
   const regex = new RegExp(placeholderRegex(context).source, "g");
+  let pluginNoted = false;
 
   for (const match of template.matchAll(regex)) {
     let raw = match[0];
@@ -74,7 +77,24 @@ function checkPlaceholders(
 
     const line = lineAt(template, index);
     const placeholder = raw.substring(1, raw.length - 1);
+    if (placeholder.includes("{") || placeholder.includes("\n")) continue;
+
     const attribute = attributeOfPlaceholder(placeholder);
+
+    if (placeholder.includes("@@") && !placeholder.includes("@@@")) {
+      const plugin = placeholder.split("@@")[1];
+      if (!KNOWN_PLUGINS.includes(plugin)) {
+        issues.push({
+          severity: "warning",
+          code: "unknownPlugin",
+          params: { name: plugin, suggestion: DOCUMENT_HANDLER_PLUGIN },
+          line,
+        });
+      } else if (!pluginNoted) {
+        pluginNoted = true;
+        issues.push({ severity: "info", code: "documentHandlerRequired", line });
+      }
+    }
 
     if (attribute !== null && attribute.trim() === "") {
       issues.push({ severity: "warning", code: "emptyPlaceholder", line });
@@ -258,6 +278,7 @@ export function validateTemplate(
   checkPlaceholders(template, context, issues);
   checkConditionals(template, issues);
   checkSecurity(template, context, issues);
+  checkSyntax(template, issues);
   return issues.sort((a, b) => a.line - b.line);
 }
 

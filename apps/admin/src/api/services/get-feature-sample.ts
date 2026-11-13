@@ -12,10 +12,12 @@ interface GeoJsonFeatureCollection {
   }[];
 }
 
+export const SAMPLE_FEATURE_LIMIT = 5;
+
 export async function fetchFeatureSample(
   baseUrl: string,
   typeName: string,
-  count = 10,
+  count = SAMPLE_FEATURE_LIMIT,
 ): Promise<SampleFeature[]> {
   const url = new URL(baseUrl);
   url.searchParams.set("service", "WFS");
@@ -36,7 +38,7 @@ export async function fetchFeatureSample(
   if (!Array.isArray(data.features)) {
     throw new Error("GetFeature did not return GeoJSON features");
   }
-  return data.features.map((feature, index) => ({
+  return data.features.slice(0, count).map((feature, index) => ({
     id: String(feature.id ?? index + 1),
     properties: feature.properties ?? {},
   }));

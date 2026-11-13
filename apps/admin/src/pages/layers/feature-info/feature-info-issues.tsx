@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Alert, Box, Link, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import type { TemplateIssue } from "./template-validation";
@@ -7,7 +8,9 @@ interface FeatureInfoIssuesProps {
   onGoToLine: (line: number) => void;
 }
 
-export default function FeatureInfoIssues({
+export default memo(FeatureInfoIssues);
+
+function FeatureInfoIssues({
   issues,
   onGoToLine,
 }: FeatureInfoIssuesProps) {

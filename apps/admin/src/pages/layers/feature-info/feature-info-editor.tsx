@@ -14,6 +14,8 @@ import LinkIcon from "@mui/icons-material/Link";
 import HorizontalRuleIcon from "@mui/icons-material/HorizontalRule";
 import TableChartOutlinedIcon from "@mui/icons-material/TableChartOutlined";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
+import OpenInFullIcon from "@mui/icons-material/OpenInFull";
+import CloseFullscreenIcon from "@mui/icons-material/CloseFullscreen";
 import { useTranslation } from "react-i18next";
 import FeatureInfoSyntaxHelp from "./feature-info-syntax-help";
 
@@ -29,6 +31,8 @@ interface FeatureInfoEditorProps {
   id?: string;
   value: string;
   onChange: (value: string) => void;
+  expanded: boolean;
+  onToggleExpanded: () => void;
   ref?: Ref<FeatureInfoEditorHandle>;
 }
 
@@ -39,6 +43,8 @@ export default function FeatureInfoEditor({
   id,
   value,
   onChange,
+  expanded,
+  onToggleExpanded,
   ref,
 }: FeatureInfoEditorProps) {
   const { t } = useTranslation();
@@ -80,6 +86,8 @@ export default function FeatureInfoEditor({
       const end = start + (lines[line - 1]?.length ?? 0);
       el.focus();
       el.setSelectionRange(start, end);
+      const lineHeight = Number.parseFloat(getComputedStyle(el).lineHeight) || 20;
+      el.scrollTop = Math.max(0, (line - 1) * lineHeight - el.clientHeight / 2);
     },
   }));
 
@@ -175,6 +183,25 @@ export default function FeatureInfoEditor({
           () => snippet,
           (inserted) => [inserted.length, inserted.length],
         )} />
+        <Tooltip
+          title={t(
+            expanded ? "layers.featureInfo.collapse" : "layers.featureInfo.expand",
+          )}
+        >
+          <IconButton
+            size="small"
+            aria-label={t(
+              expanded ? "layers.featureInfo.collapse" : "layers.featureInfo.expand",
+            )}
+            onClick={onToggleExpanded}
+          >
+            {expanded ? (
+              <CloseFullscreenIcon fontSize="small" />
+            ) : (
+              <OpenInFullIcon fontSize="small" />
+            )}
+          </IconButton>
+        </Tooltip>
       </Box>
       <Divider />
       <TextField
@@ -182,11 +209,10 @@ export default function FeatureInfoEditor({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         inputRef={inputRef}
-        multiline
         fullWidth
-        minRows={18}
         placeholder={t("layers.featureInfo.editorPlaceholder")}
         slotProps={{
+          input: { inputComponent: "textarea" },
           htmlInput: {
             spellCheck: false,
             "aria-label": t("layers.infobox"),
@@ -194,8 +220,21 @@ export default function FeatureInfoEditor({
         }}
         sx={{
           flex: 1,
+          minHeight: 0,
           "& .MuiOutlinedInput-notchedOutline": { border: 0 },
+          "& .MuiInputBase-root": {
+            height: "100%",
+            alignItems: "stretch",
+            p: 0,
+            overflow: "hidden",
+          },
           "& textarea": {
+            boxSizing: "border-box",
+            height: "100%",
+            resize: "none",
+            overflow: "auto",
+            px: 1.5,
+            py: 1,
             fontFamily: "monospace",
             fontSize: "0.85rem",
             lineHeight: 1.5,

@@ -1,5 +1,6 @@
-import { useMemo, type ReactNode } from "react";
-import { Alert, Box, Paper, Typography } from "@mui/material";
+import { memo, useMemo, type ReactNode } from "react";
+import { Alert, Box, Typography } from "@mui/material";
+import ClientWindowFrame from "./client-window-frame";
 import { useTranslation } from "react-i18next";
 import {
   renderTemplate,
@@ -19,6 +20,7 @@ interface FeatureInfoPreviewProps {
   properties: FeatureProperties;
   options: TemplateOptions;
   controls: ReactNode;
+  fill?: boolean;
 }
 
 type RenderOutcome =
@@ -29,12 +31,15 @@ type RenderOutcome =
     }
   | { ok: false; error: string };
 
-export default function FeatureInfoPreview({
+export default memo(FeatureInfoPreview);
+
+function FeatureInfoPreview({
   template,
   caption,
   properties,
   options,
   controls,
+  fill = false,
 }: FeatureInfoPreviewProps) {
   const { t } = useTranslation();
   const allowDangerousHtml = options.allowDangerousHtml ?? true;
@@ -63,25 +68,30 @@ export default function FeatureInfoPreview({
   );
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 1, minHeight: 0 }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 1,
+        minHeight: 0,
+        ...(fill && { flex: 1 }),
+      }}
+    >
       <Typography variant="subtitle2">{t("layers.featureInfo.preview")}</Typography>
       {controls}
-      <Paper
-        variant="outlined"
-        sx={{ p: 1.5, overflow: "auto", maxHeight: 560, backgroundColor: "background.default" }}
-      >
+      {!template.trim() && (
+        <Typography variant="caption" color="text.secondary">
+          {t("layers.featureInfo.defaultTableNotice")}
+        </Typography>
+      )}
+      <ClientWindowFrame title={t("layers.featureInfo.clientWindowTitle")} fill={fill}>
         {caption && (
           <Typography variant="button" component="h6" align="center" gutterBottom>
             {caption}
           </Typography>
         )}
         {!template.trim() ? (
-          <>
-            <Typography variant="caption" color="text.secondary" component="p" sx={{ mb: 1 }}>
-              {t("layers.featureInfo.defaultTableNotice")}
-            </Typography>
-            <FeatureInfoDefaultTable properties={properties} />
-          </>
+          <FeatureInfoDefaultTable properties={properties} />
         ) : !outcome.ok ? (
           renderError(outcome.error)
         ) : (
@@ -96,7 +106,7 @@ export default function FeatureInfoPreview({
             />
           </PreviewErrorBoundary>
         )}
-      </Paper>
+      </ClientWindowFrame>
       {outcome.ok &&
         outcome.filterIssues
           .filter(({ issue }) => issue.message !== "unknownFilter")
