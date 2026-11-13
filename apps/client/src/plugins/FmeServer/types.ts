@@ -79,12 +79,7 @@ export type SliderValueResolver = (parameter: PublishedParameter) => {
 
 // ---- Job / order status ----
 export type FmeJobStatus =
-  | "SUCCESS"
-  | "FME_FAILURE"
-  | "JOB_FAILURE"
-  | "ABORTED"
-  | "RUNNING"
-  | string;
+  "SUCCESS" | "FME_FAILURE" | "JOB_FAILURE" | "ABORTED" | "RUNNING" | string;
 
 export type OrderStatus =
   | "NONE"

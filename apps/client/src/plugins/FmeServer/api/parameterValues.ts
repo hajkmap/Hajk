@@ -7,9 +7,7 @@ import { getParameterUiKind } from "./parameterUi";
  */
 function scalarValue(parameter: PublishedParameter): string | number | boolean {
   return (parameter.value ?? parameter.defaultValue ?? "") as
-    | string
-    | number
-    | boolean;
+    string | number | boolean;
 }
 
 /**

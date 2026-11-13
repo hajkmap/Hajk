@@ -18,8 +18,7 @@ class FmeServerModel {
   constructor(settings: FmeServerModelSettings) {
     this.#options = settings.options;
     const userDetails = settings.app.config.userDetails as
-      | { mail?: string }
-      | undefined;
+      { mail?: string } | undefined;
     this.#activeUserEmail = userDetails?.mail ?? "";
     this.#mapViewModel = settings.mapViewModel;
   }
