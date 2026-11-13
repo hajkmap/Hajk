@@ -1,55 +1,18 @@
 import { useTranslation } from "react-i18next";
 import Grid from "@mui/material/Grid";
 import Page from "../layouts/root/components/page";
-import {
-  Card,
-  CardContent,
-  Typography,
-  Button,
-  Stack,
-  Skeleton,
-  Box,
-} from "@mui/material";
+import { Card, CardContent, Typography, Skeleton, Box } from "@mui/material";
 import { PieChart, LineChart, BarChart } from "@mui/x-charts";
-import { Link } from "react-router";
 import { useMaps } from "../api/maps/hooks";
 import { useServices } from "../api/services/hooks";
 import { useLayers } from "../api/layers/hooks";
 import { useGroups } from "../api/groups/hooks";
 import { useTools } from "../api/tools/hooks";
 import { useUsers } from "../api/users/hooks";
-
-function StatCard({
-  title,
-  count,
-  to,
-  loading,
-}: {
-  title: string;
-  count: number;
-  to: string;
-  loading?: boolean;
-}) {
-  return (
-    <Card variant="outlined">
-      <CardContent>
-        <Stack spacing={1.5}>
-          <Typography variant="overline" color="text.secondary">
-            {title}
-          </Typography>
-          {loading ? (
-            <Skeleton variant="text" width={60} height={40} />
-          ) : (
-            <Typography variant="h3">{count}</Typography>
-          )}
-          <Button component={Link} to={to} variant="contained" size="small">
-            View
-          </Button>
-        </Stack>
-      </CardContent>
-    </Card>
-  );
-}
+import MapsPanel from "./home/components/maps-panel";
+import OverviewPanel, {
+  type OverviewItem,
+} from "./home/components/overview-panel";
 
 function ChartCard({
   title,
@@ -103,6 +66,45 @@ export default function IndexPage() {
     { id: 5, value: users?.length ?? 0, label: t("common.users") },
   ];
 
+  const overviewItems: OverviewItem[] = [
+    {
+      title: t("common.maps"),
+      count: maps?.length ?? 0,
+      to: "/maps",
+      loading: mapsLoading,
+    },
+    {
+      title: t("navBar.servicesAndLayers.serviceDefinitions"),
+      count: services?.length ?? 0,
+      to: "/services",
+      loading: servicesLoading,
+    },
+    {
+      title: t("common.layers"),
+      count: layers?.length ?? 0,
+      to: "/search-layers",
+      loading: layersLoading,
+    },
+    {
+      title: t("common.layerGroups"),
+      count: groups?.length ?? 0,
+      to: "/groups",
+      loading: groupsLoading,
+    },
+    {
+      title: t("common.tools"),
+      count: tools?.length ?? 0,
+      to: "/tools",
+      loading: toolsLoading,
+    },
+    {
+      title: t("common.users"),
+      count: users?.length ?? 0,
+      to: "/users",
+      loading: usersLoading,
+    },
+  ];
+
   const barData = entityData.map((item) => ({
     name: item.label,
     count: item.value,
@@ -122,59 +124,15 @@ export default function IndexPage() {
       <Grid component="div" container spacing={2}>
         {/* Row 1: Stat cards */}
         <Grid component="div" size={12}>
-          <Grid component="div" container spacing={2}>
-            <Grid component="div" size={{ xs: 12, sm: 6, md: 4 }}>
-              <StatCard
-                title={t("common.maps")}
-                count={maps?.length ?? 0}
-                to="/maps"
-                loading={mapsLoading}
-              />
-            </Grid>
-            <Grid component="div" size={{ xs: 12, sm: 6, md: 4 }}>
-              <StatCard
-                title={t("navBar.servicesAndLayers.serviceDefinitions")}
-                count={services?.length ?? 0}
-                to="/services"
-                loading={servicesLoading}
-              />
-            </Grid>
-            <Grid component="div" size={{ xs: 12, sm: 6, md: 4 }}>
-              <StatCard
-                title={t("common.layers")}
-                count={layers?.length ?? 0}
-                to="/search-layers"
-                loading={layersLoading}
-              />
-            </Grid>
-            <Grid component="div" size={{ xs: 12, sm: 6, md: 4 }}>
-              <StatCard
-                title={t("common.layerGroups")}
-                count={groups?.length ?? 0}
-                to="/groups"
-                loading={groupsLoading}
-              />
-            </Grid>
-            <Grid component="div" size={{ xs: 12, sm: 6, md: 4 }}>
-              <StatCard
-                title={t("common.tools")}
-                count={tools?.length ?? 0}
-                to="/tools"
-                loading={toolsLoading}
-              />
-            </Grid>
-            <Grid component="div" size={{ xs: 12, sm: 6, md: 4 }}>
-              <StatCard
-                title={t("common.users")}
-                count={users?.length ?? 0}
-                to="/users"
-                loading={usersLoading}
-              />
-            </Grid>
-          </Grid>
+          <OverviewPanel items={overviewItems} />
         </Grid>
 
-        {/* Row 2: Entity Distribution + Entity Counts */}
+        {/* Row 2: Maps */}
+        <Grid component="div" size={12}>
+          <MapsPanel />
+        </Grid>
+
+        {/* Row 3: Entity Distribution + Entity Counts */}
         <Grid component="div" size={12}>
           <Grid component="div" container spacing={2}>
             <Grid component="div" size={{ xs: 12, md: 6 }}>
@@ -227,7 +185,7 @@ export default function IndexPage() {
           </Grid>
         </Grid>
 
-        {/* Row 3: Growth Trends */}
+        {/* Row 4: Growth Trends */}
         <Grid component="div" size={12}>
           <ChartCard
             title="Growth Trends (Last 6 Months)"
