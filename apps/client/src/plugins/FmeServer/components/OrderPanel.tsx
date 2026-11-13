@@ -19,7 +19,7 @@ const OrderPanel = ({
 
   if (orderIsLoading) {
     return (
-      <Grid container>
+      <Grid container size={12}>
         <Grid size={12}>
           <Typography>Din beställning bearbetas...</Typography>
         </Grid>
