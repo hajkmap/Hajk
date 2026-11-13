@@ -578,7 +578,7 @@ class ConfigServiceV2 {
 
     // Part 6: Wash FME-server products
     const fmeServerIndexInTools = mapConfig.tools.findIndex(
-      (t) => t.type === "fmeServer"
+      (t) => t.type?.toLowerCase() === "fmeserver"
     );
 
     if (fmeServerIndexInTools !== -1) {
