@@ -10,6 +10,7 @@ const OrderPanel = ({
   orderIsLoading,
   orderIsCompleted,
   orderStatus,
+  pollError,
 }: OrderPanelProps) => {
   const informationText = shouldPromptForEmail
     ? "Beställningen är redo att skickas! Fyll i din epost och klicka sedan på beställ-knappen."
@@ -30,6 +31,17 @@ const OrderPanel = ({
     );
   }
 
+  if (pollError) {
+    return (
+      <InformationWrapper type="error">
+        <Typography>
+          Beställningen skickades, men dess status kunde inte hämtas. Kontakta
+          systemadministratören om resultatet uteblir.
+        </Typography>
+      </InformationWrapper>
+    );
+  }
+
   if (orderIsCompleted) {
     return (
       <InformationWrapper type={orderFailed ? "error" : "info"}>
@@ -44,6 +56,16 @@ const OrderPanel = ({
 
   return (
     <Grid container size={12}>
+      {orderStatus === "ORDER_REQUEST_FAILED" && (
+        <Grid sx={{ marginBottom: 1 }} size={12}>
+          <InformationWrapper type="error">
+            <Typography>
+              Beställningen kunde inte skickas. Försök igen eller kontakta
+              systemadministratören.
+            </Typography>
+          </InformationWrapper>
+        </Grid>
+      )}
       <Grid sx={{ marginBottom: 1 }} size={12}>
         <Typography>{informationText}</Typography>
       </Grid>

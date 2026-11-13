@@ -2,6 +2,7 @@ import {
   formatParameterForFormBody,
   getParameterSubmitValue,
 } from "../api/parameterValues";
+import { isDisplayOnlyParameter } from "../api/parameterUi";
 import type {
   FmeProduct,
   FmeServerModelSettings,
@@ -36,6 +37,21 @@ class FmeServerModel {
     );
   };
 
+  // Returns the parameters whose values should be sent along with an order.
+  // The geometry parameter is left out since the drawn geometry is sent
+  // separately (sending it twice lets its default value replace the drawn
+  // geometry). Display-only parameters (messages, groups) carry no value.
+  #getParametersToSubmit = (
+    product: FmeProduct,
+    productParameters: PublishedParameter[]
+  ): PublishedParameter[] =>
+    productParameters.filter(
+      (parameter) =>
+        !isDisplayOnlyParameter(parameter) &&
+        (this.noGeomAttributeSupplied(product) ||
+          parameter.name !== product.geoAttribute)
+    );
+
   buildDataDownloadFormBody = (
     product: FmeProduct,
     productParameters: PublishedParameter[],
@@ -52,13 +68,15 @@ class FmeServerModel {
       body.append(product.geoAttribute!, geoJson ?? "");
     }
 
-    productParameters.forEach((parameter) => {
-      const { name, value } = formatParameterForFormBody(
-        parameter,
-        this.getRangeSliderValueAndStep
-      );
-      body.append(name, value);
-    });
+    this.#getParametersToSubmit(product, productParameters).forEach(
+      (parameter) => {
+        const { name, value } = formatParameterForFormBody(
+          parameter,
+          this.getRangeSliderValueAndStep
+        );
+        body.append(name, value);
+      }
+    );
 
     return body.toString();
   };
@@ -77,15 +95,17 @@ class FmeServerModel {
       });
     }
 
-    productParameters.forEach((parameter) => {
-      parametersToSend.push({
-        name: parameter.name,
-        value: getParameterSubmitValue(
-          parameter,
-          this.getRangeSliderValueAndStep
-        ),
-      });
-    });
+    this.#getParametersToSubmit(product, productParameters).forEach(
+      (parameter) => {
+        parametersToSend.push({
+          name: parameter.name,
+          value: getParameterSubmitValue(
+            parameter,
+            this.getRangeSliderValueAndStep
+          ),
+        });
+      }
+    );
 
     return parametersToSend;
   };

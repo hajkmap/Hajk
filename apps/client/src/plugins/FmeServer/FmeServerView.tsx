@@ -56,7 +56,6 @@ const FmeServerView: React.FC<FmeServerViewProps> = ({
   const [activeProduct, setActiveProduct] = React.useState("");
   const [activeDrawButton, setActiveDrawButton] = React.useState("");
   const [featureExists, setFeatureExists] = React.useState(false);
-  const [geometryRequired, setGeometryRequired] = React.useState(false);
   const [totalAllowedArea, setTotalAllowedArea] = React.useState(0);
   const [totalDrawnArea, setTotalDrawnArea] = React.useState(0);
   const [drawError, setDrawError] = React.useState(false);
@@ -106,15 +105,18 @@ const FmeServerView: React.FC<FmeServerViewProps> = ({
         return;
       }
       const { totalArea } = drawInformation;
+      // The max area may have been stored as a string by Admin.
+      const maxArea =
+        product.maxArea == null || String(product.maxArea) === ""
+          ? null
+          : Number(product.maxArea);
       const error =
         drawInformation.error ||
-        (product.maxArea != null &&
-          product.maxArea !== -1 &&
-          totalArea > product.maxArea);
+        (maxArea != null && maxArea !== -1 && totalArea > maxArea);
       setFeatureExists(drawInformation.features.length > 0);
       setDrawError(error);
       setTotalDrawnArea(totalArea);
-      setTotalAllowedArea(product.maxArea ?? 0);
+      setTotalAllowedArea(maxArea ?? 0);
     },
     [activeGroup, activeProduct, model]
   );
@@ -148,21 +150,22 @@ const FmeServerView: React.FC<FmeServerViewProps> = ({
     };
   }, [localObserver, handleFeatureAdded, enqueueSnackbar]);
 
+  const geometryRequired = !model.noGeomAttributeSupplied(
+    model.getProduct(activeGroup, activeProduct)
+  );
+
   React.useEffect(() => {
     const product = model.getProduct(activeGroup, activeProduct);
-    if (model.noGeomAttributeSupplied(product)) {
-      setGeometryRequired(false);
-      return;
-    }
-    setGeometryRequired(true);
-    if (product) {
+    if (product && !model.noGeomAttributeSupplied(product)) {
       localObserver.publish("view.activeProductChange", product);
     }
   }, [activeGroup, activeProduct, localObserver, model]);
 
-  React.useEffect(() => {
+  // Products belong to a group, so a new group always clears the product.
+  const handleGroupChange = (group: string) => {
+    setActiveGroup(group);
     setActiveProduct("");
-  }, [activeGroup]);
+  };
 
   const resetOrderInformation = () => {
     setJobId(null);
@@ -368,7 +371,9 @@ const FmeServerView: React.FC<FmeServerViewProps> = ({
         <Grid sx={{ marginTop: 1 }} size={12}>
           <InformationWrapper type="error">
             <Typography variant="caption">
-              {`Den ritade ytan är för stor. Ta bort den och försök igen för att kunna gå vidare med beställningen! 
+              {totalDrawnArea === 0
+                ? "Den valda geometrin saknar yta. Rita eller välj en yta för att kunna gå vidare med beställningen!"
+                : `Den ritade ytan är för stor. Ta bort den och försök igen för att kunna gå vidare med beställningen! 
                 Den ritade ytan är ${totalDrawnArea.toLocaleString()} m², och den högst tillåtna arean är ${totalAllowedArea.toLocaleString()} m²`}
             </Typography>
           </InformationWrapper>
@@ -399,7 +404,7 @@ const FmeServerView: React.FC<FmeServerViewProps> = ({
                 value={activeGroup}
                 size="small"
                 label={groupDisplayName}
-                onChange={(e) => setActiveGroup(e.target.value)}
+                onChange={(e) => handleGroupChange(e.target.value)}
               >
                 {groupsToRender.map((group) => (
                   <MenuItem value={group} key={group}>
@@ -514,15 +519,16 @@ const FmeServerView: React.FC<FmeServerViewProps> = ({
       activeGroup,
       activeProduct
     );
-    const buttons: StepperButton[] = orderIsCompleted
-      ? [{ type: "reset", disabled: false }]
-      : [
-          { type: "back", disabled: orderIsLoading },
-          {
-            type: "order",
-            disabled: !getContinueFromOrderStep(shouldPromptForEmail),
-          },
-        ];
+    const buttons: StepperButton[] =
+      orderIsCompleted || pollError
+        ? [{ type: "reset", disabled: false }]
+        : [
+            { type: "back", disabled: orderIsLoading },
+            {
+              type: "order",
+              disabled: !getContinueFromOrderStep(shouldPromptForEmail),
+            },
+          ];
 
     return (
       <Grid container size={12}>
@@ -531,6 +537,7 @@ const FmeServerView: React.FC<FmeServerViewProps> = ({
           userEmail={userEmail}
           setUserEmail={setUserEmail}
           orderStatus={orderStatus}
+          pollError={pollError}
           orderIsLoading={orderIsLoading}
           orderIsCompleted={orderIsCompleted}
         />

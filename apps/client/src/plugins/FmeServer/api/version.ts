@@ -28,8 +28,8 @@ async function isApiAvailable(
 }
 
 /**
- * Detects the FME API version.
- * This is used to detect the FME API version of the FME server.
+ * Detects the FME API version of the FME server.
+ * Throws if neither version answers (proxy disabled, bad credentials, server down).
  */
 export async function detectFmeApiVersion(
   proxyBase: string,
@@ -40,5 +40,5 @@ export async function detectFmeApiVersion(
       return version;
     }
   }
-  return FME_API_V3;
+  throw new Error("Could not reach the FME API (neither v4 nor v3 responded).");
 }

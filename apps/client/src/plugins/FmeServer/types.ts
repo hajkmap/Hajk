@@ -168,6 +168,7 @@ export interface OrderPanelProps {
   userEmail: string;
   setUserEmail: (email: string) => void;
   orderStatus: OrderStatus;
+  pollError: boolean;
   orderIsLoading: boolean;
   orderIsCompleted: boolean;
 }

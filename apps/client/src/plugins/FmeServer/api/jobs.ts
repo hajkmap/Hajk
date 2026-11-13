@@ -7,8 +7,8 @@ import type {
 import { FME_API_V3 } from "./version";
 
 interface SubmitJobResponse {
-  id?: string;
-  jobId?: string;
+  id?: string | number;
+  jobId?: string | number;
 }
 
 interface JobStatusResponse {
@@ -45,7 +45,8 @@ export function buildSubmitBody(
  * The job id can then be used to get the status of the job.
  */
 export function parseSubmitJobId(data: SubmitJobResponse): string | null {
-  return data?.id ?? data?.jobId ?? null;
+  const jobId = data?.id ?? data?.jobId;
+  return jobId == null || jobId === "" ? null : String(jobId);
 }
 
 /**

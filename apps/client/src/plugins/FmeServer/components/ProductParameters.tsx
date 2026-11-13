@@ -16,9 +16,15 @@ const ProductParameters = ({
     value: string | number | boolean | string[],
     index: number
   ) => {
-    setProductParameters(
-      parameters.map((parameter, i) =>
-        i === index ? { ...parameter, value } : parameter
+    // The rendered list is a filtered view of the state, so we update the
+    // matching parameter in the state rather than writing the view back.
+    const changed = parameters[index];
+    if (!changed) {
+      return;
+    }
+    setProductParameters((current) =>
+      current.map((parameter) =>
+        parameter.name === changed.name ? { ...parameter, value } : parameter
       )
     );
   };

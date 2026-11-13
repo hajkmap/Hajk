@@ -23,7 +23,12 @@ export default function useProductParameters(
   const [loading, setLoading] = useState(false);
   const [parameters, setParameters] = useState<PublishedParameter[]>([]);
 
-  const { fetchProductParameters, isReady, isResolving } = fmeApi;
+  const {
+    fetchProductParameters,
+    isReady,
+    isResolving,
+    error: apiError,
+  } = fmeApi;
   const shouldFetch = Boolean(groupName && productName && isReady);
 
   useEffect(() => {
@@ -58,7 +63,7 @@ export default function useProductParameters(
   const hasSelection = Boolean(groupName && productName);
 
   return {
-    error: hasSelection ? error : false,
+    error: hasSelection ? error || apiError : false,
     loading: hasSelection ? loading || isResolving : false,
     parameters: hasSelection ? parameters : [],
     setProductParameters: setParameters,

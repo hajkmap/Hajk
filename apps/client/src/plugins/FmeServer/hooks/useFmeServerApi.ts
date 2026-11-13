@@ -25,6 +25,32 @@ import type {
 import useFmeApiVersion from "./useFmeApiVersion";
 
 /**
+ * Creates an id used to namespace the files a user uploads.
+ */
+function createSessionId(): string {
+  if (typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join(
+    ""
+  );
+}
+
+/**
+ * An order without a job id cannot be followed up, so we treat it as failed.
+ */
+function toOrderResult(jobId: unknown): {
+  error: boolean;
+  jobId: string | null;
+} {
+  if (jobId == null || jobId === "") {
+    return { error: true, jobId: null };
+  }
+  return { error: false, jobId: String(jobId) };
+}
+
+/**
  * Hook to use the FME server API.
  * This is used to fetch the product parameters, upload files, submit orders, and fetch job status.
  */
@@ -34,7 +60,13 @@ export default function useFmeServerApi(
 ): FmeServerApi {
   const { apiVersion, isReady, isResolving, error } =
     useFmeApiVersion(proxyBase);
-  const uploadSessionId = useRef(crypto.randomUUID());
+  // Created on first use: crypto.randomUUID only exists in secure contexts
+  // (HTTPS or localhost), and Hajk is sometimes served over plain HTTP.
+  const uploadSessionIdRef = useRef<string | null>(null);
+  const getUploadSessionId = useCallback((): string => {
+    uploadSessionIdRef.current ??= createSessionId();
+    return uploadSessionIdRef.current;
+  }, []);
 
   const uploadParameterFile = useCallback(
     async (product: FmeProduct, file: File): Promise<FmeFileUploadResult> => {
@@ -44,7 +76,7 @@ export default function useFmeServerApi(
 
         const response = await hfetch(
           getDataUploadUrl(proxyBase, product, {
-            sessionId: uploadSessionId.current,
+            sessionId: getUploadSessionId(),
           }),
           {
             method: "POST",
@@ -62,7 +94,7 @@ export default function useFmeServerApi(
         return { error: true, path: null };
       }
     },
-    [proxyBase]
+    [getUploadSessionId, proxyBase]
   );
 
   const fetchProductParameters = useCallback(
@@ -84,6 +116,9 @@ export default function useFmeServerApi(
           apiVersion
         );
         const response = await hfetch(url);
+        if (!response.ok) {
+          return { error: true, parameters: [] as PublishedParameter[] };
+        }
         const data = await response.json();
         return {
           error: false,
@@ -120,8 +155,11 @@ export default function useFmeServerApi(
           credentials: "same-origin",
           headers: { "Content-Type": "application/json" },
         });
+        if (!response.ok) {
+          return { error: true, jobId: null };
+        }
         const data = await response.json();
-        return { error: false, jobId: parseSubmitJobId(data) };
+        return toOrderResult(parseSubmitJobId(data));
       } catch {
         return { error: true, jobId: null };
       }
@@ -146,11 +184,11 @@ export default function useFmeServerApi(
           credentials: "same-origin",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
         });
+        if (!response.ok) {
+          return { error: true, jobId: null };
+        }
         const data = await response.json();
-        return {
-          error: false,
-          jobId: (data?.serviceResponse?.jobID as string | undefined) ?? null,
-        };
+        return toOrderResult(data?.serviceResponse?.jobID);
       } catch {
         return { error: true, jobId: null };
       }
@@ -168,6 +206,9 @@ export default function useFmeServerApi(
         const response = await hfetch(
           getJobStatusUrl(proxyBase, jobId, apiVersion)
         );
+        if (!response.ok) {
+          return { error: true, status: null };
+        }
         const data = await response.json();
         return {
           error: false,

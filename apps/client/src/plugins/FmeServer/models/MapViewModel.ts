@@ -352,6 +352,10 @@ class MapViewModel {
       const radius = geometry.getRadius();
       return Math.round(Math.pow(radius, 2) * Math.PI);
     }
+    // Points and lines (which can be picked with the select tool) have no area.
+    if (!("getArea" in geometry)) {
+      return 0;
+    }
     return Math.round((geometry as Polygon).getArea());
   };
 
