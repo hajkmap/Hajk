@@ -16,34 +16,56 @@ import TileLayer from "ol/layer/Tile";
 import TileWMS from "ol/source/TileWMS";
 import ImageWMS from "ol/source/ImageWMS";
 
-import QRCode from "qrcode";
+import {
+  PAPER_DIMS_MM,
+  PAPER_SIZE_PT,
+  buildScaleBarLengths,
+} from "./options/defaults";
+import {
+  getTextHeight,
+  getTextWidth,
+  wrapTextToLines,
+  getCenteredX,
+  getRightAlignedPositions,
+} from "./layout/textMeasure";
+
+import {
+  getFittingScaleBarLength,
+  getLengthText,
+  getDivLinesArrayAndDivider,
+} from "./layout/scaleBarMath";
+import {
+  getBoundingBoxFromUrl,
+  loadImageTile,
+  getTileColumn,
+  getVersionThreeBoundingBox,
+  getVersionOneBoundingBox,
+  appendBoundingBox,
+  getTileInformation,
+} from "./layers/tileMath";
+import {
+  getImageDataBlobFromUrl,
+  getImageForPdfFromUrl,
+  generateQR,
+} from "./utils/images";
+import { getProxiedUrl, toUrlString } from "./utils/proxyUrl";
+import {
+  getMapScaleFromView,
+  findClosestScale,
+  calculateScaleResolution,
+  getUserFriendlyScale,
+} from "./utils/scale";
 
 import { buildLayout } from "./PrintLayout";
 import { renderToPdf } from "./PdfRenderer";
 import { renderToPng } from "./PngRenderer";
 import { buildLegendPdfPages, getLegendInfoForLayer } from "./LegendUtil";
 
-const DEFAULT_DIMS = {
-  a0: [1189, 841],
-  a1: [841, 594],
-  a2: [594, 420],
-  a3: [420, 297],
-  a4: [297, 210],
-  a5: [210, 148],
-};
-
-// Paper sizes in points assuming landscape
-const DEFAULT_PAPER_SIZE = {
-  a2: { width: 1684, height: 1190 },
-  a3: { width: 1190, height: 842 },
-  a4: { width: 842, height: 595 },
-};
-
 export default class PrintModel {
   constructor(settings) {
     this.proxy = settings.proxy;
     this.map = settings.map;
-    this.dims = settings.dims || DEFAULT_DIMS;
+    this.dims = settings.dims || PAPER_DIMS_MM;
     this.logoUrl = settings.options.logo || "";
     this.northArrowUrl = settings.options.northArrow || "";
     this.logoMaxWidth = settings.options.logoMaxWidth;
@@ -51,7 +73,7 @@ export default class PrintModel {
     this.northArrowMaxWidth = settings.options.northArrowMaxWidth;
     this.scales = settings.options.scales;
     this.scaleMeters = settings.options.scaleMeters;
-    this.scaleBarLengths = this.calculateScaleBarLengths();
+    this.scaleBarLengths = buildScaleBarLengths(this.scales, this.scaleMeters);
     this.copyright = settings.options.copyright || "";
     this.textFontSize = settings.options.textFontSize || 8;
     this.textFontWeight = settings.options.textFontWeight || "normal";
@@ -98,22 +120,6 @@ export default class PrintModel {
     });
   }
 
-  defaultScaleBarLengths = {
-    200: 10,
-    500: 50,
-    1000: 100,
-    2000: 200,
-    5000: 500,
-    10000: 1000,
-    20000: 2000,
-    50000: 5000,
-    100000: 10000,
-    200000: 20000,
-    300000: 20000,
-  };
-
-  fakeBase = "https://hajk.js.internal";
-
   previewLayer = null;
   previewFeature = null;
 
@@ -130,32 +136,7 @@ export default class PrintModel {
 
   // Gets the height in points or pixels of the combined texts in the array with newlines, or just a string.
   getTextHeight = (text, fontSize) => {
-    // If we are generating a PDF, an array of text is passed. Otherwise just a string.
-    let numberOfLines = 1;
-    if (typeof text === "object") {
-      // Let's see if our texts (disclaimer, copyright)contain newlines, and if
-      // so, ensure that they count towards the total height.
-      let lineBreaks = 0;
-      for (let i = 0; i < text.length; i++) {
-        // Count how many newlines exist in the specific text part. Bear in mind that \n
-        // is not the only possible newline, let's also count \r. \r\n is also a possibility,
-        // but since it contains both \r and \n, we will count it as two newlines, which is correct.
-        const newlineCount = (text[i].match(/\n|\r/g) || []).length;
-
-        lineBreaks = lineBreaks + newlineCount;
-      }
-      numberOfLines = text.length + lineBreaks;
-    }
-    // Estimate lineheight and calculate the height in points over number of lines.
-    const lineHeight = fontSize * 1.2;
-    const totalHeight = lineHeight * numberOfLines;
-    // Calculate points if we are creating a pdf
-    const totalHeightInPoints = totalHeight * (72 / 96);
-    // Return pixels if PNG or points if PDF
-    if (this.saveAsType === "PDF") {
-      return totalHeightInPoints;
-    }
-    return totalHeight;
+    return getTextHeight(text, fontSize, this.saveAsType);
   };
 
   getRightAlignedPositions = (
@@ -168,126 +149,53 @@ export default class PrintModel {
     fontWeight,
     maxWidth
   ) => {
-    // If we are printing a PNG we assign the maxWidth to the width of the separate text string.
-    if (this.saveAsType !== "PDF") {
-      const canvas = document.createElement("canvas");
-      const context = canvas.getContext("2d");
-      context.font = `${fontWeight === "bold" ? "700" : "400"} ${fontSize}px Roboto, roboto, sans-serif`;
-      maxWidth = context.measureText(text).width;
-    }
-    // If QrCode is placed in the bottom right corner, move text to the left of it (its wider)
-    // Otherwise its a logo or northarrow, needs less text movement.
-    // Also take care of scalebar placement bottomRight
-    let x;
-    if (options.includeQrCode && options.qrCodePlacement === "bottomRight") {
-      x = paperWidth - maxWidth - xmargin - 90;
-    } else if (
-      options.includeNorthArrow &&
-      options.northArrowPlacement === "bottomRight"
-    ) {
-      x = paperWidth - maxWidth - xmargin - this.northArrowMaxWidth * 3 - 10;
-    } else if (
-      options.includeScaleBar &&
-      options.scaleBarPlacement === "bottomRight"
-    ) {
-      // Use the scalebarMaxWidth that either is the text or the scalebar length, to align ex copyright
-      // and disclaimer/date correctly to the left of the scalebar when bottomRight
-      x = paperWidth - maxWidth - xmargin - this.scalebarMaxWidth - 10;
-    } else if (options.includeLogo && options.logoPlacement === "bottomRight") {
-      x =
-        paperWidth -
-        maxWidth -
-        xmargin -
-        this.logoMaxWidth * this.mmPerPoint -
-        10;
-    } else {
-      x = paperWidth - maxWidth - xmargin;
-    }
-    const y = this.getTextHeight(text, fontSize) + ymargin;
-    return { x, y };
-  };
-
-  getCenterAlignedPositions = (
-    text,
-    fontSize,
-    ymargin,
-    paperWidth,
-    paperHeight
-  ) => {
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-    context.font = `${fontSize}px Roboto, roboto, sans-serif`;
-    const textWidth = context.measureText(text).width;
-
-    const x = (paperWidth - textWidth) / 2;
-    const y = paperHeight - ymargin;
-    return { x, y };
+    return getRightAlignedPositions(
+      {
+        text,
+        fontSize,
+        xmargin,
+        ymargin,
+        paperWidth,
+        fontWeight,
+        maxWidth,
+        saveAsType: this.saveAsType,
+        northArrowMaxWidth: this.northArrowMaxWidth,
+        logoMaxWidth: this.logoMaxWidth,
+        mmPerPoint: this.mmPerPoint,
+        scalebarMaxWidth: this.scalebarMaxWidth,
+      },
+      options
+    );
   };
 
   /** Word-wrap text to maxWidth. Honours explicit newlines. */
   wrapTextToLines = (text, fontSize, maxWidth, fontWeight = "normal") => {
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    const weight = fontWeight === "bold" ? "700" : "400";
-    ctx.font = `${weight} ${fontSize}px Roboto, roboto, sans-serif`;
-
-    const measure = (str) => ctx.measureText(str).width;
-
-    const lines = [];
-    for (const segment of text.split("\n")) {
-      if (measure(segment) <= maxWidth) {
-        lines.push(segment);
-        continue;
-      }
-      const words = segment.split(" ");
-      let current = "";
-      for (const word of words) {
-        const candidate = current ? `${current} ${word}` : word;
-        if (measure(candidate) <= maxWidth) {
-          current = candidate;
-        } else {
-          if (current) lines.push(current);
-          current = word;
-        }
-      }
-      if (current) lines.push(current);
-    }
-    return lines.length ? lines : [""];
+    return wrapTextToLines(text, fontSize, maxWidth, fontWeight);
   };
 
   /** Centred x for text within paperWidth. */
   getCenteredX = (text, fontSize, paperWidth, fontWeight = "normal") => {
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    const weight = fontWeight === "bold" ? "700" : "400";
-    ctx.font = `${weight} ${fontSize}px Roboto, roboto, sans-serif`;
-    const textWidth = ctx.measureText(text).width;
-    return (paperWidth - textWidth) / 2;
+    return getCenteredX(text, fontSize, paperWidth, fontWeight);
+  };
+
+  getTextWidth = (text, size) => {
+    return getTextWidth(text, size);
+  };
+
+  /**
+   * @summary Returns a Promise which resolves if image loading succeeded.
+   * @description The Promise will contain an object with data blob of the loaded image. If loading fails, the Promise rejects
+   *
+   * @param {*} url
+   * @returns {Promise}
+   */
+  getImageDataBlobFromUrl = (url) => {
+    return getImageDataBlobFromUrl(url);
   };
 
   generateQR = async (url, qrSize) => {
-    try {
-      return {
-        data: await QRCode.toDataURL(url),
-        width: qrSize * 4,
-        height: qrSize * 4,
-      };
-    } catch (err) {
-      console.warn(err);
-      return "";
-    }
+    return generateQR(url, qrSize);
   };
-
-  calculateScaleBarLengths() {
-    if (this.scales.length === this.scaleMeters.length) {
-      return this.scales.reduce((acc, curr, index) => {
-        acc[curr] = this.scaleMeters[index];
-        return acc;
-      }, {});
-    } else {
-      return this.defaultScaleBarLengths;
-    }
-  }
 
   addPreviewLayer() {
     if (this.previewLayer) return;
@@ -312,17 +220,12 @@ export default class PrintModel {
 
   getMapScale = () => {
     // We have to make sure to get (and set on the printView) the current zoom
-    //  of the "original" view. Otherwise, the scale calculation could be wrong
+    // of the "original" view. Otherwise, the scale calculation could be wrong
     // since it depends on the static zoom of the printView.
     this.printView.setZoom(this.originalView.getZoom());
     // When this is updated, we're ready to calculate the scale, which depends on the
-    // dpi, mpu, inchPerMeter, and resolution. (TODO: (@hallbergs) Clarify these calculations).
-    const dpi = 25.4 / 0.28,
-      mpu = this.printView.getProjection().getMetersPerUnit(),
-      inchesPerMeter = 39.37,
-      res = this.printView.getResolution();
-
-    return res * mpu * inchesPerMeter * dpi;
+    // dpi, mpu, inchPerMeter, and resolution.
+    return getMapScaleFromView(this.printView);
   };
 
   getFittingScale = () => {
@@ -330,11 +233,7 @@ export default class PrintModel {
     const proposedScale = this.getMapScale();
 
     //Get the scale closest to the proposed scale.
-    return this.scales.reduce((prev, curr) => {
-      return Math.abs(curr - proposedScale) < Math.abs(prev - proposedScale)
-        ? curr
-        : prev;
-    });
+    return findClosestScale(proposedScale, this.scales);
   };
 
   removePreview = () => {
@@ -475,69 +374,14 @@ export default class PrintModel {
   };
 
   /**
-   * @summary Returns a Promise which resolves if image loading succeeded.
-   * @description The Promise will contain an object with data blob of the loaded image. If loading fails, the Promise rejects
-   *
-   * @param {*} url
-   * @returns {Promise}
-   */
-  getImageDataBlobFromUrl = (url) => {
-    return new Promise((resolve, reject) => {
-      const image = new Image();
-      image.setAttribute("crossOrigin", "anonymous"); //getting images from external domain
-
-      // We must resolve the promise even if
-      image.onerror = function (err) {
-        reject(err);
-      };
-
-      // When load succeeds
-      image.onload = function () {
-        const imgCanvas = document.createElement("canvas");
-        imgCanvas.width = this.naturalWidth;
-        imgCanvas.height = this.naturalHeight;
-
-        // Draw the image on canvas so that we can read the data blob later on
-        imgCanvas.getContext("2d").drawImage(this, 0, 0);
-
-        resolve({
-          data: imgCanvas.toDataURL("image/png"), // read data blob from canvas
-          width: imgCanvas.width, // also return dimensions so we can use them later
-          height: imgCanvas.height,
-        });
-      };
-
-      // Go, load!
-      image.src = url;
-    });
-  };
-  /**
    * @summary Helper function that takes a URL and max width and returns the ready data blob as well as width/height which fit into the specified max value.
    *
    * @param {*} url
    * @param {*} maxWidth
-   * @returns {Object} image data blob, image width, image height
+   * @returns {Promise<Object>} image data blob, image width, image height
    */
   getImageForPdfFromUrl = async (url, maxWidth) => {
-    // Use the supplied logo URL to get img data blob and dimensions
-    const {
-      data,
-      width: sourceWidth,
-      height: sourceHeight,
-    } = await this.getImageDataBlobFromUrl(url);
-
-    // We must ensure that the logo will be printed with a max width of X, while keeping the aspect ratio between width and height
-    const ratio = (maxWidth * 3) / sourceWidth;
-    const width = sourceWidth * ratio;
-    const height = sourceHeight * ratio;
-    return { data, width, height };
-  };
-
-  getTextWidth = (text, size) => {
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-    context.font = `${size}px roboto`;
-    return context.measureText(text).width;
+    return getImageForPdfFromUrl(url, maxWidth);
   };
 
   /**
@@ -619,70 +463,16 @@ export default class PrintModel {
    * @returns {Float} Fitting number of meters for current scale.
    */
   getFittingScaleBarLength = (scale) => {
-    const length = this.scaleBarLengths[scale];
-
-    if (length) {
-      return length;
-    } else {
-      if (scale < 250) {
-        return 5;
-      } else if (scale < 2500) {
-        return scale * 0.02;
-      } else {
-        return scale * 0.05;
-      }
-    }
+    return getFittingScaleBarLength(this.scaleBarLengths, scale);
   };
 
   //Formats the text for the scale bar
   getLengthText = (scaleBarLengthMeters) => {
-    let units = "m";
-    if (scaleBarLengthMeters > 1000) {
-      scaleBarLengthMeters /= 1000;
-      units = "km";
-    }
-    return `${Number(scaleBarLengthMeters).toLocaleString()} ${units}`;
+    return getLengthText(scaleBarLengthMeters);
   };
 
-  // Divides scaleBarLength with correct number to get divisions lines every 1, 10 or 100 m or km.
-  // Example 1: If scaleBarLengthMeters is 1000 we divide by 10 to get 10 division lines every 100 meters.
-  // Example 2: If _scaleBarLengthMeters is 500 we divide by 5 to get 5 division lines every 10 meters.
   getDivLinesArrayAndDivider = (scaleBarLengthMeters, scaleBarLength) => {
-    const scaleBarLengthMetersStr = scaleBarLengthMeters.toString();
-    // Here we get the lengthMeters first two numbers.
-    const scaleBarFirstDigits = parseInt(
-      scaleBarLengthMetersStr.substring(0, 2)
-    );
-    // We want to check if lengthMeters starts with 10 through 19 to make sure we divide correctly later.
-    const startsWithDoubleDigits =
-      scaleBarFirstDigits >= 10 && scaleBarFirstDigits <= 19;
-
-    // Here we set the scaleLength variable to the length of lengthMeters.
-    // For example, if lengthMeters is 1000 we want the scaleLength to be 10.
-    // And if lengthMeters is 500 we want the scaleLength to be 5.
-    const scaleLength = startsWithDoubleDigits
-      ? scaleBarLengthMetersStr.length - 2
-      : scaleBarLengthMetersStr.length - 1;
-
-    // Here we set the divider by dividing lengthMeters with 10 to the power of scaleLength...
-    // For example, if lengthMeters is 500 we want to divide it by 5 to get 5 division lines, each 100 meters...
-    // and if lengthMeters is 1 000 we want to divide it by 100.
-    const divider = scaleBarLengthMeters / Math.pow(10, scaleLength);
-    // Finally, we want to calculate the number of pixels between each division line on the scalebar
-    const divLinePixelsCount = scaleBarLength / divider;
-
-    // We loop through and fill the divLinesArray with the divLinePixelsCount...
-    // to get the correct division line distribution on the scalebar
-    let divLinesArray = [];
-    for (
-      let divLine = divLinePixelsCount;
-      divLine <= scaleBarLength;
-      divLine += divLinePixelsCount
-    ) {
-      divLinesArray.push(divLine);
-    }
-
-    return { divLinesArray, divider };
+    return getDivLinesArrayAndDivider(scaleBarLengthMeters, scaleBarLength);
   };
 
   // Make sure the desired resolution (depending on scale and dpi)
@@ -702,13 +492,11 @@ export default class PrintModel {
   };
 
   getScaleResolution = (scale, resolution, center) => {
-    return (
-      scale /
-      getPointResolution(
-        this.map.getView().getProjection(),
-        resolution / 25.4,
-        center
-      )
+    return calculateScaleResolution(
+      scale,
+      resolution,
+      this.map.getView().getProjection(),
+      center
     );
   };
 
@@ -815,185 +603,55 @@ export default class PrintModel {
     }
   };
 
-  // Returns an array of floats representing the bounding box found
-  // in the 'BBOX' query-parameter in the supplied url.
+  // Returns a string representing the bounding-box found in the 'BBOX'
+  // query-parameter in the supplied url.
   getBoundingBoxFromUrl = (url) => {
-    return url.searchParams
-      .get("BBOX")
-      .split(",")
-      .map((coord) => parseFloat(coord));
+    return getBoundingBoxFromUrl(url);
   };
 
   // Loads an image (tile) and draws it on the supplied canvas-context
   loadImageTile = (canvas, tileOptions) => {
-    // We have to get the context so that we can draw the image
-    const ctx = canvas.getContext("2d");
-    // Then we need some tile-information
-    const { url, x, y, tileWidth, tileHeight } = tileOptions;
-    // Let's return a promise...
-    return new Promise((resolve, reject) => {
-      // Let's create an image-element
-      const tile = document.createElement("img");
-      tile.onload = () => {
-        // When the tile has loaded, we can draw the tile on the canvas.
-        ctx.drawImage(tile, x, y, tileWidth, tileHeight);
-        // The promise can be resolved when the tile has been fetched and
-        // drawn on the canvas.
-        resolve();
-      };
-      // If the fetch fails, we have to reject the promise.
-      tile.onerror = () => {
-        reject();
-      };
-      // Let's set the cross-origin-attribute to prevent cors-problems
-      tile.crossOrigin = "anonymous";
-      // Then we'll set the url so that the image can be fetched.
-      tile.src = url;
-    });
+    return loadImageTile(canvas, tileOptions);
   };
 
   // Creates tile-information-objects for a column (all tiles needed to fill
   // up to the target-height).
   getTileColumn = (targetHeight, x, tileWidth) => {
-    // We're gonna need to store the tile-information in an array
-    const tiles = [];
-    // We'll iterate (and push tiles to the tile-array) until...
-    while (true) {
-      // ... we've reached the target-height. Let's summarize all tile-height
-      // so that we can check if we're done.
-      const accHeight = tiles.reduce((acc, curr) => acc + curr.tileHeight, 0);
-      // If we are, we can return the array of tile-information
-      if (accHeight >= targetHeight) return tiles;
-      // Otherwise we'll calculate how many pixels are left...
-      const remainingHeight = targetHeight - accHeight;
-      // And either create a tile with that height (or the max-height if the remainder is too large).
-      const tileHeight =
-        remainingHeight > this.maxTileSize ? this.maxTileSize : remainingHeight;
-      // Then we have to calculate where the tile is to be placed on the canvas later.
-      const y = targetHeight - accHeight - tileHeight;
-      // And finally we'll push the information to the array.
-      tiles.push({
-        x,
-        y,
-        tileWidth,
-        tileHeight,
-      });
-    }
+    return getTileColumn(targetHeight, x, tileWidth, this.maxTileSize);
   };
 
   // Returns a string representing the bounding-box for the supplied tile.
-  // (WMS-version 1.3.0)
-  // If the WMS-version is set to 1.3.0 the axis-orientation should be set by the
-  // definition of the projection. However, in 'ConfigMapper.js' we specify the
-  // axis-direction as 'NEU' (northing, easting, up). This means we can assume
-  // that the axis-direction is 'NEU' when dealing with version 1.3.0.
+  // (WMS-version 1.3.0, see layers/tileMath.js for details.)
   getVersionThreeBoundingBox = (tile, bBox, height, width) => {
-    // We have to know how much the northing and easting change per pixel, so that we
-    // can calculate proper bounding-boxes for the new tiles.
-    const northingChangePerPixel = (bBox[2] - bBox[0]) / height;
-    const eastingChangePerPixel = (bBox[3] - bBox[1]) / width;
-    // Then we can construct the bounding-box-string:
-    // The bounding-box is calculated by combining how much the bounding-box
-    // changes per pixel, along with the supplied tile height, width, and position
-    // (presented as pixel-values). For information regarding x, and y, see:
-    // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
-    return `${
-      bBox[0] + northingChangePerPixel * (height - tile.y - tile.tileHeight)
-    },${bBox[1] + eastingChangePerPixel * tile.x},${
-      bBox[0] + northingChangePerPixel * (height - tile.y)
-    }, ${bBox[1] + eastingChangePerPixel * (tile.x + tile.tileWidth)}`;
+    return getVersionThreeBoundingBox(tile, bBox, height, width);
   };
 
   // Returns a string representing the bounding-box for the supplied tile.
-  // (WMS-version 1.1.1)
-  // In version 1.1.1 the axis orientation is always 'ENU' (easting-northing-up).
+  // (WMS-version 1.1.1, see layers/tileMath.js for details.)
   getVersionOneBoundingBox = (tile, bBox, height, width) => {
-    // We have to know how much the northing and easting change per pixel, so that we
-    // can calculate proper bounding-boxes for the new tiles.
-    const northingChangePerPixel = (bBox[3] - bBox[1]) / height;
-    const eastingChangePerPixel = (bBox[2] - bBox[0]) / width;
-    // Then we can construct the bounding-box-string:
-    // The bounding-box is calculated by combining how much the bounding-box
-    // changes per pixel, along with the supplied tile height, width, and position
-    // (presented as pixel-values). For information regarding x, and y, see:
-    // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
-    return `${bBox[0] + eastingChangePerPixel * tile.x},${
-      bBox[1] + northingChangePerPixel * (height - tile.y - tile.tileHeight)
-    },${bBox[0] + eastingChangePerPixel * (tile.x + tile.tileWidth)},${
-      bBox[1] + northingChangePerPixel * (height - tile.y)
-    }`;
+    return getVersionOneBoundingBox(tile, bBox, height, width);
   };
 
   // Appends a bounding-box to each tile-information-object.
   appendBoundingBox = (tiles, bBox, height, width, wmsVersion) => {
-    // The bounding-box calculations might seem a bit messy... One reason for that
-    // is that the x- and y-values for the tiles are set to match how images are added
-    // to a canvas, and those coordinates go the opposite direction compared to the map-coordinate-axels.
-    // See: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage for more info.
-    // Let's calculate and set the bounding-box for each tile-information-object.
-    for (const tile of tiles) {
-      // We have to make sure to check if we're dealing with version 1.3.0 or 1.1.1
-      // so that we can handle the axis-orientation properly.
-      if (wmsVersion === "1.3.0") {
-        tile.bBox = this.getVersionThreeBoundingBox(tile, bBox, height, width);
-      } else {
-        // If we're not dealing with version 1.3.0, we're probably dealing with 1.1.1
-        tile.bBox = this.getVersionOneBoundingBox(tile, bBox, height, width);
-      }
-    }
+    return appendBoundingBox(tiles, bBox, height, width, wmsVersion);
   };
 
   // Returns an URL object from the src string, prepended with proxy if any.
-  // Uses a fake base for resolving relative URL:s so we can detect this when
-  // resolving the final URL to string (and remove it).
-  // This let's us work with NodeJS URL API with relative URL:s.
   getURL = (src) => {
-    const location = (this.proxy || "") + src;
-    return new URL(location, this.fakeBase);
+    return getProxiedUrl(this.proxy, src);
   };
 
   // Returns a string with the complete URL, removing fake base if any.
   toURLString = (url) => {
-    const urlString = url.toString();
-    return urlString.replace(this.fakeBase, "");
+    return toUrlString(url);
   };
 
   // Returns an array of objects containing information regarding the tiles
-  // that should be created to comply with the supplied 'MAX_TILE_SIZE' and
-  // also 'fill' the image.
+  // that should be created to comply with the 'MAX_TILE_SIZE' and also
+  // 'fill' the image.
   getTileInformation = (height, width, url) => {
-    // We're gonna want to return an array containing the tile-objects
-    const tiles = [];
-    // We're also gonna need to keep track of the original bounding box. This bounding-box
-    // will be used to calculate the new bounding-boxes for each tile that we're about to create.
-    const bBox = this.getBoundingBoxFromUrl(url);
-    // Since the northing and easting axels are flipped in version 1.1.0 vs 1.3.0 we
-    // have to make sure to check which WMS-version we are dealing with.
-    const wmsVersion = url.searchParams.get("VERSION");
-    // To gather all the required tile-information we will work with 'columns'. This means
-    // we will create all necessary images at a fixed width, and then move to the next width.
-    // We'll do this until we've created enough columns to fill the entire width.
-    let accWidth = 0;
-    while (true) {
-      // If we've created enough columns to fill the supplied width, we can break.
-      if (accWidth >= width) break;
-      // Otherwise we'll check how many pixels remain until we do...
-      const remainingWidth = width - accWidth;
-      // We'll use a tile-width that is either:
-      // - The remaining amount of pixels
-      // - The max tile-size
-      const tileWidth =
-        remainingWidth > this.maxTileSize ? this.maxTileSize : remainingWidth;
-      // Then we'll create a column of tiles
-      tiles.push(...this.getTileColumn(height, accWidth, tileWidth));
-      // And bump the current width
-      accWidth += tileWidth;
-    }
-    // When the tile-information is created, we can append the bounding-box-information
-    // to each tile. The bounding-box-information will be used to fetch the tiles later.
-    this.appendBoundingBox(tiles, bBox, height, width, wmsVersion);
-    // Finally we can return the tile-information.
-    return tiles;
+    return getTileInformation(height, width, url, this.maxTileSize);
   };
 
   // Updates the parameters of the supplied layer to make sure we
@@ -1107,9 +765,118 @@ export default class PrintModel {
     this.addedLayers = new Set();
   };
 
+  // Renders every canvas found in OpenLayer's viewport onto a single,
+  // print-sized canvas and returns it as a PNG data URL.
+  snapshotMapCanvas = (width, height) => {
+    // Create the map canvas that will hold all of our map tiles
+    const mapCanvas = document.createElement("canvas");
+
+    // Set canvas dimensions to the newly calculated ones that take user's desired resolution etc into account
+    mapCanvas.width = width;
+    mapCanvas.height = height;
+
+    const mapContext = mapCanvas.getContext("2d");
+    const backgroundColor = this.getMapBackgroundColor(); // Make sure we use the same background-color as the map
+    mapContext.fillStyle = backgroundColor;
+    mapContext.fillRect(0, 0, width, height);
+
+    // Each canvas element inside OpenLayer's viewport should get printed
+    document.querySelectorAll(".ol-viewport canvas").forEach((canvas) => {
+      if (canvas.width > 0) {
+        const opacity = canvas.parentNode.style.opacity;
+        mapContext.globalAlpha = opacity === "" ? 1 : Number(opacity);
+        // Get the transform parameters from the style's transform matrix
+        if (canvas.style.transform) {
+          const matrix = canvas.style.transform
+            .match(/^matrix\(([^(]*)\)$/)[1]
+            .split(",")
+            .map(Number);
+          // Apply the transform to the export map context
+          CanvasRenderingContext2D.prototype.setTransform.apply(
+            mapContext,
+            matrix
+          );
+        }
+        mapContext.drawImage(canvas, 0, 0);
+      }
+    });
+
+    return mapCanvas.toDataURL("image/png");
+  };
+
+  // Returns the page size (in PDF points) for the selected format, flipped
+  // according to the selected orientation. Falls back to A4.
+  resolvePageSizeInPoints = (format, orientation) => {
+    // Assign our pagewidth and heights
+    let pageWidth = PAPER_SIZE_PT[format]?.width ?? PAPER_SIZE_PT.a4.width;
+    let pageHeight = PAPER_SIZE_PT[format]?.height ?? PAPER_SIZE_PT.a4.height;
+
+    // Flip depending on orientation
+    return {
+      pageWidth: orientation === "landscape" ? pageWidth : pageHeight,
+      pageHeight: orientation === "landscape" ? pageHeight : pageWidth,
+    };
+  };
+
+  // Renders the layout elements using the renderer matching the selected
+  // output type. For PDF, the resulting file is downloaded and null is
+  // returned; for PNG/BLOB a blob is returned.
+  saveOutput = async ({
+    elements,
+    options,
+    width,
+    height,
+    fileName,
+    legendInfosForPdf,
+    pageWidth,
+    pageHeight,
+    orientation,
+  }) => {
+    if (options.saveAsType === "PDF") {
+      // Build one or more extra pages listing the WMS legends for
+      // each visible layer, appended after the map page.
+      // Note: we intentionally don't pass `options.mapTextColorNormRgb`
+      // here – that color is chosen by the user for text overlaid on
+      // the map image (often white, so it pops on dark aerial
+      // backgrounds), which would be invisible on the plain white
+      // legend page. Let the helper's default (black) take over.
+      const legendPages = await buildLegendPdfPages(legendInfosForPdf, {
+        pageWidth,
+        pageHeight,
+        orientation,
+      });
+      const pdf = await renderToPdf(
+        elements,
+        pageWidth,
+        pageHeight,
+        orientation,
+        legendPages
+      );
+      const bytes = await pdf.save();
+      const pdfBlob = new Blob([bytes], { type: "application/pdf" });
+      const url = URL.createObjectURL(pdfBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${fileName}.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+      return null;
+    } else {
+      // PNG or BLOB
+      return await renderToPng(
+        elements,
+        pageWidth,
+        pageHeight,
+        width,
+        height,
+        fileName,
+        options.saveAsType
+      );
+    }
+  };
+
   print = async (options) => {
     return new Promise((resolve, reject) => {
-      this.saveAsType = options.saveAsType;
       this.saveAsType = options.saveAsType;
       const windowUrl = window.location.href;
       const format = options.format;
@@ -1174,71 +941,11 @@ export default class PrintModel {
         // canvas PDF)
         await delay(500);
 
-        // Create the map canvas that will hold all of our map tiles
-        const mapCanvas = document.createElement("canvas");
-
-        // Set canvas dimensions to the newly calculated ones that take user's desired resolution etc into account
-        mapCanvas.width = width;
-        mapCanvas.height = height;
-
-        const mapContext = mapCanvas.getContext("2d");
-        const backgroundColor = this.getMapBackgroundColor(); // Make sure we use the same background-color as the map
-        mapContext.fillStyle = backgroundColor;
-        mapContext.fillRect(0, 0, width, height);
-
-        // Each canvas element inside OpenLayer's viewport should get printed
-        document.querySelectorAll(".ol-viewport canvas").forEach((canvas) => {
-          if (canvas.width > 0) {
-            const opacity = canvas.parentNode.style.opacity;
-            mapContext.globalAlpha = opacity === "" ? 1 : Number(opacity);
-            // Get the transform parameters from the style's transform matrix
-            if (canvas.style.transform) {
-              const matrix = canvas.style.transform
-                .match(/^matrix\(([^(]*)\)$/)[1]
-                .split(",")
-                .map(Number);
-              // Apply the transform to the export map context
-              CanvasRenderingContext2D.prototype.setTransform.apply(
-                mapContext,
-                matrix
-              );
-            }
-            mapContext.drawImage(canvas, 0, 0);
-          }
-        });
-
-        const dataUrl = mapCanvas.toDataURL("image/png");
-        let pageHeight = 0;
-        let pageWidth = 0;
-
-        // Assign our pagewidth and heights
-        switch (options.format) {
-          case "a4":
-            pageWidth = DEFAULT_PAPER_SIZE.a4.width;
-            pageHeight = DEFAULT_PAPER_SIZE.a4.height;
-            break;
-          case "a3":
-            pageWidth = DEFAULT_PAPER_SIZE.a3.width;
-            pageHeight = DEFAULT_PAPER_SIZE.a3.height;
-            break;
-          case "a2":
-            pageWidth = DEFAULT_PAPER_SIZE.a2.width;
-            pageHeight = DEFAULT_PAPER_SIZE.a2.height;
-            break;
-          default:
-            // Defult to a4
-            pageWidth = DEFAULT_PAPER_SIZE.a4.width;
-            pageHeight = DEFAULT_PAPER_SIZE.a4.height;
-        }
-
-        // Flip depending on orientation
-        const originalPageWidth = pageWidth;
-        const originalPageHeight = pageHeight;
-
-        pageWidth =
-          orientation === "landscape" ? originalPageWidth : originalPageHeight;
-        pageHeight =
-          orientation === "landscape" ? originalPageHeight : originalPageWidth;
+        const dataUrl = this.snapshotMapCanvas(width, height);
+        const { pageWidth, pageHeight } = this.resolvePageSizeInPoints(
+          format,
+          orientation
+        );
 
         try {
           // Build the shared layout (renderer-agnostic element list)
@@ -1253,48 +960,17 @@ export default class PrintModel {
           );
 
           const fileName = `Kartexport - ${new Date().toLocaleString()}`;
-          let blob = null;
-
-          if (options.saveAsType === "PDF") {
-            // Build one or more extra pages listing the WMS legends for
-            // each visible layer, appended after the map page.
-            // Note: we intentionally don't pass `options.mapTextColorNormRgb`
-            // here – that color is chosen by the user for text overlaid on
-            // the map image (often white, so it pops on dark aerial
-            // backgrounds), which would be invisible on the plain white
-            // legend page. Let the helper's default (black) take over.
-            const legendPages = await buildLegendPdfPages(legendInfosForPdf, {
-              pageWidth,
-              pageHeight,
-              orientation,
-            });
-            const pdf = await renderToPdf(
-              elements,
-              pageWidth,
-              pageHeight,
-              orientation,
-              legendPages
-            );
-            const bytes = await pdf.save();
-            const pdfBlob = new Blob([bytes], { type: "application/pdf" });
-            const url = URL.createObjectURL(pdfBlob);
-            const link = document.createElement("a");
-            link.href = url;
-            link.download = `${fileName}.pdf`;
-            link.click();
-            URL.revokeObjectURL(url);
-          } else {
-            // PNG or BLOB
-            blob = await renderToPng(
-              elements,
-              pageWidth,
-              pageHeight,
-              width,
-              height,
-              fileName,
-              options.saveAsType
-            );
-          }
+          const blob = await this.saveOutput({
+            elements,
+            options,
+            width,
+            height,
+            fileName,
+            legendInfosForPdf,
+            pageWidth,
+            pageHeight,
+            orientation,
+          });
 
           this.localObserver.publish("print-completed");
           resolve(blob);
@@ -1356,6 +1032,6 @@ export default class PrintModel {
    * @returns {string} Input parameter, prefixed by "1:" and with spaces as thousands separator, e.g "5000" -> "1:5 000".
    */
   getUserFriendlyScale = (scale) => {
-    return `1:${Number(scale).toLocaleString()}`;
+    return getUserFriendlyScale(scale);
   };
 }

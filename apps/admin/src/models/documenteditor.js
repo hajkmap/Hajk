@@ -119,11 +119,10 @@ var documentEditor = Model.extend({
     hfetch(url, {
       method: "post",
       body: JSON.stringify(data),
-    }).then((response) => {
-      response.text().then((text) => {
-        callback(text);
-      });
-    });
+    })
+      .then((response) => response.json())
+      .then((json) => callback(json.message || json.error))
+      .catch((error) => callback(`Error: ${error.message}`));
   },
 
   createFolder(data, callback) {
@@ -131,12 +130,10 @@ var documentEditor = Model.extend({
     hfetch(url, {
       method: "post",
       body: JSON.stringify(data),
-    }).then((response) => {
-      response.text().then((text) => {
-        callback(text);
-        console.log(text);
-      });
-    });
+    })
+      .then((response) => response.json())
+      .then((json) => callback(json.message || json.error))
+      .catch((error) => callback(`Error: ${error.message}`));
   },
 
   load: function (folder, documentName, callback) {

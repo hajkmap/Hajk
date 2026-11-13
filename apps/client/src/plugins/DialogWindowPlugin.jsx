@@ -114,6 +114,12 @@ class DialogWindowPlugin extends React.PureComponent {
       this.setState({ dialogOpen: true });
     });
 
+    // Close windown event, needed for ex commandpalette
+    const closeEventName = `${this.uniqueIdentifier}.closeWindow`;
+    this.props.app.globalObserver.subscribe(closeEventName, () => {
+      this.closeWindow();
+    });
+
     // If our global observers wants to re-render plugins, we want to obey.
     this.props.app.globalObserver.subscribe("core.pluginsRerender", () => {
       this.forceUpdate();

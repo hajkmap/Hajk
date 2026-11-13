@@ -227,6 +227,7 @@ class BaseWindowPlugin extends React.PureComponent {
             globalObserver={this.props.app.globalObserver}
             minimizeOnFocusMapClick
             disablePadding={this.props.custom.disablePadding}
+            persistent={this.props.custom.persistent}
           >
             <section id={this.type}>
               {React.cloneElement(this.props.children, {

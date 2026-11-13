@@ -34,8 +34,7 @@ const FeatureItem = (props: FeatureItemProps) => {
   const layer = props.feature.get("layer");
   const caption = props.feature.get("caption");
   const paverkasAvText = props.feature.get("paverkasAvText") as
-    | string
-    | undefined;
+    string | undefined;
   // For Hajk group layers, we want to append a small
   // text saying that "this layer is part of group layer X".
   const subcaption: string | null =

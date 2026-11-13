@@ -66,13 +66,13 @@ const MapZoomProvider = ({ map, children }) => {
 // This is a hack to listen on all layers with zoom check
 // This could be moved to the core code or another plugin. It's not really the
 // responsibility of the LayerSwitcher
-const LayerZoomListener = ({ layer }) => {
+const LayerZoomListener = ({ layer, options }) => {
   const layerMinZoom = layer.get("minZoom");
   const layerMaxZoom = layer.get("maxZoom");
   const layerIsToggled = layer.get("visible");
-  const layerMinMaxZoomAlertOnToggleOnly = layer.get(
-    "minMaxZoomAlertOnToggleOnly"
-  );
+  const minMaxZoomAlertOnToggleOnly =
+    Boolean(options?.minMaxZoomAlertOnToggleOnly) ||
+    Boolean(layer.get("minMaxZoomAlertOnToggleOnly"));
   const layerId = layer.get("name");
   const caption = layer.get("caption");
 
@@ -80,14 +80,14 @@ const LayerZoomListener = ({ layer }) => {
     layerMinZoom,
     layerMaxZoom,
     layerIsToggled,
-    layerMinMaxZoomAlertOnToggleOnly,
+    minMaxZoomAlertOnToggleOnly,
     layerId,
     caption
   );
   return <></>;
 };
 
-const LayerZoomVisibleSnackbarProvider = ({ children, layers }) => {
+const LayerZoomVisibleSnackbarProvider = ({ children, layers, options }) => {
   return (
     <>
       {layers.map((l) => {
@@ -100,7 +100,7 @@ const LayerZoomVisibleSnackbarProvider = ({ children, layers }) => {
           return null;
         }
         if (!id?.includes("plugin")) {
-          return <LayerZoomListener key={id} layer={l} />;
+          return <LayerZoomListener key={id} layer={l} options={options} />;
         } else {
           return null;
         }
@@ -511,6 +511,32 @@ const LayerSwitcherProvider = ({
   const dispatcher = useRef(
     createDispatch(map, staticLayerConfigMap, layerTreeData)
   );
+
+  // Add listeners for toggling layers and backgroundlayers via globalobserver.
+  useEffect(() => {
+    const toggleLayerListener = globalObserver.subscribe(
+      "layerswitcher.toggleLayer",
+      ({ layerId }) => {
+        const olLayer = map
+          .getAllLayers()
+          .find((l) => l.get("name") === layerId);
+        if (!olLayer) return;
+        dispatcher.current.setLayerVisibility(layerId, !olLayer.getVisible());
+      }
+    );
+
+    const setBackgroundLayerListener = globalObserver.subscribe(
+      "layerswitcher.setBackgroundLayer",
+      (layerId) => {
+        dispatcher.current.setBackgroundLayer(layerId);
+      }
+    );
+
+    return () => {
+      toggleLayerListener.unsubscribe();
+      setBackgroundLayerListener.unsubscribe();
+    };
+  }, [globalObserver, map]);
 
   return (
     <LayerSwitcherDispatchContext.Provider value={dispatcher.current}>

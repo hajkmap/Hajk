@@ -152,8 +152,8 @@ class FirLayerController {
       "fir.search.results.addFeatureByMapClick",
       (data) => {
         this.clickLock(data.active);
-        this.model.layers.wmsRealEstate.setVisible(data.active);
-        this.model.layers.wmsRealEstate.setOpacity(1.0);
+        this.model.layers.wmsRealEstate?.setVisible(data.active);
+        this.model.layers.wmsRealEstate?.setOpacity(1.0);
         this.removeIsActive = false;
       }
     );
@@ -382,7 +382,7 @@ class FirLayerController {
     if (first === true) {
       this.model.layers.marker.setVisible(false);
       // no feature was clicked, check realestate layer for features.
-      if (this.model.layers.wmsRealEstate.getVisible() === true) {
+      if (this.model.layers.wmsRealEstate?.getVisible() === true) {
         this.getFeaturesAtCoordinates(e.coordinate);
       }
     }
@@ -402,7 +402,7 @@ class FirLayerController {
       active: false,
     });
     this.removeIsActive = false;
-    this.model.layers.wmsRealEstate.setVisible(false);
+    this.model.layers.wmsRealEstate?.setVisible(false);
     this.clickLock(false);
   };
 

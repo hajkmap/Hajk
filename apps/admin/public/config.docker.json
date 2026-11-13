@@ -103,6 +103,9 @@
     "url_create_folder": "/api/v2/informative/createfolder",
     "url_folder_list": "/api/v2/informative/folderlist"
   },
+  "feedback": {
+    "url": "/api/v2/feedback"
+  },
   "router": [
     {
       "name": "layermanager",
@@ -128,6 +131,10 @@
     {
       "name": "documenthandler",
       "title": "Dokumenthanterare 2.0"
+    },
+    {
+      "name": "feedback",
+      "title": "Feedback"
     }
   ]
 }

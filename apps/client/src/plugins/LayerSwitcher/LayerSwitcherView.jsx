@@ -19,21 +19,17 @@ const StyledAppBar = styled(AppBar)(() => ({
 
 /**
  * BreadCrumbs are a feature used to "link" content between LayerSwitcher
- * and Informative plugins. They get rendered directly to #map, as they
- * are not part of LayerSwitcher plugin, at least not visually. To achieve
- * that we use createPortal().
+ * and Informative plugins. They get rendered into #breadcrumbs-container
+ * in the footer via createPortal(), so they are not part of LayerSwitcher
+ * visually. Portal events still bubble through the React tree, so
+ * BreadCrumbs stops that on its own container (see BreadCrumbs.jsx).
  *
  * @returns
  * @memberof LayersSwitcherView
  */
 const BreadCrumbsContainer = ({ map, app }) => {
   return createPortal(
-    // We must wrap the component in a div, on which we can catch
-    // events. This is done to prevent event bubbling to the
-    // layerSwitcher component.
-    <div onMouseDown={(e) => e.stopPropagation()}>
-      <BreadCrumbs map={map} app={app} />
-    </div>,
+    <BreadCrumbs map={map} app={app} />,
     document.getElementById("breadcrumbs-container")
   );
 };

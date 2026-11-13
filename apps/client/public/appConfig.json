@@ -1,13 +1,17 @@
 {
   "mapserviceBase": "",
-  "defaultMap": "map_1",
+  "defaultMap": "simpleMapAndLayersConfig",
   "availableTools": [
     "Anchor",
+    "AttributeEditor",
     "Bookmarks",
     "Buffer",
+    "CommandPalette",
     "Coordinates",
     "DocumentHandler",
     "Edit",
+    "Feedback",
+    "FloodSimulator",
     "FmeServer",
     "InfoDialog",
     "LayerComparer",
@@ -31,7 +35,10 @@
       "active": true,
       "text": "Hi, this is **Hajk**! 😃 \n\nWe hope you enjoy it. 🚀💯",
       "showOnlyOnce": true,
-      "maps": ["map_1", "simpleMapAndLayersConfig"],
+      "maps": [
+        "map_1",
+        "simpleMapAndLayersConfig"
+      ],
       "timeout": 5000,
       "startTime": "2020-06-29",
       "stopTime": "2099-12-31",

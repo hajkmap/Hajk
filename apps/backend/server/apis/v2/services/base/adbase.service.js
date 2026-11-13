@@ -1,4 +1,8 @@
 import log4js from "log4js";
+import {
+  getGroupDelimiter,
+  parseGroupHeader,
+} from "../../utils/parseGroupHeader.js";
 
 const ErrorNotImplemented = "The method '{name}' is not implemented!";
 
@@ -26,9 +30,10 @@ class AdBaseService {
     }
 
     if (this.overrideUserGroups) {
-      this.overrideUserGroups = this.overrideUserGroups
-        .split(",")
-        .map((group) => group.trim());
+      this.overrideUserGroups = parseGroupHeader(
+        this.overrideUserGroups,
+        getGroupDelimiter()
+      );
       this.logger.warn(
         'AD_OVERRIDE_USER_GROUPS_WITH_VALUE is set in .env! Will use "%s" as groups for all AD functions. DON\'T USE THIS IN PRODUCTION!',
         this.overrideUserGroups

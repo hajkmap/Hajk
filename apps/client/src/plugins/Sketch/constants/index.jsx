@@ -5,6 +5,7 @@ import OpenWithIcon from "@mui/icons-material/OpenWith";
 import SaveIcon from "@mui/icons-material/Save";
 import ImportExportIcon from "@mui/icons-material/ImportExport";
 import SettingsIcon from "@mui/icons-material/Settings";
+import AddLocationAltIcon from "@mui/icons-material/AddLocationAlt";
 
 export const ACTIVITIES = [
   {
@@ -18,7 +19,7 @@ export const ACTIVITIES = [
     id: "EDIT",
     tooltip: "Redigera existerande objekt.",
     information:
-      "Redigera noder, byt ritordning, eller ändra färg på ritade objekt.",
+      "Redigera noder (radera nod med alt-klick), byt ritordning, eller ändra färg på ritade objekt.",
     icon: <FormatShapesIcon />,
   },
   {
@@ -46,7 +47,7 @@ export const ACTIVITIES = [
     id: "UPLOAD",
     tooltip: "Ladda ned eller ladda upp ritade objekt.",
     information:
-      "Importera eller exportera ritobjekt i .kml/.gpx-format. Använd knapparna nedan, eller dra in en fil direkt till kartan.",
+      "Importera eller exportera ritobjekt i .kml/.gpx/.geojson-format. Använd knapparna nedan, eller dra in en fil direkt till kartan.",
     icon: <ImportExportIcon />,
   },
   {
@@ -54,6 +55,13 @@ export const ACTIVITIES = [
     tooltip: "Ändra om objektens mått ska synas etc.",
     information: "Här kan du ändra verktygets inställningar.",
     icon: <SettingsIcon />,
+  },
+  {
+    id: "OGC",
+    tooltip: "Välj redigerbart lager att spara till.",
+    information:
+      "Här kan du välja ett redigeringsbart lager kopplat till en kartserver.",
+    icon: <AddLocationAltIcon />,
   },
 ];
 
@@ -174,6 +182,21 @@ export const DEFAULT_MEASUREMENT_SETTINGS = {
   areaUnit: "AUTO",
   lengthUnit: "AUTO",
   precision: 0,
+  pointPrecision: 0,
+};
+
+export const SNAP_TOLERANCE_OPTIONS = [
+  { value: 4, name: "4 pixlar" },
+  { value: 6, name: "6 pixlar" },
+  { value: 8, name: "8 pixlar" },
+  { value: 10, name: "10 pixlar" },
+  { value: 12, name: "12 pixlar" },
+  { value: 15, name: "15 pixlar" },
+];
+
+export const DEFAULT_SNAP_SETTINGS = {
+  snapEnabled: true,
+  snapTolerance: 10,
 };
 
 export const STORAGE_KEY = "sketch";
@@ -199,12 +222,15 @@ export const PROMPT_TEXTS = {
     "Skapa en polygon genom att klicka på en position för varje nod, avsluta med dubbelklick.",
   PointHelp: "Klicka på en position för att infoga en punkt.",
   TextHelp: "Klicka på en position för att infoga text.",
+  MultiDrawHelp:
+    "Rita flera separata delar som blir ett gemensamt objekt (MultiPolygon/MultiLineString/MultiPoint). Klicka 'Avsluta multi-ritning' när du är klar.",
   EDITHelp:
     "Klicka på ett objekt för att ändra dess utseende eller ritordning.",
   MOVEHelp: "Klicka på ett objekt för att förflytta det.",
   DELETEHelp: "Klicka på ett objekt för att radera det från din skiss.",
   SAVEHelp:
     "Här kan du spara en arbetsyta för att fortsätta ditt arbete senare. För att spara över en äldre arbetsyta, ange samma namn.",
+  OGCHelp: "Här kan du aktivera redigeringsbart lager att spara till.",
 };
 
 export const AREA_MEASUREMENT_UNITS = [

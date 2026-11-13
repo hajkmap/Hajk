@@ -49,6 +49,10 @@ For some real-life examples, see the following solutions:
 - [Varberg municipality's map](https://karta.varberg.se)
 - [Uddevalla municipality's map](https://karta.uddevalla.se)
 
+## Security
+
+To report a vulnerability, see [SECURITY.md](SECURITY.md). If you are evaluating Hajk for your organisation, see the [Security FAQ](docs/security-faq.md).
+
 ## Community extensions
 
 Community extensions are additions developed by the community outside the scope of the core Hajk distribution. These can include anything from rewrites in other programming languages to customized integrations with specific business systems.
@@ -57,7 +61,7 @@ For a list of community extensions, please refer to [this page](https://github.c
 
 ## Quick start (for admins)
 
-Please refer to Hajk's official [installation guide](https://github.com/hajkmap/Hajk/wiki/Installation-guide-%28for-pre-packaged-releases%29).
+Please refer to Hajk's official [installation guide](https://github.com/hajkmap/Hajk/wiki/Installation-guide-%28for-pre-packaged-releases%29). For which version to run, the downloads and the Docker images, see [Releases](docs/releases.md).
 
 ## Quick start (for developers)
 

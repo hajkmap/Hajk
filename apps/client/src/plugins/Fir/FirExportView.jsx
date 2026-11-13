@@ -1,6 +1,7 @@
-import React from "react";
+import { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
+
 import FirExportPropertyListView from "./FirExportPropertyListView";
 import FirExportResidentListView from "./FirExportResidentListView";
 
@@ -12,61 +13,73 @@ const SpanNum = styled("span")(({ _theme }) => ({
   fontWeight: 500,
   fontSize: "1rem",
 }));
-class FirExportView extends React.PureComponent {
-  state = {
+
+function FirExportView({ model, app, localObserver }) {
+  const fnsRef = useRef({});
+
+  const [state, setStateRaw] = useState(() => ({
     results: [],
+  }));
+  const stateRef = useRef(state);
+  const [, setTick] = useState(0);
+
+  const setState = (patch) => {
+    stateRef.current = { ...stateRef.current, ...patch };
+    setStateRaw(stateRef.current);
   };
 
-  static propTypes = {
-    model: PropTypes.object.isRequired,
-    app: PropTypes.object.isRequired,
-    localObserver: PropTypes.object.isRequired,
+  const forceUpdate = () => {
+    setTick((tick) => tick + 1);
   };
 
-  constructor(props) {
-    super(props);
-    this.model = this.props.model;
-    this.localObserver = this.props.localObserver;
-    this.globalObserver = this.props.app.globalObserver;
+  fnsRef.current = {
+    handleResultsFiltered: (list) => {
+      setState({ results: [...list] });
+      forceUpdate();
+    },
+  };
 
-    this.localObserver.subscribe("fir.results.filtered", (list) => {
-      this.setState({ results: [...list] });
-      this.forceUpdate();
+  useEffect(() => {
+    localObserver.subscribe("fir.results.filtered", (list) => {
+      fnsRef.current.handleResultsFiltered(list);
     });
-  }
+  }, [localObserver, fnsRef]);
 
-  render() {
-    return (
-      <>
-        <div>
-          <ContainerInfo>
-            <SpanNum>{this.state.results.length}</SpanNum> objekt finns
-            tillgängliga för export.
-          </ContainerInfo>
-          {this.model.config.propertyList ? (
-            <FirExportPropertyListView
-              results={this.state.results}
-              model={this.model}
-              app={this.props.app}
-              localObserver={this.localObserver}
-            />
-          ) : (
-            ""
-          )}
-          {this.model.config.residentList ? (
-            <FirExportResidentListView
-              results={this.state.results}
-              model={this.model}
-              app={this.app}
-              localObserver={this.localObserver}
-            />
-          ) : (
-            ""
-          )}
-        </div>
-      </>
-    );
-  }
+  return (
+    <>
+      <div>
+        <ContainerInfo>
+          <SpanNum>{state.results.length}</SpanNum> objekt finns tillgängliga
+          för export.
+        </ContainerInfo>
+        {model.config.propertyList ? (
+          <FirExportPropertyListView
+            results={state.results}
+            model={model}
+            app={app}
+            localObserver={localObserver}
+          />
+        ) : (
+          ""
+        )}
+        {model.config.residentList ? (
+          <FirExportResidentListView
+            results={state.results}
+            model={model}
+            localObserver={localObserver}
+          />
+        ) : (
+          ""
+        )}
+      </div>
+    </>
+  );
 }
+
+FirExportView.propTypes = {
+  model: PropTypes.object.isRequired,
+  app: PropTypes.object.isRequired,
+  localObserver: PropTypes.object.isRequired,
+};
 
 export default FirExportView;

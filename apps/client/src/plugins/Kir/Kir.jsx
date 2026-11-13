@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import PropTypes from "prop-types";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 import Observer from "react-event-observer";
@@ -9,113 +9,99 @@ import KirView from "./KirView";
 import KirImport from "../Fir/FirImport";
 import KirWfsService from "./KirWfsService";
 
-class Kir extends React.PureComponent {
-  state = {
-    title: "KIR",
-    color: null,
-  };
+function Kir(props) {
+  const [{ localObserver, model }] = useState(() => {
+    const localObserver = new Observer();
 
-  static propTypes = {
-    app: PropTypes.object.isRequired,
-    map: PropTypes.object.isRequired,
-    options: PropTypes.object.isRequired,
-  };
+    function loadFeatures(features) {
+      layerController.clearBeforeSearch();
+      layerController.addFeatures(features, { zoomToLayer: true });
+      localObserver.publish("kir.search.completed", features);
+    }
 
-  constructor(props) {
-    super(props);
+    function handleSearch(params = {}) {
+      let features = model.layers.buffer.getSource().getFeatures();
 
-    this.localObserver = new Observer();
+      if (features.length === 0) {
+        features = model.layers.draw.getSource().getFeatures();
+      }
 
-    this.localObserver.subscribe("kir.search.search", this.handleSearch);
-    this.localObserver.subscribe("kir.search.load", this.loadFeatures);
+      const defaultParams = {
+        features: features,
+        app: props.app,
+        map: props.map,
+        searchTypeId: model.config.wfsId,
+      };
 
-    this.model = new KirModel({
-      localObserver: this.localObserver,
+      layerController.clearBeforeSearch(params);
+      localObserver.publish("kir.search.started", params);
+      service
+        .search(defaultParams, params)
+        .then((features) => {
+          layerController.addFeatures(features, params);
+          localObserver.publish("kir.search.completed", features);
+        })
+        .catch((error) => {
+          localObserver.publish("kir.search.error", error);
+        });
+    }
+
+    localObserver.subscribe("kir.search.search", handleSearch);
+    localObserver.subscribe("kir.search.load", loadFeatures);
+
+    const model = new KirModel({
+      localObserver: localObserver,
       app: props.app,
       map: props.map,
     });
 
-    this.layerController = new KirLayerController(
-      this.model,
-      this.localObserver
-    );
+    const layerController = new KirLayerController(model, localObserver);
 
-    this.import = new KirImport({
-      localObserver: this.localObserver,
-      layerController: this.layerController,
+    new KirImport({
+      localObserver: localObserver,
+      layerController: layerController,
       map: props.map,
       eventPrefix: "kir",
     });
 
-    this.service = new KirWfsService(this.model);
-  }
+    const service = new KirWfsService(model);
 
-  onWindowShow = () => {
-    this.model.windowIsVisible = true;
+    return { localObserver, model };
+  });
+
+  const onWindowShow = () => {
+    model.windowIsVisible = true;
   };
 
-  onWindowHide = () => {
-    this.model.windowIsVisible = false;
+  const onWindowHide = () => {
+    model.windowIsVisible = false;
   };
 
-  loadFeatures = (features) => {
-    this.layerController.clearBeforeSearch();
-    this.layerController.addFeatures(features, { zoomToLayer: true });
-    this.localObserver.publish("kir.search.completed", features);
-  };
-
-  handleSearch = (params = {}) => {
-    let features = this.model.layers.buffer.getSource().getFeatures();
-
-    if (features.length === 0) {
-      features = this.model.layers.draw.getSource().getFeatures();
-    }
-
-    const defaultParams = {
-      features: features,
-      app: this.props.app,
-      map: this.props.map,
-      searchTypeId: this.model.config.wfsId,
-    };
-
-    this.layerController.clearBeforeSearch(params);
-    this.localObserver.publish("kir.search.started", params);
-    this.service
-      .search(defaultParams, params)
-      .then((features) => {
-        this.layerController.addFeatures(features, params);
-        this.localObserver.publish("kir.search.completed", features);
-      })
-      .catch((error) => {
-        this.localObserver.publish("kir.search.error", error);
-      });
-  };
-
-  render() {
-    return (
-      <BaseWindowPlugin
-        {...this.props}
-        type="Kir"
-        custom={{
-          disablePadding: true,
-          icon: <PluginIcon />,
-          title: this.state.title,
-          color: this.state.color,
-          description: "",
-          height: "dynamic",
-          width: 400,
-          onWindowShow: this.onWindowShow,
-          onWindowHide: this.onWindowHide,
-        }}
-      >
-        <KirView
-          model={this.model}
-          app={this.props.app}
-          localObserver={this.localObserver}
-        />
-      </BaseWindowPlugin>
-    );
-  }
+  return (
+    <BaseWindowPlugin
+      {...props}
+      type="Kir"
+      custom={{
+        disablePadding: true,
+        icon: <PluginIcon />,
+        title: "KIR",
+        color: null,
+        description: "",
+        height: "dynamic",
+        width: 400,
+        onWindowShow: onWindowShow,
+        onWindowHide: onWindowHide,
+      }}
+    >
+      <KirView model={model} app={props.app} localObserver={localObserver} />
+    </BaseWindowPlugin>
+  );
 }
+
+Kir.propTypes = {
+  app: PropTypes.object.isRequired,
+  map: PropTypes.object.isRequired,
+  options: PropTypes.object.isRequired,
+};
 
 export default Kir;

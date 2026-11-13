@@ -52,6 +52,7 @@ class MapOptions extends Component {
         constrainResolutionMobile: config.constrainResolutionMobile || false,
         enableDownloadLink: config.enableDownloadLink || false,
         enableAppStateInHash: config.enableAppStateInHash,
+        replaceAppStateInHash: config.replaceAppStateInHash === true,
         confirmOnWindowClose: config.confirmOnWindowClose ?? true,
         altShiftDragRotate: config.altShiftDragRotate || true,
         onFocusOnly: config.onFocusOnly || false,
@@ -90,6 +91,9 @@ class MapOptions extends Component {
         defaultCookieNoticeMessage: config.defaultCookieNoticeMessage,
         defaultCookieNoticeUrl: config.defaultCookieNoticeUrl,
         crossOrigin: config.crossOrigin,
+        measurementMethod: config.measurementMethod || "planar",
+        measurementWfs: config.measurementWfs ?? false,
+        measurementWfsDeriveUrl: config.measurementWfsDeriveUrl ?? false,
         showCookieNotice:
           config.showCookieNotice !== undefined
             ? config.showCookieNotice
@@ -162,6 +166,7 @@ class MapOptions extends Component {
       constrainResolutionMobile: mapConfig.constrainResolutionMobile || false,
       enableDownloadLink: mapConfig.enableDownloadLink,
       enableAppStateInHash: mapConfig.enableAppStateInHash,
+      replaceAppStateInHash: mapConfig.replaceAppStateInHash === true,
       confirmOnWindowClose: mapConfig.confirmOnWindowClose ?? true,
       altShiftDragRotate: mapConfig.altShiftDragRotate,
       onFocusOnly: mapConfig.onFocusOnly,
@@ -204,6 +209,10 @@ class MapOptions extends Component {
         ? mapConfig.defaultCookieNoticeUrl
         : "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
       crossOrigin: mapConfig.crossOrigin ? mapConfig.crossOrigin : "anonymous",
+      measurementMethod:
+        mapConfig.measurementMethod === "sphere" ? "sphere" : "planar",
+      measurementWfs: mapConfig.measurementWfs ?? false,
+      measurementWfsDeriveUrl: mapConfig.measurementWfsDeriveUrl ?? false,
       showCookieNotice:
         mapConfig.showCookieNotice !== undefined
           ? mapConfig.showCookieNotice
@@ -377,6 +386,7 @@ class MapOptions extends Component {
       case "constrainResolutionMobile":
       case "enableDownloadLink":
       case "enableAppStateInHash":
+      case "replaceAppStateInHash":
       case "confirmOnWindowClose":
       case "altShiftDragRotate":
       case "onFocusOnly":
@@ -387,6 +397,8 @@ class MapOptions extends Component {
       case "dragPan":
       case "pinchRotate":
       case "pinchZoom":
+      case "measurementWfs":
+      case "measurementWfsDeriveUrl":
       case "mapselector":
       case "mapcleaner":
       case "mapresetter":
@@ -450,6 +462,7 @@ class MapOptions extends Component {
         );
         config.enableDownloadLink = this.getValue("enableDownloadLink");
         config.enableAppStateInHash = this.getValue("enableAppStateInHash");
+        config.replaceAppStateInHash = this.getValue("replaceAppStateInHash");
         config.confirmOnWindowClose = this.getValue("confirmOnWindowClose");
         config.altShiftDragRotate = this.getValue("altShiftDragRotate");
         config.onFocusOnly = this.getValue("onFocusOnly");
@@ -490,6 +503,12 @@ class MapOptions extends Component {
         );
         config.defaultCookieNoticeUrl = this.getValue("defaultCookieNoticeUrl");
         config.crossOrigin = this.getValue("crossOrigin");
+        config.measurementMethod =
+          this.getValue("measurementMethod") || "planar";
+        config.measurementWfs = this.getValue("measurementWfs");
+        config.measurementWfsDeriveUrl = this.getValue(
+          "measurementWfsDeriveUrl"
+        );
         config.showCookieNotice = this.getValue("showCookieNotice");
         config.showCookieNoticeButton = this.getValue("showCookieNoticeButton");
         config.cookieUse3dPart = this.getValue("cookieUse3dPart");
@@ -885,6 +904,30 @@ class MapOptions extends Component {
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
                   title="Kartans status hålls ständigt uppdaterad, som en del av URL:ens #-parametrar. Se även #1252."
+                />
+              </label>
+            </div>
+            <div style={{ marginLeft: 24 }}>
+              <input
+                id="input_replaceAppStateInHash"
+                type="checkbox"
+                ref="input_replaceAppStateInHash"
+                disabled={!this.state.enableAppStateInHash}
+                onChange={(e) => {
+                  this.setState({ replaceAppStateInHash: e.target.checked });
+                }}
+                checked={this.state.replaceAppStateInHash}
+              />
+              &nbsp;
+              <label
+                className="long-label"
+                htmlFor="input_replaceAppStateInHash"
+              >
+                Uppdatera hash utan att lägga till webbläsarhistorik{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om aktivt så uppdateras adressen i webbläsaren utan att varje ändring läggs till i historiken. Bakåtknappen går då tillbaka till föregående sida, till exempel den sida användaren kom ifrån. Annars backar den genom panoreringar, lagerväxlingar och öppnade verktyg. Kräver att liveuppdatering av hashparametrar är på."
                 />
               </label>
             </div>
@@ -1312,6 +1355,77 @@ class MapOptions extends Component {
                   this.setState({ crossOrigin: e.target.value });
                 }}
               />
+            </div>
+            <div>
+              <label>
+                Mätmetod{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Plan (kartesisk) mäter i kartans koordinatsystem och stämmer med t.ex. QGIS för projicerade CRS. Sfärisk (ol/sphere) använder geodetiska beräkningar. Standard är plan om värdet saknas."
+                />
+              </label>
+              <select
+                id="input_measurementMethod"
+                ref="input_measurementMethod"
+                value={this.state.measurementMethod || "planar"}
+                onChange={(e) => {
+                  this.setState({ measurementMethod: e.target.value });
+                }}
+                className="control-fixed-width"
+              >
+                <option value="planar">Plan (kartesisk)</option>
+                <option value="sphere">Sfärisk (ol/sphere)</option>
+              </select>
+            </div>
+            <div>
+              <input
+                id="input_measurementWfs"
+                type="checkbox"
+                ref="input_measurementWfs"
+                onChange={(e) => {
+                  this.setState({
+                    measurementWfs: e.target.checked,
+                  });
+                }}
+                checked={this.state.measurementWfs}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_measurementWfs">
+                Hämta full geometri via WFS vid 'Välj på kartan'
+                (GeoServer-lager med sök-URL, experimentell funktion){" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om aktivt hämtas hela geometrin via underlagrets sök-URL när man väljer på kartan i Mät eller Skiss. Gäller GeoServer-lager. Om WFS misslyckas används geometrin från GetFeatureInfo. (experimentell funktion)"
+                />
+              </label>
+            </div>
+            <div style={{ marginLeft: 24 }}>
+              <input
+                id="input_measurementWfsDeriveUrl"
+                type="checkbox"
+                ref="input_measurementWfsDeriveUrl"
+                disabled={!this.state.measurementWfs}
+                onChange={(e) => {
+                  this.setState({
+                    measurementWfsDeriveUrl: e.target.checked,
+                  });
+                }}
+                checked={this.state.measurementWfsDeriveUrl}
+              />
+              &nbsp;
+              <label
+                className="long-label"
+                htmlFor="input_measurementWfsDeriveUrl"
+              >
+                Även utan sök-URL, byt /wms mot /wfs (experimentell funktion){" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Används bara när alternativet ovan är på. Lager utan sök-URL försöker med WMS-adressen där /wms byts mot /wfs. Om WFS misslyckas används geometrin från GetFeatureInfo. (experimentell funktion)"
+                />
+              </label>
             </div>
             <div className="separator">Extra kontroller i kartan</div>
             <div>

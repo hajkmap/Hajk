@@ -1,10 +1,11 @@
 import * as express from "express";
 import controller from "./controller.js";
 import restrictAdmin from "../../middlewares/restrict.admin.js";
+import { adminLimiter } from "../../../../common/middlewares/rate.limiter.js";
 
 export default express
   .Router()
-  .use(restrictAdmin) // We will not allow any of the following routes unless user is admin
+  .use(adminLimiter, restrictAdmin) // We will not allow any of the following routes unless user is admin
   // First we handle _specific_ routes, so we can catch them…
   .put("/duplicate/:nameFrom/:nameTo", controller.duplicateMap)
   .get("/export/:map/:format", controller.exportMapConfig) // Describe all available layers in a human-readable format

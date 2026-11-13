@@ -1,0 +1,63 @@
+{
+  "realm": "hajk",
+  "enabled": true,
+  "displayName": "Hajk",
+  "loginWithEmailAllowed": true,
+  "groups": [{ "name": "GIS_ADMIN" }, { "name": "GIS_USER" }],
+  "users": [
+    {
+      "username": "alice",
+      "firstName": "Alice",
+      "lastName": "Admin",
+      "email": "alice@example.com",
+      "emailVerified": true,
+      "enabled": true,
+      "credentials": [{ "type": "password", "value": "${DEMO_USER_PASSWORD}" }],
+      "groups": ["/GIS_ADMIN", "/GIS_USER"]
+    },
+    {
+      "username": "bob",
+      "firstName": "Bob",
+      "lastName": "User",
+      "email": "bob@example.com",
+      "emailVerified": true,
+      "enabled": true,
+      "credentials": [{ "type": "password", "value": "${DEMO_USER_PASSWORD}" }],
+      "groups": ["/GIS_USER"]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "hajk",
+      "name": "Hajk",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "${OIDC_CLIENT_SECRET}",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "rootUrl": "http://localhost:8080",
+      "redirectUris": ["http://localhost:8080/oauth2/callback"],
+      "webOrigins": ["http://localhost:8080"],
+      "attributes": {
+        "post.logout.redirect.uris": "http://localhost:8080/*",
+        "pkce.code.challenge.method": "S256"
+      },
+      "protocolMappers": [
+        {
+          "name": "groups",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-group-membership-mapper",
+          "config": {
+            "claim.name": "groups",
+            "full.path": "false",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ]
+}

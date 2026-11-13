@@ -1,5 +1,10 @@
 import AdBaseService from "./base/adbase.service.js";
 import log4js from "log4js";
+import {
+  DEFAULT_GROUP_DELIMITER,
+  getGroupDelimiter,
+  parseGroupHeader,
+} from "../utils/parseGroupHeader.js";
 
 class AdGroupHeaderService extends AdBaseService {
   constructor() {
@@ -20,6 +25,14 @@ class AdGroupHeaderService extends AdBaseService {
       );
     }
 
+    this.groupDelimiter = getGroupDelimiter();
+    if (this.groupDelimiter !== DEFAULT_GROUP_DELIMITER) {
+      this.logger2.info(
+        'Using "%s" as delimiter for groups in the group header.',
+        this.groupDelimiter
+      );
+    }
+
     this.users = {};
   }
 
@@ -35,13 +48,13 @@ class AdGroupHeaderService extends AdBaseService {
           process.env.AD_TRUSTED_GROUP_HEADER || "X-Control-Group-Header";
         const groupString = request.get(xControlGroupHeader);
         if (groupString) {
-          groups = groupString.split(",").map((group) => group.trim());
+          groups = parseGroupHeader(groupString, this.groupDelimiter);
         }
       }
       this.logger2.trace(
         `[getUserFromRequestHeader] For user "%s", the group header "%s" has value: \n%s`,
         user,
-        process.env.AD_TRUSTED_GROUP_HEADER,
+        process.env.AD_TRUSTED_GROUP_HEADER || "X-Control-Group-Header",
         JSON.stringify(groups, null, 2) // way nicer to print this as formatted JSON string
       );
 

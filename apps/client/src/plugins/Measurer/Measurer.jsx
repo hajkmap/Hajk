@@ -7,8 +7,10 @@ import Observer from "react-event-observer";
 
 import { MeasurerIcon } from "./MeasurerIcons";
 
-import { DEFAULT_MEASUREMENT_SETTINGS } from "./constants";
+import { DEFAULT_MEASUREMENT_SETTINGS, STORAGE_KEY } from "./constants";
 import DrawModel from "../../models/DrawModel";
+import LocalStorageHelper from "../../utils/LocalStorageHelper";
+import useCookieStatus from "../../hooks/useCookieStatus";
 import { Circle, Fill, RegularShape, Stroke, Style } from "ol/style";
 import HelpIcon from "@mui/icons-material/Help";
 import AngleSnapping from "./AngleSnapping";
@@ -25,6 +27,25 @@ function Measurer(props) {
     props.options.visibleAtStart ?? false
   );
 
+  // We're gonna need to keep track of if we're allowed to save stuff in LS.
+  const { functionalCookiesOk } = useCookieStatus(props.app.globalObserver);
+
+  // Returns the measurement-settings from LS if they exist and can be read
+  // (i.e. if functional cookies are accepted), otherwise the defaults.
+  const getMeasurementSettings = () => {
+    if (!functionalCookiesOk) {
+      return DEFAULT_MEASUREMENT_SETTINGS;
+    }
+    const saved = LocalStorageHelper.get(STORAGE_KEY);
+    return saved.measurementSettings || DEFAULT_MEASUREMENT_SETTINGS;
+  };
+
+  // We need to keep track of the measurement-settings so that the view can
+  // change them (and the draw-model stays in sync via the effect below).
+  const [measurementSettings, setMeasurementSettings] = React.useState(() => {
+    return getMeasurementSettings();
+  });
+
   const [drawModel] = React.useState(
     () =>
       new DrawModel({
@@ -33,7 +54,7 @@ function Measurer(props) {
         map: map,
         observer: localObserver,
         observerPrefix: "measure",
-        measurementSettings: DEFAULT_MEASUREMENT_SETTINGS,
+        measurementSettings: measurementSettings,
         customGetDrawImageStyle: () => {
           return new RegularShape({
             fill: new Fill({
@@ -64,6 +85,40 @@ function Measurer(props) {
   const segments = useMemo(() => {
     return new Segment(drawModel, map);
   }, [drawModel, map]);
+
+  // Load (or reset) the measurement-settings when the cookie-status changes,
+  // since the LS can't be read until functional cookies have been accepted.
+  React.useEffect(() => {
+    // Must be read here and not inside the updater: the persist-effect below
+    // runs in the same commit and would otherwise overwrite LS before the read.
+    const settings = getMeasurementSettings();
+    setMeasurementSettings((prev) => {
+      return JSON.stringify(settings) === JSON.stringify(prev)
+        ? prev
+        : settings;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [functionalCookiesOk]);
+
+  // An effect making sure to update the measurement-settings in the draw-model
+  // (and in LS if that's OK) when they are changed.
+  React.useEffect(() => {
+    if (functionalCookiesOk) {
+      LocalStorageHelper.set(STORAGE_KEY, {
+        ...LocalStorageHelper.get(STORAGE_KEY),
+        measurementSettings: measurementSettings,
+      });
+    }
+    drawModel.setMeasurementSettings(measurementSettings);
+  }, [functionalCookiesOk, drawModel, measurementSettings]);
+
+  const onUpdateSettings = (partial) => {
+    setMeasurementSettings({
+      ...DEFAULT_MEASUREMENT_SETTINGS,
+      ...measurementSettings,
+      ...partial,
+    });
+  };
 
   angleSnapping.setActive(true);
   segments.setEnabled(segmentsEnabled);
@@ -101,6 +156,7 @@ function Measurer(props) {
 
       if (remove) {
         drawModel.removeFeature(feature);
+        return;
       }
 
       // If the measurer creates a LineString or a polygon give it an ID so we can
@@ -119,7 +175,7 @@ function Measurer(props) {
 
   const handleDrawEnd = useCallback(
     (e) => {
-      angleSnapping.clearSnapGuides();
+      angleSnapping.handleDrawEndEvent();
       if (!e.feature) return;
       const feature = e.feature;
       const type = feature.getGeometry().getType();
@@ -156,17 +212,29 @@ function Measurer(props) {
     [drawModel, map, angleSnapping, segments]
   );
 
+  const handleDrawAbort = useCallback(() => {
+    angleSnapping.handleDrawEndEvent();
+    segments.handleDrawAbortEvent();
+  }, [angleSnapping, segments]);
+
   const startInteractionWithDrawType = useCallback(
     (type) => {
       setDrawType(type);
       drawModel.toggleDrawInteraction(type, {
         handleDrawEnd: handleDrawEnd,
         handleDrawStart: handleDrawStart,
+        handleDrawAbort: handleDrawAbort,
         handleAddFeature: handleAddFeature,
         drawStyleSettings: { strokeStyle: { dash: null } },
       });
     },
-    [drawModel, handleAddFeature, handleDrawEnd, handleDrawStart]
+    [
+      drawModel,
+      handleAddFeature,
+      handleDrawAbort,
+      handleDrawEnd,
+      handleDrawStart,
+    ]
   );
 
   const handleDrawTypeChange = (e, value) => {
@@ -245,6 +313,28 @@ function Measurer(props) {
     [drawType, currentHoverFeature, pluginShown, map]
   );
 
+  // "Välj på kartan" adds a copy without going through drawend. Finish it the
+  // same way a completed draw is finished so delete-hover can turn the stroke red.
+  React.useEffect(() => {
+    const finishSelectedMeasurement = (feature) => {
+      if (!feature || feature.get("USER_MEASUREMENT") === true) {
+        return;
+      }
+      handleDrawEnd({ feature });
+      handleAddFeature({ feature });
+    };
+    localObserver.subscribe(
+      "measure.drawModel.select.added",
+      finishSelectedMeasurement
+    );
+    return () => {
+      localObserver.unsubscribe(
+        "measure.drawModel.select.added",
+        finishSelectedMeasurement
+      );
+    };
+  }, [localObserver, handleDrawEnd, handleAddFeature]);
+
   React.useEffect(() => {
     map.on("pointermove", handlePointerMove);
 
@@ -264,6 +354,7 @@ function Measurer(props) {
 
   const onWindowHide = () => {
     restoreHoveredFeature();
+    angleSnapping.handleDrawEndEvent();
     angleSnapping.setActive(false);
     angleSnapping.clearSnapGuides();
     setPluginShown(false);
@@ -311,6 +402,8 @@ function Measurer(props) {
         drawModel={drawModel}
         segmentsEnabled={segmentsEnabled}
         toggleSegmentsEnabled={(enabled) => toggleSegmentsEnabled(enabled)}
+        measurementSettings={measurementSettings}
+        onUpdateMeasurementSettings={onUpdateSettings}
         handleDrawTypeChange={handleDrawTypeChange}
       />
     </BaseWindowPlugin>

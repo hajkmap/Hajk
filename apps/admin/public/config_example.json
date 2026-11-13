@@ -70,6 +70,9 @@
     ],
     "wmtsUrl": "http://giscloud.se/mapservice/lmproxy/wmts"
   },
+  "feedback": {
+    "url": "https://YOUR_DOMAIN.COM/api/v2/feedback"
+  },
   "router": [
     {
       "name": "layermanager",
@@ -91,6 +94,10 @@
     {
       "name": "informative",
       "title": "Dokumenthanterare"
+    },
+    {
+      "name": "feedback",
+      "title": "Feedback"
     }
   ]
 }

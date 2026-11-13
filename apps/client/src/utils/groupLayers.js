@@ -1,3 +1,5 @@
+import { getLabelStyleName } from "./labelStyle";
+
 export const setOLSubLayers = (olLayer, visibleSubLayersArray) => {
   if (visibleSubLayersArray.length === 0) {
     // Fix underlying source
@@ -25,7 +27,10 @@ export const setOLSubLayers = (olLayer, visibleSubLayersArray) => {
         .filter(([k]) => visibleSubLayersArray.indexOf(k) !== -1)
         .map(([name, info]) => {
           const labeled = olLayer.get("labeledSubLayers");
-          return labeled?.has(name) ? `${name}_labels` : (info.style || "");
+          // useLabelStyle is the single-sublayer equivalent of labeledSubLayers
+          return labeled?.has(name) || olLayer.get("useLabelStyle")
+            ? getLabelStyleName(olLayer.layersInfo, name)
+            : info.style || "";
         })
         .join(","),
       CQL_FILTER: layerInfo?.params?.CQL_FILTER || null,

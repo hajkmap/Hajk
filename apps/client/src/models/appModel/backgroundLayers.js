@@ -6,6 +6,7 @@ import VectorTileLayer from "ol/layer/VectorTile";
 import { applyStyle, applyBackground } from "ol-mapbox-style";
 import { mapDirectionToAngle } from "../../utils/mapDirectionToAngle";
 import { easeOut } from "ol/easing";
+import { BACKGROUND_LAYER_IDS } from "../../constants/backgroundLayers";
 
 const DEFAULT_OSM_VECTOR_STYLE_URL =
   "https://tiles.openfreemap.org/styles/liberty";
@@ -19,7 +20,7 @@ export function createWhiteLayer(appModel) {
     zIndex: -1,
     layerType: "base",
     rotateMap: "n",
-    name: "-1",
+    name: BACKGROUND_LAYER_IDS.WHITE,
     caption: "Vit",
     layerInfo: {
       caption: "Vit",
@@ -44,7 +45,7 @@ export function createBlackLayer(appModel) {
     zIndex: -1,
     layerType: "base",
     rotateMap: "n",
-    name: "-2",
+    name: BACKGROUND_LAYER_IDS.BLACK,
     caption: "Svart",
     layerInfo: {
       caption: "Svart",
@@ -81,7 +82,7 @@ export function createOSMLayer(appModel) {
     zIndex: -1,
     layerType: "base",
     rotateMap: "n", // OpenStreetMap should be rotated to North
-    name: "-3",
+    name: BACKGROUND_LAYER_IDS.OSM,
     caption: "OpenStreetMap",
     layerInfo: {
       infoText:
@@ -153,7 +154,7 @@ export function createOSMVectorLayer(appModel) {
     zIndex: -1,
     layerType: "base",
     rotateMap: "n", // OpenStreetMap should be rotated to North
-    name: "-4", // Let's follow the precedent of the other "special" background layers
+    name: BACKGROUND_LAYER_IDS.OSM_VECTOR,
     caption: "OpenStreetMap (vektor)",
     layerInfo: {
       infoText:

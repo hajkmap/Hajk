@@ -8,6 +8,11 @@ import asyncFilter from "../utils/asyncFilter.js";
 import getAnalyticsOptionsFromDotEnv from "../utils/getAnalyticsOptionsFromDotEnv.js";
 import { AccessError } from "../utils/AccessError.js";
 import { ConfigParseError } from "../utils/ConfigParseError.js";
+import {
+  assertSafeSegment,
+  resolvePathUnder,
+  validateMapName,
+} from "../utils/safePath.js";
 
 const logger = log4js.getLogger("service.config.v2");
 
@@ -28,27 +33,6 @@ class ConfigServiceV2 {
   }
 
   /**
-   * Validate map configuration name before using it in filesystem paths.
-   *
-   * @param {string} map
-   * @returns {string}
-   */
-  #validateMapName(map) {
-    if (typeof map !== "string") {
-      throw new Error("Invalid map name.");
-    }
-
-    const normalizedMap = map.trim();
-
-    // Only allow simple map IDs (file stem), e.g. "default_map-1".
-    if (!/^[A-Za-z0-9_-]+$/.test(normalizedMap)) {
-      throw new Error("Invalid map name.");
-    }
-
-    return normalizedMap;
-  }
-
-  /**
    * @summary Get contents of a map configuration as JSON object, if AD is active
    * a check will be made to see if specified user has access to the map.
    *
@@ -61,10 +45,9 @@ class ConfigServiceV2 {
    */
   async getMapConfig(map, user, washContent = true) {
     try {
-      const safeMap = this.#validateMapName(map);
-      const pathToFile = path.join(
-        process.cwd(),
-        "App_Data",
+      const safeMap = validateMapName(map);
+      const pathToFile = resolvePathUnder(
+        path.join(process.cwd(), "App_Data"),
         `${safeMap}.json`
       );
       const text = await fs.promises.readFile(pathToFile, "utf-8");
@@ -240,6 +223,13 @@ class ConfigServiceV2 {
       }
     }
 
+    // Grab layers from AttributeEditor
+    const attributeEditorOptions = mapConfig.tools.find(
+      (t) => t.type === "AttributeEditor"
+    )?.options;
+    const attributeEditorLayerIds =
+      attributeEditorOptions?.activeServices?.map((as) => as.id) || [];
+
     // Ensure that the WFST layer that is used by the Collector plugin is added too.
     // This one differs a bit from the previous washes as there is no need to map
     // an Array: the `serviceId` is just a string as Collector only supports one
@@ -254,6 +244,7 @@ class ConfigServiceV2 {
       ...layerIds,
       ...searchLayerIds,
       ...editLayerIds,
+      ...attributeEditorLayerIds,
       ...(collectorToolsServiceId ? [collectorToolsServiceId] : []), // Conditional spread to avoid undefined inside the Set
     ]);
 
@@ -562,7 +553,30 @@ class ConfigServiceV2 {
       mapConfig.tools[editIndexInTools].options.activeServices = activeServices;
     }
 
-    // Part 5: Wash FME-server products
+    // Part 5: Wash AttributeEditor services
+    const attributeEditorIndexInTools = mapConfig.tools.findIndex(
+      (t) => t.type === "AttributeEditor"
+    );
+
+    if (attributeEditorIndexInTools !== -1) {
+      let { activeServices } =
+        mapConfig.tools[attributeEditorIndexInTools].options;
+      if (Array.isArray(activeServices)) {
+        activeServices = await asyncFilter(
+          activeServices,
+          async (service) =>
+            await this.filterByGroupVisibility(
+              service.visibleForGroups,
+              user,
+              `AttributeEditor service "${service.id}"`
+            )
+        );
+        mapConfig.tools[attributeEditorIndexInTools].options.activeServices =
+          activeServices;
+      }
+    }
+
+    // Part 6: Wash FME-server products
     const fmeServerIndexInTools = mapConfig.tools.findIndex(
       (t) => t.type?.toLowerCase() === "fmeserver"
     );
@@ -691,7 +705,7 @@ class ConfigServiceV2 {
 
       // Next, prepare the URL that we will fetch in order to GetCapabilities.
       // This differs a little, depending on if it's WMS or WFS.
-      let params = {};
+      let params;
       switch (type) {
         case "wms":
           params = {
@@ -716,9 +730,7 @@ class ConfigServiceV2 {
       // A slight delay - too many requests to the same server can cause a block
       await delay(100);
 
-      let response,
-        text,
-        json = "";
+      let response, text, json;
       try {
         // Go fetch
         response = await fetch(getCapabilitiesUrl);
@@ -1114,19 +1126,27 @@ class ConfigServiceV2 {
    */
   async duplicateMap(src, dest) {
     try {
+      const appDataRoot = path.join(process.cwd(), "App_Data");
       let srcPath = null;
 
-      if (src.endsWith(".template")) {
+      if (typeof src === "string" && src.endsWith(".template")) {
         // If src ends with ".template", don't add the .json file extension,
         // and look inside /templates directory.
-        srcPath = path.join(process.cwd(), "App_Data", "templates", src);
+        validateMapName(src.slice(0, -".template".length));
+        srcPath = resolvePathUnder(
+          path.join(appDataRoot, "templates"),
+          assertSafeSegment(src)
+        );
       } else {
         // Else it's a regular JSON file, add the extension and look in App_Data only
-        srcPath = path.join(process.cwd(), "App_Data", src + ".json");
+        srcPath = resolvePathUnder(appDataRoot, `${validateMapName(src)}.json`);
       }
 
       // Destination will always need the extension added
-      const destPath = path.join(process.cwd(), "App_Data", dest + ".json");
+      const destPath = resolvePathUnder(
+        appDataRoot,
+        `${validateMapName(dest)}.json`
+      );
 
       // Copy!
       await fs.promises.copyFile(srcPath, destPath);
@@ -1158,7 +1178,10 @@ class ConfigServiceV2 {
   async deleteMap(name) {
     try {
       // Prepare path
-      const filePath = path.join(process.cwd(), "App_Data", name + ".json");
+      const filePath = resolvePathUnder(
+        path.join(process.cwd(), "App_Data"),
+        `${validateMapName(name)}.json`
+      );
       await fs.promises.unlink(filePath);
       return {};
     } catch (error) {

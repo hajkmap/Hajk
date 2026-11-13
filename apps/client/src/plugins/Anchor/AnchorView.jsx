@@ -1,10 +1,10 @@
-import React from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
-import withSnackbar from "components/WithSnackbar";
 import QRCode from "qrcode";
 import HajkToolTip from "components/HajkToolTip";
 import ShareIcon from "@mui/icons-material/Share";
+import { useSnackbar } from "notistack";
 
 import Alert from "@mui/material/Alert";
 
@@ -38,14 +38,6 @@ const StyledAlert = styled(Alert)(({ theme }) => ({
   },
 }));
 
-const StyledButton = styled(Button)(({ _theme }) => ({
-  minHeight: { xs: "48px", sm: "36px" },
-  height: "auto",
-  whiteSpace: { xs: "normal", sm: "nowrap" },
-  lineHeight: { xs: 1.2, sm: 1.75 },
-  textAlign: "center",
-}));
-
 // Hide icons on small screens
 const ResponsiveIcon = styled("span")(({ theme }) => ({
   display: "inline-flex",
@@ -55,211 +47,212 @@ const ResponsiveIcon = styled("span")(({ theme }) => ({
   },
 }));
 
-class AnchorView extends React.PureComponent {
-  static propTypes = {
-    closeSnackbar: PropTypes.func.isRequired,
-    enqueueSnackbar: PropTypes.func.isRequired,
-    globalObserver: PropTypes.object.isRequired,
-    model: PropTypes.object.isRequired,
-  };
+const AnchorView = (props) => {
+  const { globalObserver, model, options, enableAppStateInHash } = props;
+  const { enqueueSnackbar } = useSnackbar();
 
-  state = {
-    anchor: "",
-    cleanUrl: false,
-    qrCode: null,
-  };
+  const [anchor, setAnchor] = useState("");
+  const [cleanUrl, setCleanUrl] = useState(false);
+  const [qrCode, setQrCode] = useState(null);
 
-  async componentDidMount() {
-    // Subscribe to changes to anchor URL caused by other components. This ensure
+  // Keep a mirror of cleanUrl so the mapUpdated subscription
+  // (which is registered only once) always reads the current value.
+  // Maintained by toggleCleanUrl, do not write to it during render.
+  const cleanUrlRef = useRef(false);
+
+  // Clipboard API is only available in secure contexts.
+  const canCopyToClipboard =
+    typeof navigator.clipboard?.writeText === "function";
+
+  const appendCleanModeIfActive = useCallback(
+    (url) => (cleanUrlRef.current ? `${url}&clean` : url),
+    []
+  );
+
+  const generateQr = useCallback(
+    (url) => QRCode.toDataURL(appendCleanModeIfActive(url)),
+    [appendCleanModeIfActive]
+  );
+
+  useEffect(() => {
+    // Subscribe to changes to anchor URL caused by other components. This ensures
     // that we have a live update of the anchor whether user does anything in the map.
-    this.mapUpdatedSubscription = this.props.globalObserver.subscribe(
+    const mapUpdatedSubscription = globalObserver.subscribe(
       "core.mapUpdated",
       ({ url }) => {
-        this.generateQr(url).then((data) => {
-          this.setState({
-            anchor: this.appendCleanModeIfActive(url),
-            qrCode: data,
-          });
+        generateQr(url).then((data) => {
+          setAnchor(appendCleanModeIfActive(url));
+          setQrCode(data);
         });
       }
     );
 
     // Initiate the anchor-url on mount
-    const a = await this.props.model.getAnchor();
-    const qrData = await this.generateQr(a);
-    this.setState({
-      anchor: a,
-      qrCode: qrData,
+    model.getAnchor().then(async (a) => {
+      const qrData = await generateQr(a);
+      setAnchor(a);
+      setQrCode(qrData);
     });
-  }
 
-  componentWillUnmount() {
-    this.mapUpdatedSubscription?.unsubscribe();
-  }
+    return () => {
+      mapUpdatedSubscription?.unsubscribe();
+    };
+  }, [globalObserver, model, generateQr, appendCleanModeIfActive]);
 
-  generateQr = (url) => {
-    return QRCode.toDataURL(this.appendCleanModeIfActive(url));
+  const toggleCleanUrl = async () => {
+    const newCleanState = !cleanUrl;
+    cleanUrlRef.current = newCleanState;
+    setCleanUrl(newCleanState);
+    const newUrl = await model.getAnchor();
+    setAnchor(appendCleanModeIfActive(newUrl));
   };
 
-  appendCleanModeIfActive = (url) =>
-    this.state.cleanUrl ? (url += "&clean") : url;
-
-  toggleCleanUrl = () => {
-    const newCleanState = !this.state.cleanUrl;
-    this.setState(
-      {
-        cleanUrl: newCleanState,
-      },
-      async () => {
-        const newUrl = await this.props.model.getAnchor();
-        this.setState({ anchor: this.appendCleanModeIfActive(newUrl) });
-      }
-    );
-  };
-
-  handleClickOnCopyToClipboard = (_e) => {
-    const input = document.getElementById("anchorUrl");
-    input.select();
-    document.execCommand("copy") &&
-      this.props.enqueueSnackbar("Kopiering till urklipp lyckades!", {
+  const handleClickOnCopyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(anchor);
+      enqueueSnackbar("Kopiering till urklipp lyckades!", {
         variant: "info",
       });
+    } catch {
+      enqueueSnackbar("Kopiering till urklipp misslyckades.", {
+        variant: "warning",
+      });
+    }
   };
 
-  render() {
-    const allowCreatingCleanUrls =
-      this.props.options.allowCreatingCleanUrls ?? true;
-    const appStateInHashEnabled = this.props.enableAppStateInHash === true;
+  const allowCreatingCleanUrls = options.allowCreatingCleanUrls ?? true;
+  const appStateInHashEnabled = enableAppStateInHash === true;
 
-    return (
-      <Grid container direction="column" sx={{ maxWidth: 400 }}>
-        <Grid>
-          <StyledAlert icon={<ShareIcon />} variant="info">
-            Skapa en länk med kartans synliga lager, aktuella zoomnivå och
-            utbredning.
-          </StyledAlert>
+  return (
+    <Grid container direction="column" sx={{ maxWidth: 400 }}>
+      <Grid>
+        <StyledAlert icon={<ShareIcon />} variant="info">
+          Skapa en länk med kartans synliga lager, aktuella zoomnivå och
+          utbredning.
+        </StyledAlert>
+      </Grid>
+      {allowCreatingCleanUrls && (
+        <Grid sx={{ mb: 1.5, display: { xs: "none", sm: "block" } }}>
+          <RadioGroup
+            aria-label="copy-url"
+            name="copy-url"
+            onChange={toggleCleanUrl}
+          >
+            <FormControlLabel
+              checked={!cleanUrl}
+              value="default"
+              control={<Radio color="primary" />}
+              label="Skapa länk till karta"
+            />
+            <FormControlLabel
+              checked={cleanUrl}
+              value="clean"
+              control={<Radio color="primary" />}
+              label="Skapa länk till karta utan verktyg etc."
+            />
+          </RadioGroup>
         </Grid>
-        {allowCreatingCleanUrls && (
-          <Grid sx={{ mb: 1.5, display: { xs: "none", sm: "block" } }}>
-            <RadioGroup
-              aria-label="copy-url"
-              name="copy-url"
-              onChange={this.toggleCleanUrl}
-            >
-              <FormControlLabel
-                checked={!this.state.cleanUrl}
-                value="default"
-                control={<Radio color="primary" />}
-                label="Skapa länk till karta"
-              />
-              <FormControlLabel
-                checked={this.state.cleanUrl}
-                value="clean"
-                control={<Radio color="primary" />}
-                label="Skapa länk till karta utan verktyg etc."
-              />
-            </RadioGroup>
-          </Grid>
-        )}
-        <Grid sx={{ mb: 1, display: { xs: "none", sm: "block" } }}>
-          <StyledTextField
-            fullWidth={true}
-            id="anchorUrl"
-            slotProps={{ input: { readOnly: true } }}
-            value={this.state.anchor}
-            variant="outlined"
-            size="small"
-          />
-        </Grid>
-        {document.queryCommandSupported("copy") && (
-          <Grid sx={{ mb: 0 }}>
-            <Grid container spacing={2}>
-              <Grid size={6} sx={{ display: "flex" }}>
-                <HajkToolTip title="Kopiera länk till urklipp">
-                  <StyledButton
-                    fullWidth
-                    variant="contained"
-                    color="primary"
-                    component="a"
-                    endIcon={
-                      <ResponsiveIcon>
-                        <FileCopyIcon />
-                      </ResponsiveIcon>
-                    }
-                    sx={{
-                      minHeight: { xs: "48px", sm: "36px" },
-                      height: "auto",
-                      whiteSpace: { xs: "normal", sm: "nowrap" },
-                      lineHeight: { xs: 1.2, sm: 1.75 },
-                      textAlign: "center",
-                    }}
-                    onClick={this.handleClickOnCopyToClipboard}
-                  >
-                    Kopiera länk
-                  </StyledButton>
-                </HajkToolTip>
-              </Grid>
-              <Grid size={6} sx={{ display: "flex" }}>
-                <HajkToolTip title="Öppna länk i nytt fönster">
-                  <StyledButton
-                    fullWidth
-                    variant="contained"
-                    color="primary"
-                    endIcon={
-                      <ResponsiveIcon>
-                        <OpenInNewIcon />
-                      </ResponsiveIcon>
-                    }
-                    href={this.state.anchor || null}
-                    target="_blank"
-                    sx={{
-                      minHeight: { xs: "48px", sm: "36px" },
-                      height: "auto",
-                      whiteSpace: { xs: "normal", sm: "nowrap" },
-                      lineHeight: { xs: 1.2, sm: 1.75 },
-                      textAlign: "center",
-                    }}
-                  >
-                    Öppna länk
-                  </StyledButton>
-                </HajkToolTip>
-              </Grid>
+      )}
+      <Grid sx={{ mb: 1, display: { xs: "none", sm: "block" } }}>
+        <StyledTextField
+          fullWidth={true}
+          id="anchorUrl"
+          slotProps={{ input: { readOnly: true } }}
+          value={anchor}
+          variant="outlined"
+          size="small"
+        />
+      </Grid>
+      <Grid sx={{ mb: 0 }}>
+        <Grid container spacing={2}>
+          {canCopyToClipboard && (
+            <Grid size={6} sx={{ display: "flex" }}>
+              <HajkToolTip title="Kopiera länk till urklipp">
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  endIcon={
+                    <ResponsiveIcon>
+                      <FileCopyIcon />
+                    </ResponsiveIcon>
+                  }
+                  sx={{
+                    minHeight: { xs: "48px", sm: "36px" },
+                    height: "auto",
+                    whiteSpace: { xs: "normal", sm: "nowrap" },
+                    lineHeight: { xs: 1.2, sm: 1.75 },
+                    textAlign: "center",
+                  }}
+                  onClick={handleClickOnCopyToClipboard}
+                >
+                  Kopiera länk
+                </Button>
+              </HajkToolTip>
             </Grid>
-          </Grid>
-        )}
-        {appStateInHashEnabled && (
-          <Grid>
-            <Paper sx={{ p: 1, mt: 2 }}>
-              <Grid
-                container
+          )}
+          <Grid size={canCopyToClipboard ? 6 : 12} sx={{ display: "flex" }}>
+            <HajkToolTip title="Öppna länk i nytt fönster">
+              <Button
+                fullWidth
+                variant="contained"
+                color="primary"
+                endIcon={
+                  <ResponsiveIcon>
+                    <OpenInNewIcon />
+                  </ResponsiveIcon>
+                }
+                href={anchor || null}
+                target="_blank"
                 sx={{
-                  justifyContent: "center",
+                  minHeight: { xs: "48px", sm: "36px" },
+                  height: "auto",
+                  whiteSpace: { xs: "normal", sm: "nowrap" },
+                  lineHeight: { xs: 1.2, sm: 1.75 },
+                  textAlign: "center",
                 }}
               >
-                <Grid size={12}>
-                  <Box
-                    sx={{
-                      minHeight: 200,
-                      display: "flex",
-                      justifyContent: "center",
-                    }}
-                  >
-                    {this.state.qrCode && (
-                      <img
-                        src={this.state.qrCode}
-                        alt="QR-kod"
-                        style={{ minHeight: 200 }}
-                      />
-                    )}
-                  </Box>
-                </Grid>
-              </Grid>
-            </Paper>
+                Öppna länk
+              </Button>
+            </HajkToolTip>
           </Grid>
-        )}
+        </Grid>
       </Grid>
-    );
-  }
-}
+      {appStateInHashEnabled && (
+        <Grid>
+          <Paper sx={{ p: 1, mt: 2 }}>
+            <Grid
+              container
+              sx={{
+                justifyContent: "center",
+              }}
+            >
+              <Grid size={12}>
+                <Box
+                  sx={{
+                    minHeight: 200,
+                    display: "flex",
+                    justifyContent: "center",
+                  }}
+                >
+                  {qrCode && (
+                    <img src={qrCode} alt="QR-kod" style={{ minHeight: 200 }} />
+                  )}
+                </Box>
+              </Grid>
+            </Grid>
+          </Paper>
+        </Grid>
+      )}
+    </Grid>
+  );
+};
 
-export default withSnackbar(AnchorView);
+AnchorView.propTypes = {
+  enableAppStateInHash: PropTypes.bool,
+  globalObserver: PropTypes.object.isRequired,
+  model: PropTypes.object.isRequired,
+  options: PropTypes.object.isRequired,
+};
+
+export default AnchorView;

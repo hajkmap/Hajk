@@ -287,6 +287,7 @@ class WMSLayerForm extends Component {
             queryable: true,
             infoclickIcon: "",
             hasLabelStyle: false,
+            labelStyle: "",
           };
         });
       }
@@ -524,6 +525,9 @@ class WMSLayerForm extends Component {
               onChange={(e) => {
                 let addedLayersInfo = this.state.addedLayersInfo;
                 addedLayersInfo[layerInfo.id].hasLabelStyle = e.target.checked;
+                if (!e.target.checked) {
+                  addedLayersInfo[layerInfo.id].labelStyle = "";
+                }
                 this.setState(
                   {
                     addedLayersInfo: addedLayersInfo,
@@ -536,6 +540,43 @@ class WMSLayerForm extends Component {
             />
           </div>
         </div>
+
+        {layerInfo.hasLabelStyle && (
+          <div className="form-row split0">
+            <div>
+              <label>Etikettstil</label>
+            </div>
+            <div>
+              <select
+                value={layerInfo.labelStyle || ""}
+                className="control-fixed-width"
+                onChange={(e) => {
+                  let addedLayersInfo = this.state.addedLayersInfo;
+                  addedLayersInfo[layerInfo.id].labelStyle = e.target.value;
+                  this.setState(
+                    {
+                      addedLayersInfo: addedLayersInfo,
+                    },
+                    () => {
+                      this.renderLayerInfoDialog(layerInfo);
+                    },
+                  );
+                }}
+              >
+                <option value={""}>{`<standard: ${layerInfo.id}_labels>`}</option>
+                {layerInfo.labelStyle &&
+                  !layerInfo.styles?.some?.(
+                    (style) => style.Name === layerInfo.labelStyle,
+                  ) && (
+                    <option value={layerInfo.labelStyle}>
+                      {layerInfo.labelStyle}
+                    </option>
+                  )}
+                {styles}
+              </select>
+            </div>
+          </div>
+        )}
 
         <div className="separator">Infoklick</div>
 
@@ -883,6 +924,7 @@ class WMSLayerForm extends Component {
           queryable: true,
           infoclickIcon: "",
           hasLabelStyle: false,
+          labelStyle: "",
         };
       }
     });

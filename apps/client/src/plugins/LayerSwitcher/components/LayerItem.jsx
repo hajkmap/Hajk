@@ -1,4 +1,4 @@
-import { useEffect, useState, memo, useCallback } from "react";
+import { useEffect, useState, memo } from "react";
 
 // Material UI components
 import {
@@ -130,31 +130,6 @@ function LayerItem({
 
   const legendIcon = layerInfo?.legendIcon || layerLegendIcon;
 
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
-  const applyLabelStyle = useCallback(() => {
-    if (!olLayer) return;
-    if (olLayer.get("allSubLayers")?.length > 1) return; // Multi-sublayer group layers handle labels per-sublayer
-
-    const source = olLayer.getSource?.();
-    if (!source || typeof source.updateParams !== "function") return;
-
-    const currentParams = source.getParams?.() || {};
-
-    // Get stored layer name
-    const layerName = olLayer.get("wmsLayerName") || currentParams.LAYERS;
-
-    if (!layerName) return;
-
-    const isActive = !!olLayer.get("useLabelStyle");
-    const baseStyle = olLayer.get("initialStyles") || "";
-
-    source.updateParams({
-      ...currentParams,
-      LAYERS: layerName,
-      STYLES: isActive ? `${layerName}_labels` : baseStyle,
-    });
-  }, [olLayer]);
-
   const toggleLabelLayer = (e) => {
     e.stopPropagation();
     if (!olLayer) return;
@@ -163,29 +138,13 @@ function LayerItem({
     olLayer.set("useLabelStyle", newValue);
   };
 
-  // Save the initial styles in "initialStyles" once when olLayer is ready
-  useEffect(() => {
-    if (!olLayer) return;
-
-    const source = olLayer.getSource?.();
-    if (!source) return;
-
-    const params = source.getParams?.() || {};
-
-    // Store original style once
-    if (olLayer.get("initialStyles") == null) {
-      olLayer.set("initialStyles", params.STYLES || "");
-    }
-  }, [olLayer]);
-
-  // Sync showingLabelLayer state with olLayer property and apply styles
+  // Sync showingLabelLayer state with olLayer property. The WMS STYLES param
+  // itself is updated by WMSLayer's own change:useLabelStyle listener.
   useEffect(() => {
     if (!olLayer) return;
 
     const update = () => {
-      const active = !!olLayer.get("useLabelStyle");
-      setShowingLabelLayer(active);
-      applyLabelStyle();
+      setShowingLabelLayer(!!olLayer.get("useLabelStyle"));
     };
 
     // Initial sync on mount or layer change
@@ -197,18 +156,7 @@ function LayerItem({
     return () => {
       olLayer.un("change:useLabelStyle", update);
     };
-  }, [olLayer, layerId, applyLabelStyle]);
-
-  // Apply label style when layer becomes visible (in case it was set while hidden)
-  useEffect(() => {
-    if (!olLayer) return;
-    if (!layerIsToggled) return;
-
-    // Wait for OL state to be ready
-    requestAnimationFrame(() => {
-      applyLabelStyle();
-    });
-  }, [layerIsToggled, olLayer]);
+  }, [olLayer, layerId]);
 
   useEffect(() => {
     const handleLoadStatusChange = (d) => {
@@ -443,15 +391,12 @@ function LayerItem({
               }}
             >
               {renderStatusIcon()}
-              {!(allSubLayers?.length > 1) &&
-                (layerInfo?.hasLabelStyle ||
-                  layerInfo?.layersInfo?.[allSubLayers?.[0]]
-                    ?.hasLabelStyle) && (
-                  <BtnToggleLayerLabel
-                    active={showingLabelLayer}
-                    onClick={toggleLabelLayer}
-                  />
-                )}
+              {olLayer?.get("hasLabelStyle") === true && (
+                <BtnToggleLayerLabel
+                  active={showingLabelLayer}
+                  onClick={toggleLabelLayer}
+                />
+              )}
               {!toggleable && !draggable ? (
                 <LsIconButton size="small">
                   <HajkToolTip title="Bakgrundskartan ligger låst längst ner i ritordningen">

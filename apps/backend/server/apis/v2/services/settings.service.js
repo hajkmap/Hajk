@@ -1,6 +1,11 @@
 import fs from "fs";
 import path from "path";
 import ConfigService from "./config.service.js";
+import {
+  InvalidPathError,
+  resolvePathUnder,
+  validateMapName,
+} from "../utils/safePath.js";
 
 class SettingsService {
   /**
@@ -40,7 +45,12 @@ class SettingsService {
   }
 
   getFullPathToFile(file) {
-    return path.join(process.cwd(), "App_Data", file);
+    // Only allow plain JSON file names directly inside App_Data, e.g. "map_1.json"
+    if (typeof file !== "string" || !file.endsWith(".json")) {
+      throw new InvalidPathError("Invalid file name.");
+    }
+    validateMapName(file.slice(0, -".json".length));
+    return resolvePathUnder(path.join(process.cwd(), "App_Data"), file);
   }
 
   async readFileAsJson(file) {
@@ -370,7 +380,7 @@ class SettingsService {
    * @param {string} mapFile
    * @param {string} toolName
    * @param {object | object[]} incomingOptions
-   * @returns {object} mapConfig
+   * @returns {object} { status, created } where status is 201 (tool added) or 204 (tool updated)
    */
   async updateMapTool(mapFile, toolName, incomingOptions) {
     try {
@@ -414,7 +424,8 @@ class SettingsService {
 
       // Send HTTP 201 status code if we created the entry,
       // or 204 if we've updated an existing one.
-      return i === -1 ? 201 : 204;
+      const created = i === -1;
+      return { status: created ? 201 : 204, created };
     } catch (error) {
       return { error };
     }

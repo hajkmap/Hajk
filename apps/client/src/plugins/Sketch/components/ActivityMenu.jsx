@@ -5,6 +5,12 @@ import HajkToolTip from "components/HajkToolTip";
 import { ACTIVITIES } from "../constants";
 
 const ActivityMenu = (props) => {
+  // The OGC activity depends on AttributeEditor, so Sketch can hide it by
+  // passing showOgcActivity={false}.
+  const activities =
+    props.showOgcActivity === false
+      ? ACTIVITIES.filter((activity) => activity.id !== "OGC")
+      : ACTIVITIES;
   return (
     <Grid
       container
@@ -14,7 +20,7 @@ const ActivityMenu = (props) => {
       }}
     >
       <Paper elevation={4}>
-        {ACTIVITIES.map((activity, index) => {
+        {activities.map((activity, index) => {
           return (
             <div key={index} style={{ padding: 8 }}>
               <HajkToolTip title={activity.tooltip}>

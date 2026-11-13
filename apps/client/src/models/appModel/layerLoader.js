@@ -5,6 +5,8 @@ import WFSVectorLayer from "../layers/VectorLayer";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { Icon, Fill, Stroke, Style } from "ol/style";
+import { BACKGROUND_LAYER_IDS } from "../../constants/backgroundLayers";
+import { layerHasLabelStyle } from "../../utils/labelStyle";
 
 export function addMapLayer(appModel, layer) {
   const configMapper = new ConfigMapper(appModel.config.appConfig.proxy);
@@ -21,37 +23,10 @@ export function addMapLayer(appModel, layer) {
         appModel.globalObserver
       );
 
-      if (layer.hasLabelStyle === true) {
-        layerItem.layer.set("hasLabelStyle", true);
-        // Store the layername so we can access it before wms layer changes
-        // ex when switching labels
-        layerItem.layer.set("wmsLayerName", layer.layers?.[0] || layer.name); // ← Store it!
-
-        const source = layerItem.layer.getSource();
-        if (source && source.getParams) {
-          const params = source.getParams();
-          layerItem.layer.set("initialStyles", params.STYLES || "");
-        }
-      }
-
-      // Check if we should load the label layer for this layer
-      if (
-        layer._requestLabelLayer &&
-        layerItem?.layer?.getSource?.()?.updateParams
-      ) {
-        const olLayer = layerItem.layer;
-        const source = olLayer.getSource();
-        const params = source.getParams?.() || {};
-        const layerName = params.LAYERS;
-
-        // Save the provided style before we change it
-        olLayer.set("initialStyles", params.STYLES || "");
-        olLayer.set("useLabelStyle", true);
-
-        source.updateParams({
-          ...params,
-          STYLES: `${layerName}_labels`,
-        });
+      // Check if we should load the label layer for this layer (`_l` suffix
+      // in URL). WMSLayer's change:useLabelStyle listener applies the style.
+      if (layer._requestLabelLayer) {
+        layerItem.layer.set("useLabelStyle", true);
       }
       appModel.map.addLayer(layerItem.layer);
       break;
@@ -142,8 +117,7 @@ function applyUrlOverridesToLayer(
     });
 
     layer._requestLabelLayer =
-      layer.hasLabelStyle === true &&
-      layersFromParams.includes(`${layer.id}_l`);
+      layerHasLabelStyle(layer) && layersFromParams.includes(`${layer.id}_l`);
 
     // groupLayersFromParams is an object where keys are layer IDs and values are
     // the sublayers that should be active for this given layer. A layer's key will
@@ -166,28 +140,34 @@ function applyBackgroundLayerVisibilityFromParams(
 ) {
   // Check if the layerParams contains -1 (white background) and handle set it to visible on load
   if (
-    layersFromParams.includes("-1") &&
+    layersFromParams.includes(BACKGROUND_LAYER_IDS.WHITE) &&
     layerSwitcherConf?.options?.backgroundSwitcherWhite
   ) {
-    const whiteLayer = map.getAllLayers().find((l) => l.get("name") === "-1");
+    const whiteLayer = map
+      .getAllLayers()
+      .find((l) => l.get("name") === BACKGROUND_LAYER_IDS.WHITE);
     whiteLayer.setVisible(true);
   }
 
   // Check if the layerParams contains -2 (black background) and handle set it to visible on load
   if (
-    layersFromParams.includes("-2") &&
+    layersFromParams.includes(BACKGROUND_LAYER_IDS.BLACK) &&
     layerSwitcherConf?.options?.backgroundSwitcherBlack
   ) {
-    const blackLayer = map.getAllLayers().find((l) => l.get("name") === "-2");
+    const blackLayer = map
+      .getAllLayers()
+      .find((l) => l.get("name") === BACKGROUND_LAYER_IDS.BLACK);
     blackLayer.setVisible(true);
   }
 
   // Check if the layerParams contains -3 (osm-layer) and handle set it to visible on load
   if (
-    layersFromParams.includes("-3") &&
+    layersFromParams.includes(BACKGROUND_LAYER_IDS.OSM) &&
     layerSwitcherConf?.options?.enableOSM
   ) {
-    const osmLayer = map.getAllLayers().find((l) => l.get("name") === "-3");
+    const osmLayer = map
+      .getAllLayers()
+      .find((l) => l.get("name") === BACKGROUND_LAYER_IDS.OSM);
     if (osmLayer === undefined) {
       console.warn(`Cannot find the OSM layer`);
     } else {
@@ -197,12 +177,12 @@ function applyBackgroundLayerVisibilityFromParams(
 
   // Check if the layerParams contains -4 (osm-vector-layer) and handle set it to visible on load
   if (
-    layersFromParams.includes("-4") &&
+    layersFromParams.includes(BACKGROUND_LAYER_IDS.OSM_VECTOR) &&
     layerSwitcherConf?.options?.enableOSMVector
   ) {
     const osmVectorLayer = map
       .getAllLayers()
-      .find((l) => l.get("name") === "-4");
+      .find((l) => l.get("name") === BACKGROUND_LAYER_IDS.OSM_VECTOR);
     if (osmVectorLayer === undefined) {
       console.warn(`Cannot find the OSM vector layer`);
     } else {
@@ -231,21 +211,6 @@ export function addLayers(appModel) {
       appModel.cqlFiltersFromParams
     );
     addMapLayer(appModel, layer);
-  });
-
-  // Now that layers exist, we set useLabelStyle on the proper layers
-  appModel.layers.forEach((layer) => {
-    if (layer._requestLabelLayer === true) {
-      const olLayer = appModel.map
-        .getAllLayers()
-        .find((l) => l.get("name") === layer.id);
-
-      if (olLayer && olLayer.get("hasLabelStyle")) {
-        if (!olLayer.get("useLabelStyle")) {
-          olLayer.set("useLabelStyle", true);
-        }
-      }
-    }
   });
 
   applyBackgroundLayerVisibilityFromParams(

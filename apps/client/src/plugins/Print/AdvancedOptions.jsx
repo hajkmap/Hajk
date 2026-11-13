@@ -1,7 +1,6 @@
 import React from "react";
 import Grid from "@mui/material/Grid";
 import { styled } from "@mui/material/styles";
-import withSnackbar from "components/WithSnackbar";
 import {
   Badge,
   Checkbox,
@@ -19,6 +18,7 @@ import {
 import PaletteIcon from "@mui/icons-material/Palette";
 import { TwitterPicker as ColorPicker } from "react-color";
 import HajkToolTip from "components/HajkToolTip";
+import { MAP_TEXT_AVAILABLE_COLORS } from "./constants";
 
 const Root = styled(Grid)(() => ({
   display: "flex",
@@ -35,24 +35,6 @@ class AdvancedOptions extends React.PureComponent {
   state = {
     anchorEl: null,
   };
-
-  // Default colors for color picker used to set text color (used in map title, scale, etc)
-  mapTextAvailableColors = [
-    "#FFFFFF",
-    "#D0021B",
-    "#F5A623",
-    "#F8E71C",
-    "#8B572A",
-    "#7ED321",
-    "#417505",
-    "#9013FE",
-    "#4A90E2",
-    "#50E3C2",
-    "#B8E986",
-    "#000000",
-    "#4A4A4A",
-    "#9B9B9B",
-  ];
 
   placementOverlaps = {
     northArrow: false,
@@ -446,7 +428,7 @@ class AdvancedOptions extends React.PureComponent {
                 name: "mapTextColor",
               }}
               color={mapTextColor}
-              colors={this.mapTextAvailableColors}
+              colors={MAP_TEXT_AVAILABLE_COLORS}
               onChangeComplete={this.handleMapTextColorChangeComplete}
             />
           </Popover>
@@ -456,4 +438,4 @@ class AdvancedOptions extends React.PureComponent {
   }
 }
 
-export default withSnackbar(AdvancedOptions);
+export default AdvancedOptions;

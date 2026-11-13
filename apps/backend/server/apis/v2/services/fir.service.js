@@ -29,8 +29,7 @@ class FirService {
   }
 
   #setDefaultResponseHeaders(res) {
-    // This imitates the request and response from old .Net backend.
-    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    // Cache headers imitate the response from the old .Net backend.
     res.setHeader("Cache-Control", "private, no-cache");
     res.setHeader("Expires", new Date(Date.now() - 3600000 * 24).toUTCString());
   }

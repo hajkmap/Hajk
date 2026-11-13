@@ -413,8 +413,7 @@ export default class PropertyCheckerModel {
 
     for (const parent of parentFeatures) {
       const raw = parent.get(this.#checkLayerAffectedByAttribute) as
-        | string
-        | undefined;
+        string | undefined;
       if (raw === undefined) {
         console.warn(
           `PropertyChecker: feature has no \`${this.#checkLayerAffectedByAttribute}\` attribute, skipping.`

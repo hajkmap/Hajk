@@ -1,7 +1,5 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import withSnackbar from "components/WithSnackbar";
-
 import BaseDialog from "components/Dialog/BaseDialog";
 import {
   Button,
@@ -41,4 +39,4 @@ class PrintDialog extends React.PureComponent {
   }
 }
 
-export default withSnackbar(PrintDialog);
+export default PrintDialog;
