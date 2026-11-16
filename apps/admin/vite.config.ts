@@ -15,6 +15,9 @@ export default defineConfig({
   test: {
     environment: "happy-dom",
     globals: true,
+    // Node 25 and later have a localStorage of their own that, without
+    // --localstorage-file, is undefined and hides happy-dom's.
+    execArgv: ["--no-experimental-webstorage"],
     include: ["src/**/__tests__/**/*.test.ts", "src/**/__tests__/**/*.test.tsx"],
     alias: {
       "@/": "/src/",
