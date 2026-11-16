@@ -4,12 +4,19 @@ import type Feature from "ol/Feature";
 import type { Geometry } from "ol/geom";
 
 /**
+ * Represents the OpenLayers map with Hajk specific extensions.
+ */
+export interface HajkMap extends OlMap {
+  clickLock: Set<string>;
+}
+
+/**
  * Represents the main Hajk application instance that is passed around
  * to plugins and models via the `app` prop.
  */
 export interface HajkApp {
   /** The OpenLayers Map instance */
-  map: OlMap;
+  map: HajkMap;
   /** Global event observer for cross-plugin communication */
   globalObserver: EventObserver;
   /** Application configuration */

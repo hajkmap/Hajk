@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Admin + Client: FME Server - The plugin now supports both v3 and v4 of the FME Flow REST API (detected automatically), more published-parameter types and file uploads. [#1814](https://github.com/hajkmap/Hajk/issues/1814)
 - Admin + Client: Map setting `replaceAppStateInHash` (default off, and only used when `enableAppStateInHash` is on). When on, hash updates use `history.replaceState` so the browser Back button leaves the map instead of stepping through pans, layer toggles, and opened tools. Missing or any value other than `true` keeps assigning `location.hash`.
 - Backend: The delimiter used between groups in the AD group header is now configurable via `AD_TRUSTED_GROUP_HEADER_DELIMITER`, making it possible to use the same header for Hajk and GeoServer. [#1914](https://github.com/hajkmap/Hajk/issues/1914)
 - Client: Measurer/Sketch - Angle snapping can be repeated while Ctrl/Cmd is held. Clicking a green snap guide removes that guide and draws a new one from the clicked point. [#1923](https://github.com/hajkmap/Hajk/issues/1923)
@@ -70,6 +71,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Client: FME Server - The data-download order body is now encoded, so attribute values and emails containing &, +, = or % are no longer truncated or altered. [#1886](https://github.com/hajkmap/Hajk/issues/1886)
+- Client: FME Server - Failed requests (order, parameters, job status, unreachable FME API) are now reported to the user instead of being ignored, the drawn geometry is no longer sent twice, selecting a point or line no longer reports the area as too large, and the plugin works when Hajk is served over plain HTTP. [#1814](https://github.com/hajkmap/Hajk/issues/1814)
 - Client: The `_l` suffix in the `l` URL param (and in bookmarks) now activates the label style for layers where "Has label style" option is set per sublayer in Admin. Previously the layer was shown without labels and the suffix was dropped from the URL.
 - Client: The label style is now applied when a layer is shown with the `_l` suffix through a DocumentHandler map link, a hash change or `LayerControlModel`. Previously the style only switched if the layer's group was expanded in LayerSwitcher.
 - Client: DocumentHandler - On mobile, chapter jumps scroll the bottom sheet so the chapter lines up. [#1933](https://github.com/hajkmap/Hajk/issues/1933)

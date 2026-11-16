@@ -1,19 +1,51 @@
 # FME-Server Plugin
 
 The main purpose for this plugin is to run FME-workspaces that are published to an FME server.
-The plugin allows for both Data-download (targeting /fmeproxy/fmedatadownload/repository/workspace) as well as running with the REST-api (v3) (targeting /fmeproxy/fmerest/v3/transformations/submit/repository/workspace). Currently, the plugin is only available for users with the nodeJS backend, simply because the plugin relies on the fact that mapServiceBase/fmeProxy exists (and this is currently only implemented in the nodeJS backend).
+The plugin allows for both Data-download (targeting `/fmeproxy/fmedatadownload/repository/workspace`) as well as running jobs via the FME REST API. The REST API version (v3 or v4) is detected automatically on first use by probing the FME server (v4 first, then v3). See the [FME Flow REST API v4 docs](https://docs.safe.com/fme/html/fmeapiv4/docs/index.html) for endpoint differences.
 
-## Developer info
+- **v3**: `/fmeproxy/fmerest/v3/...` — transformations submit and job status endpoints.
+- **v4** (FME Flow 2025.1+): `/fmeproxy/fmeapiv4/...` — `POST /jobs` and `GET /jobs/{id}`; parameters via `GET /workspaces/{repository}/{workspace}/parameters`.
 
-The FmeServer-plugin is built as a functional component, and might seem a bit strange at first sight if you've only dealt with class components. However, remember that React is leaning toward more and more functional components, and in my opinion all new plugins should be built as functional components.
-Functional components are really fun to build! I suggest you give it a go if you are planning on building/rewriting a plugin.
+Data-download always uses `/fmedatadownload/` regardless of REST API version.
 
-### TODO:s
+### Parameter type handling (single source of truth)
 
-As explained earlier, the plugin is only available for the users with the nodeJS backend. So, there are some TODO:s that i see as musts:
+The v3 REST API and the v4 JSON UI describe parameters with different type names
+(`CHOICE` vs `dropdown`, `LISTBOX` vs `listbox`, `RANGE_SLIDER` vs `range`, …).
+Rather than aliasing v4 names back to v3 names and then re-classifying them, the
+plugin classifies every raw type **once**:
 
-- Add /fmeProxy route to .NET backend. This route has a really simple job => Forward to FME-server with authentication.
-- Make sure the .NET backend can handle the new tool in admin.
+- `api/parameterUi.ts` holds a single flat `KIND_BY_TYPE` record mapping each FME
+  parameter type (v3 + v4, normalized to `SCREAMING_SNAKE`) to a `ParameterUiKind`
+  - the control the plugin renders it with. `resolveParameterUiKind` also uses the
+    v4 `valueType` hint to refine generic text fields into numbers/booleans, and
+    unknown types fall back to a plain text input.
+- `api/publishedParameters.ts` runs this once during normalization and stores the
+  result on `PublishedParameter.uiKind`. Rendering (`ParameterField`) and value
+  extraction (`parameterValues`) switch on `uiKind` and never re-parse type
+  strings. Adding a new type means one entry in one map.
+
+Job status is normalized the same way: `api/jobs.ts` maps v4 (lowercase) status
+spellings onto the canonical FME statuses (`SUCCESS`, `FME_FAILURE`,
+`JOB_FAILURE`, `ABORTED`, `QUEUED`, `RUNNING`, `SUBMITTED`, `PULLED`); v3 is passed
+through unchanged.
+
+### Code structure
+
+| Path                            | Role                                                       |
+| ------------------------------- | ---------------------------------------------------------- |
+| `types.ts`                      | Shared types for the plugin                                |
+| `api/version.ts`                | Detects v3 vs v4 against the FME server                    |
+| `api/endpoints.ts`              | Builds proxied REST URLs                                   |
+| `api/publishedParameters.ts`    | Normalizes workspace parameters for the UI                 |
+| `api/parameterUi.ts`            | Single map from FME type → UI control (`uiKind`)           |
+| `api/parameterValues.ts`        | Resolves values sent to FME when ordering                  |
+| `api/jobs.ts`                   | Submit body and job status helpers                         |
+| `hooks/useFmeApiVersion.ts`     | React hook wrapping API version detection                  |
+| `hooks/useFmeServerApi.ts`      | REST calls (parameters, orders, job status)                |
+| `hooks/useProductParameters.ts` | Loads parameters when group/product changes                |
+| `models/FmeServerModel.ts`      | Product config, validation, and payload building (no HTTP) |
+| `models/MapViewModel.ts`        | Map drawing and geometry handling                          |
 
 ### Further development
 

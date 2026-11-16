@@ -28,6 +28,15 @@ import SaveIcon from "@material-ui/icons/SaveSharp";
 import WarningIcon from "@material-ui/icons/Warning";
 import { withStyles } from "@material-ui/core/styles";
 import { blue } from "@material-ui/core/colors";
+import {
+  extractListItemNames,
+  getParametersUrl,
+  getRepositoriesUrl,
+  getWorkspacesUrl,
+  normalizeListResponse,
+  normalizeParametersResponse,
+  resolveApiVersion,
+} from "utils/FmeRestApi";
 
 const ColorButtonBlue = withStyles((theme) => ({
   root: {
@@ -76,6 +85,7 @@ const defaultState = {
   drawFillColor: "rgba(255,255,255,0.07)",
   drawStrokeColor: "rgba(74,74,74,0.5)",
   groupDisplayName: "Grupp",
+  fmeApiVersion: null,
 };
 
 class RGBA {
@@ -114,21 +124,26 @@ class ToolOptions extends Component {
 
   async componentDidMount() {
     const { newProduct } = this.state;
+    const tool = this.getTool();
+    const apiVersion = await resolveApiVersion(this.fmeServerUrl, hfetch);
     // Let's start by fetching all available repositories
-    const availableRepositories = await this.getAvailableRepositories();
+    const availableRepositories = await this.getAvailableRepositories(
+      apiVersion,
+    );
     const availableWorkspaces = await this.getAvailableWorkspaces(
-      availableRepositories[0]
+      availableRepositories[0],
+      apiVersion,
     );
     const availableParameters = await this.getWorkspaceParameters(
       availableRepositories[0],
-      availableWorkspaces[0]
+      availableWorkspaces[0],
+      apiVersion,
     );
 
     newProduct.repository = availableRepositories[0] ?? "";
     newProduct.workspace = availableWorkspaces[0] ?? "";
     newProduct.geoAttribute = availableParameters[0] ?? "";
 
-    const tool = this.getTool();
     if (tool) {
       this.setState({
         active: true,
@@ -158,6 +173,7 @@ class ToolOptions extends Component {
           tool.options.drawStrokeColor || this.state.drawStrokeColor,
         groupDisplayName:
           tool.options.groupDisplayName || this.state.groupDisplayName,
+        fmeApiVersion: apiVersion,
       });
     } else {
       this.setState({
@@ -170,76 +186,67 @@ class ToolOptions extends Component {
         availableWorkspaces: availableWorkspaces,
         availableParameters: availableParameters,
         newProduct: newProduct,
+        fmeApiVersion: apiVersion,
       });
     }
   }
 
-  getAvailableRepositories = async () => {
-    const repositories = [];
+  getAvailableRepositories = async (apiVersion) => {
     try {
       const response = await hfetch(
-        `${this.fmeServerUrl}/fmerest/v3/repositories?limit=-1&offset=-1`
+        getRepositoriesUrl(this.fmeServerUrl, apiVersion),
       );
       const data = await response.json();
-      if (!data.items) {
-        return [];
-      }
-      data.items.forEach((repo) => {
-        repositories.push(repo.name);
-      });
-      return repositories;
+      return extractListItemNames(normalizeListResponse(data));
     } catch (error) {
       console.error(
-        `Failed to fetch repositories trough the backend. Make sure that the FME-server proxy is properly configured in the backend.`
+        `Failed to fetch repositories trough the backend. Make sure that the FME-server proxy is properly configured in the backend.`,
       );
       return [];
     }
   };
 
-  getAvailableWorkspaces = async (repositoryName) => {
+  getAvailableWorkspaces = async (repositoryName, apiVersion) => {
     if (!repositoryName) {
       return [];
     }
 
-    const workspaces = [];
     try {
       const response = await hfetch(
-        `${this.fmeServerUrl}/fmerest/v3/repositories/${repositoryName}/items`
+        getWorkspacesUrl(this.fmeServerUrl, repositoryName, apiVersion),
       );
       const data = await response.json();
-      if (!data.items) {
-        return [];
-      }
-      data.items.forEach((workspace) => {
-        workspaces.push(workspace.name);
-      });
-      return workspaces;
+      return extractListItemNames(normalizeListResponse(data));
     } catch (error) {
       console.error(
-        `Failed to fetch workspaces trough the backend. Make sure that the FME-server proxy is properly configured in the backend.`
+        `Failed to fetch workspaces trough the backend. Make sure that the FME-server proxy is properly configured in the backend.`,
       );
       return [];
     }
   };
 
-  getWorkspaceParameters = async (repositoryName, workspaceName) => {
+  getWorkspaceParameters = async (
+    repositoryName,
+    workspaceName,
+    apiVersion,
+  ) => {
     if (!repositoryName || !workspaceName) {
       return [];
     }
 
-    const parameters = [];
     try {
       const response = await hfetch(
-        `${this.fmeServerUrl}/fmerest/v3/repositories/${repositoryName}/items/${workspaceName}/parameters`
+        getParametersUrl(
+          this.fmeServerUrl,
+          repositoryName,
+          workspaceName,
+          apiVersion,
+        ),
       );
       const data = await response.json();
-      if (!data) {
-        return [];
-      }
-      data.forEach((parameter) => {
-        parameters.push(parameter.name);
-      });
-      return parameters;
+      return normalizeParametersResponse(data).map(
+        (parameter) => parameter.name,
+      );
     } catch (error) {
       return [];
     }
@@ -264,7 +271,11 @@ class ToolOptions extends Component {
   getTool() {
     return this.props.model
       .get("toolConfig")
-      .find((tool) => tool.type === this.type);
+      .find(
+        (tool) =>
+          typeof tool.type === "string" &&
+          tool.type.toLowerCase() === this.type.toLowerCase(),
+      );
   }
 
   add(tool) {
@@ -304,7 +315,7 @@ class ToolOptions extends Component {
         visibleAtStart: this.state.visibleAtStart,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
-          String.prototype.trim
+          String.prototype.trim,
         ),
         drawFillColor: this.state.drawFillColor,
         drawStrokeColor: this.state.drawStrokeColor,
@@ -324,7 +335,7 @@ class ToolOptions extends Component {
             alert: true,
             alertMessage: "Uppdateringen lyckades",
           });
-        }
+        },
       );
     }
 
@@ -426,13 +437,18 @@ class ToolOptions extends Component {
   handleCurrentRepositoryChange = async (newRepository) => {
     const { newProduct } = this.state;
     const availableWorkspaces = await this.getAvailableWorkspaces(
-      newRepository
+      newRepository,
+      this.state.fmeApiVersion,
     );
     const newWorkspace =
       availableWorkspaces.length > 0 ? availableWorkspaces[0] : null;
     const availableParameters = !newWorkspace
       ? []
-      : await this.getWorkspaceParameters(newRepository, newWorkspace);
+      : await this.getWorkspaceParameters(
+          newRepository,
+          newWorkspace,
+          this.state.fmeApiVersion,
+        );
 
     newProduct.repository = newRepository;
     newProduct.workspace = newWorkspace;
@@ -453,7 +469,11 @@ class ToolOptions extends Component {
     const { newProduct } = this.state;
     const availableParameters = !newWorkspace
       ? []
-      : await this.getWorkspaceParameters(currentRepository, newWorkspace);
+      : await this.getWorkspaceParameters(
+          currentRepository,
+          newWorkspace,
+          this.state.fmeApiVersion,
+        );
 
     newProduct.workspace = newWorkspace;
     newProduct.geoAttribute = availableParameters[0] ?? "";
@@ -621,7 +641,7 @@ class ToolOptions extends Component {
                         item
                         xs={12}
                         alignItems="center"
-                        justify="space-between"
+                        justifyContent="space-between"
                       >
                         <Typography>{product.name}</Typography>
                         <Grid
@@ -629,7 +649,7 @@ class ToolOptions extends Component {
                           item
                           xs={3}
                           alignItems="center"
-                          justify="flex-end"
+                          justifyContent="flex-end"
                         >
                           {!productGroups.includes(product.group) && (
                             <Tooltip
@@ -832,7 +852,7 @@ class ToolOptions extends Component {
           container
           item
           xs={12}
-          justify="flex-end"
+          justifyContent="flex-end"
           style={{ marginBottom: 8 }}
         >
           <Typography variant="caption">
@@ -872,7 +892,7 @@ class ToolOptions extends Component {
           container
           item
           xs={12}
-          justify="flex-end"
+          justifyContent="flex-end"
           style={{ marginBottom: 16 }}
         >
           <Typography variant="caption">
@@ -881,7 +901,7 @@ class ToolOptions extends Component {
             grupp.
           </Typography>
         </Grid>
-        <Grid container item xs={12} justify="flex-end">
+        <Grid container item xs={12} justifyContent="flex-end">
           <Button
             disabled={!newProductIsValid}
             onClick={this.handleAddNewProduct}
