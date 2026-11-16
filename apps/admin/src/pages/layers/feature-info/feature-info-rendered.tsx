@@ -46,6 +46,14 @@ function Heading({ node, children }: ComponentPropsWithoutRef<"h1"> & ExtraProps
   );
 }
 
+function MarkdownRow({ children }: { children?: ReactNode }) {
+  return (
+    <TableRow sx={{ "&:nth-of-type(even)": { backgroundColor: "action.hover" } }}>
+      {children}
+    </TableRow>
+  );
+}
+
 function Cell({
   node,
   children,
@@ -58,6 +66,7 @@ function Cell({
       align={(style?.textAlign as "left" | "right" | "center" | undefined) ?? "inherit"}
       style={style}
       className={className}
+      sx={{ overflowWrap: "anywhere" }}
     >
       {children}
     </TableCell>
@@ -118,28 +127,25 @@ const clientComponents: Components = {
   h5: Heading,
   h6: Heading,
   table: ({ children, className, style }) => (
-    <TableContainer component="div" sx={{ marginBottom: BLOCK_SPACING }}>
-      <Table size="small" className={className} style={style}>
+    <TableContainer component="div" sx={{ marginBottom: BLOCK_SPACING, overflowX: "hidden" }}>
+      <Table size="small" className={className} style={style} sx={{ tableLayout: "fixed", width: "100%" }}>
         {children}
       </Table>
     </TableContainer>
   ),
   thead: ({ children }) => <TableHead>{children}</TableHead>,
   tbody: ({ children }) => <TableBody>{children}</TableBody>,
-  tr: ({ children }) => (
-    <TableRow sx={{ "&:nth-of-type(even)": { backgroundColor: "action.hover" } }}>
-      {children}
-    </TableRow>
-  ),
+  tr: MarkdownRow,
   td: Cell,
   th: Cell,
   blockquote: ({ children }) => (
     <Paper
       variant="outlined"
+      data-infoclick-preview=""
       sx={{
         padding: 1,
         marginBottom: BLOCK_SPACING,
-        backgroundColor: "background.default",
+        backgroundColor: "background.paper",
         "& p": { marginBottom: 0 },
       }}
     >
@@ -198,15 +204,15 @@ export function FeatureInfoDefaultTable({
     ([, value]) => value === null || typeof value !== "object",
   );
   return (
-    <TableContainer component="div" sx={{ marginBottom: BLOCK_SPACING }}>
-      <Table size="small">
+    <TableContainer component="div" sx={{ marginBottom: BLOCK_SPACING, overflowX: "hidden" }}>
+      <Table size="small" sx={{ tableLayout: "fixed", width: "100%" }}>
         <TableBody>
           {rows.map(([key, value], index) => (
             <TableRow key={key} selected={index % 2 === 1}>
-              <TableCell variant="head" sx={{ verticalAlign: "top" }}>
+              <TableCell variant="head" sx={{ verticalAlign: "top", overflowWrap: "anywhere" }}>
                 {key}
               </TableCell>
-              <TableCell sx={{ wordBreak: "break-all" }}>
+              <TableCell sx={{ overflowWrap: "anywhere" }}>
                 {primitiveText(value)}
               </TableCell>
             </TableRow>

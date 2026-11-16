@@ -21,6 +21,14 @@ interface FeatureInfoPreviewProps {
   options: TemplateOptions;
   controls: ReactNode;
   fill?: boolean;
+  width?: number;
+  onWidthChange?: (width: number) => void;
+  height?: number;
+  onHeightChange?: (height: number) => void;
+  hintResize?: boolean;
+  onClose?: () => void;
+  onMove?: (position: { left: number; top: number }) => void;
+  windowOnly?: boolean;
 }
 
 type RenderOutcome =
@@ -40,6 +48,14 @@ function FeatureInfoPreview({
   options,
   controls,
   fill = false,
+  width,
+  onWidthChange,
+  height,
+  onHeightChange,
+  hintResize = false,
+  onClose,
+  onMove,
+  windowOnly = false,
 }: FeatureInfoPreviewProps) {
   const { t } = useTranslation();
   const allowDangerousHtml = options.allowDangerousHtml ?? true;
@@ -74,19 +90,40 @@ function FeatureInfoPreview({
         flexDirection: "column",
         gap: 1,
         minHeight: 0,
+        minWidth: 0,
+        width: "100%",
+        maxWidth: "100%",
         ...(fill && { flex: 1 }),
       }}
     >
-      <Typography variant="subtitle2">{t("layers.featureInfo.preview")}</Typography>
-      {controls}
-      {!template.trim() && (
+      {!windowOnly && (
+        <Typography variant="subtitle2">{t("layers.featureInfo.preview")}</Typography>
+      )}
+      {!windowOnly && controls}
+      {!windowOnly && !template.trim() && (
         <Typography variant="caption" color="text.secondary">
           {t("layers.featureInfo.defaultTableNotice")}
         </Typography>
       )}
-      <ClientWindowFrame title={t("layers.featureInfo.clientWindowTitle")} fill={fill}>
+      <ClientWindowFrame
+        title={t("layers.featureInfo.clientWindowTitle")}
+        fill={fill}
+        width={width}
+        onWidthChange={onWidthChange}
+        height={height}
+        onHeightChange={onHeightChange}
+        hintResize={hintResize}
+        onClose={onClose}
+        onMove={onMove}
+      >
         {caption && (
-          <Typography variant="button" component="h6" align="center" gutterBottom>
+          <Typography
+            variant="button"
+            component="h6"
+            align="center"
+            gutterBottom
+            sx={{ overflowWrap: "anywhere" }}
+          >
             {caption}
           </Typography>
         )}
@@ -107,7 +144,7 @@ function FeatureInfoPreview({
           </PreviewErrorBoundary>
         )}
       </ClientWindowFrame>
-      {outcome.ok &&
+      {!windowOnly && outcome.ok &&
         outcome.filterIssues
           .filter(({ issue }) => issue.message !== "unknownFilter")
           .map(({ placeholder, issue }, index) => (

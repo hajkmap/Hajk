@@ -907,6 +907,8 @@
     "layers.featureInfo.newPlaceholderMatchingHelp": "Motsvarar kartans infoklick-inställning. Ändrar bara förhandsgranskningen.",
     "layers.featureInfo.defaultTableNotice": "Ingen mall: kartklienten visar alla attribut i en tabell.",
     "layers.featureInfo.expand": "Öppna i stort fönster",
+    "layers.featureInfo.resizeWindow": "Öppna infoklicksfönstret och ändra storlek",
+    "layers.featureInfo.moveWindow": "Flytta infoklicksfönstret",
     "layers.featureInfo.collapse": "Stäng det stora fönstret",
     "layers.featureInfo.done": "Klar",
     "layers.featureInfo.expandedNotice": "Inforutan redigeras i det stora fönstret.",

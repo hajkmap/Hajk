@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   Box,
@@ -11,7 +11,6 @@ import {
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { useDebounce } from "use-debounce";
 import {
   fetchDescribeFeatureType,
   type DescribeFeatureProperty,
@@ -30,15 +29,22 @@ import {
 import { validateTemplate } from "./template-validation";
 import { buildExampleProperties, withSchemaAttributes } from "./sample-data";
 import { displayFieldNames } from "./sample-label";
+import {
+  CLIENT_WINDOW_BODY_HEIGHT,
+  CLIENT_WINDOW_CHROME_HEIGHT,
+  CLIENT_WINDOW_WIDTH,
+} from "./client-window-frame";
 
 const NO_ATTRIBUTES: DescribeFeatureProperty[] = [];
 
 const PANEL_HEIGHT = { xs: 520, lg: 720 } as const;
 
+const WIDE_LAYOUT = "@container feature-info (min-width: 960px)";
+
 const fillColumnSx = {
   position: "relative",
   minWidth: 0,
-  minHeight: { lg: PANEL_HEIGHT.lg },
+  maxWidth: "100%",
 } as const;
 const fillInnerSx = {
   position: "absolute",
@@ -76,7 +82,32 @@ export default function FeatureInfoDesigner({
     useNewPlaceholderMatching: false,
   });
   const [expanded, setExpanded] = useState(false);
-  const [debouncedTemplate] = useDebounce(value, 250);
+  const [previewWidth, setPreviewWidth] = useState(CLIENT_WINDOW_WIDTH);
+  const [previewHeight, setPreviewHeight] = useState(CLIENT_WINDOW_BODY_HEIGHT);
+  const [windowPreview, setWindowPreview] = useState(false);
+  const [windowAnchor, setWindowAnchor] = useState({ left: 16, top: 16 });
+  const [showResizeHint, setShowResizeHint] = useState(true);
+  const [previewTemplate, setPreviewTemplate] = useState(value);
+  const previewTemplateRef = useRef(value);
+  const onChangeRef = useRef(onChange);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
+  useEffect(() => {
+    if (value === previewTemplateRef.current) return;
+    previewTemplateRef.current = value;
+    setPreviewTemplate(value);
+  }, [value]);
+
+  const onPreviewChange = useCallback((next: string) => {
+    if (next === previewTemplateRef.current) return;
+    previewTemplateRef.current = next;
+    startTransition(() => setPreviewTemplate(next));
+  }, []);
+  const commitTemplate = useCallback((next: string) => {
+    onChangeRef.current(next);
+  }, []);
 
   const activeTypeName = typeNames.includes(typeName) ? typeName : (typeNames[0] ?? "");
   const canQuery = Boolean(serviceUrl && activeTypeName);
@@ -100,8 +131,8 @@ export default function FeatureInfoDesigner({
   const selectedSample = samples?.find((s) => s.id === selectedId);
 
   const exampleProperties = useMemo(
-    () => exampleOverride ?? buildExampleProperties(attributesQuery.data, debouncedTemplate),
-    [exampleOverride, attributesQuery.data, debouncedTemplate],
+    () => exampleOverride ?? buildExampleProperties(attributesQuery.data, previewTemplate),
+    [exampleOverride, attributesQuery.data, previewTemplate],
   );
 
   const previewProperties = useMemo(
@@ -118,8 +149,8 @@ export default function FeatureInfoDesigner({
     [attributesQuery.data],
   );
   const issues = useMemo(
-    () => validateTemplate(debouncedTemplate, { ...options, attributes: attributeNames }),
-    [debouncedTemplate, options, attributeNames],
+    () => validateTemplate(previewTemplate, { ...options, attributes: attributeNames }),
+    [previewTemplate, options, attributeNames],
   );
 
   const { refetch: refetchAttributes } = attributesQuery;
@@ -132,6 +163,26 @@ export default function FeatureInfoDesigner({
   );
   const goToLine = useCallback((line: number) => editorRef.current?.goToLine(line), []);
   const toggleExpanded = useCallback(() => setExpanded((open) => !open), []);
+  const openWindowPreview = useCallback(() => {
+    const totalHeight = CLIENT_WINDOW_CHROME_HEIGHT + previewHeight;
+    setWindowAnchor({
+      left: Math.max(16, Math.round((window.innerWidth - previewWidth) / 2)),
+      top: Math.max(16, Math.round((window.innerHeight - totalHeight) / 2)),
+    });
+    setShowResizeHint(true);
+    setWindowPreview(true);
+  }, [previewWidth, previewHeight]);
+  const changePreviewWidth = useCallback((next: number) => {
+    setShowResizeHint(false);
+    setPreviewWidth(next);
+  }, []);
+  const changePreviewHeight = useCallback((next: number) => {
+    setShowResizeHint(false);
+    setPreviewHeight(next);
+  }, []);
+  const changeWindowAnchor = useCallback((next: { left: number; top: number }) => {
+    setWindowAnchor(next);
+  }, []);
   const displayFieldList = useMemo(() => displayFieldNames(displayFields), [displayFields]);
 
   const samplePicker = useMemo(
@@ -168,6 +219,9 @@ export default function FeatureInfoDesigner({
         display: "flex",
         flexDirection: "column",
         gap: 2,
+        containerType: "inline-size",
+        containerName: "feature-info",
+        minWidth: 0,
         ...(expanded && { flex: 1, height: "100%", minHeight: 0 }),
       }}
     >
@@ -194,25 +248,23 @@ export default function FeatureInfoDesigner({
         sx={{
           display: "grid",
           gap: 2,
-          gridTemplateColumns: {
-            xs: "minmax(0, 1fr)",
-            lg: expanded
-              ? "300px minmax(0, 1fr) minmax(0, 432px)"
-              : "minmax(200px, 0.7fr) minmax(0, 1.4fr) minmax(0, 432px)",
-          },
+          gridTemplateColumns: "minmax(0, 1fr)",
           alignItems: "stretch",
-          ...(expanded && {
-            flex: 1,
-            minHeight: 0,
-            gridTemplateRows: { lg: "minmax(0, 1fr)" },
-          }),
+          ...(expanded && { flex: 1, minHeight: 0 }),
+          [WIDE_LAYOUT]: {
+            gridTemplateColumns: expanded
+              ? "300px minmax(280px, 1fr) minmax(280px, 432px)"
+              : "minmax(220px, 0.7fr) minmax(320px, 1.4fr) minmax(280px, 432px)",
+            ...(expanded && { gridTemplateRows: "minmax(0, 1fr)" }),
+          },
         }}
       >
         <Box
           sx={{
             ...fillColumnSx,
-            height: expanded ? { xs: 320, lg: "auto" } : { xs: 320, lg: PANEL_HEIGHT.lg },
+            height: 320,
             ...(expanded && { minHeight: 0 }),
+            [WIDE_LAYOUT]: { height: expanded ? "auto" : PANEL_HEIGHT.lg },
           }}
         >
           <Box sx={fillInnerSx}>
@@ -229,8 +281,9 @@ export default function FeatureInfoDesigner({
         <Box
           sx={{
             ...fillColumnSx,
-            height: expanded ? { xs: PANEL_HEIGHT.xs, lg: "auto" } : PANEL_HEIGHT,
+            height: PANEL_HEIGHT.xs,
             ...(expanded && { minHeight: 0 }),
+            [WIDE_LAYOUT]: { height: expanded ? "auto" : PANEL_HEIGHT.lg },
           }}
         >
           <Box sx={{ ...fillInnerSx, gap: 1 }}>
@@ -239,9 +292,11 @@ export default function FeatureInfoDesigner({
                 ref={editorRef}
                 id={inputId}
                 value={value}
-                onChange={onChange}
+                onChange={commitTemplate}
+                onPreviewChange={onPreviewChange}
                 expanded={expanded}
                 onToggleExpanded={toggleExpanded}
+                onOpenWindowPreview={openWindowPreview}
               />
             </Box>
             <Box sx={{ maxHeight: "35%", overflowY: "auto", flexShrink: 0 }}>
@@ -249,58 +304,44 @@ export default function FeatureInfoDesigner({
             </Box>
           </Box>
         </Box>
-        {expanded ? (
-          <Box
-            sx={{
-              ...fillColumnSx,
-              height: { xs: 640, lg: "auto" },
-              minHeight: 0,
-            }}
-          >
-            <Box sx={fillInnerSx}>
-              <FeatureInfoPreview
-                template={debouncedTemplate}
-                caption={caption}
-                properties={previewProperties}
-                options={options}
-                controls={samplePicker}
-                fill
-              />
-            </Box>
+        <Box
+          sx={{
+            ...fillColumnSx,
+            height: expanded ? 640 : PANEL_HEIGHT.xs,
+            ...(expanded && { minHeight: 0 }),
+            [WIDE_LAYOUT]: { height: expanded ? "auto" : PANEL_HEIGHT.lg },
+          }}
+        >
+          <Box sx={fillInnerSx}>
+            <FeatureInfoPreview
+              template={previewTemplate}
+              caption={caption}
+              properties={previewProperties}
+              options={options}
+              controls={samplePicker}
+              fill
+            />
           </Box>
-        ) : (
-          <Box sx={{ ...fillColumnSx, height: PANEL_HEIGHT }}>
-            <Box sx={fillInnerSx}>
-              <FeatureInfoPreview
-                template={debouncedTemplate}
-                caption={caption}
-                properties={previewProperties}
-                options={options}
-                controls={samplePicker}
-                fill
-              />
-            </Box>
-          </Box>
-        )}
+        </Box>
       </Box>
     </Box>
   );
 
-  if (!expanded) return <Box data-form-wide="">{workspace}</Box>;
-
-  const title = caption
-    ? `${t("layers.infobox")}: ${caption}`
-    : t("layers.infobox");
+  const title = caption ? `${t("layers.infobox")}: ${caption}` : t("layers.infobox");
   return (
     <>
-      <Box data-form-wide="">
-        <Alert severity="info" variant="outlined">
-          {t("layers.featureInfo.expandedNotice")}
-        </Alert>
-      </Box>
+      {!expanded && <Box data-form-wide="">{workspace}</Box>}
+      {expanded && (
+        <Box data-form-wide="">
+          <Alert severity="info" variant="outlined">
+            {t("layers.featureInfo.expandedNotice")}
+          </Alert>
+        </Box>
+      )}
       <Dialog
         fullScreen
-        open
+        open={expanded}
+        transitionDuration={0}
         onClose={() => setExpanded(false)}
         slotProps={{
           paper: { sx: { display: "flex", flexDirection: "column", height: "100%" } },
@@ -326,9 +367,56 @@ export default function FeatureInfoDesigner({
             overflow: { xs: "auto", lg: "hidden" },
           }}
         >
-          {workspace}
+          {expanded && workspace}
         </DialogContent>
       </Dialog>
+      {windowPreview && (
+        <Dialog
+          open
+          maxWidth={false}
+          transitionDuration={0}
+          onClose={() => setWindowPreview(false)}
+          slotProps={{
+            container: {
+              sx: {
+                alignItems: "flex-start",
+                justifyContent: "flex-start",
+                position: "relative",
+              },
+            },
+            paper: {
+              sx: {
+                position: "absolute",
+                top: windowAnchor.top,
+                left: windowAnchor.left,
+                width: previewWidth,
+                maxWidth: "none",
+                maxHeight: "none",
+                m: 0,
+                bgcolor: "transparent",
+                boxShadow: "none",
+                overflow: "visible",
+              },
+            },
+          }}
+        >
+          <FeatureInfoPreview
+            windowOnly
+            hintResize={showResizeHint}
+            template={previewTemplate}
+            caption={caption}
+            properties={previewProperties}
+            options={options}
+            controls={samplePicker}
+            width={previewWidth}
+            height={previewHeight}
+            onWidthChange={changePreviewWidth}
+            onHeightChange={changePreviewHeight}
+            onMove={changeWindowAnchor}
+            onClose={() => setWindowPreview(false)}
+          />
+        </Dialog>
+      )}
     </>
   );
 }

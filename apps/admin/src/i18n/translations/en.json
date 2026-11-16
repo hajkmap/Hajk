@@ -816,6 +816,8 @@
     "layers.featureInfo.newPlaceholderMatchingHelp": "Matches the map's infoclick setting. Only changes the preview.",
     "layers.featureInfo.defaultTableNotice": "No template: the map client shows all attributes in a table.",
     "layers.featureInfo.expand": "Open in a large window",
+    "layers.featureInfo.resizeWindow": "Open the infoclick window and resize it",
+    "layers.featureInfo.moveWindow": "Move the infoclick window",
     "layers.featureInfo.collapse": "Close the large window",
     "layers.featureInfo.done": "Done",
     "layers.featureInfo.expandedNotice": "The infobox is being edited in the large window.",
