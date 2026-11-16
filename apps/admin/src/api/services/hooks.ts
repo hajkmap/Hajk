@@ -27,6 +27,7 @@ import {
   UseServiceCapabilitiesProps,
   Projection,
   SERVICE_STATUS,
+  type CapabilitiesLayerInfo,
 } from "./types";
 import { LayersApiResponse } from "../layers";
 import { MapSummary } from "../maps";
@@ -37,6 +38,8 @@ const HEALTH_CHECK_CONCURRENCY = 3;
 const HEALTH_CHECK_INTERVAL_MS = 5 * 60 * 1000;
 /** A service that hasn't answered by now is shown as slow, while its answer is still awaited. */
 const CAPABILITIES_SLOW_AFTER_MS = 10 * 1000;
+const NO_LAYER_INFO: Record<string, CapabilitiesLayerInfo> = {};
+const NO_PROJECTIONS: string[] = [];
 
 /** Whether a service is due for a check: one found down waits twice as long. */
 function isDue(service: Service): boolean {
@@ -274,6 +277,8 @@ export const useServiceCapabilities = ({
     layers: data?.layers ?? [],
     workspaces: data?.workspaces ?? [],
     styles: data?.styles ?? {},
+    layerInfo: data?.layerInfo ?? NO_LAYER_INFO,
+    projections: data?.projections ?? NO_PROJECTIONS,
     isError,
     isLoading,
     isFetching,

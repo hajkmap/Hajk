@@ -101,10 +101,26 @@ export interface ServiceUpdateInput {
   };
 }
 
+/**
+ * A layer's own title and abstract in the service's GetCapabilities, trimmed;
+ * one the answer leaves empty is undefined.
+ */
+export interface CapabilitiesLayerInfo {
+  title?: string;
+  abstract?: string;
+}
+
 export interface ServiceCapabilities {
   layers: string[];
   workspaces?: string[];
   styles?: Record<string, { name: string; legendUrl?: string | undefined }[]>;
+  /** Each layer's own title and abstract, by its name. */
+  layerInfo?: Record<string, CapabilitiesLayerInfo>;
+  /**
+   * The coordinate systems every layer can be drawn in, as "EPSG:3006".
+   * Empty when the answer doesn't say.
+   */
+  projections?: string[];
   metadata?: {
     title?: string;
     description?: string;
@@ -122,6 +138,8 @@ export interface ServiceLayerCountResponse {
 export interface LayersGridProps {
   layers: string[];
   workspaces?: string[];
+  /** The layers' own titles and abstracts, for the layers published here. */
+  layerInfo?: Record<string, CapabilitiesLayerInfo>;
   serviceId: string;
   serviceType?: string;
   isError: boolean;

@@ -156,6 +156,9 @@ export interface LayerCreateInput {
   serviceId: string;
   selectedLayers?: string[];
   locked?: boolean;
+  /** The text the layer's info shows users. */
+  description?: string;
+  metadata?: LayerUpdateInput["metadata"];
   options?: Record<string, string>;
   /**
    * When `true`, the backend skips the duplicate-publication guard

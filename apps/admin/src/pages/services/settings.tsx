@@ -143,6 +143,8 @@ export default function ServiceSettings() {
   const {
     layers: getCapLayers,
     workspaces: getCapWorkspaces,
+    layerInfo: getCapLayerInfo,
+    projections: serviceProjections,
     isError: layersError,
     isLoading: layersLoading,
     isSlow: layersSlow,
@@ -216,6 +218,17 @@ export default function ServiceSettings() {
       visibleFrom: watchVisibleFrom,
       visibleUntil: watchVisibleUntil,
     }),
+  );
+
+  // The chosen coordinate system against those the service's capabilities list.
+  const projectionCode = useWatch({ control, name: "projection.code" }) as
+    string | undefined;
+  const projectionUnlisted =
+    Boolean(projectionCode) &&
+    serviceProjections.length > 0 &&
+    !serviceProjections.includes(projectionCode ?? "");
+  const listedProjections = defaultCoordinates.filter((code) =>
+    serviceProjections.includes(code),
   );
 
   const handleDialogOpen = () => {
@@ -908,6 +921,20 @@ export default function ServiceSettings() {
                       />
                     </FormFieldRow>
                   </SettingsSearchField>
+                  {projectionUnlisted ? (
+                    <FormFieldRow fullWidth>
+                      <Alert severity="warning">
+                        {listedProjections.length > 0
+                          ? t("services.projectionNotListed", {
+                              code: projectionCode,
+                              listed: listedProjections.join(", "),
+                            })
+                          : t("services.projectionNoneListed", {
+                              code: projectionCode,
+                            })}
+                      </Alert>
+                    </FormFieldRow>
+                  ) : null}
                 </FormFieldGrid>
               </FormPanel>
             </SearchablePanel>
@@ -977,6 +1004,7 @@ export default function ServiceSettings() {
               <LayersGrid
                 layers={getCapLayers}
                 workspaces={getCapWorkspaces}
+                layerInfo={getCapLayerInfo}
                 serviceId={service.id}
                 serviceType={service.type}
                 isError={layersError}

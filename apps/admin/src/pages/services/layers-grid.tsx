@@ -34,6 +34,7 @@ import { GRID_SWEDISH_LOCALE_TEXT } from "../../i18n/translations/datagrid/sv";
 import useAppStateStore from "../../store/use-app-state-store";
 import { useCreateLayer, type LayersApiResponse } from "../../api/layers";
 import { LayerCreationError } from "../../api/layers/types";
+import { layerFieldsFromCapabilities } from "../../api/layers/layer-fields-from-capabilities";
 import LayerKindBadge from "../layers/components/layer-kind-badge";
 import LayerKindSelect from "../layers/components/layer-kind-select";
 import {
@@ -90,6 +91,7 @@ function buildPublicationsByLayerName(
 function LayersGrid({
   layers,
   workspaces,
+  layerInfo,
   serviceId,
   serviceType,
   isError,
@@ -166,7 +168,7 @@ function LayersGrid({
       const response = await createLayer({
         layerKind,
         serviceId,
-        name: layerName,
+        ...layerFieldsFromCapabilities(layerName, layerInfo?.[layerName]),
         selectedLayers: [layerName],
         ...(options.force ? { force: true } : {}),
       });

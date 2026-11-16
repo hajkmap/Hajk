@@ -14,7 +14,9 @@ import { LayersApiResponse } from "../layers";
 import { MapSummary } from "../maps";
 import { GlobalMapsApiResponse } from "../tools";
 import { mergeWithConfigDefaults } from "../../lib/merge-with-config-defaults";
+import { serviceRequestUrl } from "../../lib/service-request-url";
 import useAppStateStore from "../../store/use-app-state-store";
+import { chooseProjection, parseCapabilitiesFromXML } from "./capabilities";
 
 /**
  * This module provides API request functions to interact with the backend
@@ -28,8 +30,8 @@ import useAppStateStore from "../../store/use-app-state-store";
  * - The ´createService` function creates a new service.
  * - The `updateService` function updates a service.
  * - The `deleteService` function deletes a service.
- * - The parseCapabilitiesFromXML function parses layer names and metadata from a capabilities XML string.
- * - The fetchCapabilities function fetches GetCapabilities directly from the external service.
+ * - The fetchCapabilities function fetches GetCapabilities directly from the external service
+ *   and reads it with parseCapabilitiesFromXML (capabilities.ts).
  *
  * These functions utilize a custom Axios instance and throw appropriate error messages for failures.
  *
@@ -219,7 +221,10 @@ export const getAllProjections = async (): Promise<Projection[]> => {
 
 /** Aligns with backend default when config has no projection (see services.service.ts). */
 const CREATE_SERVICE_PROJECTION_FALLBACK = "EPSG:3006";
-/** How long creating a service waits for its capabilities: they only pre-fill optional metadata. */
+/**
+ * How long creating a service waits for its capabilities, which pre-fill its
+ * metadata and pick its coordinate system. Without them it keeps the defaults.
+ */
 const CREATE_SERVICE_CAPABILITIES_TIMEOUT_MS = 10000;
 const CAPABILITIES_SERVICE_TYPE_BY_SERVICE_TYPE: Partial<
   Record<string, string>
@@ -315,6 +320,18 @@ async function enrichCreateServicePayloadWithCapabilities(
         hasDescription: Boolean(currentMetadata.description),
         hasOwner: Boolean(currentMetadata.owner),
       });
+    }
+
+    const projection = payload.projection as { code?: string } | undefined;
+    if (projection?.code) {
+      payload.projection = {
+        ...projection,
+        code: chooseProjection(
+          projection.code,
+          capabilities.projections ?? [],
+          useAppStateStore.getState().defaultCoordinates,
+        ),
+      };
     }
 
     return payload;
@@ -440,104 +457,6 @@ export const restoreService = async (serviceId: string): Promise<Service> => {
   }
 };
 
-const parseCapabilitiesFromXML = (
-  xmlString: string,
-  type = "WMS",
-): ServiceCapabilities => {
-  const parser = new DOMParser();
-  const xmlDoc = parser.parseFromString(xmlString, "application/xml");
-
-  const layerNames: string[] = [];
-  const workspaces: Set<string> = new Set<string>();
-  const styles: Record<string, { name: string; legendUrl?: string }[]> = {};
-
-  // WFS capabilities use FeatureType elements; WMS/WMTS use Layer elements.
-  const isWFS = type === "WFS";
-  const elements = isWFS
-    ? xmlDoc.getElementsByTagName("FeatureType")
-    : xmlDoc.getElementsByTagName("Layer");
-
-  for (const element of elements) {
-    // Scope to direct child Name to avoid picking up names from nested layers or styles.
-    const nameEl = Array.from(element.children).find(
-      (c) => c.localName === "Name",
-    );
-    const name = nameEl?.textContent?.trim();
-
-    if (!name) continue;
-
-    layerNames.push(name);
-
-    if (name.includes(":")) {
-      workspaces.add(name.split(":")[0]);
-    }
-
-    if (!isWFS) {
-      const styleElements = Array.from(element.children).filter(
-        (c) => c.localName === "Style",
-      );
-      const styleData: { name: string; legendUrl?: string }[] = [];
-
-      for (const styleElement of styleElements) {
-        const styleNameEl = Array.from(styleElement.children).find(
-          (c) => c.localName === "Name",
-        );
-        const styleName = styleNameEl?.textContent?.trim();
-        const legendUrl = styleElement
-          .getElementsByTagName("LegendURL")[0]
-          ?.getElementsByTagName("OnlineResource")[0]
-          ?.getAttribute("xlink:href");
-        if (styleName) {
-          styleData.push({
-            name: styleName,
-            legendUrl: legendUrl ?? undefined,
-          });
-        }
-      }
-      styles[name] = styleData;
-    }
-  }
-
-  const getNodeTextByLocalNames = (
-    root: Document | Element,
-    localNames: string[],
-  ): string | undefined => {
-    const allNodes =
-      "getElementsByTagName" in root ? root.getElementsByTagName("*") : [];
-
-    for (const node of allNodes) {
-      const localName = node.localName?.toLowerCase();
-      if (!localName) continue;
-      if (localNames.some((n) => n.toLowerCase() === localName)) {
-        const text = node.textContent?.trim();
-        if (text) return text;
-      }
-    }
-
-    return undefined;
-  };
-
-  // Covers both OWS and plain WMS capability variants.
-  const title = getNodeTextByLocalNames(xmlDoc, ["Title"]);
-  const description = getNodeTextByLocalNames(xmlDoc, ["Abstract"]);
-  const organization = getNodeTextByLocalNames(xmlDoc, [
-    "ProviderName",
-    "ContactOrganization",
-    "ContactOrganizationName",
-  ]);
-
-  return {
-    layers: layerNames,
-    workspaces: Array.from(workspaces),
-    styles,
-    metadata: {
-      title,
-      description,
-      organization,
-    },
-  };
-};
-
 /**
  * Fetches GetCapabilities from the service itself. A slow answer is waited
  * for; `signal` is how the caller stops waiting.
@@ -548,7 +467,7 @@ export const fetchCapabilities = async (
   signal?: AbortSignal,
 ): Promise<ServiceCapabilities> => {
   const response = await fetch(
-    `${baseUrl}?SERVICE=${type}&REQUEST=GetCapabilities`,
+    serviceRequestUrl(baseUrl, { SERVICE: type, REQUEST: "GetCapabilities" }),
     { signal },
   );
 
@@ -581,7 +500,10 @@ export const checkServiceHealth = async (
   updateCache: (id: string, status: SERVICE_STATUS) => void,
 ) => {
   try {
-    const healthUrl = `${service.url}?service=${service.type === SERVICE_TYPE.WFST ? "WFS" : service.type}&request=GetCapabilities`;
+    const healthUrl = serviceRequestUrl(service.url, {
+      SERVICE: service.type === SERVICE_TYPE.WFST ? "WFS" : service.type,
+      REQUEST: "GetCapabilities",
+    });
     // Bypass the browser cache: a cached GetCapabilities answer would report
     // the service as up even when it can't be reached.
     const response = await fetch(healthUrl, {

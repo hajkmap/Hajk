@@ -33,6 +33,7 @@ import {
   useLayersUsageSummary,
 } from "../../../api/layers";
 import { LayerCreationError } from "../../../api/layers/types";
+import { layerFieldsFromCapabilities } from "../../../api/layers/layer-fields-from-capabilities";
 import { LAYER_CATEGORY_I18N_KEYS } from "../layer-category";
 import {
   useServices,
@@ -394,6 +395,7 @@ export default function LayersList({
   const {
     layers: capabilitiesLayers,
     workspaces,
+    layerInfo: capabilitiesLayerInfo,
     isError: capabilitiesError,
     isLoading: capabilitiesLoading,
     isFetching: capabilitiesFetching,
@@ -437,8 +439,13 @@ export default function LayersList({
     options: { force?: boolean } = {},
   ) => {
     try {
+      const [sourceLayer = ""] = layerData.selectedLayers ?? [];
       const payload: LayerCreateInput = {
         layerKind,
+        ...layerFieldsFromCapabilities(
+          sourceLayer,
+          capabilitiesLayerInfo[sourceLayer],
+        ),
         name: layerData.name,
         serviceId: layerData.serviceId,
         selectedLayers: layerData.selectedLayers,
