@@ -16,8 +16,13 @@ export default defineConfig({
     environment: "happy-dom",
     globals: true,
     // Node 25 and later have a localStorage of their own that, without
-    // --localstorage-file, is undefined and hides happy-dom's.
-    execArgv: ["--no-experimental-webstorage"],
+    // --localstorage-file, is undefined and hides happy-dom's. The Node
+    // versions that have it know the flag that turns it off.
+    execArgv: process.allowedNodeEnvironmentFlags.has(
+      "--experimental-webstorage",
+    )
+      ? ["--no-experimental-webstorage"]
+      : [],
     include: ["src/**/__tests__/**/*.test.ts", "src/**/__tests__/**/*.test.tsx"],
     alias: {
       "@/": "/src/",
