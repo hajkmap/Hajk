@@ -33,10 +33,17 @@ describe("serviceRequestUrl", () => {
     expect(url.searchParams.get("REQUEST")).toBe("GetCapabilities");
   });
 
-  it("replaces a parameter the url already sets", () => {
+  it("replaces a parameter the url already sets, whatever its case", () => {
     const url = new URL(
-      serviceRequestUrl("https://example.org/ows?SERVICE=WFS", capabilities),
+      serviceRequestUrl(
+        "https://example.org/ows?service=WFS&Request=GetFeature&MAP=a",
+        capabilities,
+      ),
     );
-    expect(url.searchParams.getAll("SERVICE")).toEqual(["WMS"]);
+    expect([...url.searchParams.entries()]).toEqual([
+      ["MAP", "a"],
+      ["SERVICE", "WMS"],
+      ["REQUEST", "GetCapabilities"],
+    ]);
   });
 });

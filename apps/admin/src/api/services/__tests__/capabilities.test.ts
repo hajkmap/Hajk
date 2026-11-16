@@ -104,6 +104,29 @@ describe("parseCapabilitiesFromXML, WMS", () => {
   });
 });
 
+describe("parseCapabilitiesFromXML, thousands of coordinate systems", () => {
+  it("finds those every layer has, as a GeoServer with its full list needs", () => {
+    const codes = Array.from(
+      { length: 6000 },
+      (_, i) => `<CRS>EPSG:${2000 + i}</CRS>`,
+    ).join("");
+    // Every layer repeats one of the top layer's; the first adds one of its own.
+    const layers = Array.from(
+      { length: 400 },
+      (_, i) =>
+        `<Layer><Name>ws:l${i}</Name><CRS>EPSG:3006</CRS>${i === 0 ? "<CRS>CRS:84</CRS>" : ""}</Layer>`,
+    ).join("");
+    const capabilities = parseCapabilitiesFromXML(
+      `<?xml version="1.0" encoding="UTF-8"?><WMS_Capabilities version="1.3.0" xmlns="http://www.opengis.net/wms"><Capability><Layer>${codes}${layers}</Layer></Capability></WMS_Capabilities>`,
+      "WMS",
+    );
+
+    expect(capabilities.layers).toHaveLength(400);
+    expect(capabilities.projections).toHaveLength(6000);
+    expect(capabilities.projections).not.toContain("CRS:84");
+  });
+});
+
 describe("parseCapabilitiesFromXML, WFS", () => {
   const capabilities = parseCapabilitiesFromXML(WFS, "WFS");
 
@@ -133,6 +156,7 @@ describe("crsCode", () => {
     ["urn:ogc:def:crs:EPSG::3006", "EPSG:3006"],
     ["urn:x-ogc:def:crs:EPSG:6.11:3006", "EPSG:3006"],
     ["http://www.opengis.net/def/crs/EPSG/0/3006", "EPSG:3006"],
+    ["http://www.opengis.net/gml/srs/epsg.xml#3006", "EPSG:3006"],
     ["epsg:3010", "EPSG:3010"],
     ["CRS:84", "CRS:84"],
   ])("%s is %s", (value, code) => {
@@ -149,14 +173,14 @@ describe("chooseProjection", () => {
     ).toBe("EPSG:3007");
   });
 
-  it("else takes the first listed one admin offers", () => {
+  it("else takes the first of those admin offers that the service lists", () => {
     expect(
       chooseProjection(
         "EPSG:3010",
         ["EPSG:4326", "EPSG:3034", "EPSG:3857", "EPSG:3006"],
         offered,
       ),
-    ).toBe("EPSG:3857");
+    ).toBe("EPSG:3006");
   });
 
   it("keeps the default when none of the listed ones is offered", () => {

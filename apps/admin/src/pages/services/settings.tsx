@@ -140,6 +140,18 @@ export default function ServiceSettings() {
   );
   const count = layerCountByService?.count ?? 0;
   const { defaultCoordinates } = useAppStateStore.getState();
+  const capabilitiesType =
+    service?.type === SERVICE_TYPE.WMS
+      ? SERVICE_TYPE.WMS
+      : service?.type === SERVICE_TYPE.WMTS
+        ? SERVICE_TYPE.WMS
+        : service?.type === SERVICE_TYPE.WFS
+          ? SERVICE_TYPE.WFS
+          : service?.type === SERVICE_TYPE.WFST
+            ? SERVICE_TYPE.WFS
+            : service?.type === SERVICE_TYPE.VECTOR
+              ? SERVICE_TYPE.WFS
+              : service?.type;
   const {
     layers: getCapLayers,
     workspaces: getCapWorkspaces,
@@ -151,18 +163,7 @@ export default function ServiceSettings() {
     refetch: refetchLayers,
   } = useServiceCapabilities({
     baseUrl: service?.url ?? "",
-    type:
-      service?.type === SERVICE_TYPE.WMS
-        ? SERVICE_TYPE.WMS
-        : service?.type === SERVICE_TYPE.WMTS
-          ? SERVICE_TYPE.WMS
-          : service?.type === SERVICE_TYPE.WFS
-            ? SERVICE_TYPE.WFS
-            : service?.type === SERVICE_TYPE.WFST
-              ? SERVICE_TYPE.WFS
-              : service?.type === SERVICE_TYPE.VECTOR
-                ? SERVICE_TYPE.WFS
-                : service?.type,
+    type: capabilitiesType,
   });
 
   const {
@@ -230,6 +231,9 @@ export default function ServiceSettings() {
   const listedProjections = defaultCoordinates.filter((code) =>
     serviceProjections.includes(code),
   );
+  // A WMS draws in the systems it lists. A WFS may deliver in others too:
+  // some servers reproject on request, others refuse.
+  const listIsBinding = capabilitiesType !== SERVICE_TYPE.WFS;
 
   const handleDialogOpen = () => {
     setIsDialogOpen(true);
@@ -923,7 +927,7 @@ export default function ServiceSettings() {
                   </SettingsSearchField>
                   {projectionUnlisted ? (
                     <FormFieldRow fullWidth>
-                      <Alert severity="warning">
+                      <Alert severity={listIsBinding ? "warning" : "info"}>
                         {listedProjections.length > 0
                           ? t("services.projectionNotListed", {
                               code: projectionCode,
@@ -932,6 +936,9 @@ export default function ServiceSettings() {
                           : t("services.projectionNoneListed", {
                               code: projectionCode,
                             })}
+                        {listIsBinding
+                          ? null
+                          : ` ${t("services.projectionWfsMayStillDeliver")}`}
                       </Alert>
                     </FormFieldRow>
                   ) : null}

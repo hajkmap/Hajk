@@ -3,6 +3,9 @@ import type { CapabilitiesLayerInfo, ServiceCapabilities } from "./types";
 /** The parts of a GetCapabilities answer that describe the service itself. */
 const SERVICE_PARTS = ["Service", "ServiceIdentification", "ServiceProvider"];
 
+/** Where a WMS layer lists its coordinate systems (WMS 1.3.0, 1.1.1). */
+const WMS_LAYER_CRS = ["CRS", "SRS"];
+
 /** Where a WFS feature type lists its coordinate systems (WFS 2.0, 1.1, 1.0). */
 const FEATURE_TYPE_CRS = [
   "DefaultCRS",
@@ -39,59 +42,75 @@ function textInside(
 
 /**
  * "EPSG:3006" from the ways capabilities write a coordinate system:
- * "EPSG:3006", "urn:ogc:def:crs:EPSG::3006" and
- * "http://www.opengis.net/def/crs/EPSG/0/3006". Others are kept as written.
+ * "EPSG:3006", "urn:ogc:def:crs:EPSG::3006",
+ * "http://www.opengis.net/def/crs/EPSG/0/3006" and
+ * "http://www.opengis.net/gml/srs/epsg.xml#3006". Others are kept as written.
  */
 export function crsCode(value: string): string {
   const code = value.trim();
-  const epsg = /EPSG(?::[\d.]*)?:(\d+)$|EPSG\/[\d.]+\/(\d+)$/i.exec(code);
-  return epsg ? `EPSG:${epsg[1] ?? epsg[2]}` : code;
+  const epsg =
+    /EPSG(?::[\d.]*)?:(\d+)$|EPSG\/[\d.]+\/(\d+)$|epsg\.xml#(\d+)$/i.exec(code);
+  return epsg ? `EPSG:${epsg[1] ?? epsg[2] ?? epsg[3]}` : code;
 }
 
-/** The coordinate systems in these elements, in order and without repeats. */
-function crsListOf(elements: Element[]): string[] {
-  const codes = elements
-    .flatMap((element) => (element.textContent ?? "").trim().split(/\s+/))
+/** The coordinate systems an element lists in its children with these names, in order. */
+function crsCodesIn(element: Element, localNames: string[]): string[] {
+  return Array.from(element.children)
+    .filter((child) => localNames.includes(child.localName))
+    .flatMap((child) => (child.textContent ?? "").trim().split(/\s+/))
     .filter(Boolean)
     .map(crsCode);
-  return [...new Set(codes)];
 }
 
-/** A WMS layer's coordinate systems: those of the layers above it, then its own. */
-function wmsLayerCrs(layer: Element): string[] {
-  const chain: Element[] = [];
-  for (
-    let element: Element | null = layer;
-    element?.localName === "Layer";
-    element = element.parentElement
-  ) {
-    chain.unshift(element);
+/**
+ * A layer's coordinate systems: those it adds to the ones of the layer above
+ * it. A server may list thousands on its top layer, which the layers below
+ * then share instead of each holding a copy.
+ */
+interface LayerCrs {
+  added: Set<string>;
+  above: LayerCrs | null;
+}
+
+function hasCrs(crs: LayerCrs | null, code: string): boolean {
+  for (let level = crs; level; level = level.above) {
+    if (level.added.has(code)) return true;
   }
-  return [
-    ...new Set(
-      chain.flatMap((element) =>
-        crsListOf(
-          Array.from(element.children).filter(
-            (child) => child.localName === "CRS" || child.localName === "SRS",
-          ),
-        ),
-      ),
-    ),
-  ];
+  return false;
 }
 
-function featureTypeCrs(featureType: Element): string[] {
-  return crsListOf(
-    Array.from(featureType.children).filter((child) =>
-      FEATURE_TYPE_CRS.includes(child.localName),
-    ),
+/** In order: those of the layers above, then the layer's own. */
+function crsCodesOf(crs: LayerCrs | null): string[] {
+  return crs ? [...crsCodesOf(crs.above), ...crs.added] : [];
+}
+
+/**
+ * Reads WMS layers' coordinate systems, each layer once. A layer that adds
+ * none to those above it is the layer above, as far as they go.
+ */
+function wmsCrsReader(): (layer: Element) => LayerCrs | null {
+  const known = new Map<Element, LayerCrs | null>();
+  const read = (layer: Element): LayerCrs | null => {
+    const cached = known.get(layer);
+    if (cached !== undefined) return cached;
+    const parent = layer.parentElement;
+    const above = parent?.localName === "Layer" ? read(parent) : null;
+    const added = new Set(
+      crsCodesIn(layer, WMS_LAYER_CRS).filter((code) => !hasCrs(above, code)),
+    );
+    const crs = added.size === 0 ? above : { added, above };
+    known.set(layer, crs);
+    return crs;
+  };
+  return read;
+}
+
+/** The codes every layer has, in the first layer's order. */
+function inEveryLayer(layers: (LayerCrs | null)[]): string[] {
+  const [first = null, ...rest] = [...new Set(layers)];
+  return crsCodesOf(first).filter((code) =>
+    rest.every((crs) => hasCrs(crs, code)),
   );
-}
-
-/** The codes every list has, in the first list's order. */
-function inEveryList(lists: string[][]): string[] {
-  const [first = [], ...rest] = lists;
-  return first.filter((code) => rest.every((list) => list.includes(code)));
 }
 
 /**
@@ -110,7 +129,8 @@ export function parseCapabilitiesFromXML(
   const workspaces: Set<string> = new Set<string>();
   const styles: Record<string, { name: string; legendUrl?: string }[]> = {};
   const layerInfo: Record<string, CapabilitiesLayerInfo> = {};
-  const crsLists: string[][] = [];
+  const layerCrs: (LayerCrs | null)[] = [];
+  const wmsLayerCrs = wmsCrsReader();
 
   // WFS capabilities use FeatureType elements; WMS/WMTS use Layer elements.
   const isWFS = type === "WFS";
@@ -134,7 +154,11 @@ export function parseCapabilitiesFromXML(
       title: childText(element, "Title"),
       abstract: childText(element, "Abstract"),
     };
-    crsLists.push(isWFS ? featureTypeCrs(element) : wmsLayerCrs(element));
+    layerCrs.push(
+      isWFS
+        ? { added: new Set(crsCodesIn(element, FEATURE_TYPE_CRS)), above: null }
+        : wmsLayerCrs(element),
+    );
 
     if (!isWFS) {
       const styleElements = Array.from(element.children).filter(
@@ -171,7 +195,7 @@ export function parseCapabilitiesFromXML(
     workspaces: Array.from(workspaces),
     styles,
     layerInfo,
-    projections: inEveryList(crsLists),
+    projections: inEveryLayer(layerCrs),
     metadata: {
       title: serviceText("Title"),
       description: serviceText("Abstract"),
@@ -186,7 +210,7 @@ export function parseCapabilitiesFromXML(
 
 /**
  * The coordinate system a new service gets: the default when the service
- * lists it, else the first one it lists among those admin offers, else the
+ * lists it, else the first of those admin offers that it lists, else the
  * default. An empty list (the answer didn't say) keeps the default.
  */
 export function chooseProjection(
@@ -195,5 +219,5 @@ export function chooseProjection(
   offered: string[],
 ): string {
   if (listed.length === 0 || listed.includes(defaultCode)) return defaultCode;
-  return listed.find((code) => offered.includes(code)) ?? defaultCode;
+  return offered.find((code) => listed.includes(code)) ?? defaultCode;
 }

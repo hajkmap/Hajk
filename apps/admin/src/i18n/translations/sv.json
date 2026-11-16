@@ -229,6 +229,7 @@
     "services.slowAnswer": "Tjänsten svarar långsamt. Väntar fortfarande på svaret.",
     "services.projectionNotListed": "Tjänsten listar inte {{code}}. Av era koordinatsystem listar den {{listed}}.",
     "services.projectionNoneListed": "Tjänsten listar inte {{code}}, och inte heller något annat av era koordinatsystem.",
+    "services.projectionWfsMayStillDeliver": "En del WFS-servrar levererar ändå i andra koordinatsystem.",
     "services.workspace": "Arbetsområde",
     "services.imageFormats": "Bildformat",
     "services.publishLayer": "Publicera ditt första lager",

@@ -231,6 +231,7 @@
     "services.slowAnswer": "The service is slow to answer. Still waiting for it.",
     "services.projectionNotListed": "The service doesn't list {{code}}. Of your coordinate systems it lists {{listed}}.",
     "services.projectionNoneListed": "The service lists neither {{code}} nor any other of your coordinate systems.",
+    "services.projectionWfsMayStillDeliver": "Some WFS servers still deliver in other coordinate systems.",
     "services.imageFormats": "Image formats",
     "services.publishLayer": "Publish your first layer",
     "services.publishLayerAction": "Publish layer",
