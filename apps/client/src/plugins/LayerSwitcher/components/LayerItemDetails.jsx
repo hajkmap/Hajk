@@ -75,7 +75,14 @@ function LayerItemDetails({
 
   // Handle opacity slider changes
   const handleOpacitySliderChange = (_, newValue) => {
-    layerItemDetails.layer.set("opacity", newValue);
+    const { layer } = layerItemDetails;
+    const layerControl = app.layerControl;
+    // Route via LayerControlModel; unnamed (system) layers aren't indexed there.
+    if (layerControl?.getLayer(layer.get("name")) === layer) {
+      layerControl.setOpacity(layer.get("name"), newValue);
+    } else {
+      layer.setOpacity(newValue);
+    }
   };
 
   // Callback for change:opacity listeners

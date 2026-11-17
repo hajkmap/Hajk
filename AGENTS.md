@@ -106,7 +106,7 @@ visibility changes etc instead of reinventing something new.
   showing a direct child (including via sublayer activation) auto-hides its siblings,
   and `showGroup()` on an exclusive folder shows only the first child. Do not build
   parallel radio logic in plugins; route through the model.
-- Access via `props.app.appModel.layerControl` (plugins) or
+- Access via `props.app.layerControl` (plugins — `props.app` is the `AppModel`) or
   `window.hajkPublicApi.layerControl` (embedders, console).
 - In React, read state with the `useLayerVisibility`/`useLayerState` hooks rather than
   local `useState`, so the UI follows toggles made elsewhere.

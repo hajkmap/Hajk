@@ -1521,7 +1521,8 @@ class WMSLayerForm extends Component {
     if (fieldName === "searchFields") value = value || null;
     if (fieldName === "displayFields") value = value || null;
     if (fieldName === "zIndex") value = value || null;
-    if (fieldName === "opacity") value = parseFloat(Number(value).toFixed(2));
+    if (fieldName === "opacity")
+      value = value === "" ? "" : parseFloat(Number(value).toFixed(2));
     if (fieldName === "infoClickSortDesc") value = input.checked;
     if (fieldName === "hideExpandArrow") value = input.checked;
 
@@ -1529,7 +1530,7 @@ class WMSLayerForm extends Component {
   }
 
   validate() {
-    var validationFields = ["url", "caption", "layers"];
+    var validationFields = ["url", "caption", "layers", "opacity"];
     var errors = [];
 
     validationFields.forEach((field) => {
@@ -1580,7 +1581,7 @@ class WMSLayerForm extends Component {
         }
         break;
       case "opacity":
-        if (isNaN(Number(value)) || value < 0 || value > 1) {
+        if (value === "" || isNaN(value) || value < 0 || value > 1) {
           valid = false;
         }
         break;
@@ -2198,12 +2199,14 @@ class WMSLayerForm extends Component {
             max="1"
             ref="input_opacity"
             value={this.state.opacity}
-            className={
-              (this.getValidationClass("opacity"), "control-fixed-width")
-            }
+            className={`${this.getValidationClass(
+              "opacity"
+            )} control-fixed-width`}
             onChange={(e) => {
-              this.setState({ opacity: e.target.value });
-              this.validateField("opacity");
+              const v = e.target.value;
+              this.setState({ opacity: v }, () =>
+                this.validateField("opacity")
+              );
             }}
           />
         </div>

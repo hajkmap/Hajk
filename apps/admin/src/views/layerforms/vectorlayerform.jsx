@@ -178,9 +178,11 @@ class VectorLayerForm extends React.Component {
     let value = input ? input.value : "";
 
     // We must cast the following to Number, as String won't be accepted for those:
-    if (["maxZoom", "minZoom", "opacity"].includes(fieldName)) {
+    if (["maxZoom", "minZoom"].includes(fieldName)) {
       value = Number(value);
     }
+    if (fieldName === "opacity")
+      value = value === "" ? "" : parseFloat(Number(value).toFixed(2));
 
     if (fieldName === "date") value = create_date();
     if (fieldName === "queryable") value = input.checked;
@@ -195,7 +197,7 @@ class VectorLayerForm extends React.Component {
   }
 
   validate() {
-    var validationFields = ["url", "caption", "projection"];
+    var validationFields = ["url", "caption", "projection", "opacity"];
     if (this.state.dataFormat !== "GeoJSON") {
       validationFields.push("layer");
     }
@@ -243,6 +245,10 @@ class VectorLayerForm extends React.Component {
         }
         break;
       case "opacity":
+        if (value === "" || isNaN(value) || value < 0 || value > 1) {
+          valid = false;
+        }
+        break;
       case "minZoom":
       case "maxZoom":
         if (!number(value) || empty(value)) {
@@ -670,9 +676,9 @@ class VectorLayerForm extends React.Component {
             max="1"
             ref="input_opacity"
             value={this.state.opacity}
-            className={
-              (this.getValidationClass("opacity"), "control-fixed-width")
-            }
+            className={`${this.getValidationClass(
+              "opacity"
+            )} control-fixed-width`}
             onChange={(e) => {
               const v = e.target.value;
               this.setState({ opacity: v }, () =>
