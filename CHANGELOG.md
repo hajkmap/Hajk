@@ -7,7 +7,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-<!-- ## [unreleased] -->
+## [unreleased]
+
+### Added
+
+- Admin + Client: WMTS layers can now have a default opacity, like WMS and vector layers. The opacity field is validated (0–1) the same way in all three layer forms, and an opacity of `0` is no longer turned into `1` in the Client. `LayerControlModel` gets `setOpacity(id, value)` and `getOpacity(id)`, which the LayerSwitcher opacity slider now uses. [#1945](https://github.com/hajkmap/Hajk/issues/1945)
 
 ## [4.4.0-rc.1] - 2026-11-16
 
@@ -667,8 +671,7 @@ _A quick follow-up to 3.13.22, that had some issues with certain map configurati
 
 ## [3.12.0-rc.2] - 2023-06-19
 
-<!-- [unreleased]: https://github.com/hajkmap/Hajk/compare/v4.3.0...develop -->
-
+[unreleased]: https://github.com/hajkmap/Hajk/compare/v4.4.0...develop
 [4.4.0-rc.1]: https://github.com/hajkmap/Hajk/compare/v4.3.0...v4.4.0-rc.1
 [4.3.0]: https://github.com/hajkmap/Hajk/compare/v4.3.0-rc1...v4.3.0
 [4.3.0-rc.1]: https://github.com/hajkmap/Hajk/compare/v4.2.0...v4.3.0-rc1
