@@ -148,6 +148,10 @@ const arraysEqual = (a = [], b = []) => {
  * lc.setGroupVisibility("folderId", true);
  * lc.isGroupVisible("folderId");                   // -> boolean (all leaves visible)
  *
+ * // Opacity (0–1, clamped). Initial value is the Admin default from layers.json.
+ * lc.setOpacity("id", 0.5);
+ * lc.getOpacity("id");                             // -> number | undefined
+ *
  * // Reactive primitives (back the useLayerVisibility / useLayerState hooks)
  * const off = lc.subscribe("id", () => {});        // -> unsubscribe fn
  * lc.getVisibilitySnapshot("id");                  // -> boolean (stable)
@@ -879,6 +883,33 @@ class LayerControlModel {
         this.hideLayer(id);
       }
     });
+  }
+
+  /**
+   * Set a layer's opacity. Values are clamped to 0–1. Also moves the
+   * LayerSwitcher opacity slider, which listens to `change:opacity`.
+   * @param {string} id
+   * @param {number} opacity
+   */
+  setOpacity(id, opacity) {
+    const olLayer = this.getLayer(id);
+    const value = Number(opacity);
+    if (olLayer === undefined || opacity === null || Number.isNaN(value)) {
+      console.warn(
+        `Attempt to set opacity ${opacity} for layer ${id} failed: layer not found or value not a number`
+      );
+      return;
+    }
+    olLayer.setOpacity(Math.min(1, Math.max(0, value)));
+  }
+
+  /**
+   * Get a layer's current opacity (0–1).
+   * @param {string} id
+   * @returns {number | undefined} `undefined` if the layer isn't found.
+   */
+  getOpacity(id) {
+    return this.getLayer(id)?.getOpacity();
   }
 
   /**

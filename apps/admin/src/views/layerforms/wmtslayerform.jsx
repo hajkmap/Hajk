@@ -271,6 +271,7 @@ const defaultState = {
   timeSliderEnd: "",
   maxZoom: -1,
   minZoom: -1,
+  opacity: 1,
   wmtsCapabilities: null,
   wmtsLayers: [],
   wmtsTileMatrixSets: [],
@@ -933,6 +934,7 @@ class WMTSLayerForm extends Component {
       timeSliderEnd: this.getValue("timeSliderEnd"),
       maxZoom: this.getValue("maxZoom"),
       minZoom: this.getValue("minZoom"),
+      opacity: this.getValue("opacity"),
     };
   }
 
@@ -950,6 +952,8 @@ class WMTSLayerForm extends Component {
       return value === 0 ? -1 : value;
     }
 
+    if (fieldName === "opacity")
+      value = value === "" ? "" : parseFloat(Number(value).toFixed(2));
     if (fieldName === "date") value = create_date();
     if (fieldName === "dimensions") {
       value = parseDimensions(value);
@@ -1008,6 +1012,7 @@ class WMTSLayerForm extends Component {
       "origins",
       "resolutions",
       "matrixIds",
+      "opacity",
     ];
     var errors = [];
 
@@ -1075,6 +1080,11 @@ class WMTSLayerForm extends Component {
       case "imageFormat":
       case "projection":
         if (value === "") {
+          valid = false;
+        }
+        break;
+      case "opacity":
+        if (value === "" || isNaN(value) || value < 0 || value > 1) {
           valid = false;
         }
         break;
@@ -1233,6 +1243,26 @@ class WMTSLayerForm extends Component {
           >
             Välj fil {imageLoader}
           </span>
+        </div>
+        <div>
+          <label>Opacitet*</label>
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            max="1"
+            ref="input_opacity"
+            value={this.state.opacity}
+            className={`${this.getValidationClass(
+              "opacity"
+            )} control-fixed-width`}
+            onChange={(e) => {
+              const v = e.target.value;
+              this.setState({ opacity: v }, () =>
+                this.validateField("opacity")
+              );
+            }}
+          />
         </div>
         <div>
           <label>
