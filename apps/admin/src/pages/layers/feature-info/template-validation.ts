@@ -6,7 +6,7 @@ import {
   type TemplateOptions,
 } from "./template-engine";
 import { DOCUMENT_HANDLER_PLUGIN, KNOWN_PLUGINS } from "./document-link";
-import { checkSyntax } from "./template-syntax";
+import { checkSyntax, maskLiterals } from "./template-syntax";
 
 export type IssueSeverity = "error" | "warning" | "info";
 
@@ -59,6 +59,10 @@ function checkPlaceholders(
   context: ValidationContext,
   issues: TemplateIssue[],
 ) {
+  // Style, script, code and comments are not placeholders. maskLiterals
+  // keeps every index and line break, so the warnings still point at the
+  // right row.
+  template = maskLiterals(template);
   const known = context.attributes
     ? [...context.attributes, ...CLICK_ATTRIBUTES]
     : undefined;

@@ -81,6 +81,8 @@ import {
   type SublayersInfo,
 } from "./feature-info/infoclick-target";
 import SublayerInfoClickSettings from "./feature-info/sublayer-infoclick-settings";
+import VectorLayerSettings from "./components/vector-layer-settings";
+import { vectorOptionsFromForm } from "./components/vector-options";
 import EditingLayerSettings from "./components/editing-layer-settings";
 import {
   defaultEditingOptions,
@@ -364,6 +366,9 @@ export default function LayerSettings() {
     current !== undefined &&
     JSON.stringify(current) !== JSON.stringify(savedSublayersInfo);
   const infoClickTarget = infoClickTargetFor(service?.type);
+  const isVectorLayer = service?.type === SERVICE_TYPE.VECTOR;
+  const showWmsDisplayOptions =
+    settingsVisibility.showDisplayRequestOptions && !isVectorLayer;
 
   const layerEditingDefaults = useMemo(() => {
     if (!layer) return null;
@@ -912,6 +917,7 @@ export default function LayerSettings() {
                   visibleUntil: fromDateTimeLocal(
                     (data.options as { visibleUntil?: string })?.visibleUntil,
                   ),
+                  ...(isVectorLayer ? vectorOptionsFromForm(data.options) : {}),
                   ...(settingsVisibility.showEditingSettingsPanel && {
                     ...editingOptions,
                     editableFields: editingEditableFields,
@@ -1296,7 +1302,15 @@ export default function LayerSettings() {
           </Box>
 
           <Box sx={{ display: showDisplayTab ? "block" : "none" }}>
-            {settingsVisibility.showDisplayRequestOptions && (
+            {isVectorLayer && (
+              <VectorLayerSettings
+                control={control}
+                register={register}
+                searchTerm={settingsSearchTerm}
+                allValues={showSettingsSearchUi ? getValues() : undefined}
+              />
+            )}
+            {showWmsDisplayOptions && (
               <SearchablePanel
                 panelTitleKeywords={settingsSearchLabels(
                   "services.settings.request",
@@ -1456,7 +1470,7 @@ export default function LayerSettings() {
               </SearchablePanel>
             )}
 
-            {settingsVisibility.showDisplayRequestOptions && (
+            {showWmsDisplayOptions && (
               <SearchablePanel
                 panelTitleKeywords={settingsSearchLabels("layers.customDpi")}
                 keywords={[
@@ -1622,7 +1636,7 @@ export default function LayerSettings() {
             >
               <FormPanel title={t("layers.settings")}>
                 <FormFieldGrid>
-                  {settingsVisibility.showDisplayRequestOptions && (
+                  {showWmsDisplayOptions && (
                     <SettingsSearchField
                       labelKeys={["layers.style"]}
                       fields={["style"]}
@@ -1748,6 +1762,7 @@ export default function LayerSettings() {
                       />
                     </FormFieldRow>
                   </SettingsSearchField>
+                  {!isVectorLayer && (
                   <SettingsSearchField
                     labelKeys={["layers.legendOptions"]}
                     fields={["legendOptions"]}
@@ -1764,6 +1779,7 @@ export default function LayerSettings() {
                       />
                     </FormFieldRow>
                   </SettingsSearchField>
+                  )}
                   <SettingsSearchField
                     labelKeys={["layers.minMaxZoomAlertOnToggleOnly"]}
                     searchTerm={settingsSearchTerm}

@@ -54,6 +54,13 @@ function clientFieldList(value: unknown): string {
   return "";
 }
 
+/** A single layers.json string. Numbers are kept so a stored `0` or `3` is not dropped. */
+function clientScalar(value: unknown, fallback = ""): string {
+  if (typeof value === "string") return value.length > 0 ? value : fallback;
+  if (typeof value === "number" && Number.isFinite(value)) return String(value);
+  return fallback;
+}
+
 /** WFST edit-tool fields stored on `layer.options` (legacy `wfstlayers` shape). */
 function getWfstEditingFields(
   optionsRec: Record<string, unknown>
@@ -636,7 +643,7 @@ function appendDisplayLayer(
       typeof optionsRec.dataFormat === "string" &&
       optionsRec.dataFormat.length > 0
         ? optionsRec.dataFormat
-        : "GeoJSON";
+        : "WFS";
 
     appendToBucket("vectorlayers", out, {
       id: baseId,
@@ -662,10 +669,30 @@ function appendDisplayLayer(
       secondaryLabelFields: clientFieldList(optionsRec.secondaryLabelFields),
       shortDisplayFields: clientFieldList(optionsRec.shortDisplayFields),
       infoclickIcon: infClick?.icon ?? "",
+      attribution: metadata?.attribution ?? "",
       opacity: layer.opacity,
       maxZoom: layer.maxZoom >= 0 ? layer.maxZoom : -1,
       minZoom: layer.minZoom >= 0 ? layer.minZoom : -1,
       visibleAtStart: inst.visibleAtStart,
+      hideExpandArrow: layer.hideExpandArrow === true,
+      timeSliderVisible: layer.timeSliderVisible === true,
+      timeSliderStart: layer.timeSliderStart ?? "",
+      timeSliderEnd: layer.timeSliderEnd ?? "",
+      filterable: optionsRec.filterable === true,
+      filterAttribute: clientScalar(optionsRec.filterAttribute),
+      filterComparer: clientScalar(optionsRec.filterComparer, "eq"),
+      filterValue: clientScalar(optionsRec.filterValue),
+      icon: clientScalar(optionsRec.icon),
+      fillColor: clientScalar(optionsRec.fillColor),
+      lineColor: clientScalar(optionsRec.lineColor),
+      lineStyle: clientScalar(optionsRec.lineStyle),
+      lineWidth: clientScalar(optionsRec.lineWidth),
+      pointSize: clientScalar(optionsRec.pointSize),
+      symbolXOffset: clientScalar(optionsRec.symbolXOffset, "0"),
+      symbolYOffset: clientScalar(optionsRec.symbolYOffset, "0"),
+      sldUrl: clientScalar(optionsRec.sldUrl),
+      sldText: clientScalar(optionsRec.sldText),
+      sldStyle: clientScalar(optionsRec.sldStyle, "Default Styler"),
       queryable:
         layer.infoClickActive !== false && inst.infoClickActive !== false,
       infoClickSortType: infClick?.sortMethod ?? "text",

@@ -23,7 +23,11 @@ export function resolveGeometryFieldFromPayload(
   return undefined;
 }
 
-const optionText = (value: unknown) => (typeof value === "string" ? value : "");
+const optionText = (value: unknown) => {
+  if (typeof value === "string") return value;
+  if (typeof value === "number" && Number.isFinite(value)) return String(value);
+  return "";
+};
 
 /** Form shape used by layer settings reset / dirty comparison. */
 export function buildLayerSettingsFormValues(
@@ -118,6 +122,23 @@ export function buildLayerSettingsFormValues(
       displayFields: optionText(layerOptions.displayFields),
       secondaryLabelFields: optionText(layerOptions.secondaryLabelFields),
       shortDisplayFields: optionText(layerOptions.shortDisplayFields),
+      dataFormat: optionText(layerOptions.dataFormat) || "WFS",
+      content: optionText(layerOptions.content),
+      sldUrl: optionText(layerOptions.sldUrl),
+      sldText: optionText(layerOptions.sldText),
+      sldStyle: optionText(layerOptions.sldStyle) || "Default Styler",
+      icon: optionText(layerOptions.icon),
+      symbolXOffset: optionText(layerOptions.symbolXOffset) || "0",
+      symbolYOffset: optionText(layerOptions.symbolYOffset) || "0",
+      pointSize: optionText(layerOptions.pointSize),
+      lineWidth: optionText(layerOptions.lineWidth),
+      lineStyle: optionText(layerOptions.lineStyle),
+      fillColor: optionText(layerOptions.fillColor),
+      lineColor: optionText(layerOptions.lineColor),
+      filterable: layerOptions.filterable === true,
+      filterAttribute: optionText(layerOptions.filterAttribute),
+      filterComparer: optionText(layerOptions.filterComparer) || "eq",
+      filterValue: optionText(layerOptions.filterValue),
     },
   };
 }
