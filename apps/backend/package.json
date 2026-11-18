@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "activedirectory2": "^2.2.0",
-    "altcha-lib": "^2.8.0",
+    "altcha-lib": "^2.9.0",
     "chokidar": "^6.0.0",
     "compression": "^1.8.2",
     "cookie-parser": "^1.4.7",

@@ -26,18 +26,13 @@ export default defineConfig({
     outDir: "build",
     assetsDir: "static",
     sourcemap: false,
-    rollupOptions: {
+    rolldownOptions: {
       output: {
-        manualChunks: {
-          "app-core": ["./src/components/App.jsx"],
+        // Rolldown only accepts the function form of manualChunks
+        manualChunks(id) {
+          if (id.endsWith("/src/components/App.jsx")) return "app-core";
         },
       },
     },
-  },
-  esbuild: {
-    // Allow both JS/JSX and TS/TSX in src
-    loader: "tsx",
-    include: /src\/.*\.[tj]sx?$/,
-    exclude: [],
   },
 });

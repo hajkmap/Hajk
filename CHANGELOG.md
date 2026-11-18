@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Admin + Client: WMTS layers can now have a default opacity, like WMS and vector layers. The opacity field is validated (0–1) the same way in all three layer forms, and an opacity of `0` is no longer turned into `1` in the Client. `LayerControlModel` gets `setOpacity(id, value)` and `getOpacity(id)`, which the LayerSwitcher opacity slider now uses. [#1945](https://github.com/hajkmap/Hajk/issues/1945)
 
+### Changed
+
+- Backend: Bumped `altcha-lib`.
+- Client: Bumped Vite from 7 to 8 (Rolldown/Oxc), `motion`, `@nieuwlandgeo/sldreader` from 0.7 to 2.2 and `@libpdf/core`. `vite.config.ts` updated for Vite 8.
+
 ## [4.4.0-rc.1] - 2026-11-16
 
 ### Breaking
