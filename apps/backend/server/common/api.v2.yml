@@ -963,6 +963,62 @@ paths:
                     type: integer
         403:
           description: Access denied
+  /feedback/{id}:
+    patch:
+      tags: [Feedback]
+      summary: Mark feedback as answered or not answered (admin-only)
+      description: Marking already answered feedback keeps the original answeredAt and answeredBy.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [answered]
+              properties:
+                answered:
+                  type: boolean
+      responses:
+        200:
+          description: Answered status updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  answered:
+                    type: boolean
+                  answeredAt:
+                    type: string
+                    format: date-time
+                    nullable: true
+                  answeredBy:
+                    type: string
+                    nullable: true
+        400:
+          description: Invalid id or body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        403:
+          description: Access denied
+        404:
+          description: No feedback with this id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /feedback/stats:
     get:
       tags: [Feedback]
@@ -1075,12 +1131,27 @@ components:
         user:
           type: string
           description: Only present if FEEDBACK_STORE_AUTH_USER is true and the user was authenticated
+        answered:
+          type: boolean
+          description: Whether an admin has marked this feedback as answered
+        answeredAt:
+          type: string
+          format: date-time
+          nullable: true
+        answeredBy:
+          type: string
+          nullable: true
+          description: The admin who marked it as answered, if known (requires AD)
     FeedbackStats:
       type: object
       properties:
         active:
           type: boolean
         entryCount:
+          type: integer
+        answeredCount:
+          type: integer
+        unansweredCount:
           type: integer
         totalSize:
           type: integer

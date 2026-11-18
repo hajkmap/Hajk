@@ -20,7 +20,7 @@ function getErrorMessage(xhr, fallback) {
 
 /**
  * Model for the admin "Feedback" tab. Talks to the backend's admin-only
- * feedback endpoints (GET/DELETE {url}, GET {url}/stats).
+ * feedback endpoints (GET/DELETE {url}, GET {url}/stats, PATCH {url}/{id}).
  *
  * All callbacks are called node-style: callback(errorMessage, data).
  */
@@ -34,7 +34,7 @@ var feedback = Model.extend({
     return config && config.url ? config.url.replace(/\/+$/, "") : null;
   },
 
-  request: function (path, method, errorText, callback) {
+  request: function (path, method, errorText, callback, body) {
     const baseUrl = this.getBaseUrl();
     if (!baseUrl) {
       callback(
@@ -47,6 +47,10 @@ var feedback = Model.extend({
       method: method,
       dataType: "json",
       cache: false,
+      ...(body !== undefined && {
+        contentType: "application/json",
+        data: JSON.stringify(body),
+      }),
       success: (data) => {
         callback(null, data);
       },
@@ -69,6 +73,16 @@ var feedback = Model.extend({
     this.request("", "GET", "Kunde inte hämta feedback.", (error, data) => {
       callback(error, Array.isArray(data) ? data : []);
     });
+  },
+
+  setAnswered: function (id, answered, callback) {
+    this.request(
+      "/" + encodeURIComponent(id),
+      "PATCH",
+      "Kunde inte uppdatera feedback.",
+      callback,
+      { answered }
+    );
   },
 
   deleteAll: function (callback) {

@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Admin + Client: WMTS layers can now have a default opacity, like WMS and vector layers. The opacity field is validated (0–1) the same way in all three layer forms, and an opacity of `0` is no longer turned into `1` in the Client. `LayerControlModel` gets `setOpacity(id, value)` and `getOpacity(id)`, which the LayerSwitcher opacity slider now uses. [#1945](https://github.com/hajkmap/Hajk/issues/1945)
+- Admin + Backend: Feedback can be marked as answered. The Admin's Feedback view now has separate tabs for unanswered and answered feedback, and a checkbox on each row moves it between them. The status, with when and by whom (if AD is active), is stored in `App_Data/feedback/answered.json` and set through the new admin-only `PATCH /api/v2/feedback/{id}`. `GET /feedback` includes `answered`, `answeredAt` and `answeredBy` for each entry, and `/feedback/stats` includes `answeredCount` and `unansweredCount`. [#1947](https://github.com/hajkmap/Hajk/issues/1947)
 
 ## [4.4.0-rc.1] - 2026-11-16
 

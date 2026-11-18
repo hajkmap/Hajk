@@ -233,4 +233,141 @@ describe("FeedbackService", () => {
     assert.deepEqual(listFiles(), []);
     assert.equal((await service.getStats()).entryCount, 0);
   });
+
+  test("marks feedback as answered and back again", async () => {
+    clearDir();
+    const service = createService();
+    const submit = async (message) =>
+      (
+        await service.submit({
+          map: "demo",
+          message,
+          captcha: await solve(service),
+        })
+      ).id;
+    const first = await submit("Första");
+    const second = await submit("Andra");
+
+    let entries = await service.getAll();
+    assert.ok(entries.every((e) => e.answered === false));
+    assert.ok(entries.every((e) => e.answeredAt === null));
+
+    const marked = await service.setAnswered(first, true, "admin1");
+    assert.equal(marked.answered, true);
+    assert.equal(marked.answeredBy, "admin1");
+    assert.ok(Date.parse(marked.answeredAt));
+
+    entries = await service.getAll();
+    assert.equal(entries.find((e) => e.id === first).answered, true);
+    assert.equal(entries.find((e) => e.id === first).answeredBy, "admin1");
+    assert.equal(entries.find((e) => e.id === second).answered, false);
+
+    let stats = await service.getStats();
+    assert.equal(stats.answeredCount, 1);
+    assert.equal(stats.unansweredCount, 1);
+    // answered.json is not counted as a feedback file
+    assert.equal(stats.files.length, 1);
+
+    // Marking again keeps who and when
+    const again = await service.setAnswered(first, true, "admin2");
+    assert.equal(again.answeredBy, "admin1");
+    assert.equal(again.answeredAt, marked.answeredAt);
+
+    const unmarked = await service.setAnswered(first, false);
+    assert.equal(unmarked.answered, false);
+    assert.equal(unmarked.answeredAt, null);
+    assert.equal(
+      (await service.getAll()).find((e) => e.id === first).answered,
+      false
+    );
+    // Nothing answered, so no file is left behind
+    assert.ok(!listFiles().includes("answered.json"));
+
+    // Without a known user
+    assert.equal((await service.setAnswered(second, true)).answeredBy, null);
+    stats = await service.getStats();
+    assert.equal(stats.answeredCount, 1);
+  });
+
+  test("rejects invalid input when marking as answered", async () => {
+    clearDir();
+    const service = createService();
+    const id = (
+      await service.submit({
+        map: "demo",
+        message: "Hej",
+        captcha: await solve(service),
+      })
+    ).id;
+    assert.equal(
+      (await service.setAnswered("../../etc/passwd", true)).error.statusCode,
+      400
+    );
+    assert.equal((await service.setAnswered(id, "yes")).error.statusCode, 400);
+    assert.equal(
+      (await service.setAnswered("00000000-0000-4000-8000-000000000000", true))
+        .error.statusCode,
+      404
+    );
+  });
+
+  test("treats a broken answered.json as nothing answered", async () => {
+    clearDir();
+    const service = createService();
+    const id = (
+      await service.submit({
+        map: "demo",
+        message: "Hej",
+        captcha: await solve(service),
+      })
+    ).id;
+    fs.writeFileSync(path.join(dir, "answered.json"), "{ not json");
+    assert.equal((await service.getAll())[0].answered, false);
+    assert.ok((await service.setAnswered(id, true)).answered);
+    assert.equal((await service.getAll())[0].answered, true);
+  });
+
+  test("forgets answered entries removed by rotation", async () => {
+    clearDir();
+    const service = createService({ maxFileSize: 500, maxFiles: 2 });
+    const submit = async (i) =>
+      (
+        await service.submit(
+          {
+            map: "demo",
+            message: `Meddelande ${i}`,
+            captcha: await solve(service),
+          },
+          undefined,
+          "Mozilla/5.0"
+        )
+      ).id;
+    const oldest = await submit(0);
+    await service.setAnswered(oldest, true);
+    let newest;
+    for (let i = 1; i < 8; i++) newest = await submit(i);
+    assert.ok(!(await service.getAll()).some((e) => e.id === oldest));
+
+    await service.setAnswered(newest, true);
+    const answered = JSON.parse(
+      fs.readFileSync(path.join(dir, "answered.json"), "utf-8")
+    );
+    assert.deepEqual(Object.keys(answered), [newest]);
+  });
+
+  test("deleting all feedback also removes answered status", async () => {
+    clearDir();
+    const service = createService();
+    const id = (
+      await service.submit({
+        map: "demo",
+        message: "Hej",
+        captcha: await solve(service),
+      })
+    ).id;
+    await service.setAnswered(id, true);
+    assert.ok(listFiles().includes("answered.json"));
+    await service.deleteAll();
+    assert.deepEqual(listFiles(), []);
+  });
 });

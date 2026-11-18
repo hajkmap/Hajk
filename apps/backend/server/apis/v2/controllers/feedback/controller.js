@@ -41,6 +41,24 @@ export class Controller {
     FeedbackService.getStats().then((r) => handleStandardResponse(res, r));
   }
 
+  setAnswered(req, res) {
+    const body = parseJsonBody(req.body);
+    if (body.error) return handleStandardResponse(res, body);
+
+    FeedbackService.setAnswered(
+      req.params.id,
+      body.answered,
+      res.locals.authUser
+    ).then((r) => {
+      handleStandardResponse(res, r);
+      if (!r.error) {
+        ael.info(
+          `marked feedback ${r.id} as ${r.answered ? "answered" : "not answered"}.`
+        );
+      }
+    });
+  }
+
   deleteAll(req, res) {
     FeedbackService.deleteAll().then((r) => {
       handleStandardResponse(res, r);

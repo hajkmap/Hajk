@@ -12,4 +12,5 @@ export default express
   .use(adminLimiter, restrictAdmin) // All routes that follow are admin-only!
   .get("/", controller.list)
   .get("/stats", controller.stats)
+  .patch("/:id", controller.setAnswered)
   .delete("/", controller.deleteAll);
