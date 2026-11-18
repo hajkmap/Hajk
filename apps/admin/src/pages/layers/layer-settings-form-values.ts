@@ -23,6 +23,8 @@ export function resolveGeometryFieldFromPayload(
   return undefined;
 }
 
+const optionText = (value: unknown) => (typeof value === "string" ? value : "");
+
 /** Form shape used by layer settings reset / dirty comparison. */
 export function buildLayerSettingsFormValues(
   layer: Layer,
@@ -60,7 +62,7 @@ export function buildLayerSettingsFormValues(
     minZoom: layer.minZoom,
     maxZoom: layer.maxZoom,
     minMaxZoomAlertOnToggleOnly: layer.minMaxZoomAlertOnToggleOnly ?? false,
-    infoClickActive: layer.infoClickActive ?? false,
+    infoClickActive: layer.infoClickActive !== false,
     showMetadata: layer.showMetadata ?? false,
     legendUrl: layer.legendUrl ?? "",
     legendIconUrl: layer.legendIconUrl ?? "",
@@ -113,6 +115,9 @@ export function buildLayerSettingsFormValues(
       editableFields: savedEditableFields,
       nonEditableFields: savedNonEditableFields,
       layersInfo: sublayersInfoFrom(layerOptions, layer.selectedLayers ?? []),
+      displayFields: optionText(layerOptions.displayFields),
+      secondaryLabelFields: optionText(layerOptions.secondaryLabelFields),
+      shortDisplayFields: optionText(layerOptions.shortDisplayFields),
     },
   };
 }

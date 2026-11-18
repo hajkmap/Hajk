@@ -46,6 +46,14 @@ function getOptionsRecord(options: Prisma.JsonValue): Record<string, unknown> {
   return {};
 }
 
+function clientFieldList(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) {
+    return value.filter((item) => typeof item === "string").join(",");
+  }
+  return "";
+}
+
 /** WFST edit-tool fields stored on `layer.options` (legacy `wfstlayers` shape). */
 function getWfstEditingFields(
   optionsRec: Record<string, unknown>
@@ -650,15 +658,16 @@ function appendDisplayLayer(
         (typeof optionsRec.infoboxSummary === "string"
           ? optionsRec.infoboxSummary
           : ""),
-      displayFields: [],
-      secondaryLabelFields: [],
-      shortDisplayFields: [],
+      displayFields: clientFieldList(optionsRec.displayFields),
+      secondaryLabelFields: clientFieldList(optionsRec.secondaryLabelFields),
+      shortDisplayFields: clientFieldList(optionsRec.shortDisplayFields),
       infoclickIcon: infClick?.icon ?? "",
       opacity: layer.opacity,
       maxZoom: layer.maxZoom >= 0 ? layer.maxZoom : -1,
       minZoom: layer.minZoom >= 0 ? layer.minZoom : -1,
       visibleAtStart: inst.visibleAtStart,
-      queryable: inst.infoClickActive !== false,
+      queryable:
+        layer.infoClickActive !== false && inst.infoClickActive !== false,
       infoClickSortType: infClick?.sortMethod ?? "text",
       infoClickSortDesc: infClick?.sortDescending ?? false,
       infoClickSortProperty: infClick?.sortProperty ?? "",

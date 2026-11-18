@@ -901,6 +901,7 @@
     "layers.featureInfo.filterDesc.superscript": "Digits as superscript characters.",
     "layers.featureInfo.filterDesc.toProjection": "Coordinate in another projection. Only shows in the map client.",
     "layers.displayName": "Display name",
+    "layers.infoClickActive": "Infoclickable",
     "layers.infoClickIcon": "Infoclick icon",
     "layers.infoClickIconHelp": "Use the name of a Material icon or enter the URL to an SVG icon. The SVG icon should be square.",
     "layers.listLink": "(list)",

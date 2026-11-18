@@ -755,6 +755,7 @@
     "layers.infobox": "Inforuta",
     "layers.otherSettings": "Övriga inställningar",
     "layers.displayName": "Visningsnamn",
+    "layers.infoClickActive": "Infoklickbar",
     "layers.infoClickIcon": "Infoklick ikon",
     "layers.infoClickIconHelp": "Använd namnet på en material-icon eller ange url:en till en svg-ikon. Svg-ikonen ska vara kvadratisk.",
     "layers.listLink": "(lista)",

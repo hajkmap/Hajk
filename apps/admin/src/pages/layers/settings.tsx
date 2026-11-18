@@ -430,6 +430,14 @@ export default function LayerSettings() {
     control,
     name: "searchSettings.primaryDisplayFields",
   }) as string | undefined;
+  const watchVectorDisplayFields = useWatch({
+    control,
+    name: "options.displayFields",
+  }) as string | undefined;
+  const infoClickActive = useWatch({
+    control,
+    name: "infoClickActive",
+  }) as boolean | undefined;
   // Saving waits until "Tillgänglig till" lies after "Tillgänglig från".
   const [watchVisible, watchVisibleFrom, watchVisibleUntil] = useWatch({
     control,
@@ -2142,6 +2150,9 @@ export default function LayerSettings() {
                     "common.infoclick",
                     "layers.infobox",
                     "layers.infoClickIcon",
+                    "layers.infoClickActive",
+                    "layers.legend",
+                    "layers.legendIcon",
                     "layers.sortByAttribute",
                     "layers.infoClickFormat",
                     "layers.infoClickSortMethod",
@@ -2154,6 +2165,9 @@ export default function LayerSettings() {
                   "sortering",
                   "sort",
                   "format",
+                  "teckenförklaring",
+                  "legend",
+                  "infoklickbar",
                 ]}
                 fields={[
                   "infoClickSettings.definition",
@@ -2161,6 +2175,12 @@ export default function LayerSettings() {
                   "infoClickSettings.sortProperty",
                   "infoClickSettings.format",
                   "infoClickSettings.sortMethod",
+                  "infoClickActive",
+                  "legendUrl",
+                  "legendIconUrl",
+                  "options.displayFields",
+                  "options.secondaryLabelFields",
+                  "options.shortDisplayFields",
                 ]}
                 allValues={showSettingsSearchUi ? getValues() : undefined}
                 searchTerm={settingsSearchTerm}
@@ -2223,6 +2243,49 @@ export default function LayerSettings() {
                     )}
                     {infoClickTarget === "layer" && (
                     <SettingsSearchField
+                      labelKeys={["layers.infoClickActive"]}
+                      fields={["infoClickActive"]}
+                      synonyms={["infoklickbar", "queryable"]}
+                      searchTerm={settingsSearchTerm}
+                      allValues={showSettingsSearchUi ? getValues() : undefined}
+                    >
+                      <FormFieldRow>
+                        <FormGroup>
+                          <Controller
+                            name="infoClickActive"
+                            control={control}
+                            render={({ field }) => (
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    checked={field.value !== false}
+                                    onChange={(e) =>
+                                      field.onChange(e.target.checked)
+                                    }
+                                  />
+                                }
+                                label={fieldLabel(
+                                  "layers.infoClickActive",
+                                  "layers.help.infoClickActive",
+                                )}
+                              />
+                            )}
+                          />
+                        </FormGroup>
+                      </FormFieldRow>
+                    </SettingsSearchField>
+                    )}
+                    {infoClickTarget === "layer" && infoClickActive === false && (
+                      <FormFieldRow fullWidth>
+                        <Alert severity="info">
+                          {t("layers.featureInfo.sublayerNotQueryable", {
+                            name: layer?.name ?? "",
+                          })}
+                        </Alert>
+                      </FormFieldRow>
+                    )}
+                    {infoClickTarget === "layer" && (
+                    <SettingsSearchField
                       labelKeys={["layers.infobox"]}
                       fields={["infoClickSettings.definition"]}
                       searchTerm={settingsSearchTerm}
@@ -2251,7 +2314,11 @@ export default function LayerSettings() {
                               serviceUrl={service?.url ?? ""}
                               typeNames={infoboxTypeNames}
                               caption={layer?.name ?? ""}
-                              displayFields={watchPrimaryDisplayFields ?? ""}
+                              displayFields={
+                                infoClickTarget === "layer"
+                                  ? (watchVectorDisplayFields ?? "")
+                                  : (watchPrimaryDisplayFields ?? "")
+                              }
                             />
                           )}
                         />
@@ -2275,6 +2342,90 @@ export default function LayerSettings() {
                         />
                       </FormFieldRow>
                     </SettingsSearchField>
+                    )}
+                    {infoClickTarget === "layer" && (
+                    <>
+                    <SettingsSearchField
+                      labelKeys={["layers.displayFieldInResultList"]}
+                      fields={["options.displayFields"]}
+                      synonyms={["huvudvisningsfält", "displayFields"]}
+                      searchTerm={settingsSearchTerm}
+                      allValues={showSettingsSearchUi ? getValues() : undefined}
+                    >
+                      <FormFieldRow>
+                        <TextFieldWithHelp
+                          labelKey="layers.displayFieldInResultList"
+                          helpKey="layers.help.primaryDisplayFields"
+                          fullWidth
+                          {...register("options.displayFields")}
+                        />
+                      </FormFieldRow>
+                    </SettingsSearchField>
+                    <SettingsSearchField
+                      labelKeys={["layers.secondaryDisplayFieldInResultList"]}
+                      fields={["options.secondaryLabelFields"]}
+                      synonyms={["sekundära", "secondaryLabelFields"]}
+                      searchTerm={settingsSearchTerm}
+                      allValues={showSettingsSearchUi ? getValues() : undefined}
+                    >
+                      <FormFieldRow>
+                        <TextFieldWithHelp
+                          labelKey="layers.secondaryDisplayFieldInResultList"
+                          helpKey="layers.help.secondaryDisplayFields"
+                          fullWidth
+                          {...register("options.secondaryLabelFields")}
+                        />
+                      </FormFieldRow>
+                    </SettingsSearchField>
+                    <SettingsSearchField
+                      labelKeys={["layers.shortDisplayField"]}
+                      fields={["options.shortDisplayFields"]}
+                      synonyms={["visningsfält i kartan", "shortDisplayFields"]}
+                      searchTerm={settingsSearchTerm}
+                      allValues={showSettingsSearchUi ? getValues() : undefined}
+                    >
+                      <FormFieldRow>
+                        <TextFieldWithHelp
+                          labelKey="layers.shortDisplayField"
+                          helpKey="layers.help.shortDisplayFields"
+                          fullWidth
+                          {...register("options.shortDisplayFields")}
+                        />
+                      </FormFieldRow>
+                    </SettingsSearchField>
+                    <SettingsSearchField
+                      labelKeys={["layers.legend"]}
+                      fields={["legendUrl"]}
+                      synonyms={["teckenförklaring", "legend"]}
+                      searchTerm={settingsSearchTerm}
+                      allValues={showSettingsSearchUi ? getValues() : undefined}
+                    >
+                      <FormFieldRow>
+                        <TextFieldWithHelp
+                          labelKey="layers.legend"
+                          helpKey="layers.help.legend"
+                          fullWidth
+                          {...register("legendUrl")}
+                        />
+                      </FormFieldRow>
+                    </SettingsSearchField>
+                    <SettingsSearchField
+                      labelKeys={["layers.legendIcon"]}
+                      fields={["legendIconUrl"]}
+                      synonyms={["teckenförklaringsikon", "legendIcon"]}
+                      searchTerm={settingsSearchTerm}
+                      allValues={showSettingsSearchUi ? getValues() : undefined}
+                    >
+                      <FormFieldRow>
+                        <TextFieldWithHelp
+                          labelKey="layers.legendIcon"
+                          helpKey="layers.help.legendIcon"
+                          fullWidth
+                          {...register("legendIconUrl")}
+                        />
+                      </FormFieldRow>
+                    </SettingsSearchField>
+                    </>
                     )}
                     <FormAccordion
                       title={t("layers.featureInfo.formatAndSort")}
