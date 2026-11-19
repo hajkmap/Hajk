@@ -1,7 +1,10 @@
 import React from "react";
 import { Component } from "react";
 import Alert from "../views/alert.jsx";
+import FeedbackTable from "./feedbackTable.jsx";
 import Button from "@material-ui/core/Button";
+import Tabs from "@material-ui/core/Tabs";
+import Tab from "@material-ui/core/Tab";
 import RefreshIcon from "@material-ui/icons/Refresh";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
@@ -28,13 +31,13 @@ const ColorButtonRed = withStyles((theme) => ({
   },
 }))(Button);
 
-const MAX_VISIBLE_ENTRIES = 100;
-
 const defaultState = {
   loading: false,
   error: null,
   stats: null,
   entries: [],
+  activeTab: 0, // 0 = unanswered, 1 = answered
+  pending: {}, // ids of entries whose answered status is being saved
   alert: false,
   confirm: false,
   alertMessage: "",
@@ -55,22 +58,6 @@ function formatBytes(bytes) {
   return `${value.toLocaleString("sv-SE", { maximumFractionDigits: 1 })} ${
     units[unit]
   }`;
-}
-
-function formatTimestamp(timestamp) {
-  const date = new Date(timestamp);
-  return isNaN(date.getTime())
-    ? String(timestamp || "")
-    : date.toLocaleString("sv-SE");
-}
-
-function isHttpUrl(url) {
-  return typeof url === "string" && /^https?:\/\//i.test(url);
-}
-
-function formatUser(user) {
-  if (user === undefined || user === null || user === "") return "";
-  return typeof user === "string" ? user : JSON.stringify(user);
 }
 
 function todayAsString() {
@@ -108,6 +95,45 @@ class Feedback extends Component {
           stats: statsError ? null : stats,
           entries: entriesError ? [] : entries,
         });
+      });
+    });
+  }
+
+  /**
+   * Toggle an entry's answered status. The entry moves to the other tab
+   * right away and moves back if saving fails.
+   */
+  toggleAnswered(entry) {
+    const id = entry.id;
+    const answered = !entry.answered;
+    const updateEntry = (changes) =>
+      this.safeSetState((state) => ({
+        entries: state.entries.map((e) =>
+          e.id === id ? { ...e, ...changes } : e
+        ),
+      }));
+    const setPending = (value) =>
+      this.safeSetState((state) => ({
+        pending: { ...state.pending, [id]: value },
+      }));
+
+    setPending(true);
+    updateEntry({ answered });
+    this.props.model.setAnswered(id, answered, (error, result) => {
+      setPending(false);
+      if (error) {
+        updateEntry({
+          answered: entry.answered,
+          answeredAt: entry.answeredAt,
+          answeredBy: entry.answeredBy,
+        });
+        this.safeSetState({ alert: true, confirm: false, alertMessage: error });
+        return;
+      }
+      updateEntry({
+        answered: result.answered,
+        answeredAt: result.answeredAt,
+        answeredBy: result.answeredBy,
       });
     });
   }
@@ -188,7 +214,7 @@ class Feedback extends Component {
     };
   }
 
-  renderStats() {
+  renderStats(answeredCount, unansweredCount) {
     const { stats } = this.state;
     if (!stats) return null;
     const files = Array.isArray(stats.files) ? stats.files : [];
@@ -213,6 +239,12 @@ class Feedback extends Component {
             <td>{stats.entryCount}</td>
           </tr>
           <tr>
+            <th>Obesvarade / besvarade</th>
+            <td>
+              {unansweredCount} / {answeredCount}
+            </td>
+          </tr>
+          <tr>
             <th>Total storlek</th>
             <td>{formatBytes(stats.totalSize)}</td>
           </tr>
@@ -232,67 +264,45 @@ class Feedback extends Component {
     );
   }
 
-  renderEntries() {
-    const { entries } = this.state;
-    if (entries.length === 0) {
-      return <p>Det finns ingen feedback att visa.</p>;
-    }
-    const visible = entries.slice(0, MAX_VISIBLE_ENTRIES);
+  renderEntries(unanswered, answered) {
+    const { activeTab, pending } = this.state;
     return (
       <>
-        {entries.length > MAX_VISIBLE_ENTRIES && (
-          <p>
-            Visar de {MAX_VISIBLE_ENTRIES} senaste av totalt {entries.length}{" "}
-            inlägg. Ladda ner JSON-filen för att se allt.
-          </p>
+        <Tabs
+          value={activeTab}
+          onChange={(e, value) => this.setState({ activeTab: value })}
+          indicatorColor="primary"
+          textColor="primary"
+          style={{ marginBottom: 10 }}
+        >
+          <Tab label={`Obesvarade (${unanswered.length})`} />
+          <Tab label={`Besvarade (${answered.length})`} />
+        </Tabs>
+        {activeTab === 0 ? (
+          <FeedbackTable
+            entries={unanswered}
+            answered={false}
+            pending={pending}
+            onToggle={(entry) => this.toggleAnswered(entry)}
+            emptyText="Det finns ingen obesvarad feedback."
+          />
+        ) : (
+          <FeedbackTable
+            entries={answered}
+            answered={true}
+            pending={pending}
+            onToggle={(entry) => this.toggleAnswered(entry)}
+            emptyText="Det finns ingen besvarad feedback."
+          />
         )}
-        <table className="table table-striped table-condensed">
-          <thead>
-            <tr>
-              <th style={{ whiteSpace: "nowrap" }}>Tidpunkt</th>
-              <th>Karta</th>
-              <th>Meddelande</th>
-              <th>Länk</th>
-              <th>Användare</th>
-            </tr>
-          </thead>
-          <tbody>
-            {visible.map((entry, i) => {
-              const anchorUrl = entry.context && entry.context.anchorUrl;
-              return (
-                <tr key={entry.id || i}>
-                  <td style={{ whiteSpace: "nowrap" }}>
-                    {formatTimestamp(entry.timestamp)}
-                  </td>
-                  <td>{entry.map == null ? "" : String(entry.map)}</td>
-                  <td
-                    style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
-                  >
-                    {entry.message == null ? "" : String(entry.message)}
-                  </td>
-                  <td>
-                    {isHttpUrl(anchorUrl) ? (
-                      <a
-                        href={anchorUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Öppna
-                      </a>
-                    ) : null}
-                  </td>
-                  <td>{formatUser(entry.user)}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
       </>
     );
   }
 
   render() {
-    const { loading, error } = this.state;
+    const { loading, error, entries } = this.state;
+    const answered = entries.filter((e) => e.answered === true);
+    const unanswered = entries.filter((e) => e.answered !== true);
     return (
       <section className="tab-pane active">
         <Alert options={this.getAlertOptions()} />
@@ -332,8 +342,8 @@ class Feedback extends Component {
           )}
         </p>
         {error && <div className="alert alert-danger">{error}</div>}
-        {this.renderStats()}
-        {this.renderEntries()}
+        {this.renderStats(answered.length, unanswered.length)}
+        {this.renderEntries(unanswered, answered)}
       </section>
     );
   }

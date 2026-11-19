@@ -19,6 +19,13 @@ const MAX_ANCHOR_URL_LENGTH = 2048;
 const MAX_CLIENT_VERSION_LENGTH = 64;
 const MAX_USER_AGENT_LENGTH = 512;
 
+// Which entries admins have marked as answered: { [id]: { answeredAt, answeredBy } }.
+// Shared by all instances. Not .jsonl, so it's never mistaken for a feedback file.
+const ANSWERED_FILE = "answered.json";
+
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 // C0/C1 control characters (except tab and line feed), zero-width characters
 // (except the joiner, used in emojis) and bidi overrides. Nothing a user needs
 // in a short text, but useful for hiding or disguising content.
@@ -79,6 +86,7 @@ async function mapHasFeedbackTool(map, user) {
  * feedback[_<HAJK_INSTANCE_ID>].jsonl (the active one) and
  * feedback[_<HAJK_INSTANCE_ID>]-<timestamp>.jsonl (rotated ones), so that several
  * instances can share the folder without writing to the same file.
+ * Answered status is kept separately in answered.json, see #readAnswered.
  */
 export class FeedbackService {
   #queue = Promise.resolve();
@@ -317,7 +325,91 @@ export class FeedbackService {
   }
 
   /**
-   * @summary Get all stored feedback, newest first.
+   * @summary Read all entries from all feedback files, in no particular order.
+   * @returns {Promise<object[]>}
+   */
+  async #readEntries() {
+    const entries = [];
+    for (const file of await this.#listFiles()) {
+      const text = await fs.promises.readFile(
+        resolvePathUnder(this.dir, file),
+        "utf-8"
+      );
+      text.split("\n").forEach((line, i) => {
+        if (line.trim().length === 0) return;
+        try {
+          entries.push(JSON.parse(line));
+        } catch {
+          logger.warn(`Skipping invalid line ${i + 1} in ${file}`);
+        }
+      });
+    }
+    return entries;
+  }
+
+  /**
+   * @summary Read the answered status of all entries.
+   * @returns {Promise<Object<string, {answeredAt: string, answeredBy: string|null}>>}
+   * An empty object if the file is missing or broken.
+   */
+  async #readAnswered() {
+    let text;
+    try {
+      text = await fs.promises.readFile(
+        resolvePathUnder(this.dir, ANSWERED_FILE),
+        "utf-8"
+      );
+    } catch (error) {
+      if (error.code === "ENOENT") return {};
+      throw error;
+    }
+    try {
+      const answered = JSON.parse(text);
+      if (
+        answered &&
+        typeof answered === "object" &&
+        !Array.isArray(answered)
+      ) {
+        return answered;
+      }
+    } catch {
+      // Handled below
+    }
+    logger.warn(
+      `Ignoring invalid ${ANSWERED_FILE}, all feedback is treated as unanswered.`
+    );
+    return {};
+  }
+
+  /**
+   * @summary Save the answered status atomically (write to a temporary file, then rename),
+   * or remove the file if nothing is answered. Must be called from within #enqueue.
+   */
+  async #writeAnswered(answered) {
+    const file = resolvePathUnder(this.dir, ANSWERED_FILE);
+    if (Object.keys(answered).length === 0) {
+      await fs.promises.rm(file, { force: true });
+      return;
+    }
+    await fs.promises.mkdir(this.dir, { recursive: true });
+    const tmpFile = resolvePathUnder(
+      this.dir,
+      `.${ANSWERED_FILE}-${process.pid}-${randomUUID()}.tmp`
+    );
+    try {
+      await fs.promises.writeFile(tmpFile, JSON.stringify(answered, null, 2), {
+        encoding: "utf-8",
+        mode: 0o640,
+      });
+      await fs.promises.rename(tmpFile, file);
+    } catch (error) {
+      await fs.promises.rm(tmpFile, { force: true });
+      throw error;
+    }
+  }
+
+  /**
+   * @summary Get all stored feedback, newest first, with each entry's answered status.
    * @param {string} [since] Only return feedback newer than this (ISO 8601 date/time)
    */
   async getAll(since) {
@@ -330,27 +422,76 @@ export class FeedbackService {
         }
       }
 
-      const entries = [];
-      for (const file of await this.#listFiles()) {
-        const text = await fs.promises.readFile(
-          resolvePathUnder(this.dir, file),
-          "utf-8"
-        );
-        text.split("\n").forEach((line, i) => {
-          if (line.trim().length === 0) return;
-          try {
-            entries.push(JSON.parse(line));
-          } catch {
-            logger.warn(`Skipping invalid line ${i + 1} in ${file}`);
-          }
-        });
-      }
+      const [entries, answered] = await Promise.all([
+        this.#readEntries(),
+        this.#readAnswered(),
+      ]);
 
       return entries
         .filter(
           (e) => sinceTime === null || Date.parse(e.timestamp) > sinceTime
         )
-        .sort((a, b) => (a.timestamp < b.timestamp ? 1 : -1));
+        .sort((a, b) => (a.timestamp < b.timestamp ? 1 : -1))
+        .map((e) => {
+          const status = Object.hasOwn(answered, e.id) ? answered[e.id] : null;
+          return {
+            ...e,
+            answered: status !== null,
+            answeredAt: status?.answeredAt ?? null,
+            answeredBy: status?.answeredBy ?? null,
+          };
+        });
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  /**
+   * @summary Mark one entry as answered, or as not answered.
+   * @description Also forgets entries that no longer exist (removed by rotation), so
+   * answered.json doesn't grow forever. Marking an already answered entry keeps the
+   * original answeredAt/answeredBy.
+   * @param {string} id
+   * @param {boolean} answered
+   * @param {string} [user] The admin doing it, if known
+   * @returns {Promise<{id: string, answered: boolean, answeredAt: string|null, answeredBy: string|null} | {error: Error}>}
+   */
+  async setAnswered(id, answered, user) {
+    try {
+      if (typeof id !== "string" || !UUID_REGEX.test(id)) {
+        throw new FeedbackError("Invalid id.");
+      }
+      if (typeof answered !== "boolean") {
+        throw new FeedbackError("'answered' must be true or false.");
+      }
+
+      return await this.#enqueue(async () => {
+        const ids = new Set((await this.#readEntries()).map((e) => e.id));
+        if (!ids.has(id)) {
+          throw new FeedbackError("Feedback not found.", 404);
+        }
+
+        const current = await this.#readAnswered();
+        const next = Object.fromEntries(
+          Object.entries(current).filter(([key]) => ids.has(key))
+        );
+        if (!answered) {
+          delete next[id];
+        } else if (!Object.hasOwn(next, id)) {
+          next[id] = {
+            answeredAt: new Date().toISOString(),
+            answeredBy: typeof user === "string" && user ? user : null,
+          };
+        }
+        await this.#writeAnswered(next);
+
+        return {
+          id,
+          answered,
+          answeredAt: next[id]?.answeredAt ?? null,
+          answeredBy: next[id]?.answeredBy ?? null,
+        };
+      });
     } catch (error) {
       return { error };
     }
@@ -379,6 +520,14 @@ export class FeedbackService {
           .filter((l) => l.trim().length > 0).length;
       }
 
+      const [entries, answered] = await Promise.all([
+        this.#readEntries(),
+        this.#readAnswered(),
+      ]);
+      const answeredCount = entries.filter((e) =>
+        Object.hasOwn(answered, e.id)
+      ).length;
+
       let freeDiskSpace = null;
       try {
         const stats = await fs.promises.statfs(
@@ -392,6 +541,8 @@ export class FeedbackService {
       return {
         active: this.active,
         entryCount,
+        answeredCount,
+        unansweredCount: entries.length - answeredCount,
         totalSize: files.reduce((sum, f) => sum + f.size, 0),
         files,
         freeDiskSpace,
@@ -408,7 +559,7 @@ export class FeedbackService {
   }
 
   /**
-   * @summary Remove all stored feedback files, from all instances.
+   * @summary Remove all stored feedback files, from all instances, and the answered status.
    */
   async deleteAll() {
     try {
@@ -417,6 +568,9 @@ export class FeedbackService {
         for (const file of files) {
           await fs.promises.unlink(resolvePathUnder(this.dir, file));
         }
+        await fs.promises.rm(resolvePathUnder(this.dir, ANSWERED_FILE), {
+          force: true,
+        });
         return { deletedFiles: files.length };
       });
     } catch (error) {
