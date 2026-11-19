@@ -33,15 +33,9 @@ const DISPLAY_SCALAR_KEYS = [
 ] as const;
 
 const SEARCH_SCALAR_KEYS = [
-  "active",
-  "url",
   "searchFields",
-  "primaryDisplayFields",
-  "secondaryDisplayFields",
-  "shortDisplayFields",
   "outputFormat",
   "geometryField",
-  "infobox",
   "aliasDict",
   "zIndex",
 ] as const;
@@ -88,15 +82,9 @@ export function flattenSearchSettings(
     return {};
   }
   return {
-    active: nested.active,
-    url: nested.url,
     searchFields: toStringArray(nested.searchFields),
-    primaryDisplayFields: toStringArray(nested.primaryDisplayFields),
-    secondaryDisplayFields: toStringArray(nested.secondaryDisplayFields),
-    shortDisplayFields: toStringArray(nested.shortDisplayFields),
     outputFormat: nested.outputFormat,
     geometryField: nested.geometryField,
-    infobox: nested.infobox,
     aliasDict: nested.aliasDict,
   };
 }
@@ -118,6 +106,9 @@ export function pickLayerCreateData(
       ...search,
       ...(flat.options !== undefined ? { options: flat.options } : {}),
       ...(flat.metadata !== undefined ? { metadata: flat.metadata } : {}),
+      ...(flat.infoClickSettings !== undefined
+        ? { infoClickSettings: flat.infoClickSettings }
+        : {}),
     };
   }
 
@@ -164,6 +155,7 @@ export function pickLayerUpdateData(
       scalars: { ...copyDefined(flat, COMMON_KEYS), ...search },
       options,
       metadata: flat.metadata,
+      infoClickSettings: flat.infoClickSettings,
     };
   }
 

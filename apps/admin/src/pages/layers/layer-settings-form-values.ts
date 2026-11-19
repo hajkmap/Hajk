@@ -3,7 +3,7 @@ import type { Layer } from "../../api/layers";
 import type { EditableFieldConfig } from "./types/editing-layer";
 import { editingOptionsFrom } from "./types/editing-layer";
 import { toDateTimeLocal } from "../../lib/availability";
-import { sublayersInfoFrom } from "./feature-info/infoclick-target";
+import { infoClickLayersFrom } from "./feature-info/infoclick-target";
 
 /** Geometry field from searchSettings (search) or top-level scalar (editing). */
 export function getLayerGeometryField(layer: Layer): string {
@@ -66,7 +66,10 @@ export function buildLayerSettingsFormValues(
     minZoom: layer.minZoom,
     maxZoom: layer.maxZoom,
     minMaxZoomAlertOnToggleOnly: layer.minMaxZoomAlertOnToggleOnly ?? false,
-    infoClickActive: layer.infoClickActive !== false,
+    infoClickActive:
+      layer.layerKind === "search"
+        ? layer.infoClickSettings?.active === true
+        : layer.infoClickActive !== false,
     showMetadata: layer.showMetadata ?? false,
     legendUrl: layer.legendUrl ?? "",
     legendIconUrl: layer.legendIconUrl ?? "",
@@ -82,20 +85,10 @@ export function buildLayerSettingsFormValues(
       attribution: layer.metadata?.attribution ?? "",
     },
     searchSettings: {
-      active: layer.searchSettings?.active ?? false,
-      url: layer.searchSettings?.url ?? "",
       searchFields: (layer.searchSettings?.searchFields ?? []).join(", "),
-      primaryDisplayFields: (
-        layer.searchSettings?.primaryDisplayFields ?? []
-      ).join(", "),
-      secondaryDisplayFields: (
-        layer.searchSettings?.secondaryDisplayFields ?? []
-      ).join(", "),
-      shortDisplayFields: (layer.searchSettings?.shortDisplayFields ?? []).join(
-        ", ",
-      ),
       geometryField: getLayerGeometryField(layer),
       outputFormat: layer.searchSettings?.outputFormat ?? "",
+      aliasDict: layer.aliasDict ?? "",
     },
     infoClickSettings: {
       definition: layer.infoClickSettings?.definition ?? "",
@@ -104,6 +97,23 @@ export function buildLayerSettingsFormValues(
       sortProperty: layer.infoClickSettings?.sortProperty ?? "",
       sortMethod: layer.infoClickSettings?.sortMethod ?? "",
       sortDescending: layer.infoClickSettings?.sortDescending ?? false,
+      active: layer.infoClickSettings?.active ?? layer.infoClickActive === true,
+      displayFields:
+        optionText(layer.infoClickSettings?.displayFields) ||
+        optionText(layerOptions.displayFields),
+      secondaryLabelFields:
+        optionText(layer.infoClickSettings?.secondaryLabelFields) ||
+        optionText(layerOptions.secondaryLabelFields),
+      shortDisplayFields:
+        optionText(layer.infoClickSettings?.shortDisplayFields) ||
+        optionText(layerOptions.shortDisplayFields),
+      legend: layer.infoClickSettings?.legend ?? layer.legendUrl ?? "",
+      legendIcon: layer.infoClickSettings?.legendIcon ?? layer.legendIconUrl ?? "",
+      options: infoClickLayersFrom(
+        layer.infoClickSettings,
+        layerOptions,
+        layer.selectedLayers,
+      ),
     },
     options: {
       keyword: layer.options?.keyword ?? "",
@@ -118,10 +128,6 @@ export function buildLayerSettingsFormValues(
       ...editingOptionsFrom(layerOptions),
       editableFields: savedEditableFields,
       nonEditableFields: savedNonEditableFields,
-      layersInfo: sublayersInfoFrom(layerOptions, layer.selectedLayers ?? []),
-      displayFields: optionText(layerOptions.displayFields),
-      secondaryLabelFields: optionText(layerOptions.secondaryLabelFields),
-      shortDisplayFields: optionText(layerOptions.shortDisplayFields),
       dataFormat: optionText(layerOptions.dataFormat) || "WFS",
       content: optionText(layerOptions.content),
       sldUrl: optionText(layerOptions.sldUrl),

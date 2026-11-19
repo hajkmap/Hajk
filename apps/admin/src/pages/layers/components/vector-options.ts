@@ -16,9 +16,6 @@ const VECTOR_OPTION_KEYS = [
   "filterAttribute",
   "filterComparer",
   "filterValue",
-  "displayFields",
-  "secondaryLabelFields",
-  "shortDisplayFields",
 ] as const;
 
 /** Vector fields live on `DisplayLayer.options`. The save payload must copy them explicitly. */

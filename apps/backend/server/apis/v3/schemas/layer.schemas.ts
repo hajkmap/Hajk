@@ -11,7 +11,13 @@ const ServiceTypeSchema = z.enum([
   "WMTS",
 ]);
 const ServerTypeSchema = z.enum(["QGIS_SERVER", "GEOSERVER"]);
-const SearchOutputFormatSchema = z.enum(["GML2", "GML3", "GML32"]);
+const SearchOutputFormatSchema = z.enum([
+  "application/json",
+  "application/vnd.geo+json",
+  "GML3",
+  "GML2",
+  "GML32",
+]);
 const UseTypeSchema = z.enum(["BACKGROUND", "FOREGROUND"]);
 
 const MetadataSchema = z.object({
@@ -37,6 +43,22 @@ const ServiceSchema = z.object({
   locked: z.boolean().default(false),
 });
 
+const InfoClickLayerSchema = z
+  .object({
+    id: z.string().optional(),
+    caption: z.string().optional(),
+    style: z.string().optional(),
+    definition: z.string().optional(),
+    icon: z.string().optional(),
+    active: z.boolean().optional(),
+    displayFields: z.string().optional(),
+    secondaryLabelFields: z.string().optional(),
+    shortDisplayFields: z.string().optional(),
+    legend: z.string().optional(),
+    legendIcon: z.string().optional(),
+  })
+  .catchall(z.json());
+
 const InfoClickSettingsSchema = z.object({
   definition: z.string().optional(),
   icon: z.string().optional(),
@@ -44,17 +66,20 @@ const InfoClickSettingsSchema = z.object({
   sortProperty: z.string().optional(),
   sortMethod: z.string().default("text"),
   sortDescending: z.boolean().default(false),
+  active: z.boolean().optional(),
+  displayFields: z.string().optional(),
+  secondaryLabelFields: z.string().optional(),
+  shortDisplayFields: z.string().optional(),
+  legend: z.string().optional(),
+  legendIcon: z.string().optional(),
+  options: z.array(InfoClickLayerSchema).optional(),
 });
 
 const SearchSettingsSchema = z.object({
-  active: z.boolean().default(false),
-  url: z.string().optional(),
   searchFields: z.array(z.string()).optional(),
-  primaryDisplayFields: z.array(z.string()).optional(),
-  secondaryDisplayFields: z.array(z.string()).optional(),
-  shortDisplayFields: z.array(z.string()).optional(),
   outputFormat: SearchOutputFormatSchema.default("GML3"),
   geometryField: z.string().optional(),
+  aliasDict: z.string().optional(),
 });
 
 const LayerKindSchema = z.enum(["display", "search", "editing"]);
@@ -142,26 +167,16 @@ export const MetadataCreateSchema = z.object({
   attribution: z.string().optional(),
 });
 
-export const InfoClickSettingsCreateSchema = z.object({
+export const InfoClickSettingsCreateSchema = InfoClickSettingsSchema.extend({
   layerId: z.string().optional(),
   layerInstanceId: z.string().optional(),
-  definition: z.string().optional(),
-  icon: z.string().optional(),
-  format: z.string().default("application/json"),
-  sortProperty: z.string().optional(),
-  sortMethod: z.string().default("text"),
-  sortDescending: z.boolean().default(false),
 });
 
 export const SearchSettingsCreateSchema = z.object({
-  active: z.boolean().default(false),
-  url: z.string().optional(),
   searchFields: z.array(z.string()).optional(),
-  primaryDisplayFields: z.array(z.string()).optional(),
-  secondaryDisplayFields: z.array(z.string()).optional(),
-  shortDisplayFields: z.array(z.string()).optional(),
   outputFormat: SearchOutputFormatSchema.default("GML3"),
   geometryField: z.string().optional(),
+  aliasDict: z.string().optional(),
 });
 
 export const LayerUpdateSchema = z.object({
@@ -235,14 +250,10 @@ export const InfoClickSettingsUpdateSchema = z.object({
 });
 
 export const SearchSettingsUpdateSchema = z.object({
-  active: z.boolean().optional(),
-  url: z.string().optional(),
   searchFields: z.array(z.string()).optional(),
-  primaryDisplayFields: z.array(z.string()).optional(),
-  secondaryDisplayFields: z.array(z.string()).optional(),
-  shortDisplayFields: z.array(z.string()).optional(),
   outputFormat: SearchOutputFormatSchema.optional(),
   geometryField: z.string().optional(),
+  aliasDict: z.string().optional(),
 });
 
 export type LayerCreateInput = z.infer<typeof LayerCreateSchema>;

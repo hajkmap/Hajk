@@ -12,6 +12,7 @@ const SEARCH_FORM_KEYS = [
   "options",
   "roleId",
   "searchSettings",
+  "infoClickSettings",
 ] as const;
 
 /** Top-level form keys that belong to the editing-layer settings UI. */
@@ -220,9 +221,9 @@ export function getLayerSettingsVisibility(
       return {
         tabs: ["general", "infoclick", "layers", "search"],
         showSearchSettingsPanel: true,
-        showDisplayFieldsPanel: true,
+        showDisplayFieldsPanel: false,
         showDisplayRequestOptions: false,
-        showInfoClickSettingsPanel: false,
+        showInfoClickSettingsPanel: true,
         showEditingSettingsPanel: false,
       };
     case "editing":

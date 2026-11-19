@@ -24,17 +24,12 @@ const DISPLAY_DEFAULT_KEYS = new Set([
 ]);
 
 const SEARCH_DEFAULT_KEYS = new Set([
-  "active",
-  "url",
   "searchFields",
-  "primaryDisplayFields",
-  "secondaryDisplayFields",
-  "shortDisplayFields",
   "outputFormat",
   "geometryField",
-  "infobox",
   "aliasDict",
   "searchSettings",
+  "infoClickSettings",
 ]);
 
 const EDITING_DEFAULT_KEYS = new Set(["geometryField"]);
@@ -96,15 +91,9 @@ function flattenSearchSettings(
   const nested = data.searchSettings;
   if (!isPlainObject(nested)) return {};
   return {
-    active: nested.active,
-    url: nested.url,
     searchFields: toStringArray(nested.searchFields),
-    primaryDisplayFields: toStringArray(nested.primaryDisplayFields),
-    secondaryDisplayFields: toStringArray(nested.secondaryDisplayFields),
-    shortDisplayFields: toStringArray(nested.shortDisplayFields),
     outputFormat: nested.outputFormat,
     geometryField: nested.geometryField,
-    infobox: nested.infobox,
     aliasDict: nested.aliasDict,
   };
 }
@@ -127,19 +116,14 @@ export function buildLayerUpdatePayload(
   if (kind === "search") {
     return {
       ...base,
-      active: flat.active,
-      url: flat.url,
       searchFields: flat.searchFields,
-      primaryDisplayFields: flat.primaryDisplayFields,
-      secondaryDisplayFields: flat.secondaryDisplayFields,
-      shortDisplayFields: flat.shortDisplayFields,
       outputFormat: flat.outputFormat,
       geometryField: flat.geometryField,
-      infobox: flat.infobox,
       aliasDict: flat.aliasDict,
       zIndex: flat.zIndex,
       options: flat.options,
       metadata: flat.metadata,
+      infoClickSettings: flat.infoClickSettings,
     };
   }
 

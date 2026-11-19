@@ -10,6 +10,7 @@ import { lighten } from "@mui/material/styles";
 import { SketchPicker } from "react-color";
 
 interface FormColorPickerProps {
+  id?: string;
   label?: string;
   value: string;
   onChange: (hex: string) => void;
@@ -20,6 +21,7 @@ interface FormColorPickerProps {
 }
 
 export default function FormColorPicker({
+  id,
   label,
   value,
   onChange,
@@ -34,6 +36,7 @@ export default function FormColorPicker({
   return (
     <>
       <TextField
+        id={id}
         label={label}
         fullWidth={fullWidth}
         size={size}

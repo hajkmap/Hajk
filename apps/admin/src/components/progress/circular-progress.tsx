@@ -19,7 +19,11 @@ const ProgressCircular: React.FC<CircularProgressProps> = ({
       }}
     >
       <CircularProgress color={color} size={size} thickness={5} />
-      {typographyText && <Typography>{typographyText}</Typography>}
+      {typographyText && (
+        <Typography sx={{ mt: 1, maxWidth: 420, textAlign: "center" }}>
+          {typographyText}
+        </Typography>
+      )}
     </Box>
   );
 };

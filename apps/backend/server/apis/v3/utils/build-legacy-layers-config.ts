@@ -84,14 +84,70 @@ function getWfstEditingFields(
 
 function searchOutputToClient(fmt: string | undefined | null): string {
   switch (fmt) {
+    case "application/json":
+    case "application/vnd.geo+json":
     case "GML2":
-      return "GML2";
-    case "GML32":
-      return "GML32";
     case "GML3":
+    case "GML32":
+      return fmt;
     default:
       return "GML3";
   }
+}
+
+/** InfoClickSettings.options (shared names) or an older layersInfo row, as the client reads it. */
+function toClientLayerInfoRow(
+  row: Record<string, unknown>,
+  layerId: string
+): Record<string, unknown> {
+  const text = (value: unknown) => (typeof value === "string" ? value : "");
+  const infobox = text(row.definition) || text(row.infobox);
+  const queryable = row.active === true || row.queryable === true;
+  return {
+    id: text(row.id) || layerId,
+    caption: text(row.caption),
+    legend: text(row.legend),
+    legendIcon: text(row.legendIcon),
+    infobox,
+    style: text(row.style),
+    queryable,
+    infoclickIcon: text(row.icon) || text(row.infoclickIcon),
+    searchDisplayName: text(row.displayFields) || text(row.searchDisplayName),
+    secondaryLabelFields: text(row.secondaryLabelFields),
+    searchShortDisplayName:
+      text(row.shortDisplayFields) || text(row.searchShortDisplayName),
+    searchUrl: row.searchUrl,
+    searchPropertyName: row.searchPropertyName,
+    searchOutputFormat: row.searchOutputFormat,
+    searchGeometryField: row.searchGeometryField,
+    hasLabelStyle: row.hasLabelStyle === true ? true : undefined,
+    format: typeof row.format === "string" ? row.format : undefined,
+    sortProperty: row.sortProperty,
+    sortMethod: row.sortMethod,
+    sortDescending: row.sortDescending,
+  };
+}
+
+function layersInfoForClient(
+  infoClickLayers: unknown,
+  selectedLayers: string[],
+  options: Prisma.JsonValue
+): Record<string, unknown>[] {
+  if (Array.isArray(infoClickLayers) && infoClickLayers.length > 0) {
+    const byId = new Map<string, Record<string, unknown>>();
+    for (const row of infoClickLayers) {
+      if (row !== null && typeof row === "object" && !Array.isArray(row)) {
+        const record = row as Record<string, unknown>;
+        const id = typeof record.id === "string" ? record.id : "";
+        if (id) byId.set(id, record);
+      }
+    }
+    const ids = selectedLayers.length > 0 ? selectedLayers : [...byId.keys()];
+    return ids.map((layerId) =>
+      toClientLayerInfoRow(byId.get(layerId) ?? {}, layerId)
+    );
+  }
+  return buildLayersInfoArray(selectedLayers, options);
 }
 
 function buildLayersInfoArray(
@@ -170,6 +226,7 @@ type SearchLayerWithRelations = Prisma.SearchLayerGetPayload<{
   include: {
     service: { include: { projection: true } };
     metadata: true;
+    infoClickSettings: true;
   };
 }>;
 
@@ -204,17 +261,24 @@ function appendSearchLayerToWfs(
   });
   const selected = searchLayer.selectedLayers ?? [];
   const metadata = searchLayer.metadata;
-  const optionsRec = getOptionsRecord(searchLayer.options);
+  const infClick = searchLayer.infoClickSettings;
+  const commaFields = (value: string | null | undefined): string[] =>
+    typeof value === "string"
+      ? value
+          .split(",")
+          .map((field) => field.trim())
+          .filter((field) => field.length > 0)
+      : [];
 
   out.wfslayers.push({
     id: instance?.id ?? searchLayer.id,
     caption: searchLayer.name,
-    url: searchLayer.url ?? svc.url,
+    url: svc.url,
     layers: selected,
-    searchFields: searchLayer.active ? searchLayer.searchFields : [],
-    infobox: searchLayer.infobox ?? "",
+    searchFields: searchLayer.searchFields,
+    infobox: infClick?.definition || "",
     aliasDict: searchLayer.aliasDict ?? "",
-    displayFields: searchLayer.primaryDisplayFields,
+    displayFields: commaFields(infClick?.displayFields),
     geometryField: searchLayer.geometryField ?? "geom",
     outputFormat: searchOutputToClient(searchLayer.outputFormat),
     infoVisible: false,
@@ -230,14 +294,13 @@ function appendSearchLayerToWfs(
           ? searchLayer.zIndex
           : null,
     visibleAtStart: instance?.visibleAtStart,
-    secondaryLabelFields: searchLayer.secondaryDisplayFields,
-    shortDisplayFields: searchLayer.shortDisplayFields,
+    secondaryLabelFields: commaFields(infClick?.secondaryLabelFields),
+    shortDisplayFields: commaFields(infClick?.shortDisplayFields),
     serverType: svc.serverType,
     projection: svc.projection ?? "",
     version: svc.version ?? "1.1.0",
     layer: selected[0] ?? "",
     dataFormat: searchOutputToClient(searchLayer.outputFormat),
-    ...optionsRec,
   });
 }
 
@@ -356,6 +419,7 @@ export async function buildLegacyLayersConfigForMap(
         include: {
           service: { include: { projection: true } },
           metadata: true,
+          infoClickSettings: true,
         },
       },
       editingLayer: {
@@ -389,6 +453,7 @@ export async function buildLegacyLayersConfigForMap(
       include: {
         service: { include: { projection: true } },
         metadata: true,
+        infoClickSettings: true,
       },
     })
   );
@@ -536,7 +601,11 @@ function appendDisplayLayer(
       projection: svc.projection ?? "",
       workspace: svc.workspace ?? "",
       layers: selected,
-      layersInfo: buildLayersInfoArray(selected, layer.options),
+      layersInfo: layersInfoForClient(
+        infClick?.options,
+        selected,
+        layer.options
+      ),
       searchFields: null,
       displayFields: null,
       visibleAtStart: inst.visibleAtStart,
@@ -665,9 +734,15 @@ function appendDisplayLayer(
         (typeof optionsRec.infoboxSummary === "string"
           ? optionsRec.infoboxSummary
           : ""),
-      displayFields: clientFieldList(optionsRec.displayFields),
-      secondaryLabelFields: clientFieldList(optionsRec.secondaryLabelFields),
-      shortDisplayFields: clientFieldList(optionsRec.shortDisplayFields),
+      displayFields: clientFieldList(
+        infClick?.displayFields ?? optionsRec.displayFields
+      ),
+      secondaryLabelFields: clientFieldList(
+        infClick?.secondaryLabelFields ?? optionsRec.secondaryLabelFields
+      ),
+      shortDisplayFields: clientFieldList(
+        infClick?.shortDisplayFields ?? optionsRec.shortDisplayFields
+      ),
       infoclickIcon: infClick?.icon ?? "",
       attribution: metadata?.attribution ?? "",
       opacity: layer.opacity,
@@ -694,14 +769,16 @@ function appendDisplayLayer(
       sldText: clientScalar(optionsRec.sldText),
       sldStyle: clientScalar(optionsRec.sldStyle, "Default Styler"),
       queryable:
-        layer.infoClickActive !== false && inst.infoClickActive !== false,
+        (infClick ? infClick.active !== false : layer.infoClickActive !== false) &&
+        inst.infoClickActive !== false,
       infoClickSortType: infClick?.sortMethod ?? "text",
       infoClickSortDesc: infClick?.sortDescending ?? false,
       infoClickSortProperty: infClick?.sortProperty ?? "",
       content: typeof optionsRec.content === "string" ? optionsRec.content : "",
       extent: Array.isArray(optionsRec.extent) ? optionsRec.extent : [],
-      legend: layer.legendUrl ?? "",
-      legendIcon: layer.legendIconUrl ?? "",
+      legend: clientScalar(infClick?.legend) || (layer.legendUrl ?? ""),
+      legendIcon:
+        clientScalar(infClick?.legendIcon) || (layer.legendIconUrl ?? ""),
       rotateMap: "n",
       drawOrder: inst.zIndex,
       infoVisible:

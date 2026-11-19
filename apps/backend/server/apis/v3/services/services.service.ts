@@ -353,7 +353,7 @@ class ServicesService {
         }),
         transaction.searchLayer.findMany({
           where: { serviceId: id, deletedAt: null },
-          select: { id: true, metadataId: true },
+          select: { id: true, metadataId: true, infoClickSettingsId: true },
         }),
         transaction.editingLayer.findMany({
           where: { serviceId: id, deletedAt: null },
@@ -368,11 +368,12 @@ class ServicesService {
         ...displayLayers.map((layer) => layer.metadataId),
         ...searchLayers.map((layer) => layer.metadataId),
       ].filter((metadataId): metadataId is string => Boolean(metadataId));
-      const layerInfoClickSettingsIds = displayLayers
-        .map((layer) => layer.infoClickSettingsId)
-        .filter((infoClickSettingsId): infoClickSettingsId is string =>
-          Boolean(infoClickSettingsId)
-        );
+      const layerInfoClickSettingsIds = [
+        ...displayLayers.map((layer) => layer.infoClickSettingsId),
+        ...searchLayers.map((layer) => layer.infoClickSettingsId),
+      ].filter((infoClickSettingsId): infoClickSettingsId is string =>
+        Boolean(infoClickSettingsId)
+      );
 
       const deletedAt = new Date();
 
@@ -403,7 +404,12 @@ class ServicesService {
         });
         await transaction.searchLayer.updateMany({
           where: { id: { in: searchLayerIds }, deletedAt: null },
-          data: { deletedAt, lastSavedDate: deletedAt, metadataId: null },
+          data: {
+            deletedAt,
+            lastSavedDate: deletedAt,
+            metadataId: null,
+            infoClickSettingsId: null,
+          },
         });
       }
 

@@ -362,22 +362,36 @@ model Metadata {
   searchLayer  SearchLayer?
 }
 
+/// Infoclick for a display layer (WMS, vector) or a search layer (WFS).
+/// Column names are the same for every kind. The client config still uses
+/// its own names (`infobox`, `queryable`, `infoclickIcon`, `searchDisplayName`).
 model InfoClickSettings {
-  id              String        @id @default(cuid())
-  layerInstanceId String?
-  definition      String?
-  icon            String?
-  format          String        @default("application/json")
-  sortProperty    String?
-  sortMethod      String        @default("text") // number or text
-  sortDescending  Boolean       @default(false)
-  displayLayer    DisplayLayer?
-}
-
-enum SearchOutputFormat {
-  GML2
-  GML3
-  GML32
+  id                   String        @id @default(cuid())
+  layerInstanceId      String?
+  /// Template. Client: `infobox`.
+  definition           String?
+  /// Hit-list icon. Client: `infoclickIcon`.
+  icon                 String?
+  /// WMS GetFeatureInfo format. Client: `infoFormat`.
+  format               String        @default("application/json")
+  sortProperty         String?
+  sortMethod           String        @default("text") // number or text
+  sortDescending       Boolean       @default(false)
+  /// Whole-layer switch. Client: `queryable`. WMS stores this per row in `options`.
+  active               Boolean       @default(true)
+  /// Comma-separated attributes. Client: `displayFields` (WMS row: `searchDisplayName`).
+  displayFields        String?
+  secondaryLabelFields String?
+  /// Client: `shortDisplayFields` (WMS row: `searchShortDisplayName`).
+  shortDisplayFields   String?
+  /// Client: `legend`.
+  legend               String?
+  /// Client: `legendIcon`.
+  legendIcon           String?
+  /// WMS sublayers. Each object uses these same names, plus `id`, `caption` and `style`.
+  options              Json          @default("[]")
+  displayLayer         DisplayLayer?
+  searchLayer          SearchLayer?
 }
 
 /// Map visualization layer (WMS, WMTS, ARCGIS, VECTOR, etc.).
@@ -407,7 +421,7 @@ model DisplayLayer {
   style                       String?
   customRatio                 Int                  @default(0)
   showMetadata                Boolean              @default(false)
-  infoClickActive             Boolean              @default(true)
+  infoClickActive             Boolean              @default(false)
   timeSliderVisible           Boolean              @default(false)
   timeSliderStart             String?
   timeSliderEnd               String?
@@ -432,37 +446,39 @@ model DisplayLayer {
   @@index([serviceId])
 }
 
-/// Search layer configuration (independent of service type; WFS is common).
+/// Search layer (WFS). Infoclick text lives on InfoClickSettings.
+/// The request URL is the service URL.
 model SearchLayer {
-  id                     String              @id @default(cuid())
-  serviceId              String
-  metadataId             String?             @unique
-  selectedLayers         String[]            @default([])
-  locked                 Boolean             @default(false)
-  name                   String
-  internalName           String?
-  description            String?
-  service                Service             @relation(fields: [serviceId], references: [id])
-  metadata               Metadata?           @relation(fields: [metadataId], references: [id])
-  active                 Boolean             @default(false)
-  url                    String?
-  searchFields           String[]            @default([])
-  primaryDisplayFields   String[]            @default([])
-  secondaryDisplayFields String[]            @default([])
-  shortDisplayFields     String[]            @default([])
-  outputFormat           SearchOutputFormat  @default(GML3)
-  geometryField          String?
-  infobox                String?
-  aliasDict              String?
-  zIndex                 Int                 @default(0)
-  createdBy              String?
-  createdDate            DateTime?           @db.Timestamptz(3)
-  lastSavedBy            String?
-  lastSavedDate          DateTime?           @db.Timestamptz(3)
-  deletedAt              DateTime?           @db.Timestamptz(3)
-  restrictedToRoles      RoleOnSearchLayer[]
-  instances              LayerInstance[]
-  options                Json                @default("{}")
+  id                  String              @id @default(cuid())
+  serviceId           String
+  metadataId          String?             @unique
+  infoClickSettingsId String?             @unique
+  selectedLayers      String[]            @default([])
+  locked              Boolean             @default(false)
+  name                String
+  internalName        String?
+  description         String?
+  service             Service             @relation(fields: [serviceId], references: [id])
+  metadata            Metadata?           @relation(fields: [metadataId], references: [id])
+  infoClickSettings   InfoClickSettings?  @relation(fields: [infoClickSettingsId], references: [id])
+  /// Attributes the search request queries. Client: `searchFields`.
+  searchFields        String[]            @default([])
+  /// WFS response type. Client: `outputFormat`. Not InfoClickSettings.format.
+  outputFormat        String              @default("GML3")
+  /// Geometry column. Client: `geometryField`.
+  geometryField       String?
+  /// Attribute rename map. Client: `aliasDict`.
+  aliasDict           String?
+  zIndex              Int                 @default(0)
+  createdBy           String?
+  createdDate         DateTime?           @db.Timestamptz(3)
+  lastSavedBy         String?
+  lastSavedDate       DateTime?           @db.Timestamptz(3)
+  deletedAt           DateTime?           @db.Timestamptz(3)
+  restrictedToRoles   RoleOnSearchLayer[]
+  instances           LayerInstance[]
+  /// Availability only: `visible`, `visibleFrom`, `visibleUntil`.
+  options             Json                @default("{}")
 
   @@index([serviceId])
 }

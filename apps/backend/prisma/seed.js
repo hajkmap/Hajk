@@ -26,6 +26,20 @@ const prisma = new PrismaClient({
 
 const DEFAULT_PROJECTION_CODE = "EPSG:3006";
 
+/** InfoClickSettings stores the display-field lists as one comma-separated string. */
+const commaList = (value) => {
+  const items = Array.isArray(value)
+    ? value
+    : typeof value === "string"
+      ? value.split(",")
+      : [];
+  const text = items
+    .map((item) => (item == null ? "" : String(item).trim()))
+    .filter((item) => item.length > 0)
+    .join(", ");
+  return text.length > 0 ? text : undefined;
+};
+
 // Known plugin types available in the client. Each Tool instance references
 // one of these. Types found in map configs but missing here are upserted
 // with the type name as title.
@@ -451,33 +465,13 @@ async function readAndPopulateLayers() {
               name: layer.caption,
               internalName: layer.internalLayerName || generateRandomName(),
               selectedLayers,
-              active: Boolean(
-                layer.searchUrl ||
-                (Array.isArray(layer.searchFields) &&
-                  layer.searchFields.length > 0)
-              ),
-              url: layer.searchUrl,
               searchFields:
                 layer.searchFields ||
                 (typeof layer.searchPropertyName === "string"
                   ? layer.searchPropertyName.split(",")
                   : layer.searchPropertyName || []),
-              primaryDisplayFields:
-                layer.displayFields ||
-                (typeof layer.searchDisplayName === "string"
-                  ? layer.searchDisplayName.split(",")
-                  : layer.searchDisplayName || []),
-              secondaryDisplayFields:
-                typeof layer.secondaryLabelFields === "string"
-                  ? layer.secondaryLabelFields.split(",")
-                  : layer.secondaryLabelFields || [],
-              shortDisplayFields:
-                typeof layer.searchShortDisplayName === "string"
-                  ? layer.searchShortDisplayName.split(",")
-                  : layer.searchShortDisplayName || [],
               outputFormat: layer.outputFormat || undefined,
               geometryField: layer.geometryField || layer.searchGeometryField,
-              infobox: layer.infobox,
               aliasDict: layer.aliasDict,
               zIndex: layer.zIndex ?? 0,
               service: { connect: { id: service.id } },
@@ -489,6 +483,19 @@ async function readAndPopulateLayers() {
                   urlTitle: layer.infoUrlText,
                   owner: layer.infoOwner,
                   created: new Date(),
+                },
+              },
+              infoClickSettings: {
+                create: {
+                  definition:
+                    typeof layer.infobox === "string" ? layer.infobox : undefined,
+                  displayFields: commaList(
+                    layer.displayFields ?? layer.searchDisplayName,
+                  ),
+                  secondaryLabelFields: commaList(layer.secondaryLabelFields),
+                  shortDisplayFields: commaList(
+                    layer.shortDisplayFields ?? layer.searchShortDisplayName,
+                  ),
                 },
               },
               options: {},

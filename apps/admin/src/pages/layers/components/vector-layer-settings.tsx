@@ -1,4 +1,5 @@
 import {
+  Box,
   Checkbox,
   FormControlLabel,
   FormGroup,
@@ -18,10 +19,12 @@ import FormFieldGrid, {
 } from "../../../components/form-components/form-field-grid";
 import FormPanel from "../../../components/form-components/form-panel";
 import {
+  FieldLabelAbove,
   InlineLabelWithHelp,
   SelectWithHelp,
   TextFieldWithHelp,
 } from "../../../components/form-components/field-label-with-help";
+import FormColorPicker from "../../../components/form-components/form-color-picker";
 import { SettingsSearchField } from "../../../components/form-components/searchable-field";
 import SearchablePanel from "../../../components/form-components/searchable-panel";
 
@@ -233,34 +236,20 @@ export default function VectorLayerSettings({
                 ["dot", "layers.vector.lineDot"],
               ]}
             />
-            <SettingsSearchField
-              labelKeys={["layers.vector.fillColor"]}
-              fields={["options.fillColor"]}
-              {...search}
-            >
-              <FormFieldRow>
-                <TextFieldWithHelp
-                  labelKey="layers.vector.fillColor"
-                  helpKey="layers.vector.fillColorHelp"
-                  fullWidth
-                  {...register("options.fillColor")}
-                />
-              </FormFieldRow>
-            </SettingsSearchField>
-            <SettingsSearchField
-              labelKeys={["layers.vector.lineColor"]}
-              fields={["options.lineColor"]}
-              {...search}
-            >
-              <FormFieldRow>
-                <TextFieldWithHelp
-                  labelKey="layers.vector.lineColor"
-                  helpKey="layers.vector.lineColorHelp"
-                  fullWidth
-                  {...register("options.lineColor")}
-                />
-              </FormFieldRow>
-            </SettingsSearchField>
+            <ColorField
+              name="options.fillColor"
+              labelKey="layers.vector.fillColor"
+              helpKey="layers.vector.fillColorHelp"
+              control={control}
+              search={search}
+            />
+            <ColorField
+              name="options.lineColor"
+              labelKey="layers.vector.lineColor"
+              helpKey="layers.vector.lineColorHelp"
+              control={control}
+              search={search}
+            />
           </FormFieldGrid>
         </FormAccordion>
 
@@ -343,6 +332,48 @@ export default function VectorLayerSettings({
         </FormAccordion>
       </FormPanel>
     </SearchablePanel>
+  );
+}
+
+function ColorField({
+  name,
+  labelKey,
+  helpKey,
+  control,
+  search,
+}: {
+  name: string;
+  labelKey: string;
+  helpKey: string;
+  control: Control<FieldValues>;
+  search: { searchTerm: string; allValues: FieldValues | undefined };
+}) {
+  const { t } = useTranslation();
+  const inputId = name.replace(/\./g, "-");
+  return (
+    <SettingsSearchField labelKeys={[labelKey]} fields={[name]} {...search}>
+      <FormFieldRow>
+        <Box>
+          <FieldLabelAbove
+            htmlFor={inputId}
+            label={t(labelKey)}
+            help={t(helpKey)}
+          />
+          <Controller
+            name={name}
+            control={control}
+            render={({ field }) => (
+              <FormColorPicker
+                id={inputId}
+                size="medium"
+                value={typeof field.value === "string" ? field.value : ""}
+                onChange={(color) => field.onChange(color)}
+              />
+            )}
+          />
+        </Box>
+      </FormFieldRow>
+    </SettingsSearchField>
   );
 }
 

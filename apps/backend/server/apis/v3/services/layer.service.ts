@@ -44,12 +44,7 @@ export interface UnifiedLayer {
   metadata?: Prisma.MetadataGetPayload<object> | null;
   searchSettings?: {
     id: string;
-    active: boolean;
-    url?: string | null;
     searchFields: string[];
-    primaryDisplayFields: string[];
-    secondaryDisplayFields: string[];
-    shortDisplayFields: string[];
     geometryField?: string | null;
     outputFormat: string;
   };
@@ -60,23 +55,13 @@ export interface UnifiedLayer {
 
 function toSearchSettingsShape(layer: {
   id: string;
-  active: boolean;
-  url?: string | null;
   searchFields: string[];
-  primaryDisplayFields: string[];
-  secondaryDisplayFields: string[];
-  shortDisplayFields: string[];
   geometryField?: string | null;
   outputFormat: string;
 }) {
   return {
     id: layer.id,
-    active: layer.active,
-    url: layer.url,
     searchFields: layer.searchFields,
-    primaryDisplayFields: layer.primaryDisplayFields,
-    secondaryDisplayFields: layer.secondaryDisplayFields,
-    shortDisplayFields: layer.shortDisplayFields,
     geometryField: layer.geometryField,
     outputFormat: layer.outputFormat,
   };
@@ -100,14 +85,17 @@ function mapDisplayLayer(
 function mapSearchLayer(
   layer: Prisma.SearchLayerGetPayload<{
     include: { metadata: true };
-  }>
+  }> & {
+    infoClickSettings?: Prisma.InfoClickSettingsGetPayload<object> | null;
+    infoClickSettingsId?: string | null;
+  }
 ): UnifiedLayer {
   return {
     layerKind: "search",
     ...layer,
     searchSettings: toSearchSettingsShape(layer),
-    infoClickSettings: null,
-    infoClickSettingsId: undefined,
+    infoClickSettings: layer.infoClickSettings ?? null,
+    infoClickSettingsId: layer.infoClickSettingsId,
     metadataId: layer.metadataId,
   };
 }
@@ -274,7 +262,7 @@ class LayerService {
       prisma.searchLayer.findMany({
         where: { deletedAt: null },
         orderBy: { name: "asc" },
-        include: { metadata: true },
+        include: { metadata: true, infoClickSettings: true },
       }),
       prisma.editingLayer.findMany({
         where: { deletedAt: null },
@@ -314,7 +302,7 @@ class LayerService {
     if (kind === "search") {
       const layer = await prisma.searchLayer.findUnique({
         where: { id },
-        include: { metadata: true },
+        include: { metadata: true, infoClickSettings: true },
       });
       return layer?.deletedAt ? null : layer ? mapSearchLayer(layer) : null;
     }
@@ -335,7 +323,7 @@ class LayerService {
       }),
       prisma.searchLayer.findMany({
         where: { deletedAt: null, service: { type, deletedAt: null } },
-        include: { metadata: true },
+        include: { metadata: true, infoClickSettings: true },
       }),
       prisma.editingLayer.findMany({
         where: { deletedAt: null, service: { type, deletedAt: null } },
@@ -440,8 +428,14 @@ class LayerService {
                   metadata as Prisma.MetadataCreateWithoutSearchLayerInput,
               }
             : undefined,
+          infoClickSettings: infoClickSettings
+            ? {
+                create:
+                  infoClickSettings as Prisma.InfoClickSettingsCreateWithoutSearchLayerInput,
+              }
+            : undefined,
         },
-        include: { metadata: true },
+        include: { metadata: true, infoClickSettings: true },
       });
       return mapSearchLayer(created);
     }
@@ -565,8 +559,18 @@ class LayerService {
                 },
               }
             : undefined,
+          infoClickSettings: infoClickSettings
+            ? {
+                upsert: {
+                  update:
+                    infoClickSettings as Prisma.InfoClickSettingsUpdateWithoutSearchLayerInput,
+                  create:
+                    infoClickSettings as Prisma.InfoClickSettingsCreateWithoutSearchLayerInput,
+                },
+              }
+            : undefined,
         },
-        include: { metadata: true, service: true },
+        include: { metadata: true, service: true, infoClickSettings: true },
       });
       return mapSearchLayer(updated);
     }
@@ -853,7 +857,7 @@ class LayerService {
     if (kind === "search") {
       const layer = await transaction.searchLayer.findFirst({
         where: { id, deletedAt: null },
-        select: { id: true, metadataId: true },
+        select: { id: true, metadataId: true, infoClickSettingsId: true },
       });
       if (!layer) {
         throw new HajkError(
@@ -870,11 +874,21 @@ class LayerService {
       });
       await transaction.searchLayer.updateMany({
         where: { id, deletedAt: null },
-        data: { deletedAt, lastSavedDate: deletedAt, metadataId: null },
+        data: {
+          deletedAt,
+          lastSavedDate: deletedAt,
+          metadataId: null,
+          infoClickSettingsId: null,
+        },
       });
       if (layer.metadataId) {
         await transaction.metadata.deleteMany({
           where: { id: layer.metadataId },
+        });
+      }
+      if (layer.infoClickSettingsId) {
+        await transaction.infoClickSettings.deleteMany({
+          where: { id: layer.infoClickSettingsId },
         });
       }
       return;

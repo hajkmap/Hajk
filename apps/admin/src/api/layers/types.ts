@@ -36,6 +36,8 @@ export interface Layer {
   style?: string;
   /** Search/editing layers: geometry attribute name (top-level on API for editing). */
   geometryField?: string;
+  /** Search layers: attribute name mapping stored as a JSON string. */
+  aliasDict?: string | null;
   createdBy?: string;
   createdDate?: string;
   lastSavedBy?: string;
@@ -51,12 +53,7 @@ export interface Layer {
   } | null;
   searchSettings?: {
     id: string;
-    active: boolean;
-    url?: string;
     searchFields: string[];
-    primaryDisplayFields: string[];
-    secondaryDisplayFields: string[];
-    shortDisplayFields: string[];
     geometryField?: string;
     outputFormat: string;
   };
@@ -70,6 +67,13 @@ export interface Layer {
     sortProperty?: string;
     sortMethod: string;
     sortDescending: boolean;
+    active?: boolean;
+    displayFields?: string | null;
+    secondaryLabelFields?: string | null;
+    shortDisplayFields?: string | null;
+    legend?: string | null;
+    legendIcon?: string | null;
+    options?: unknown;
   };
   options: Record<string, unknown>;
 }
@@ -177,6 +181,7 @@ export interface LayerUpdateInput {
   locked?: boolean;
   internalName?: string;
   description?: string;
+  aliasDict?: string;
   opacity?: number;
   maxZoom?: number;
   minZoom?: number;
@@ -205,14 +210,10 @@ export interface LayerUpdateInput {
     attribution?: string;
   };
   searchSettings?: {
-    active?: boolean;
-    url?: string;
     searchFields?: string[];
-    primaryDisplayFields?: string[];
-    secondaryDisplayFields?: string[];
-    shortDisplayFields?: string[];
     geometryField?: string;
     outputFormat?: string;
+    aliasDict?: string;
   };
   infoClickSettings?: {
     layerId?: string;
@@ -223,6 +224,13 @@ export interface LayerUpdateInput {
     sortProperty?: string;
     sortMethod?: string;
     sortDescending?: boolean;
+    active?: boolean;
+    displayFields?: string;
+    secondaryLabelFields?: string;
+    shortDisplayFields?: string;
+    legend?: string;
+    legendIcon?: string;
+    options?: Record<string, unknown>[];
   };
   options?: Record<string, unknown>;
   geometryField?: string;
@@ -269,4 +277,9 @@ export const sortType = [
   { title: "number", value: "number" },
 ];
 
-export const searchOutputFormat = ["GML2", "GML3", "GML32"];
+export const searchOutputFormat = [
+  "application/json",
+  "application/vnd.geo+json",
+  "GML3",
+  "GML2",
+];
