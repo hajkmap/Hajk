@@ -18,6 +18,7 @@ import HajkThemeProvider from "./components/HajkThemeProvider";
 import { initHFetch, hfetch, initFetchWrapper } from "./utils/FetchWrapper";
 import LocalStorageHelper from "./utils/LocalStorageHelper";
 import { getMergedSearchAndHashParams } from "./utils/getMergedSearchAndHashParams";
+import { appReady, markAppFailed } from "./utils/appReady";
 import { AccessError, NotFoundError } from "./utils/CustomErrors";
 import { AVAILABLE_TOOLS } from "./constants";
 
@@ -62,6 +63,14 @@ function ensureActiveToolsAreValid(availableTools = []) {
  * as well as the default preferred map configuration's file name.
  */
 initHFetch();
+
+// Notify subscribers to the publicApi that the app is in a ready state.
+window.hajkPublicApi = {
+  // Example usage before interacting with the map through the api, wait for it to be ready
+  //   const hajk = iframe.contentWindow;
+  //   await hajk.hajkPublicApi.ready;
+  ready: appReady,
+};
 
 // We must define appConfig outside of the try so it's available in catch
 // statement. If we fail at some point, we may still be able to use the
@@ -141,16 +150,17 @@ try {
     initialURLParams,
   };
 
-  // For the sake of this example, I'm committing this basic object:
   // Expose a couple of useful properties as part of Hajk's public API. For
   // usage, see examples/embedded.html, which reads these values to control
   // which zoom levels are available in the embedded (outer) application.
   // This can be extended with more properties or even functions when the
   // need comes up.
-  window.hajkPublicApi = {
+  // use Object.assign into the existing object instead of replacing it so
+  // the existing references that are awaiting a ready state
+  Object.assign(window.hajkPublicApi, {
     maxZoom: config.mapConfig.map.maxZoom,
     minZoom: config.mapConfig.map.minZoom,
-  };
+  });
 
   // At this stage, we know for sure what activeMap is, so we can initiate the LocalStorageHelper
   LocalStorageHelper.setKeyName(config.activeMap);
@@ -168,6 +178,9 @@ try {
   );
 } catch (error) {
   console.error(error);
+
+  // Set the app init as failed for those who are waiting for it.
+  markAppFailed(error);
   // Prepare some empty variables
   let loadErrorTitle,
     loadErrorMessage,

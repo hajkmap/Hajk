@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Test: marker API</title>
+    <style>
+      body {
+        max-width: 1280px;
+        font-family: system-ui, sans-serif;
+      }
+      p {
+        max-width: 900px;
+        font-size: 14px;
+      }
+      code {
+        background: #f2f2f2;
+        padding: 1px 4px;
+        border-radius: 3px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <iframe id="iframe" src="/" width="1280" height="768"></iframe>
+
+    <script type="module">
+      // initialCoordinates: [1693757.22, 8239821.99],
+      const initialCoordinates = null;
+      const centerOnStart = true;
+      const startZoom = 13;
+      const clickToPlace = true;
+
+      const iframe = document.getElementById("iframe");
+      let api = null;
+
+      const waitForApi = () =>
+        new Promise((resolve) => {
+          const check = () =>
+            iframe.contentWindow.hajkPublicApi
+              ? resolve(iframe.contentWindow.hajkPublicApi)
+              : setTimeout(check, 50);
+          check();
+        });
+
+      const setup = async () => {
+        const found = await waitForApi();
+        // return if we already are aiting for the api
+        if (found === api) return;
+        api = found;
+        console.log("hajkPublicApi found");
+
+        // Listen for the ready event from hajk
+        try {
+          iframe.contentWindow.addEventListener("hajk:ready", () =>
+            console.log("hajk is ready")
+          );
+        } catch (error) {
+          console.log(error.message);
+        }
+
+        await api.ready;
+        console.log(`map projection is ${api.projection}`);
+
+        // subscribe to the event that triggers if the marker in the map is moved inside Hajk
+        api.marker.subscribe(({ x, y }) =>
+          console.log(`marker moved! x: ${x.toFixed(2)}, y: ${y.toFixed(2)})`)
+        );
+
+        api.marker.setClickToPlace(clickToPlace);
+
+        if (initialCoordinates === null) {
+          console.log(
+            "no coordinates was passed at start, click the map to place the marker"
+          );
+        } else {
+          const ok = api.marker.set(initialCoordinates);
+          if (ok && centerOnStart) {
+            api.olMap.getView().animate({
+              center: initialCoordinates,
+              zoom: startZoom ?? api.olMap.getView().getZoom(),
+            });
+          }
+        }
+      };
+
+      setup();
+      // run the setup again if the iframe reloads
+      iframe.addEventListener("load", setup);
+    </script>
+  </body>
+</html>
