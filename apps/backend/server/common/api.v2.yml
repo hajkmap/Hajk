@@ -768,6 +768,8 @@ paths:
         200:
           description: FIR
           content: {}
+        403:
+          description: Access denied
       parameters:
         - in: header
           name: X-Control-Header
@@ -780,7 +782,7 @@ paths:
         content:
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/ExampleBody"
+              $ref: "#/components/schemas/FirReportBody"
   /fir/residentreport:
     post:
       tags:
@@ -790,6 +792,8 @@ paths:
         200:
           description: FIR
           content: {}
+        403:
+          description: Access denied
       parameters:
         - in: header
           name: X-Control-Header
@@ -802,7 +806,7 @@ paths:
         content:
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/ExampleBody"
+              $ref: "#/components/schemas/FirReportBody"
 components:
   schemas:
     Example:
@@ -870,6 +874,17 @@ components:
       properties:
         folderName:
           type: string
+    FirReportBody:
+      type: object
+      required: [map, json]
+      properties:
+        map:
+          type: string
+          description: Name of the map configuration the request is made from
+          example: map_1
+        json:
+          type: string
+          description: JSON-encoded report data
     ExampleBody:
       title: example
       # required:

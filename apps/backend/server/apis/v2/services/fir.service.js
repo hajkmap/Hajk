@@ -1,31 +1,98 @@
 import log4js from "log4js";
+import crypto from "crypto";
 import fs from "fs";
 import path from "path";
 import writeXlsxFile from "write-excel-file/node";
 
 const logger = log4js.getLogger("fir.service.v2");
 
-class FirService {
-  constructor() {
-    this.outputPath = process.env.FIR_TEMP_OUTPUT_DIR;
-    this.serviceUrl = process.env.FIR_REALESTATEOWNERREPORT_URL;
+// Reports are served without access checks, so they must not live long.
+const REPORT_MAX_AGE_MS = 60 * 60 * 1000;
+const CLEANUP_INTERVAL_MS = 10 * 60 * 1000;
+// Only delete our own reports, in case the folder is shared.
+const REPORT_FILE_PATTERN =
+  /^(fastighetsforteckning|boendeforteckning)-.+\.xlsx$/;
+
+export class FirService {
+  /**
+   * @param {object} [options]
+   * @param {string} [options.outputPath] Folder under static/client, also used in the URL
+   * @param {string} [options.serviceUrl] myCarta FR Direkt URL
+   * @param {string} [options.outputDir] Absolute output folder (tests only)
+   */
+  constructor(options = {}) {
+    this.outputPath = options.outputPath ?? process.env.FIR_TEMP_OUTPUT_DIR;
+    this.serviceUrl =
+      options.serviceUrl ?? process.env.FIR_REALESTATEOWNERREPORT_URL;
+    this.outputDir = options.outputDir;
+    this.cleanupTimer = null;
+  }
+
+  #getOutputDir() {
+    return (
+      this.outputDir ??
+      path.join(process.cwd(), "static/client", this.outputPath)
+    );
   }
 
   #getReportFileInfo(name) {
     // This imitates filename format from old .Net backend.
     const dateTime = new Date().toLocaleString("sv-se").replace(/[: ]/gi, "-");
-    const randomId = Math.random().toString(36).slice(2, 5);
+    const randomId = crypto.randomUUID();
     const extension = "xlsx";
     const fileName = `${name}-${dateTime}_${randomId}.${extension}`;
-    const fullPath = path.join(
-      process.cwd(),
-      "static/client",
-      this.outputPath,
-      fileName
-    );
+    const fullPath = path.join(this.#getOutputDir(), fileName);
     const url = path.join("/", this.outputPath, fileName).replace(/\\/gi, "/");
 
     return { fileName: fileName, fullPath: fullPath, url: url };
+  }
+
+  /**
+   * @summary Delete reports older than REPORT_MAX_AGE_MS. Never throws.
+   */
+  async cleanupOldReports() {
+    const dir = this.#getOutputDir();
+    let names;
+    try {
+      names = await fs.promises.readdir(dir);
+    } catch (error) {
+      logger.debug("Could not read report folder %s: %s", dir, error.message);
+      return;
+    }
+
+    const now = Date.now();
+    for (const name of names) {
+      if (!REPORT_FILE_PATTERN.test(name)) continue;
+      const fullPath = path.join(dir, name);
+      try {
+        const stat = await fs.promises.lstat(fullPath);
+        if (!stat.isFile() || now - stat.mtimeMs <= REPORT_MAX_AGE_MS) continue;
+        await fs.promises.unlink(fullPath);
+        logger.debug("Deleted old report %s", fullPath);
+      } catch (error) {
+        // Another instance sharing the folder may have deleted it first.
+        if (error.code !== "ENOENT") {
+          logger.warn(
+            "Could not delete report %s: %s",
+            fullPath,
+            error.message
+          );
+        }
+      }
+    }
+  }
+
+  /**
+   * @summary Run cleanupOldReports() now and then every CLEANUP_INTERVAL_MS.
+   */
+  startCleanup() {
+    const configured = this.outputDir || this.outputPath?.trim();
+    if (!configured || this.cleanupTimer) return;
+    this.cleanupOldReports();
+    this.cleanupTimer = setInterval(
+      () => this.cleanupOldReports(),
+      CLEANUP_INTERVAL_MS
+    ).unref();
   }
 
   #setDefaultResponseHeaders(res) {
@@ -164,4 +231,6 @@ class FirService {
   }
 }
 
-export default new FirService();
+const firService = new FirService();
+firService.startCleanup();
+export default firService;
