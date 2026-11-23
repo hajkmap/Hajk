@@ -1,5 +1,35 @@
-import { Projection } from "ol/proj";
+import { Projection, get as getProjection } from "ol/proj";
 import { layerHasLabelStyle } from "./labelStyle";
+
+/**
+ * CRSs whose official axis order is east/north (x/y). Every other CRS is
+ * treated as north/east, which is correct for geographic CRSs like EPSG:4326
+ * and for SWEREF99 (EPSG:3006, 3007–3018). We can't ask OL for this, as our
+ * proj4 definitions lack "+axis=neu", so OL would report "enu" for SWEREF99.
+ * See #1888.
+ */
+const EAST_NORTH_CRS = ["EPSG:3857", "EPSG:900913", "CRS:84"];
+
+/**
+ * WMS 1.3.0 sends BBOX in the CRS's official axis order, so we need a
+ * Projection with the right 'axisOrientation'. The map's extent is only valid
+ * if the layer uses the map's projection; otherwise we take extent, units etc
+ * from the projection OL already knows, or the image is never requested.
+ */
+function createWms130Projection(projCode, mapConfig) {
+  const known = getProjection(projCode);
+  const sameAsMap = projCode === mapConfig.projection;
+
+  return new Projection({
+    code: projCode,
+    axisOrientation: EAST_NORTH_CRS.includes(projCode) ? "enu" : "neu",
+    extent: sameAsMap ? mapConfig.extent : known?.getExtent(),
+    units: known?.getUnits(),
+    worldExtent: known?.getWorldExtent(),
+    global: known?.isGlobal(),
+    metersPerUnit: known?.getMetersPerUnit(),
+  });
+}
 
 export default class ConfigMapper {
   constructor(proxy) {
@@ -124,13 +154,7 @@ export default class ConfigMapper {
 
     // WMS 1.3.0 requires a custom Projection object, as we need to specify 'axisOrientation'
     if (args.version === "1.3.0") {
-      // Create a new Projection
-      let projCode = projection;
-      projection = new Projection({
-        code: projCode,
-        axisOrientation: "neu",
-        extent: properties.mapConfig.map.extent,
-      });
+      projection = createWms130Projection(projection, properties.mapConfig.map);
     }
 
     // In the GetMap operation the srs parameter is called crs in 1.3.0,
