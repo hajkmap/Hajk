@@ -2,9 +2,11 @@ import log4js from "log4js";
 import ConfigService from "../services/config.service.js";
 import handleStandardResponse from "../utils/handleStandardResponse.js";
 import { AccessError } from "../utils/AccessError.js";
-import { InvalidPathError } from "../utils/safePath.js";
 
 const logger = log4js.getLogger("router.v2");
+
+// getMapConfig() builds a file path from the map name, so it must not change directory.
+const MAP_NAME_PATTERN = /^[^/\\\0]+$/;
 
 // Never echo the original error: it can contain paths, map or user names.
 const deny = (res) =>
@@ -33,9 +35,13 @@ export default function restrictToTools(rules) {
       }
 
       const map = req.body?.map;
-      if (typeof map !== "string" || map.trim() === "") {
+      if (
+        typeof map !== "string" ||
+        map.trim() === "" ||
+        !MAP_NAME_PATTERN.test(map)
+      ) {
         logger.warn(
-          "Access to %s denied for %o: no map in request",
+          "Access to %s denied for %o: no valid map in request",
           req.originalUrl,
           user
         );
@@ -48,9 +54,9 @@ export default function restrictToTools(rules) {
         // Caused by the request (no access to the map, unknown map or invalid name):
         // answer 403 for all of them, so map names can't be probed.
         if (
-          config.error.statusCode === 403 ||
-          config.error.code === "ENOENT" ||
-          config.error instanceof InvalidPathError
+          config.error.name === "AccessError" ||
+          config.error.name === "InvalidPathError" ||
+          config.error.code === "ENOENT"
         ) {
           logger.warn(
             "Access to %s denied for %o: %s",

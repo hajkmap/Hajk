@@ -133,6 +133,8 @@ describe("restrictToTools", () => {
     ["missing", {}],
     ["empty", { map: "  " }],
     ["not a string", { map: ["map_1"] }],
+    ["a path", { map: "../x" }],
+    ["a Windows path", { map: "..\\x" }],
   ]) {
     test(`map ${label} → 403 without reading any config`, async () => {
       const { res, nextCalled, getMapConfig } = await run(
@@ -172,7 +174,7 @@ describe("restrictToTools", () => {
     const { res, nextCalled } = await run(
       RESIDENT,
       { error: new InvalidPathError() },
-      { map: "../x" }
+      { map: "karta åäö" }
     );
     assert.equal(nextCalled, false);
     assert.equal(res.statusCode, 403);

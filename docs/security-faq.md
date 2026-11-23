@@ -26,7 +26,7 @@ Security is therefore a **shared responsibility**. The Hajk project is responsib
 | Monitoring, logging, backups, incident response                     |              |         ✔         |
 | Data protection (GDPR), information classification                  |              |         ✔         |
 
-¹ The project picks the base image and rebuilds the latest release on it every night as `nightly-master`. Pulling the updated image, and keeping the host and container runtime up to date, is up to your organisation. See [Which Docker image should we use?](#which-docker-image-should-we-use)
+¹ The project picks the base image and rebuilds the releases of the two latest minor versions on it every night, as `nightly-4.3` and so on. Pulling the updated image, and keeping the host and container runtime up to date, is up to your organisation. See [Which Docker image should we use?](#which-docker-image-should-we-use)
 
 ## Frequently asked questions
 
@@ -75,7 +75,7 @@ Note that a vulnerability scanner will sometimes report issues in packages that 
 
 The official Docker image is based on a slim Node.js image to reduce the number of packages it contains. Release images, such as `4.3`, are built once and never rebuilt, so the Node.js and operating system packages in them get older over time. If your organisation scans images for vulnerabilities, these are usually what it finds.
 
-To get those updates without waiting for the next Hajk release, use `nightly-master`. It is the latest release, rebuilt every night on the current upstream base image. The trade-off is that it changes every night, while a release tag only changes at a patch release. See [Nightly builds](releases.md#nightly-builds) and [Official Docker images](../SECURITY.md#official-docker-images) in SECURITY.md.
+To get those updates without waiting for the next Hajk release, use the nightly build of your minor version, such as `nightly-4.3`. It is the latest patch release of 4.3, rebuilt every night on the current upstream base image. The trade-off is that it changes every night, while a release tag only changes at a patch release. Nightly builds are only made for the two latest minor versions, and the tag of an older version is removed, so you need to keep up with new releases. See [Nightly builds](releases.md#nightly-builds) and [Official Docker images](../SECURITY.md#official-docker-images) in SECURITY.md.
 
 ### How do users log in? How is access controlled?
 

@@ -1,6 +1,7 @@
 name: Build and publish image
 
 # Builds a multi-platform image from a given branch or tag and pushes it to GHCR under the given tags. Called by the nightly-* and release workflows.
+# The workflow itself comes from the calling branch, while the Dockerfile comes from the ref that is built.
 on:
   workflow_call:
     inputs:
@@ -24,6 +25,11 @@ on:
         description: Value for the org.opencontainers.image.description label and annotation
         required: true
         type: string
+      artifact-suffix:
+        description: Added to the names of the digest artifacts. Needed when one run builds the same image more than once, for example -4.3
+        required: false
+        type: string
+        default: ""
 
 env:
   IMAGE: ghcr.io/hajkmap/${{ inputs.image }}
@@ -90,11 +96,11 @@ jobs:
           digest="${{ steps.build.outputs.digest }}"
           touch "${{ runner.temp }}/digests/${digest#sha256:}"
 
-      # The image name goes last so that the merge job's pattern for hajk doesn't also match hajk-simple. Both build in the same run and share its artifacts.
+      # The image name and suffix go last so that the merge job's pattern for hajk doesn't also match hajk-simple. All builds in the same run share its artifacts.
       - name: Upload digest
         uses: actions/upload-artifact@v7
         with:
-          name: digests-${{ matrix.arch }}-${{ inputs.image }}
+          name: digests-${{ matrix.arch }}-${{ inputs.image }}${{ inputs.artifact-suffix }}
           path: ${{ runner.temp }}/digests/*
           if-no-files-found: error
           retention-days: 1
@@ -127,7 +133,7 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           path: ${{ runner.temp }}/digests
-          pattern: digests-*-${{ inputs.image }}
+          pattern: digests-*-${{ inputs.image }}${{ inputs.artifact-suffix }}
           merge-multiple: true
 
       - name: Set up Docker Buildx
