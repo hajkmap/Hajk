@@ -2926,8 +2926,13 @@ export default function LayerSettings() {
                 selectGridId={selectGridId}
                 selectedRowObjects={selectedRowObjects}
                 onLayerClick={handleLayerClick}
-                // An editing layer edits one feature type.
-                singleSelection={layerCategory === "editing"}
+                // Editing and search use one feature type. A vector display
+                // layer does too; other display services can combine layers.
+                singleSelection={
+                  layerCategory === "editing" ||
+                  isSearchLayer ||
+                  (layerCategory === "display" && isVectorLayer)
+                }
               />
             </Box>
           )}
