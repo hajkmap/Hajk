@@ -72,7 +72,7 @@ export default function FeatureInfoSyntaxHelp({ onInsertFilter }: FeatureInfoSyn
           size="small"
           aria-label={t("layers.featureInfo.syntaxHelp")}
           onClick={() => setOpen(true)}
-          sx={{ ml: "auto" }}
+          sx={{ p: 0.5 }}
         >
           <HelpOutlineIcon fontSize="small" />
         </IconButton>

@@ -22,11 +22,11 @@ function visibleArea(shell: HTMLElement) {
   return { width: bounds.clientWidth, height: bounds.clientHeight };
 }
 
-/**
- * Grows from the bottom-right corner. Size is written straight to the elements
- * while the pointer moves, and reported once when the drag ends, so the rest
- * of the page does not re-render on every pixel.
- */
+
+function windowSizeLabel(width: number, bodyHeight: number): string {
+  return `W ${width}  H ${bodyHeight + CLIENT_WINDOW_CHROME_HEIGHT}`;
+}
+
 function beginResize(
   event: ReactPointerEvent<HTMLElement>,
   resize: {
@@ -34,6 +34,7 @@ function beginResize(
     body: HTMLElement;
     width: number;
     height: number;
+    sizeLabel?: HTMLElement | null;
     onWidth?: (width: number) => void;
     onHeight?: (height: number) => void;
   },
@@ -43,7 +44,15 @@ function beginResize(
   const handle = event.currentTarget;
   const startX = event.clientX;
   const startY = event.clientY;
-  const { frame, body, width: startWidth, height: startHeight, onWidth, onHeight } = resize;
+  const {
+    frame,
+    body,
+    width: startWidth,
+    height: startHeight,
+    sizeLabel,
+    onWidth,
+    onHeight,
+  } = resize;
   const shell = frame.closest(".MuiDialog-paper");
   const area =
     shell instanceof HTMLElement
@@ -73,6 +82,7 @@ function beginResize(
     body.style.height = `${nextHeight}px`;
     const shell = frame.closest(".MuiDialog-paper");
     if (shell instanceof HTMLElement) shell.style.width = `${nextWidth}px`;
+    if (sizeLabel) sizeLabel.textContent = windowSizeLabel(nextWidth, nextHeight);
   };
   const move = (moveEvent: PointerEvent) => {
     nextWidth = Math.round(
@@ -237,6 +247,7 @@ export default function ClientWindowFrame({
   const resizable = Boolean(onWidthChange && onHeightChange);
   const frameRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
+  const sizeLabelRef = useRef<HTMLElement>(null);
   const mode = useTheme().palette.mode;
   const clientTheme = useMemo(
     () =>
@@ -300,9 +311,30 @@ export default function ClientWindowFrame({
             ...(onMove && { cursor: "move", touchAction: "none" }),
           }}
         >
-          <Typography variant="button" noWrap>
-            {title}
-          </Typography>
+          <Box sx={{ display: "flex", alignItems: "baseline", gap: 1, minWidth: 0, flex: 1 }}>
+            <Typography variant="button" noWrap>
+              {title}
+            </Typography>
+            {resizable && (
+              <Typography
+                component="span"
+                ref={sizeLabelRef}
+                variant="caption"
+                aria-live="polite"
+                aria-label={t("layers.featureInfo.windowSizeLabel", {
+                  width,
+                  height: height + CLIENT_WINDOW_CHROME_HEIGHT,
+                })}
+                sx={{
+                  color: "text.secondary",
+                  fontVariantNumeric: "tabular-nums",
+                  flexShrink: 0,
+                }}
+              >
+                {windowSizeLabel(width, height)}
+              </Typography>
+            )}
+          </Box>
           <Box
             sx={{
               display: "flex",
@@ -366,6 +398,7 @@ export default function ClientWindowFrame({
                 body,
                 width,
                 height,
+                sizeLabel: sizeLabelRef.current,
                 onWidth: onWidthChange,
                 onHeight: onHeightChange,
               });

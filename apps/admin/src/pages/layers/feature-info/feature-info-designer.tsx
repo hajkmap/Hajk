@@ -17,6 +17,7 @@ import {
 } from "../../../api/services/describe-feature-type";
 import { fetchFeatureSample } from "../../../api/services/get-feature-sample";
 import FeatureInfoEditor, { type FeatureInfoEditorHandle } from "./feature-info-editor";
+import { EditorHistory } from "./editor-history";
 import FeatureInfoAttributes from "./feature-info-attributes";
 import FeatureInfoPreview from "./feature-info-preview";
 import FeatureInfoIssues from "./feature-info-issues";
@@ -74,6 +75,7 @@ export default function FeatureInfoDesigner({
 }: FeatureInfoDesignerProps) {
   const { t } = useTranslation();
   const editorRef = useRef<FeatureInfoEditorHandle>(null);
+  const [history] = useState(() => new EditorHistory(value));
   const [typeName, setTypeName] = useState(typeNames[0] ?? "");
   const [sampleId, setSampleId] = useState<string | null>(null);
   const [exampleOverride, setExampleOverride] = useState<FeatureProperties | null>(null);
@@ -297,11 +299,10 @@ export default function FeatureInfoDesigner({
                 expanded={expanded}
                 onToggleExpanded={toggleExpanded}
                 onOpenWindowPreview={openWindowPreview}
+                history={history}
               />
             </Box>
-            <Box sx={{ maxHeight: "35%", overflowY: "auto", flexShrink: 0 }}>
-              <FeatureInfoIssues issues={issues} onGoToLine={goToLine} />
-            </Box>
+            <FeatureInfoIssues issues={issues} onGoToLine={goToLine} />
           </Box>
         </Box>
         <Box
