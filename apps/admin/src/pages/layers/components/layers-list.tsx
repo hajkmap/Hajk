@@ -202,6 +202,7 @@ export default function LayersList({
   const { palette } = useTheme();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedServiceUrl, setSelectedServiceUrl] = useState("");
+  const [typeFilter, setTypeFilter] = useState<SERVICE_TYPE | "">("");
   const [availabilityFilter, setAvailabilityFilter] =
     useState<AvailabilityFilter>("");
   const [createStep, setCreateStep] = useState<CreateLayerStep>("details");
@@ -302,6 +303,7 @@ export default function LayersList({
       );
       if (selectedServiceUrl && service?.url !== selectedServiceUrl)
         return false;
+      if (typeFilter && service?.type !== typeFilter) return false;
       if (availabilityFilter) {
         const available =
           isAvailableNow(layer.options) && isAvailableNow(service?.options);
@@ -336,6 +338,7 @@ export default function LayersList({
     services,
     searchTerm,
     selectedServiceUrl,
+    typeFilter,
     availabilityFilter,
     layerKind,
     usageSummary,
@@ -500,57 +503,6 @@ export default function LayersList({
       void handleLayerSubmit(layerData);
     })();
   };
-
-  // const RowMenu = (params: { row: { id: string } }) => {
-  //   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  //   const open = Boolean(anchorEl);
-
-  //   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-  //     setAnchorEl(event.currentTarget as HTMLElement | null);
-  //   };
-
-  //   const handleClose = () => {
-  //     setAnchorEl(null);
-  //   };
-
-  //   return (
-  //     <Box component="div" sx={{ textAlign: "start" }}>
-  //       <IconButton onClick={handleClick}>
-  //         <MoreHorizIcon />
-  //       </IconButton>
-  //       <Menu
-  //         anchorEl={anchorEl}
-  //         open={open}
-  //         onClose={handleClose}
-  //         anchorOrigin={{
-  //           vertical: "bottom",
-  //           horizontal: "left",
-  //         }}
-  //         transformOrigin={{
-  //           vertical: "top",
-  //           horizontal: "left",
-  //         }}
-  //       >
-  //         <MenuItem
-  //           onClick={() => {
-  //             const id: string = (params.row as Layer).id;
-  //             if (id) {
-  //               void navigate(`${baseRoute}/${id}`);
-  //             }
-  //           }}
-  //         >
-  //           View
-  //         </MenuItem>
-  //         <MenuItem onClick={() => alert(`Edit ${params.row.id}`)}>
-  //           Edit
-  //         </MenuItem>
-  //         <MenuItem onClick={() => alert(`Delete ${params.row.id}`)}>
-  //           Delete
-  //         </MenuItem>
-  //       </Menu>
-  //     </Box>
-  //   );
-  // };
 
   return (
     <>
@@ -724,6 +676,30 @@ export default function LayersList({
                       <ListItemText primary={opt.name} secondary={opt.url} />
                     </MenuItem>
                   ))}
+                </Select>
+              </FormControl>
+            </ListFilterField>
+            <ListFilterField>
+              <FormControl fullWidth variant="outlined">
+                <InputLabel id="layers-type-filter-label">
+                  {t("services.filterByType")}
+                </InputLabel>
+                <Select
+                  labelId="layers-type-filter-label"
+                  label={t("services.filterByType")}
+                  value={typeFilter}
+                  onChange={(e) =>
+                    setTypeFilter(e.target.value)
+                  }
+                >
+                  <MenuItem value="">{t("common.all")}</MenuItem>
+                  {(Object.values(SERVICE_TYPE) as SERVICE_TYPE[]).map(
+                    (type) => (
+                      <MenuItem key={type} value={type}>
+                        {type}
+                      </MenuItem>
+                    ),
+                  )}
                 </Select>
               </FormControl>
             </ListFilterField>
