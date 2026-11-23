@@ -47,9 +47,9 @@ We do not backport fixes to older releases, such as 4.2.x. If you run an older r
 
 ### Official Docker images
 
-For the official images (`ghcr.io/hajkmap/hajk` and `ghcr.io/hajkmap/hajk-simple`), we choose the base image, and with it the Node.js version and operating system packages. A release image is built once and never rebuilt, so over time its base image falls behind. The `nightly-master` image is the latest release, rebuilt every night on the current upstream base image, so it picks up Node.js and OS fixes soon after upstream publishes them. npm dependencies in the images are installed from Hajk's lockfiles, so they change only when we update them, as described under [Third-party dependencies](#third-party-dependencies). See [Nightly builds](docs/releases.md#nightly-builds) for details.
+For the official images (`ghcr.io/hajkmap/hajk` and `ghcr.io/hajkmap/hajk-simple`), we choose the base image, and with it the Node.js version and operating system packages. A release image is built once and never rebuilt, so over time its base image falls behind. The nightly images, such as `nightly-4.3`, are the releases of the two latest minor versions, rebuilt every night on the current upstream base image, so they pick up Node.js and OS fixes soon after upstream publishes them. For the older of the two, this covers the base image only: fixes to Hajk itself are still made only for the latest release. npm dependencies in the images are installed from Hajk's lockfiles, so they change only when we update them, as described under [Third-party dependencies](#third-party-dependencies). See [Nightly builds](docs/releases.md#nightly-builds) for details.
 
-You don't need to report publicly known CVEs in the base image: pull `nightly-master`, or rebuild the image yourself. Do report it if our Dockerfiles add something insecure that the base image does not have, such as an unneeded package, a weak permission or an unsafe default.
+You don't need to report publicly known CVEs in the base image: pull the nightly image of your minor version, such as `nightly-4.3`, or rebuild the image yourself. Do report it if our Dockerfiles add something insecure that the base image does not have, such as an unneeded package, a weak permission or an unsafe default.
 
 ## Disclosure policy
 

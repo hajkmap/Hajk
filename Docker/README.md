@@ -15,7 +15,7 @@ Both are built for `linux/amd64` and `linux/arm64`. Which tag to use, how the im
 
 A release tag such as `4.3` only changes when a Hajk patch release comes out. Between releases, the Node.js and operating system packages in the image do not get updates, so a vulnerability scanner will find more in it over time. To pick up those updates, choose one of the following:
 
-- **Use `nightly-master`.** It is the latest release, rebuilt every night on the current upstream base image. Pull it regularly, for example with a scheduled job or a tool such as Watchtower, and recreate the container.
+- **Use the nightly build of your minor version**, such as `nightly-4.3`. It is the latest patch release of 4.3, rebuilt every night on the current upstream base image. Nightly builds are made for the two latest minor versions only, and the tag of an older version is removed. Pull it regularly, for example with a scheduled job or a tool such as Watchtower, and recreate the container.
 - **Rebuild the image yourself** from the release tag, with `docker build --pull --no-cache`, as described in [Building the images yourself](#building-the-images-yourself).
 
 npm dependencies are installed from Hajk's lockfiles in either case, so they only change with a Hajk release. Who is responsible for what in the images is described in [SECURITY.md](../SECURITY.md#official-docker-images).

@@ -249,6 +249,8 @@ function FirExportResidentListView({
 
     let searchParams = new URLSearchParams();
     searchParams.append("json", JSON.stringify(data));
+    // Lets the backend check access against the tool config of this map
+    searchParams.append("map", model.app.config.activeMap);
 
     hfetch(options.residentList.excelExportUrl, {
       method: "post",
