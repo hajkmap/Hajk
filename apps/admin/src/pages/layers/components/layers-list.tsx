@@ -52,6 +52,7 @@ import { toast } from "react-toastify";
 import LayerKindBadge from "./layer-kind-badge";
 import { LayerCategory, normalizeLayerCategory } from "../layer-category";
 import ServiceStatusIndicator from "../../services/components/service-status-indicator";
+import ServiceTypeBadge from "../../services/components/service-type-badge";
 import StyledDataGrid from "../../../components/data-grid";
 import {
   ListFilterField,
@@ -794,6 +795,19 @@ export default function LayersList({
                         />
                       </Box>
                     ),
+                  },
+                  {
+                    field: "serviceType",
+                    width: 130,
+                    headerName: t("common.serviceType"),
+                    valueGetter: (_value, row) => row.service?.type ?? "",
+                    renderCell: (
+                      params: GridRenderCellParams<LayersGridRow>,
+                    ) => {
+                      const type = params.row.service?.type;
+                      if (!type) return null;
+                      return <ServiceTypeBadge type={type} />;
+                    },
                   },
                   {
                     field: "usedInMapsCount",
