@@ -18,6 +18,7 @@ import { SketchPicker, type RGBColor } from "react-color";
 import { Tool } from "../../../api/tools";
 import ToolNameField from "./tool-name-field";
 import { infoclickDefaults } from "./tool-option-defaults";
+import { GroupsOption } from "./tool-option-fields";
 
 const DEFAULT_STROKE_COLOR: RGBColor = { r: 200, g: 0, b: 0, a: 0.7 };
 const DEFAULT_FILL_COLOR: RGBColor = { r: 255, g: 0, b: 0, a: 0.1 };
@@ -122,35 +123,7 @@ export default function InfoClickRenderer({
               )}
             />
           </FormFieldRow>
-          <FormFieldRow>
-            <Controller
-              name="options.visibleForGroups"
-              control={control}
-              defaultValue={
-                Array.isArray(tool?.options?.visibleForGroups)
-                  ? (tool.options.visibleForGroups as string[]).join(",")
-                  : ""
-              }
-              render={({ field }) => (
-                <TextField
-                  label={t("tools.visibleForGroups")}
-                  fullWidth
-                  value={
-                    Array.isArray(field.value)
-                      ? (field.value as string[]).join(",")
-                      : ((field.value as string) ?? "")
-                  }
-                  onChange={(e) =>
-                    field.onChange(
-                      e.target.value
-                        ? e.target.value.split(",").map((s) => s.trim())
-                        : [],
-                    )
-                  }
-                />
-              )}
-            />
-          </FormFieldRow>
+          <GroupsOption control={control} />
         </FormFieldGrid>
       </FormPanel>
 

@@ -43,6 +43,7 @@ import {
   FmeSuggestField,
 } from "../components/fmeserver/fme-product-fields";
 import { fmeserverDefaults } from "./tool-option-defaults";
+import { GroupsOption } from "./tool-option-fields";
 
 interface FmeServerRendererProps {
   tool: Tool;
@@ -225,35 +226,7 @@ export default function FmeServerRenderer({
             />
           </FormFieldRow>
 
-          <FormFieldRow>
-            <Controller
-              name="options.visibleForGroups"
-              control={control}
-              defaultValue={
-                Array.isArray(tool?.options?.visibleForGroups)
-                  ? (tool.options.visibleForGroups as string[]).join(",")
-                  : ""
-              }
-              render={({ field }) => (
-                <TextField
-                  label={t("tools.visibleForGroups")}
-                  fullWidth
-                  value={
-                    Array.isArray(field.value)
-                      ? (field.value as string[]).join(",")
-                      : ((field.value as string) ?? "")
-                  }
-                  onChange={(e) =>
-                    field.onChange(
-                      e.target.value
-                        ? e.target.value.split(",").map((s) => s.trim())
-                        : [],
-                    )
-                  }
-                />
-              )}
-            />
-          </FormFieldRow>
+          <GroupsOption control={control} />
 
           <FormFieldRow>
             <Controller

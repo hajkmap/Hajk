@@ -31,6 +31,7 @@ interface MapWriteInput {
   name?: string;
   locked?: boolean;
   options?: Prisma.InputJsonValue;
+  visibleForGroups?: string[];
   projection?: { code?: string };
   projections?: { code?: string }[];
 }
@@ -562,6 +563,7 @@ class MapService {
           name,
           locked,
           options: mergeOptionsWithProjection(rawOptions, projectionCode),
+          visibleForGroups: data.visibleForGroups,
           projection: { connect },
           ...(projectionsConnect
             ? { projections: { connect: projectionsConnect } }
@@ -799,6 +801,7 @@ class MapService {
             name,
             locked: source.locked,
             options: toInputJsonValue(source.options),
+            visibleForGroups: source.visibleForGroups,
             createdBy: userId,
             createdDate: new Date(),
             ...(source.projectionId

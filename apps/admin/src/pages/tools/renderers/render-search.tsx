@@ -13,6 +13,7 @@ import { useTranslation } from "react-i18next";
 import { SketchPicker } from "react-color";
 import { Tool } from "../../../api/tools";
 import { searchDefaults } from "./tool-option-defaults";
+import { GroupsOption } from "./tool-option-fields";
 
 interface SearchRendererProps {
   tool: Tool;
@@ -155,6 +156,7 @@ export default function SearchRenderer({
               )}
             />
           </FormFieldRow>
+          <GroupsOption control={control} />
         </FormFieldGrid>
       </FormPanel>
 

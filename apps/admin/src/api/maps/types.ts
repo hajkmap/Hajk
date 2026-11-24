@@ -14,6 +14,8 @@ export interface Map {
   name: string;
   locked: boolean;
   options?: MapOptions;
+  /** The AD groups whose members get the map; none means everyone. */
+  visibleForGroups: string[];
   projection?: {
     code: string;
   } | null;
@@ -83,6 +85,7 @@ export interface MapMutation {
   /** Many-to-many projections to link to the map (replaces the set on PATCH). */
   projections?: { code: string }[];
   options?: MapOptions;
+  visibleForGroups?: string[];
 }
 
 /** Where a tool instance is placed in the map setting tools' placement containers. */

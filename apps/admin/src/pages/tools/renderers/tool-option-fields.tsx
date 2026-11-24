@@ -5,12 +5,11 @@ import { useTranslation } from "react-i18next";
 import { FormFieldRow } from "../../../components/form-components/form-field-grid";
 import { TextFieldWithHelp } from "../../../components/form-components/field-label-with-help";
 import { FieldLabelWithHelp } from "../../../components/form-components/field-help-tooltip";
+import VisibleForGroupsField from "../../../components/availability/visible-for-groups-field";
 import {
   decodeInstruction,
   encodeInstruction,
-  formatGroups,
   formatNumberList,
-  parseGroups,
   parseNumberList,
   storedNumber,
 } from "./tool-option-parsers";
@@ -251,31 +250,11 @@ export function InstructionOption({
   );
 }
 
-/** Keeps the typed text so spaces inside group names survive until blur. */
+/** The AD groups whose members get the tool. */
 export function GroupsOption({ control }: { control: Control<FieldValues> }) {
-  const { t } = useTranslation();
-  const [draft, setDraft] = useState<string | null>(null);
   return (
     <FormFieldRow>
-      <Controller
-        name="options.visibleForGroups"
-        control={control}
-        render={({ field }) => (
-          <TextField
-            label={t("tools.visibleForGroups")}
-            fullWidth
-            value={draft ?? formatGroups(field.value)}
-            onChange={(event) => {
-              setDraft(event.target.value);
-              field.onChange(parseGroups(event.target.value));
-            }}
-            onBlur={() => {
-              setDraft(null);
-              field.onBlur();
-            }}
-          />
-        )}
-      />
+      <VisibleForGroupsField control={control} />
     </FormFieldRow>
   );
 }

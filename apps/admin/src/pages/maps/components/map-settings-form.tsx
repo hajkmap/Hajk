@@ -41,6 +41,7 @@ import { useSettingsSearchLabels } from "../../../hooks/use-settings-search-labe
 import ProjectionsDialog from "./projections";
 import MapScaleFields from "./map-scale-fields";
 import AvailabilityStatus from "../../../components/availability/availability-status";
+import VisibleForGroupsField from "../../../components/availability/visible-for-groups-field";
 import {
   getMainProjectionChoices,
   groupProjectionCodes,
@@ -449,6 +450,7 @@ export default function MapSettingsForm({
                 "map.visible",
                 "map.visibleFrom",
                 "map.visibleUntil",
+                "availability.visibleForGroups",
               ),
               "availability",
               "available",
@@ -460,6 +462,7 @@ export default function MapSettingsForm({
               "options.visible",
               "options.visibleFrom",
               "options.visibleUntil",
+              "visibleForGroups",
             ]}
             allValues={searchValues}
             searchTerm={settingsSearchTerm}
@@ -490,6 +493,16 @@ export default function MapSettingsForm({
                   settingsSearchTerm={settingsSearchTerm}
                   searchValues={searchValues}
                 />
+                <SettingsSearchField
+                  labelKeys={["availability.visibleForGroups"]}
+                  fields={["visibleForGroups"]}
+                  searchTerm={settingsSearchTerm}
+                  allValues={searchValues}
+                >
+                  <FormFieldRow fullWidth>
+                    <VisibleForGroupsField control={control} size="small" />
+                  </FormFieldRow>
+                </SettingsSearchField>
               </FormFieldGrid>
               <AvailabilityStatus control={control} />
             </FormPanel>

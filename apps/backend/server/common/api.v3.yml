@@ -13,6 +13,24 @@ tags:
   - name: Specification
     description: The OpenAPI specification
 paths:
+  /active-directory:
+    get:
+      tags:
+        - Admin only
+      summary: Whether the backend looks users up in AD
+      description: While it does (AD_LOOKUP_ACTIVE=true in .env), the AD groups in the visibleForGroups of maps, groups, layers and tools decide who gets them in the client.
+      responses:
+        200:
+          description: The AD lookup's state
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  lookupActive:
+                    type: boolean
+                required:
+                  - lookupActive
   /healthz:
     get:
       tags:
@@ -590,7 +608,7 @@ paths:
             type: string
       responses:
         200:
-          description: The editing layers as the client config's wfstlayers have them, leaving out those not available to users now (by their own or their service's visible, visibleFrom and visibleUntil options) and those whose url is empty, not http(s), or on a host WFS_ALLOWED_HOSTS leaves out
+          description: The editing layers as the client config's wfstlayers have them, leaving out those the user doesn't get now (by their own or their service's visible, visibleFrom and visibleUntil options, or, while the backend looks users up in AD, by their visibleForGroups) and those whose url is empty, not http(s), or on a host WFS_ALLOWED_HOSTS leaves out
           content:
             application/json:
               schema:
@@ -629,7 +647,7 @@ paths:
         400:
           description: Invalid layer id
         404:
-          description: No such editing layer (DB002), or it or its service is not available to users now by the visible, visibleFrom and visibleUntil options (DB021)
+          description: No such editing layer (DB002), or the user doesn't get it now by its or its service's visible, visibleFrom and visibleUntil options or, while the backend looks users up in AD, by its visibleForGroups (DB021)
         500:
           description: The layer's url is empty, not http(s), or on a host WFS_ALLOWED_HOSTS leaves out
   /presence:
@@ -1287,7 +1305,7 @@ paths:
       tags:
         - Client-accessible
       summary: The map's client config
-      description: The map, its layers, projections and tools as the client reads them, and the other maps for its map selector. What is not available to users now, by its visible, visibleFrom and visibleUntil options, is left out, so unavailable maps are missing from the map selector and unavailable layers from the layer tree, the backgrounds, the search layers and the editing layers. An unavailable group is left out of the layer tree with everything in it. A layer is unavailable while its service is. A tool's activeServices names only the editing layers users can have now.
+      description: The map, its layers, projections and tools as the client reads them, and the other maps for its map selector. What the user doesn't get now, by its visible, visibleFrom and visibleUntil options or, while the backend looks users up in AD (AD_LOOKUP_ACTIVE), by its visibleForGroups, is left out, so such maps are missing from the map selector and such layers from the layer tree, the backgrounds, the search layers and the editing layers. Such a group is left out of the layer tree with everything in it. A layer is unavailable while its service is. A tool's activeServices names only the editing layers the user can have now.
       parameters:
         - in: path
           name: mapName
@@ -1299,7 +1317,7 @@ paths:
         200:
           description: The client config
         404:
-          description: The map does not exist (DB003), or it is hidden from its users now by its visible, visibleFrom and visibleUntil options (DB020). The map's documenthandler routes answer the same.
+          description: The map does not exist (DB003), or the user doesn't get it now by its visible, visibleFrom and visibleUntil options or, while the backend looks users up in AD, by its visibleForGroups (DB020). The map's documenthandler routes answer the same.
           content:
             application/json:
               schema:
@@ -2005,5 +2023,11 @@ components:
           type: string
           description: "When the map is unavailable from, as an ISO date-time, or empty. Must be after visibleFrom."
           example: "2026-12-02T07:00:00.000Z"
+        visibleForGroups:
+          type: array
+          items:
+            type: string
+          description: "The AD groups whose members get the map, while the backend looks users up in AD; none means everyone. Groups, layers and tools have the same field."
+          example: ["GIS-users"]
       required:
         - name

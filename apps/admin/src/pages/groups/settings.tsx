@@ -48,6 +48,7 @@ import {
   TextFieldWithHelp,
 } from "../../components/form-components/field-label-with-help";
 import AvailabilityStatus from "../../components/availability/availability-status";
+import VisibleForGroupsField from "../../components/availability/visible-for-groups-field";
 import {
   availabilityOf,
   fromDateTimeLocal,
@@ -78,6 +79,7 @@ function formValuesOf(group: Group): FieldValues {
     type: group.type ?? GroupType.LAYER,
     locked: group.locked ?? false,
     roleIds: group.restrictedToRoles?.map((role) => role.roleId) ?? [],
+    visibleForGroups: group.visibleForGroups ?? [],
     options: {
       visible: group.options?.visible !== "false",
       visibleFrom: toDateTimeLocal(group.options?.visibleFrom),
@@ -213,6 +215,7 @@ function GroupSettings() {
         internalName: groupData.internalName?.trim(),
         type: groupData.type,
         locked: groupData.locked ?? false,
+        visibleForGroups: groupData.visibleForGroups,
         options: {
           ...group?.options,
           // Only an unticked box makes the group unavailable.
@@ -286,6 +289,7 @@ function GroupSettings() {
         internalName: data.internalName as string | undefined,
         type: data.type as GroupType | undefined,
         locked: (data.locked as boolean | undefined) ?? false,
+        visibleForGroups: data.visibleForGroups as string[] | undefined,
         options: data.options as Record<string, unknown> | undefined,
       };
       const roleIds = Array.isArray(data.roleIds)
@@ -444,6 +448,9 @@ function GroupSettings() {
                       fullWidth
                       {...register("options.visibleUntil")}
                     />
+                  </FormFieldRow>
+                  <FormFieldRow fullWidth>
+                    <VisibleForGroupsField control={control} />
                   </FormFieldRow>
                   <FormFieldRow fullWidth>
                     <AvailabilityStatus control={control} />

@@ -76,6 +76,8 @@ export interface Layer {
     options?: unknown;
   };
   options: Record<string, unknown>;
+  /** The AD groups whose members get the layer; none means everyone. */
+  visibleForGroups: string[];
 }
 
 export interface DeletedLayer {
@@ -233,6 +235,7 @@ export interface LayerUpdateInput {
     options?: Record<string, unknown>[];
   };
   options?: Record<string, unknown>;
+  visibleForGroups?: string[];
   geometryField?: string;
 }
 

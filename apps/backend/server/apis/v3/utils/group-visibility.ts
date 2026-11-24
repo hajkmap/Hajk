@@ -4,9 +4,12 @@ import ad from "../services/activedirectory.service.ts";
 
 const logger = log4js.getLogger("util.group-visibility");
 
-// With AD lookup active, what the client gets is washed per user: a tool, an
-// editing service or an FME product whose visibleForGroups names groups is kept
-// for members of one of them only. Nothing named means everyone.
+// With AD lookup active, what the client gets is washed per user: a map, a
+// layer group, a layer, a tool, an editing service or an FME product whose
+// visibleForGroups names groups is kept for members of one of them only.
+// Nothing named means everyone. Maps, groups and layers are checked with their
+// availability (availability.ts), tools when a map's tools are built
+// (build-client-map-config.ts).
 
 export interface ClientTool {
   type: string;
@@ -16,6 +19,11 @@ export interface ClientTool {
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+/** Whether the backend looks users up in AD (AD_LOOKUP_ACTIVE in .env). */
+export function isAdLookupActive(): boolean {
+  return process.env.AD_LOOKUP_ACTIVE === "true";
 }
 
 /** The groups named, without the blanks a comma list in admin can leave. */
@@ -34,7 +42,7 @@ export async function isVisibleToUser(
   user: string | undefined,
   what: string
 ): Promise<boolean> {
-  if (process.env.AD_LOOKUP_ACTIVE !== "true") return true;
+  if (!isAdLookupActive()) return true;
   const groups = namedGroups(visibleForGroups);
   if (groups.length === 0) return true;
   if (!user) {
@@ -76,26 +84,17 @@ async function washEntries(
 }
 
 /**
- * The tools `user` may see, each with only the activeServices (editing
- * services) and FME products they may see.
+ * The tools, each with only the activeServices (editing services) and FME
+ * products `user` may see.
  */
 export async function washClientTools(
   tools: ClientTool[],
   user: string | undefined
 ): Promise<ClientTool[]> {
-  if (process.env.AD_LOOKUP_ACTIVE !== "true") return tools;
+  if (!isAdLookupActive()) return tools;
   const washed: ClientTool[] = [];
   for (const tool of tools) {
     const options = isPlainObject(tool.options) ? tool.options : undefined;
-    if (
-      !(await isVisibleToUser(
-        options?.visibleForGroups,
-        user,
-        `tool ${tool.type}`
-      ))
-    ) {
-      continue;
-    }
     if (options === undefined) {
       washed.push(tool);
       continue;

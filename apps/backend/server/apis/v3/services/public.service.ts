@@ -16,7 +16,7 @@ import {
   buildClientToolsForMap,
 } from "../utils/build-client-map-config.ts";
 import { washClientTools } from "../utils/group-visibility.ts";
-import { isAvailable, requireAvailableMap } from "../utils/availability.ts";
+import { onlyAvailable, requireAvailableMap } from "../utils/availability.ts";
 
 const logger = log4js.getLogger("service.v3.public");
 
@@ -29,27 +29,29 @@ class PublicService {
     logger.debug("Initiating Public Service");
   }
 
-  async #getAllMaps() {
+  async #getAllMaps(adUser: string | undefined) {
     const maps = await prisma.map.findMany({
       where: { deletedAt: null },
       // TODO: If isAuthActive, restrict to only include maps with current user's roles within `roles`.
       select: {
         name: true,
         options: true, // Can't drill further down as `options` is a scalar object (JSON field)
+        visibleForGroups: true,
       },
     });
 
     // Now let's iterate and drop everything but name and title. Also, if we're set to
     // legacy mode, we must follow the old key names.
-    const now = new Date();
-    const formattedMaps = maps
-      .filter((map) => isAvailable(map.options, now))
-      .map((map) => ({
-        [this.#useLegacyConfig ? "mapConfigurationName" : "name"]: map.name,
-        [this.#useLegacyConfig ? "mapConfigurationTitle" : "title"]:
-          (map.options as Prisma.JsonObject)?.title ||
-          `Untitled map ${map.name}`,
-      }));
+    const available = await onlyAvailable(
+      maps,
+      adUser,
+      (map) => `map ${map.name}`
+    );
+    const formattedMaps = available.map((map) => ({
+      [this.#useLegacyConfig ? "mapConfigurationName" : "name"]: map.name,
+      [this.#useLegacyConfig ? "mapConfigurationTitle" : "title"]:
+        (map.options as Prisma.JsonObject)?.title || `Untitled map ${map.name}`,
+    }));
 
     return formattedMaps;
   }
@@ -66,7 +68,7 @@ class PublicService {
 
     logger.debug(`USE_LEGACY_MAP_CONFIG is set to ${this.#useLegacyConfig}`);
 
-    await requireAvailableMap(mapName);
+    await requireAvailableMap(mapName, adUser);
 
     // For the legacy config, we want 3 top-level properties:
     // - layersConfig
@@ -75,11 +77,11 @@ class PublicService {
 
     // The map's layers come from its layer tree, built once
     // for both the layer definitions and the layerswitcher.
-    const layerTree = await buildClientLayerTreeForMap(mapName);
+    const layerTree = await buildClientLayerTreeForMap(mapName, adUser);
 
     const [layersConfig, analytics, theMap, projections, tools, userSpecificMaps] =
       await Promise.all([
-        buildLegacyLayersConfigForMap(mapName, layerTree.placements),
+        buildLegacyLayersConfigForMap(mapName, layerTree.placements, adUser),
         Promise.resolve(
           ["plausible", "matomo"].includes(process.env.ANALYTICS_TYPE as string)
             ? getAnalyticsOptionsFromDotEnv()
@@ -87,10 +89,10 @@ class PublicService {
         ),
         buildClientMapForMap(mapName),
         buildClientProjectionsForMap(mapName),
-        buildClientToolsForMap(mapName, layerTree).then((tools) =>
+        buildClientToolsForMap(mapName, layerTree, adUser).then((tools) =>
           washClientTools(tools, adUser)
         ),
-        this.#getAllMaps(),
+        this.#getAllMaps(adUser),
       ]);
 
     return this.#useLegacyConfig

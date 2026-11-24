@@ -4,15 +4,9 @@ import { HajkError } from "../../../../common/classes.ts";
 import PublicService from "../../services/public.service.ts";
 import DocumentService from "../../services/document.service.ts";
 import { resolveClientDocumentHandler } from "../../utils/build-client-map-config.ts";
+import { adUserOf } from "../../utils/user-name.ts";
 
 import type { Request, Response } from "express";
-
-/** The AD user the request runs as, if any (set by the auth middleware). */
-function adUserOf(res: Response): string | undefined {
-  return typeof res.locals.authUser === "string"
-    ? res.locals.authUser
-    : undefined;
-}
 
 class PublicController {
   async getClientConfigForMap(req: Request, res: Response) {

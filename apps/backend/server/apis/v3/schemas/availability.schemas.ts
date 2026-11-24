@@ -27,3 +27,9 @@ export const AvailabilityOptionsSchema = z
       path: ["visibleUntil"],
     }
   );
+
+/**
+ * The AD groups whose members get a map, a group, a layer or a tool while the
+ * backend looks users up in AD; none means everyone. See utils/availability.ts.
+ */
+export const VisibleForGroupsSchema = z.array(z.string());

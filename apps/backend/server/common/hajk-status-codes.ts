@@ -141,14 +141,18 @@ enum HajkStatusCodes {
 
   /**
    * The map exists but is hidden from its users: its `visible` option is
-   * "false", or the time is outside its `visibleFrom` to `visibleUntil` period.
+   * "false", or the time is outside its `visibleFrom` to `visibleUntil` period,
+   * or, while the backend looks users up in AD, the user is in none of its
+   * `visibleForGroups`.
    */
   MAP_NOT_VISIBLE = "DB020",
 
   /**
-   * The layer exists but is not available to the client's users now: its
-   * `visible` option is "false", or the time is outside its `visibleFrom` to
-   * `visibleUntil` period.
+   * The layer exists but is not available to the client's user now: its or its
+   * service's `visible` option is "false", or the time is outside its or its
+   * service's `visibleFrom` to `visibleUntil` period, or, while the backend
+   * looks users up in AD, the user is in none of the layer's
+   * `visibleForGroups`.
    */
   LAYER_NOT_AVAILABLE = "DB021",
 

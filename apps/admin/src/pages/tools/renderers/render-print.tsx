@@ -21,6 +21,7 @@ import { useTranslation } from "react-i18next";
 import { Tool } from "../../../api/tools";
 import ToolNameField from "./tool-name-field";
 import { printDefaults } from "./tool-option-defaults";
+import { GroupsOption } from "./tool-option-fields";
 
 interface PrintToolRendererProps {
   tool: Tool;
@@ -92,6 +93,7 @@ export default function PrintToolRenderer({
               )}
             />
           </FormFieldRow>
+          <GroupsOption control={control} />
         </FormFieldGrid>
       </FormPanel>
 

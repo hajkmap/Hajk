@@ -41,17 +41,6 @@ export function storedNumber(raw: string): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-export function parseGroups(text: string): string[] {
-  return text
-    .split(",")
-    .map((part) => part.trim())
-    .filter((part) => part !== "");
-}
-
-export function formatGroups(value: unknown): string {
-  return Array.isArray(value) ? value.join(", ") : "";
-}
-
 /** Plain base64 as the legacy admin stored it; undecodable values are shown as-is. */
 export function decodeInstruction(value: unknown): string {
   if (typeof value !== "string" || !value) return "";

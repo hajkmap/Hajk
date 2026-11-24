@@ -209,6 +209,7 @@ export function buildMapSettingsFormValues(map: MapRecord): FieldValues {
   return {
     name: map.name ?? "",
     locked: map.locked ?? false,
+    visibleForGroups: map.visibleForGroups ?? [],
     projection: {
       code: projectionCode,
     },
@@ -317,6 +318,7 @@ export function buildMapUpdatePayload(
   return {
     name: (data.name as string) ?? map.name ?? "",
     locked: (data.locked as boolean) ?? map.locked ?? false,
+    visibleForGroups: data.visibleForGroups as string[] | undefined,
     projection: { code: projectionCode },
     projections: projectionCodes.map((code) => ({ code })),
     options: {

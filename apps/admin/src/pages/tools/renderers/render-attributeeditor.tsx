@@ -4,7 +4,6 @@ import {
   Checkbox,
   CircularProgress,
   FormControlLabel,
-  TextField,
   Typography,
 } from "@mui/material";
 import { Control, Controller, FieldValues, useForm } from "react-hook-form";
@@ -18,6 +17,7 @@ import { useServices } from "../../../api/services";
 import { Tool } from "../../../api/tools";
 import AvailabilityChip from "../../../components/availability/availability-chip";
 import ServiceAvailabilityChip from "../../../components/availability/service-availability-chip";
+import { VisibleForGroupsInput } from "../../../components/availability/visible-for-groups-field";
 import { attributeeditorDefaults } from "./tool-option-defaults";
 import {
   CheckboxOption,
@@ -133,17 +133,10 @@ function EditingServices({
         ? [...value, { id, visibleForGroups: [] }]
         : value.filter((service) => service.id !== id),
     );
-  const setGroups = (id: string, text: string) =>
+  const setGroups = (id: string, visibleForGroups: string[]) =>
     onChange(
       value.map((service) =>
-        service.id === id
-          ? {
-              ...service,
-              visibleForGroups: text
-                ? text.split(",").map((part) => part.trim())
-                : [],
-            }
-          : service,
+        service.id === id ? { ...service, visibleForGroups } : service,
       ),
     );
 
@@ -182,11 +175,9 @@ function EditingServices({
             />
             {service ? (
               <Box sx={{ pl: 4 }}>
-                <TextField
-                  label={t("tools.visibleForGroups")}
-                  fullWidth
-                  value={(service.visibleForGroups ?? []).join(", ")}
-                  onChange={(event) => setGroups(layer.id, event.target.value)}
+                <VisibleForGroupsInput
+                  value={service.visibleForGroups}
+                  onChange={(groups) => setGroups(layer.id, groups)}
                 />
               </Box>
             ) : null}

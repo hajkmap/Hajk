@@ -373,10 +373,12 @@ export interface DisplayLayerPlacement {
 
 /**
  * @param treePlacements the layers of the map's layer tree, one per placement.
+ * @param adUser the AD account the client's request runs as, if any.
  */
 export async function buildLegacyLayersConfigForMap(
   mapName: string,
-  treePlacements: DisplayLayerPlacement[]
+  treePlacements: DisplayLayerPlacement[],
+  adUser: string | undefined
 ): Promise<HajkLegacyLayersConfigDocument> {
   const allInstances = await prisma.layerInstance.findMany({
     where: {
@@ -427,11 +429,14 @@ export async function buildLegacyLayersConfigForMap(
       },
     },
   });
-  // Layers not available to users now are left out, as deleted ones are.
-  const instances = allInstances.filter((inst) => {
+  // Layers the user doesn't get now are left out, as deleted ones are.
+  const instances: typeof allInstances = [];
+  for (const inst of allInstances) {
     const layer = inst.displayLayer ?? inst.searchLayer ?? inst.editingLayer;
-    return layer !== null && isLayerAvailable(layer);
-  });
+    if (layer !== null && (await isLayerAvailable(layer, adUser))) {
+      instances.push(inst);
+    }
+  }
 
   const searchLayerIdsOnMap = instances
     .map((inst) => inst.searchLayerId)
@@ -441,7 +446,7 @@ export async function buildLegacyLayersConfigForMap(
     .map((inst) => inst.editingLayerId)
     .filter((id): id is string => Boolean(id));
 
-  const searchLayers = onlyAvailableLayers(
+  const searchLayers = await onlyAvailableLayers(
     await prisma.searchLayer.findMany({
       where: {
         deletedAt: null,
@@ -455,10 +460,11 @@ export async function buildLegacyLayersConfigForMap(
         metadata: true,
         infoClickSettings: true,
       },
-    })
+    }),
+    adUser
   );
 
-  const editingLayers = onlyAvailableLayers(
+  const editingLayers = await onlyAvailableLayers(
     await prisma.editingLayer.findMany({
       where: {
         deletedAt: null,
@@ -468,7 +474,8 @@ export async function buildLegacyLayersConfigForMap(
           : {}),
       },
       include: { service: { include: { projection: true } } },
-    })
+    }),
+    adUser
   );
 
   if (

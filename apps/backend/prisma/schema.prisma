@@ -126,6 +126,8 @@ model Map {
   locked            Boolean             @default(false)
   name              String              @unique
   options           Json                @default("{}")
+  /// The AD groups whose members get the map while the backend looks users up in AD (AD_LOOKUP_ACTIVE); none means everyone.
+  visibleForGroups  String[]            @default([])
   projectionId      Int?
   createdBy         String?
   createdDate       DateTime?           @db.Timestamptz(3) // Timestamp when created
@@ -232,6 +234,8 @@ model ToolInstance {
   internalName      String?
   /// Default options for this instance. ToolsOnMaps.options overrides them per map.
   options           Json                 @default("{}")
+  /// The AD groups whose members get the tool while the backend looks users up in AD (AD_LOOKUP_ACTIVE); none means everyone.
+  visibleForGroups  String[]             @default([])
   createdBy         String?
   createdDate       DateTime?            @db.Timestamptz(3) // Timestamp when created
   lastSavedBy       String?
@@ -292,6 +296,8 @@ model Group {
   deletedAt         DateTime?           @db.Timestamptz(3)
   /// visible, visibleFrom and visibleUntil decide, as on maps, layers and services, whether the client's users get the group in the layer tree, with everything in it.
   options           Json                @default("{}")
+  /// The AD groups whose members get the group, with everything in it, while the backend looks users up in AD (AD_LOOKUP_ACTIVE); none means everyone.
+  visibleForGroups  String[]            @default([])
   /// A search group's layers. A layer group's content is in `items`.
   layers            LayerInstance[]
   restrictedToRoles RoleOnGroup[]
@@ -435,6 +441,8 @@ model DisplayLayer {
   restrictedToRoles           RoleOnDisplayLayer[]
   instances                   LayerInstance[]
   options                     Json                 @default("{}")
+  /// The AD groups whose members get the layer while the backend looks users up in AD (AD_LOOKUP_ACTIVE); none means everyone.
+  visibleForGroups            String[]             @default([])
   /// Groups and map trees this layer is placed in.
   groupItems                  GroupItem[]
   groupNestedItems            GroupNestedItem[]
@@ -479,6 +487,8 @@ model SearchLayer {
   instances           LayerInstance[]
   /// Availability only: `visible`, `visibleFrom`, `visibleUntil`.
   options             Json                @default("{}")
+  /// The AD groups whose members get the layer while the backend looks users up in AD (AD_LOOKUP_ACTIVE); none means everyone.
+  visibleForGroups    String[]            @default([])
 
   @@index([serviceId])
 }
@@ -502,6 +512,8 @@ model EditingLayer {
   restrictedToRoles RoleOnEditingLayer[]
   instances         LayerInstance[]
   options           Json                 @default("{}")
+  /// The AD groups whose members get the layer while the backend looks users up in AD (AD_LOOKUP_ACTIVE); none means everyone.
+  visibleForGroups  String[]             @default([])
 
   @@index([serviceId])
 }

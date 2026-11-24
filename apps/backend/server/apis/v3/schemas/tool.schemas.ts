@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { VisibleForGroupsSchema } from "./availability.schemas.ts";
+
 const RoleOnToolSchema = z.object({
   toolId: z.number().min(1, "Tool ID is required"),
   roleId: z.string().min(1, "Role ID is required"),
@@ -15,6 +17,7 @@ const ToolsOnMapsSchema = z.object({
 export const ToolCreateSchema = z.object({
   type: z.string().min(1, "Tool type is required"),
   options: z.record(z.string(), z.unknown()).default({}),
+  visibleForGroups: VisibleForGroupsSchema.optional(),
   locked: z.boolean().default(false),
   maps: z.array(ToolsOnMapsSchema).optional(),
   restrictedToRoles: z.array(RoleOnToolSchema).optional(),
@@ -30,6 +33,7 @@ export const ToolsOnMapsCreateSchema = z.object({
 export const ToolUpdateSchema = z.object({
   type: z.string().min(1, "Tool type is required").optional(),
   options: z.record(z.string(), z.unknown()).optional(),
+  visibleForGroups: VisibleForGroupsSchema.optional(),
   locked: z.boolean().optional(),
   maps: z.array(ToolsOnMapsSchema).optional(),
   restrictedToRoles: z.array(RoleOnToolSchema).optional(),

@@ -1,6 +1,9 @@
 import { z } from "zod";
 
-import { AvailabilityOptionsSchema } from "./availability.schemas.ts";
+import {
+  AvailabilityOptionsSchema,
+  VisibleForGroupsSchema,
+} from "./availability.schemas.ts";
 
 const ServiceTypeSchema = z.enum([
   "ARCGIS",
@@ -114,6 +117,7 @@ export const LayerCreateSchema = z.object({
   hideExpandArrow: z.boolean().default(false),
   zIndex: z.number().default(0),
   options: AvailabilityOptionsSchema.default({}),
+  visibleForGroups: VisibleForGroupsSchema.optional(),
   service: ServiceSchema.optional(),
   metadata: MetadataSchema.optional(),
   infoClickSettings: InfoClickSettingsSchema.optional(),
@@ -209,6 +213,7 @@ export const LayerUpdateSchema = z.object({
   hideExpandArrow: z.boolean().optional(),
   zIndex: z.number().optional(),
   options: AvailabilityOptionsSchema.optional(),
+  visibleForGroups: VisibleForGroupsSchema.optional(),
   service: ServiceSchema.optional(),
   metadata: MetadataSchema.optional(),
   infoClickSettings: InfoClickSettingsSchema.optional(),

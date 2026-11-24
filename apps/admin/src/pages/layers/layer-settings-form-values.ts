@@ -115,6 +115,7 @@ export function buildLayerSettingsFormValues(
         layer.selectedLayers,
       ),
     },
+    visibleForGroups: layer.visibleForGroups ?? [],
     options: {
       keyword: layer.options?.keyword ?? "",
       category: layer.options?.category ?? "",

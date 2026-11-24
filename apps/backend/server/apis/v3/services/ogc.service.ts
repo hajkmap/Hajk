@@ -64,22 +64,22 @@ const editingLayerInclude = {
 
 class OgcService {
   /**
-   * The editing layers, leaving out those not available to users now (the
-   * layer or its service) and those whose url isn't allowed.
+   * The editing layers, leaving out those the user doesn't get now (the layer
+   * or its service) and those whose url isn't allowed.
    */
-  async listWfstLayers(fields?: string) {
+  async listWfstLayers(adUser: string | undefined, fields?: string) {
     const layers = await prisma.editingLayer.findMany({
       where: { deletedAt: null, service: { deletedAt: null } },
       include: editingLayerInclude,
       orderBy: { name: "asc" },
     });
-    return onlyAvailableLayers(layers)
+    return (await onlyAvailableLayers(layers, adUser))
       .map((layer) => toClientWfstLayer(layer))
       .filter((layer) => isAllowedUrl(layer.url))
       .map((layer) => pickFields(layer, fields));
   }
 
-  async getWfstLayer(id: string, fields?: string) {
+  async getWfstLayer(id: string, adUser: string | undefined, fields?: string) {
     if (!/^[a-zA-Z0-9_-]+$/.test(id)) {
       throw new HajkError(
         HttpStatusCodes.BAD_REQUEST,
@@ -98,10 +98,10 @@ class OgcService {
         HajkStatusCodes.UNKNOWN_LAYER_ID
       );
     }
-    if (!isLayerAvailable(layer)) {
+    if (!(await isLayerAvailable(layer, adUser))) {
       throw new HajkError(
         HttpStatusCodes.NOT_FOUND,
-        `Editing layer ${id} is not available to users now.`,
+        `Editing layer ${id} is not available to the user now.`,
         HajkStatusCodes.LAYER_NOT_AVAILABLE
       );
     }

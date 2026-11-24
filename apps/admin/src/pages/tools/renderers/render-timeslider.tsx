@@ -9,7 +9,11 @@ import { useLayers } from "../../../api/layers";
 import { Tool } from "../../../api/tools";
 import LayerPicker from "../components/layer-picker";
 import { timesliderDefaults } from "./tool-option-defaults";
-import { CheckboxOption, InstructionOption } from "./tool-option-fields";
+import {
+  CheckboxOption,
+  GroupsOption,
+  InstructionOption,
+} from "./tool-option-fields";
 import { optionId } from "./tool-option-parsers";
 
 interface TimeSliderRendererProps {
@@ -41,6 +45,7 @@ export default function TimeSliderRenderer({
             labelKey="tools.visibleAtStart"
           />
           <InstructionOption control={control} />
+          <GroupsOption control={control} />
           <FormFieldRow>
             <Controller
               name="options.defaultResolution"

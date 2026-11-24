@@ -8,6 +8,7 @@ const COMMON_KEYS = [
   "description",
   "selectedLayers",
   "locked",
+  "visibleForGroups",
 ] as const;
 
 const DISPLAY_SCALAR_KEYS = [

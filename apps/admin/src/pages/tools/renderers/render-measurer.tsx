@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { Tool } from "../../../api/tools";
 import ToolNameField from "./tool-name-field";
 import { measurerDefaults } from "./tool-option-defaults";
+import { GroupsOption } from "./tool-option-fields";
 
 interface MeasurerRendererProps {
   tool: Tool;
@@ -55,6 +56,7 @@ export default function MeasurerRenderer({
               )}
             />
           </FormFieldRow>
+          <GroupsOption control={control} />
         </FormFieldGrid>
       </FormPanel>
     </>

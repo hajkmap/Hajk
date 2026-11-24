@@ -69,6 +69,7 @@ export default function ToolSettings() {
         type: tool.type ?? "",
         internalName: tool.internalName ?? "",
         options,
+        visibleForGroups: tool.visibleForGroups ?? [],
       });
     }
   }, [tool, reset]);
@@ -101,6 +102,8 @@ export default function ToolSettings() {
 
     const internalName =
       typeof data.internalName === "string" ? data.internalName.trim() : "";
+    const visibleForGroups =
+      (data.visibleForGroups as string[] | undefined) ?? [];
 
     updateToolMutation.mutate(
       {
@@ -109,12 +112,13 @@ export default function ToolSettings() {
           type,
           internalName,
           options,
+          visibleForGroups,
         },
       },
       {
         onSuccess: () => {
           toast.success(t("common.dialog.saveSuccess"));
-          reset({ type, internalName, options });
+          reset({ type, internalName, options, visibleForGroups });
         },
         onError: (error: Error) => {
           toast.error(error.message);

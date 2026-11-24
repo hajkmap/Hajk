@@ -35,6 +35,7 @@ import { FieldLabelWithHelp } from "@/components/form-components/field-help-tool
 import { AttachmentsEditor } from "../attachments/attachments-editor";
 import { storedNumber } from "@/pages/tools/renderers/tool-option-parsers";
 import ToolNameField from "@/pages/tools/renderers/tool-name-field";
+import { GroupsOption } from "@/pages/tools/renderers/tool-option-fields";
 
 interface SettingsTabPanelProps {
   control: Control<FieldValues>;
@@ -114,6 +115,7 @@ export function SettingsTabPanel({
           <Grid size={12}>
             <FormFieldGrid>
               <ToolNameField control={control} />
+              <GroupsOption control={control} />
             </FormFieldGrid>
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>

@@ -1,6 +1,9 @@
 import { z } from "zod";
 
-import { AvailabilityOptionsSchema } from "./availability.schemas.ts";
+import {
+  AvailabilityOptionsSchema,
+  VisibleForGroupsSchema,
+} from "./availability.schemas.ts";
 
 const GroupTypeSchema = z.enum(["Layer", "Search"]);
 
@@ -25,6 +28,7 @@ export const GroupCreateSchema = z.object({
   type: GroupTypeSchema.default("Layer"),
   locked: z.boolean().default(false),
   options: AvailabilityOptionsSchema.optional(),
+  visibleForGroups: VisibleForGroupsSchema.optional(),
   layers: z.array(GroupLayerSchema).optional(),
   restrictedToRoles: z.array(RoleOnGroupWriteSchema).optional(),
 });
@@ -36,6 +40,7 @@ export const GroupUpdateSchema = z.object({
   type: GroupTypeSchema.optional(),
   locked: z.boolean().optional(),
   options: AvailabilityOptionsSchema.optional(),
+  visibleForGroups: VisibleForGroupsSchema.optional(),
   restrictedToRoles: z.array(RoleOnGroupWriteSchema).optional(),
 });
 

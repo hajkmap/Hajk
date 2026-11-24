@@ -8,7 +8,10 @@ const ProjectionSchema = z.object({
   units: z.string().optional(),
 });
 
-import { AvailabilityOptionsSchema } from "./availability.schemas.ts";
+import {
+  AvailabilityOptionsSchema,
+  VisibleForGroupsSchema,
+} from "./availability.schemas.ts";
 import { ToolCreateSchema, ToolUpdateSchema } from "./tool.schemas.ts";
 
 const MapProjectionSchema = z.object({
@@ -19,6 +22,7 @@ export const MapCreateSchema = z.object({
   name: z.string().min(1, "Map name is required"),
   locked: z.boolean().default(false),
   options: AvailabilityOptionsSchema.default({}),
+  visibleForGroups: VisibleForGroupsSchema.optional(),
   projection: MapProjectionSchema.optional(),
   projections: z.array(ProjectionSchema).optional(),
   tools: z.array(ToolCreateSchema).optional(),
@@ -43,6 +47,7 @@ export const MapUpdateSchema = z.object({
   name: z.string().min(1, "Map name is required").optional(),
   locked: z.boolean().optional(),
   options: AvailabilityOptionsSchema.optional(),
+  visibleForGroups: VisibleForGroupsSchema.optional(),
   projection: MapProjectionSchema.optional(),
   projections: z.array(ProjectionSchema).optional(),
   tools: z.array(ToolUpdateSchema).optional(),

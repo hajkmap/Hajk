@@ -244,13 +244,13 @@ export async function resolveClientDocumentHandler(
   mapName: string,
   adUser: string | undefined
 ): Promise<{ toolInstanceId: number; options: Prisma.JsonObject }> {
-  await requireAvailableMap(mapName);
+  await requireAvailableMap(mapName, adUser);
   const entry = await prisma.toolsOnMaps.findFirst({
     where: {
       mapName,
       active: true,
       map: { deletedAt: null },
-      tool: { type: "documenthandler" },
+      tool: { type: "documenthandler", deletedAt: null },
     },
     include: { tool: true },
   });
@@ -267,7 +267,7 @@ export async function resolveClientDocumentHandler(
   const options = mergeJsonObjects(entry.tool.options, entry.options);
   if (
     !(await isVisibleToUser(
-      options.visibleForGroups,
+      entry.tool.visibleForGroups,
       adUser,
       "tool documenthandler"
     ))
@@ -327,14 +327,20 @@ export async function buildClientMapForMap(mapName: string) {
 }
 
 /**
- * The map's background layers for the layerswitcher, those available to its
- * users now; ids are instance ids.
+ * The map's background layers for the layerswitcher, those the user gets now;
+ * ids are instance ids.
  */
 async function buildClientBaselayersForMap(
-  mapName: string
+  mapName: string,
+  adUser: string | undefined
 ): Promise<ClientLayerSwitcherLayerRef[]> {
   const availability = {
-    select: { options: true, service: { select: { options: true } } },
+    select: {
+      id: true,
+      options: true,
+      visibleForGroups: true,
+      service: { select: { options: true } },
+    },
   } as const;
   const instances = await prisma.layerInstance.findMany({
     where: {
@@ -351,11 +357,14 @@ async function buildClientBaselayersForMap(
     },
     orderBy: { zIndex: "asc" },
   });
-  const available = instances.filter((instance) => {
+  const available: typeof instances = [];
+  for (const instance of instances) {
     const layer =
       instance.displayLayer ?? instance.searchLayer ?? instance.editingLayer;
-    return layer !== null && isLayerAvailable(layer);
-  });
+    if (layer !== null && (await isLayerAvailable(layer, adUser))) {
+      available.push(instance);
+    }
+  }
   return available.map((instance) => ({
     id: instance.id,
     drawOrder: instance.zIndex,
@@ -368,17 +377,22 @@ async function buildClientBaselayersForMap(
   }));
 }
 
-/** The ids of the editing layers available to the client's users now. */
-async function availableEditingLayerIds(): Promise<Set<string>> {
+/** The ids of the editing layers the user gets now. */
+async function availableEditingLayerIds(
+  adUser: string | undefined
+): Promise<Set<string>> {
   const layers = await prisma.editingLayer.findMany({
     where: { deletedAt: null, service: { deletedAt: null } },
     select: {
       id: true,
       options: true,
+      visibleForGroups: true,
       service: { select: { options: true } },
     },
   });
-  return new Set(onlyAvailableLayers(layers).map((layer) => layer.id));
+  return new Set(
+    (await onlyAvailableLayers(layers, adUser)).map((layer) => layer.id)
+  );
 }
 
 /**
@@ -403,24 +417,31 @@ function withAvailableActiveServices(
 /**
  * @param layerTree the map's layer tree in the client's layerswitcher format,
  * in place of the groups stored in the layerswitcher tool's options.
+ * @param adUser the AD account the client's request runs as, if any.
  */
 export async function buildClientToolsForMap(
   mapName: string,
-  layerTree: ClientLayerTree
+  layerTree: ClientLayerTree,
+  adUser: string | undefined
 ) {
   const groups = layerTree.groups;
   const [toolsOnMap, baselayers, themes, editingLayerIds] = await Promise.all([
     prisma.toolsOnMaps.findMany({
-      where: { mapName, active: true, map: { deletedAt: null } },
+      where: {
+        mapName,
+        active: true,
+        map: { deletedAt: null },
+        tool: { deletedAt: null },
+      },
       include: { tool: true },
       orderBy: { index: "asc" },
     }),
-    buildClientBaselayersForMap(mapName),
+    buildClientBaselayersForMap(mapName, adUser),
     prisma.theme.findMany({
       where: { mapName, deletedAt: null },
       orderBy: { title: "asc" },
     }),
-    availableEditingLayerIds(),
+    availableEditingLayerIds(adUser),
   ]);
 
   const quickAccessPresets = themes.map((theme) => {
@@ -447,8 +468,22 @@ export async function buildClientToolsForMap(
     };
   });
 
+  // Tools the user doesn't get by their AD groups are left out.
+  const visibleTools: typeof toolsOnMap = [];
+  for (const entry of toolsOnMap) {
+    if (
+      await isVisibleToUser(
+        entry.tool.visibleForGroups,
+        adUser,
+        `tool ${entry.tool.type}`
+      )
+    ) {
+      visibleTools.push(entry);
+    }
+  }
+
   const tools: { type: string; index: number; options: unknown }[] =
-    toolsOnMap.map((entry) => {
+    visibleTools.map((entry) => {
       const options = withAvailableActiveServices(
         mergeJsonObjects(entry.tool.options, entry.options),
         editingLayerIds

@@ -1,4 +1,4 @@
-import { TextField, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { Control, Controller, FieldValues, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import FormAccordion from "../../../components/form-components/form-accordion";
@@ -8,6 +8,7 @@ import { useServices } from "../../../api/services";
 import { Tool } from "../../../api/tools";
 import AvailabilityChip from "../../../components/availability/availability-chip";
 import ServiceAvailabilityChip from "../../../components/availability/service-availability-chip";
+import { VisibleForGroupsInput } from "../../../components/availability/visible-for-groups-field";
 import LayerPicker from "../components/layer-picker";
 import { editDefaults } from "./tool-option-defaults";
 import {
@@ -123,17 +124,10 @@ function EditingServices({
     }));
   const byId = new Map(value.map((service) => [service.id, service]));
 
-  const setGroups = (id: string, text: string) =>
+  const setGroups = (id: string, visibleForGroups: string[]) =>
     onChange(
       value.map((service) =>
-        service.id === id
-          ? {
-              ...service,
-              visibleForGroups: text
-                ? text.split(",").map((part) => part.trim())
-                : [],
-            }
-          : service,
+        service.id === id ? { ...service, visibleForGroups } : service,
       ),
     );
 
@@ -152,12 +146,10 @@ function EditingServices({
         error={isError ? t("tools.edit.layersLoadFailed") : undefined}
         emptyText={t("tools.edit.noServices")}
         renderSelectedDetails={(id) => (
-          <TextField
+          <VisibleForGroupsInput
             size="small"
-            label={t("tools.visibleForGroups")}
-            fullWidth
-            value={(byId.get(id)?.visibleForGroups ?? []).join(", ")}
-            onChange={(event) => setGroups(id, event.target.value)}
+            value={byId.get(id)?.visibleForGroups}
+            onChange={(groups) => setGroups(id, groups)}
           />
         )}
       />

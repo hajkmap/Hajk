@@ -8,6 +8,7 @@ import FormAccordion from "../../../components/form-components/form-accordion";
 import { useTranslation } from "react-i18next";
 import { Tool } from "../../../api/tools";
 import { bookmarksDefaults } from "./tool-option-defaults";
+import { GroupsOption } from "./tool-option-fields";
 
 interface BookmarksRendererProps {
   tool: Tool;
@@ -77,26 +78,7 @@ export default function BookmarksRenderer({
             />
           </FormFieldRow>
 
-          <FormFieldRow>
-            <Controller
-              name="options.visibleForGroups"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  label={t("tools.visibleForGroups")}
-                  fullWidth
-                  value={((field.value as string[]) ?? []).join(",")}
-                  onChange={(e) =>
-                    field.onChange(
-                      e.target.value
-                        ? e.target.value.split(",").map((s) => s.trim())
-                        : [],
-                    )
-                  }
-                />
-              )}
-            />
-          </FormFieldRow>
+          <GroupsOption control={control} />
         </FormFieldGrid>
       </FormAccordion>
     </>

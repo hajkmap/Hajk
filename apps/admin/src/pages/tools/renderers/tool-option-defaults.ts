@@ -3,13 +3,11 @@ export const anchorDefaults: Record<string, unknown> = {
   visibleAtStart: false,
   allowCreatingCleanUrls: true,
   instruction: "",
-  visibleForGroups: [],
 };
 
 // The client's own fallbacks. Window placement and size are set per map.
 export const attributeeditorDefaults: Record<string, unknown> = {
   visibleAtStart: false,
-  visibleForGroups: [],
   title: "Attributredigerare",
   description: "Redigera attribut för WFS-lager",
   zoomLevel: 6,
@@ -20,7 +18,6 @@ export const attributeeditorDefaults: Record<string, unknown> = {
 export const bookmarksDefaults: Record<string, unknown> = {
   visibleAtStart: false,
   instruction: "",
-  visibleForGroups: [],
 };
 
 // Used as the isDirty baseline in settings.tsx. Client BufferModel.js takes
@@ -30,7 +27,6 @@ export const bookmarksDefaults: Record<string, unknown> = {
 export const bufferDefaults: Record<string, unknown> = {
   visibleAtStart: false,
   instruction: "",
-  visibleForGroups: [],
 };
 
 // Used as the isDirty baseline in settings.tsx. Matches CoordinatesModel.js's
@@ -38,7 +34,6 @@ export const bufferDefaults: Record<string, unknown> = {
 export const coordinatesDefaults: Record<string, unknown> = {
   visibleAtStart: false,
   instruction: "",
-  visibleForGroups: [],
   thousandSeparator: false,
   showFieldsOnStart: false,
   src: "marker.png",
@@ -48,15 +43,12 @@ export const coordinatesDefaults: Record<string, unknown> = {
 };
 
 // Command palette opens from the keyboard. target and index are not a placement.
-export const commandpaletteDefaults: Record<string, unknown> = {
-  visibleForGroups: [],
-};
+export const commandpaletteDefaults: Record<string, unknown> = {};
 
 // Matches the legacy feedback tool options. Window placement is per map.
 export const feedbackDefaults: Record<string, unknown> = {
   visibleAtStart: false,
   visibleAtStartMobile: false,
-  visibleForGroups: [],
   title: "Tyck till",
   description: "Skicka synpunkter till oss",
   instructionText:
@@ -68,7 +60,6 @@ export const feedbackDefaults: Record<string, unknown> = {
 // Matches FloodSimulator DEFAULT_OPTIONS. Empty optional fields stay unset.
 export const floodsimulatorDefaults: Record<string, unknown> = {
   visibleAtStart: false,
-  visibleForGroups: [],
   title: "Översvämning",
   description: "Simulera en stigande vattennivå",
   elevationUrl: "",
@@ -108,7 +99,6 @@ export const floodsimulatorDefaults: Record<string, unknown> = {
 export const externalLinksDefaults: Record<string, unknown> = {
   title: "Öppna koordinat i extern applikation", // client ExternalLinks.jsx:34 fallback
   list: [],
-  visibleForGroups: [],
 };
 
 // Used as the isDirty baseline in settings.tsx. drawFillColor/drawStrokeColor
@@ -118,7 +108,6 @@ export const externalLinksDefaults: Record<string, unknown> = {
 export const fmeserverDefaults: Record<string, unknown> = {
   visibleAtStart: false,
   instruction: "",
-  visibleForGroups: [],
   drawFillColor: "rgba(255,255,255,0.07)",
   drawStrokeColor: "rgba(74,74,74,0.5)",
   groupDisplayName: "Grupp",
@@ -133,7 +122,6 @@ export const infoclickDefaults: Record<string, unknown> = {
   description: "",
   instruction: "",
   visibleAtStart: false,
-  visibleForGroups: [],
   allowDangerousHtml: true,
   useNewInfoclick: false,
   useNewPlaceholderMatching: false,
@@ -157,7 +145,6 @@ export const informationDefaults: Record<string, unknown> = {
   headerText: "Om kartan",
   text: "Information om kartan",
   buttonText: "Stäng",
-  visibleForGroups: [],
 };
 
 // Used as the isDirty baseline in settings.tsx.
@@ -195,7 +182,6 @@ export const layerswitcherDefaults: Record<string, unknown> = {
 // Used as the isDirty baseline in settings.tsx.
 export const locationDefaults: Record<string, unknown> = {
   visibleAtStart: false,
-  visibleForGroups: [],
 };
 
 // Used as the isDirty baseline in settings.tsx.
@@ -208,7 +194,6 @@ export const measurerDefaults: Record<string, unknown> = {
 export const presetDefaults: Record<string, unknown> = {
   title: "Snabbval", // client PresetLinks.jsx:38 `this.options.title || "Snabbval"`
   presetList: [],
-  visibleForGroups: [],
 };
 
 // Matches PrintView.jsx's own fallbacks. Note includeNorthArrow is `false`
@@ -244,7 +229,6 @@ export const printDefaults: Record<string, unknown> = {
 export const routingDefaults: Record<string, unknown> = {
   visibleAtStart: false,
   instruction: "",
-  visibleForGroups: [],
   apiKey: "",
 };
 
@@ -300,26 +284,22 @@ export const searchDefaults: Record<string, unknown> = {
 export const sketchDefaults: Record<string, unknown> = {
   visibleAtStart: false,
   instruction: "",
-  visibleForGroups: [],
 };
 
 // Used as the isDirty baseline in settings.tsx.
 export const streetviewDefaults: Record<string, unknown> = {
   visibleAtStart: false,
   instruction: "",
-  visibleForGroups: [],
   apiKey: "",
 };
 
 export const dummyDefaults: Record<string, unknown> = {
   visibleAtStart: false,
-  visibleForGroups: [],
 };
 
 export const layercomparerDefaults: Record<string, unknown> = {
   visibleAtStart: false,
   instruction: "",
-  visibleForGroups: [],
   showNonBaseLayersInSelect: false,
   selectChosenLayers: false,
   chosenLayers: [],
@@ -329,7 +309,6 @@ export const layercomparerDefaults: Record<string, unknown> = {
 export const editDefaults: Record<string, unknown> = {
   visibleAtStart: false,
   instruction: "",
-  visibleForGroups: [],
   activeServices: [],
 };
 
@@ -343,7 +322,6 @@ export const timesliderDefaults: Record<string, unknown> = {
 
 export const collectorDefaults: Record<string, unknown> = {
   visibleAtStart: false,
-  visibleForGroups: [],
   url: "",
   title: "Tyck till",
   abstract: "Vi vill veta vad du tycker!",

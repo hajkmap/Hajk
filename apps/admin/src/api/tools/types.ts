@@ -11,6 +11,8 @@ export interface Tool {
   /** Shown in admin, distinguishes instances of the same type. */
   internalName?: string | null;
   options: Record<string, unknown>;
+  /** The AD groups whose members get the tool; none means everyone. */
+  visibleForGroups: string[];
   createdBy?: string;
   createdDate?: string;
   lastSavedBy?: string;
@@ -46,6 +48,7 @@ export interface ToolUpdateInput {
   type?: string;
   internalName?: string;
   options?: Record<string, unknown>;
+  visibleForGroups?: string[];
   locked?: boolean;
 }
 

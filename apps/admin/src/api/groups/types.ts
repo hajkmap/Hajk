@@ -7,6 +7,8 @@ export interface Group {
   internalName?: string;
   type: GroupType;
   options: Record<string, unknown>;
+  /** The AD groups whose members get the group; none means everyone. */
+  visibleForGroups: string[];
   restrictedToRoles?: GroupRole[];
   createdBy?: string;
   createdDate?: string;
@@ -49,6 +51,7 @@ export interface GroupUpdateInput {
   type?: GroupType;
   locked?: boolean;
   options?: Record<string, unknown>;
+  visibleForGroups?: string[];
   restrictedToRoles?: GroupRoleUpdateInput[];
 }
 

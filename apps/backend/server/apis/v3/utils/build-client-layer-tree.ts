@@ -12,7 +12,7 @@ import {
   type MapGroupSettings,
   type MapLayerSettings,
 } from "../services/map-layer-tree-settings.ts";
-import { isAvailable, onlyAvailableLayers } from "./availability.ts";
+import { onlyAvailable, onlyAvailableLayers } from "./availability.ts";
 import type { DisplayLayerPlacement } from "./build-legacy-layers-config.ts";
 
 const logger = log4js.getLogger("util.build-client-layer-tree");
@@ -85,7 +85,8 @@ function infoGroupFields({ infoGroup }: Omit<MapGroupSettings, "groupId">) {
 }
 
 export async function buildClientLayerTreeForMap(
-  mapName: string
+  mapName: string,
+  adUser: string | undefined
 ): Promise<ClientLayerTree> {
   const map = await prisma.map.findFirst({
     where: { name: mapName, deletedAt: null },
@@ -115,9 +116,9 @@ export async function buildClientLayerTreeForMap(
     _max: { zIndex: true },
   });
 
-  // Layer definitions for every layer in the tree (deleted ones, and those not
-  // available to users now, are left out), and the groups in it available to
-  // users now.
+  // Layer definitions for every layer in the tree (deleted ones, and those the
+  // user doesn't get now, are left out), and the groups in it the user gets
+  // now.
   const layerIds = new Set<string>();
   const groupIds = new Set<string>();
   const collectIds = (nodes: LayerTreeNode[]) => {
@@ -147,21 +148,26 @@ export async function buildClientLayerTreeForMap(
     }),
     prisma.group.findMany({
       where: { id: { in: [...groupIds] } },
-      select: { id: true, options: true },
+      select: { id: true, options: true, visibleForGroups: true },
     }),
   ]);
   const displayLayers = new Map(
-    onlyAvailableLayers(layersInTree).map((layer) => [layer.id, layer])
+    (await onlyAvailableLayers(layersInTree, adUser)).map((layer) => [
+      layer.id,
+      layer,
+    ])
   );
   const availableGroupIds = new Set(
-    groupsInTree
-      .filter((group) => isAvailable(group.options))
-      .map((group) => group.id)
+    (
+      await onlyAvailable(groupsInTree, adUser, (group) => `group ${group.id}`)
+    ).map((group) => group.id)
   );
 
   // A layer or group placed more than once on the map gets its own id per
   // placement, so the client shows each as a layer of its own (as with layer
-  // instances). The first placement keeps the plain id, so links work.
+  // instances). The first placement keeps the plain id, so links work. Ids
+  // are taken for the whole tree, also for what the user doesn't get, so a
+  // placement has the same id for every user and at any time.
   const usedIds = new Set<string>();
   const clientId = (id: string, parentClientId: string) => {
     let candidate = usedIds.has(id)
@@ -181,10 +187,13 @@ export async function buildClientLayerTreeForMap(
     layerId: string;
   }[] = [];
 
+  // `shown` is false inside a group the user doesn't get: the group is left
+  // out with everything in it, and its content only takes its ids.
   const toClientGroup = (
     node: GroupNode,
     parentClientId: string,
-    index: number
+    index: number,
+    shown: boolean
   ): ClientLayerSwitcherGroupNode | null => {
     if (node.cycle) {
       logger.warn(
@@ -192,9 +201,8 @@ export async function buildClientLayerTreeForMap(
       );
       return null;
     }
-    // Not available to users now: left out with everything in it.
-    if (!availableGroupIds.has(node.id)) return null;
     const groupClientId = clientId(node.id, parentClientId);
+    const groupShown = shown && availableGroupIds.has(node.id);
     const layers: ClientLayerSwitcherLayerRef[] = [];
     const groups: ClientLayerSwitcherGroupNode[] = [];
 
@@ -202,16 +210,21 @@ export async function buildClientLayerTreeForMap(
       // Hidden on this map by its exceptions.
       if (child.hidden) return;
       if (child.type === "group") {
-        const group = toClientGroup(child, groupClientId, childIndex);
+        const group = toClientGroup(
+          child,
+          groupClientId,
+          childIndex,
+          groupShown
+        );
         if (group) groups.push(group);
         return;
       }
+      const id = clientId(child.id, groupClientId);
       const displayLayer = displayLayers.get(child.id);
-      if (!displayLayer) return;
+      if (!groupShown || !displayLayer) return;
       const layer =
         layerSettings.get(layerSettingsKey(node.id, child.id)) ??
         DEFAULT_LAYER_SETTINGS;
-      const id = clientId(child.id, groupClientId);
       const ref: ClientLayerSwitcherLayerRef = {
         id,
         index: childIndex,
@@ -233,6 +246,7 @@ export async function buildClientLayerTreeForMap(
       });
     });
 
+    if (!groupShown) return null;
     const group = groupSettings.get(node.id) ?? DEFAULT_GROUP_SETTINGS;
     return {
       id: groupClientId,
@@ -258,7 +272,7 @@ export async function buildClientLayerTreeForMap(
       );
       return;
     }
-    const group = toClientGroup(node, ROOT_PARENT, index);
+    const group = toClientGroup(node, ROOT_PARENT, index, true);
     if (group) groups.push(group);
   });
 

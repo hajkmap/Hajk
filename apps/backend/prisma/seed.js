@@ -26,6 +26,21 @@ const prisma = new PrismaClient({
 
 const DEFAULT_PROJECTION_CODE = "EPSG:3006";
 
+/** The AD groups a map file names in visibleForGroups, each once. */
+const adGroupsOf = (value) =>
+  Array.isArray(value)
+    ? [
+        ...new Set(
+          value
+            .map((group) => String(group).trim())
+            .filter((group) => group !== "")
+        ),
+      ]
+    : [];
+
+const sameAdGroups = (a, b) =>
+  a.length === b.length && a.every((group) => b.includes(group));
+
 /** InfoClickSettings stores the display-field lists as one comma-separated string. */
 const commaList = (value) => {
   const items = Array.isArray(value)
@@ -108,6 +123,8 @@ const jsonToSearchLayerId = new Map();
 const jsonToEditingLayerId = new Map();
 /** Shared catalog tools keyed by type (created once, linked to many maps). */
 const seededToolsByType = new Map();
+/** Their AD groups, to tell when a later map file names others. */
+const seededToolAdGroups = new Map();
 
 const generateRandomName = () => {
   const adjectives = [
@@ -262,26 +279,34 @@ async function readMapConfigAndPopulateMap(file) {
     let toolId = !perMap ? seededToolsByType.get(toolType) : undefined;
 
     if (toolId == null) {
+      const { visibleForGroups, ...instanceOptions } = toolOptions;
+      const adGroups = adGroupsOf(visibleForGroups);
       const tool = await prisma.toolInstance.create({
         data: {
           type: toolType,
-          options: toolOptions,
+          options: instanceOptions,
+          // A layerswitcher's groups decide who gets its map, see the map below.
+          visibleForGroups: toolType === "layerswitcher" ? [] : adGroups,
         },
       });
       toolId = tool.id;
 
-      // Add potential role restrictions on the tool (only when first created)
-      await updateRolesFromVisibleForGroups(
-        toolOptions.visibleForGroups || [],
-        tool.id,
-        "tool"
-      );
-
       if (!perMap) {
         seededToolsByType.set(toolType, toolId);
+        seededToolAdGroups.set(toolType, adGroups);
       }
     } else {
       console.log(`  Reusing existing ${toolType} tool #${toolId}`);
+      if (
+        !sameAdGroups(
+          seededToolAdGroups.get(toolType),
+          adGroupsOf(toolOptions.visibleForGroups)
+        )
+      ) {
+        console.warn(
+          `Map "${file}": tool ${toolType} has other visibleForGroups than on the map it was first read from; the shared tool keeps the first map's (check it in admin).`
+        );
+      }
     }
 
     // Same shared tool must not be linked twice to one map (@@id mapName+toolId).
@@ -309,10 +334,15 @@ async function readMapConfigAndPopulateMap(file) {
   const mapProjection = await prisma.projection.findUnique({
     where: { code: mapProjectionCode },
   });
-  const createdMap = await prisma.map.create({
+  await prisma.map.create({
     data: {
       name: file, // We use the file name as our unique map identifier
       options: mapConfig.map, // Put all map options as-is, as JSON
+      // Who gets the map: the AD groups the map file gives its layerswitcher.
+      visibleForGroups: adGroupsOf(
+        mapConfig.tools.find((t) => t.type === "layerswitcher")?.options
+          ?.visibleForGroups
+      ),
       ...(mapProjection
         ? { projection: { connect: { id: mapProjection.id } } }
         : {}),
@@ -324,14 +354,6 @@ async function readMapConfigAndPopulateMap(file) {
       // They are connected in the steps below.
     },
   });
-
-  // Now that the map is created, we can create and connect roles that should have access to the map.
-  // The "roles" (defined as groups in the .json-files) are set on the layerSwitcher...
-  const layerswitcherTool = mapConfig.tools.find((t) => t.type === "layerswitcher");
-  const visibleForGroups = layerswitcherTool?.options?.visibleForGroups || [];
-
-  // Add potential role restrictions on the map
-  await updateRolesFromVisibleForGroups(visibleForGroups, createdMap.id, "map");
 
   const connectedTools = await prisma.toolsOnMaps.createMany({
     data: toolsToConnectToMap,
@@ -366,13 +388,6 @@ const LAYER_KIND_BY_JSON_KEY = {
   wfslayers: "search",
   wfstlayers: "editing",
 };
-
-function mapJsonLayerIdToPrisma(jsonLayerId, jsonKey) {
-  const kind = LAYER_KIND_BY_JSON_KEY[jsonKey];
-  if (kind === "search") return jsonToSearchLayerId.get(jsonLayerId);
-  if (kind === "editing") return jsonToEditingLayerId.get(jsonLayerId);
-  return jsonToDisplayLayerId.get(jsonLayerId);
-}
 
 async function readAndPopulateLayers() {
   try {
@@ -465,6 +480,7 @@ async function readAndPopulateLayers() {
               name: layer.caption,
               internalName: layer.internalLayerName || generateRandomName(),
               selectedLayers,
+              visibleForGroups: adGroupsOf(layer.visibleForGroups),
               searchFields:
                 layer.searchFields ||
                 (typeof layer.searchPropertyName === "string"
@@ -508,6 +524,7 @@ async function readAndPopulateLayers() {
               name: layer.caption,
               internalName: layer.internalLayerName || generateRandomName(),
               selectedLayers,
+              visibleForGroups: adGroupsOf(layer.visibleForGroups),
               geometryField: layer.geometryField || layer.searchGeometryField,
               service: { connect: { id: service.id } },
               options: {
@@ -535,6 +552,7 @@ async function readAndPopulateLayers() {
               name: layer.caption,
               internalName: layer.internalLayerName || generateRandomName(),
               selectedLayers,
+              visibleForGroups: adGroupsOf(layer.visibleForGroups),
               legendUrl: layer.legend,
               legendIconUrl: layer.legendIcon,
               opacity: layer.opacity,
@@ -592,20 +610,6 @@ async function readAndPopulateLayers() {
       console.log(
         `Created ${countByKind[layerKind] ?? 0} ${type} ${layerKind} layers`
       );
-
-      for await (const layer of cleanedLayers) {
-        const prismaId = mapJsonLayerIdToPrisma(layer.id, key);
-        if (!prismaId) continue;
-        await updateRolesFromVisibleForGroups(
-          layer.visibleForGroups || [],
-          prismaId,
-          layerKind === "search"
-            ? "searchLayer"
-            : layerKind === "editing"
-              ? "editingLayer"
-              : "displayLayer"
-        );
-      }
     }
   } catch (error) {
     console.error(error);
@@ -718,7 +722,7 @@ const bySiblingIndex = (placements) =>
 /**
  * Fills the layer trees from each map's layerswitcher Tool.options
  * (App_Data/<map>.json tools[].options.groups / .baselayers):
- * - the groups (Group, with roles from visibleForGroups);
+ * - the groups (Group, with the AD groups in visibleForGroups);
  * - each group's own content (GroupItem): its layers, in order, then the
  *   groups nested under it on every map where it is used. A group used on
  *   several maps holds the layers it has on any of them;
@@ -781,6 +785,12 @@ async function populateLayerTrees() {
       if (!layerId) continue;
       const options = { ...ref };
       delete options.id;
+      if (adGroupsOf(options.visibleForGroups).length > 0) {
+        console.warn(
+          `Map "${map.name}": background layer "${layerId}" has visibleForGroups; AD groups per placement aren't imported (set them on the layer).`
+        );
+      }
+      delete options.visibleForGroups;
       background.push({ mapId: map.id, layerId, options });
     }
 
@@ -789,11 +799,21 @@ async function populateLayerTrees() {
     const readGroup = (group, parentId, index) => {
       if (!group?.id) return;
       const known = groups.get(group.id);
+      const adGroups = adGroupsOf(group.visibleForGroups);
+      const differs =
+        known !== undefined && !sameAdGroups(known.visibleForGroups, adGroups);
+      if (differs && !known.mixed) {
+        console.warn(
+          `Map "${map.name}": group "${group.id}" has other visibleForGroups here than where it was read before; the group gets them all (check it in admin).`
+        );
+      }
       groups.set(group.id, {
         name: known?.name ?? group.name,
-        roles: [
-          ...new Set([...(known?.roles ?? []), ...(group.visibleForGroups || [])]),
+        visibleForGroups: [
+          ...new Set([...(known?.visibleForGroups ?? []), ...adGroups]),
         ],
+        // Warned about once.
+        mixed: Boolean(known?.mixed) || differs,
       });
       placements.push({ mapName: map.name, groupId: group.id, parentId, index, group });
 
@@ -808,7 +828,7 @@ async function populateLayerTrees() {
         drawOrder.set(layerId, Math.max(drawOrder.get(layerId) ?? -Infinity, order));
         if ((ref.visibleForGroups || []).length > 0) {
           console.warn(
-            `Map "${map.name}": layer "${layerId}" in group "${group.id}" has visibleForGroups; roles per placement aren't imported (set them on the layer or the group).`
+            `Map "${map.name}": layer "${layerId}" in group "${group.id}" has visibleForGroups; AD groups per placement aren't imported (set them on the layer or the group).`
           );
         }
       }
@@ -820,12 +840,13 @@ async function populateLayerTrees() {
   }
 
   await prisma.group.createMany({
-    data: [...groups].map(([id, group]) => ({ id, name: group.name })),
+    data: [...groups].map(([id, group]) => ({
+      id,
+      name: group.name,
+      visibleForGroups: group.visibleForGroups,
+    })),
     skipDuplicates: true,
   });
-  for (const [id, group] of groups) {
-    await updateRolesFromVisibleForGroups(group.roles, id, "group");
-  }
 
   // Each group's content: its layers, then the groups nested under it on
   // every map where it is used (never closing a loop).
@@ -1008,10 +1029,10 @@ async function populateLayerTrees() {
     await prisma.toolInstance.update({ where: { id: tool.id }, data: { options } });
   }
 
-  // Background layers, with their roles.
+  // Background layers.
   for (const { mapId, layerId, options } of background) {
     const placement = layerInstancePlacementFromOptions(options);
-    const instance = await prisma.layerInstance.create({
+    await prisma.layerInstance.create({
       data: {
         displayLayerId: layerId,
         mapId,
@@ -1021,11 +1042,6 @@ async function populateLayerTrees() {
         options: placement.options,
       },
     });
-    await updateRolesFromVisibleForGroups(
-      options.visibleForGroups || [],
-      instance.id,
-      "layerInstance"
-    );
   }
 
   console.log(
@@ -1057,82 +1073,6 @@ async function createBaseRoles() {
         ...role,
       },
     });
-  }
-}
-
-async function updateRolesFromVisibleForGroups(
-  visibleForGroups,
-  entityId,
-  entityType
-) {
-  for await (const group of visibleForGroups) {
-    const role = await prisma.role.upsert({
-      where: { code: group },
-      update: {},
-      create: { code: group, title: group, description: group },
-    });
-
-    switch (entityType) {
-      case "map":
-        await prisma.roleOnMap.create({
-          data: {
-            map: { connect: { id: entityId } },
-            role: { connect: { id: role.id } },
-          },
-        });
-        break;
-      case "tool":
-        await prisma.roleOnToolInstance.create({
-          data: {
-            toolInstance: { connect: { id: entityId } },
-            role: { connect: { id: role.id } },
-          },
-        });
-        break;
-      case "displayLayer":
-        await prisma.roleOnDisplayLayer.create({
-          data: {
-            displayLayer: { connect: { id: entityId } },
-            role: { connect: { id: role.id } },
-          },
-        });
-        break;
-      case "searchLayer":
-        await prisma.roleOnSearchLayer.create({
-          data: {
-            searchLayer: { connect: { id: entityId } },
-            role: { connect: { id: role.id } },
-          },
-        });
-        break;
-      case "editingLayer":
-        await prisma.roleOnEditingLayer.create({
-          data: {
-            editingLayer: { connect: { id: entityId } },
-            role: { connect: { id: role.id } },
-          },
-        });
-        break;
-      case "layerInstance":
-        await prisma.roleOnLayerInstance.create({
-          data: {
-            layerInstance: { connect: { id: entityId } },
-            role: { connect: { id: role.id } },
-          },
-        });
-        break;
-      case "group":
-        await prisma.roleOnGroup.create({
-          data: {
-            group: { connect: { id: entityId } },
-            role: { connect: { id: role.id } },
-          },
-        });
-        break;
-
-      default:
-        break;
-    }
   }
 }
 

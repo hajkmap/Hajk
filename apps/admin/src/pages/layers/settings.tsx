@@ -118,6 +118,7 @@ import { useLayerFieldLabels } from "./use-layer-field-labels";
 import { SettingsPageTabs } from "../../components/settings-page-tabs";
 import UnsavedChangesGuard from "../../components/unsaved-changes-guard";
 import AvailabilityStatus from "../../components/availability/availability-status";
+import VisibleForGroupsField from "../../components/availability/visible-for-groups-field";
 import {
   availabilityOf,
   fromDateTimeLocal,
@@ -677,6 +678,7 @@ export default function LayerSettings() {
         selectedLayers: layerData.selectedLayers,
         internalName: layerData.internalName,
         description: layerData.description,
+        visibleForGroups: layerData.visibleForGroups,
         geometryField,
         hidpi: layerData.hidpi,
         tiled: layerData.tiled,
@@ -860,6 +862,7 @@ export default function LayerSettings() {
                 serviceId: data.serviceId,
                 internalName: data.internalName,
                 description: data.description,
+                visibleForGroups: data.visibleForGroups as string[] | undefined,
                 opacity: toNumber(data.opacity),
                 minZoom: toNumber(data.minZoom),
                 maxZoom: toNumber(data.maxZoom),
@@ -1176,6 +1179,7 @@ export default function LayerSettings() {
                   "layers.available",
                   "layers.availableFrom",
                   "layers.availableUntil",
+                  "availability.visibleForGroups",
                 ),
                 "tillgänglig",
                 "available",
@@ -1186,6 +1190,7 @@ export default function LayerSettings() {
                 "options.visible",
                 "options.visibleFrom",
                 "options.visibleUntil",
+                "visibleForGroups",
               ]}
               allValues={showSettingsSearchUi ? getValues() : undefined}
               searchTerm={settingsSearchTerm}
@@ -1253,6 +1258,16 @@ export default function LayerSettings() {
                         fullWidth
                         {...register("options.visibleUntil")}
                       />
+                    </FormFieldRow>
+                  </SettingsSearchField>
+                  <SettingsSearchField
+                    labelKeys={["availability.visibleForGroups"]}
+                    fields={["visibleForGroups"]}
+                    searchTerm={settingsSearchTerm}
+                    allValues={showSettingsSearchUi ? getValues() : undefined}
+                  >
+                    <FormFieldRow fullWidth>
+                      <VisibleForGroupsField control={control} />
                     </FormFieldRow>
                   </SettingsSearchField>
                   <FormFieldRow fullWidth>

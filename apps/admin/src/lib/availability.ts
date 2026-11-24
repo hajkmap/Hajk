@@ -2,7 +2,9 @@
  * Whether a map's, a layer's or a service's users get it: its `visible`
  * option and the optional period from `visibleFrom` to `visibleUntil`. A
  * layer also needs its service. The backend applies the same rule
- * (utils/availability.ts) when the client fetches a map.
+ * (utils/availability.ts) when the client fetches a map, and for maps, groups
+ * and layers also their AD groups (`visibleForGroups`) while it looks users
+ * up in AD.
  */
 export interface Availability {
   visible: boolean;
@@ -70,6 +72,18 @@ export function toDateTimeLocal(value: unknown): string {
 /** A datetime-local field's value as an ISO date-time, or "" when it is empty. */
 export function fromDateTimeLocal(value: unknown): string {
   return dateOf(value)?.toISOString() ?? "";
+}
+
+/** AD groups typed with commas between, without blanks. */
+export function parseGroups(text: string): string[] {
+  return text
+    .split(",")
+    .map((part) => part.trim())
+    .filter((part) => part !== "");
+}
+
+export function formatGroups(value: unknown): string {
+  return Array.isArray(value) ? value.join(", ") : "";
 }
 
 export function formatWhen(

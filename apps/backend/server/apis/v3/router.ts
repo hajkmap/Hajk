@@ -1,5 +1,6 @@
 import { Router } from "express";
 
+import activeDirectoryRouter from "./controllers/active-directory/router.ts";
 import authRouter from "./controllers/auth/router.ts";
 import healthRouter from "./controllers/health/router.ts";
 import databaseRouter from "./controllers/database/router.ts";
@@ -29,6 +30,7 @@ export default Router()
   .use("/public", isAuthenticated, publicRouter)
   .use("/ogc", isAuthenticated, ogcRouter)
   // The admin endpoints require that the user is authenticated and has the admin role
+  .use("/active-directory", isAdmin, activeDirectoryRouter)
   .use("/websockets", isAdmin, websocketsRouter) // Note that UPGRADE endpoint at /api/v3/websockets is not behind this router, but rather directly in the websockets.ts file
   .use("/database", isAdmin, databaseRouter)
   .use("/documents", isAdmin, documentsRouter)

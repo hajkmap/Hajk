@@ -111,6 +111,7 @@ export function buildLayerUpdatePayload(
     internalName: flat.internalName,
     description: flat.description,
     locked: flat.locked,
+    visibleForGroups: flat.visibleForGroups,
   };
 
   if (kind === "search") {

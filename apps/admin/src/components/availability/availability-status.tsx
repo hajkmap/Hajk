@@ -2,6 +2,7 @@ import { Alert } from "@mui/material";
 import { useWatch, type Control, type FieldValues } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
+import { useActiveDirectoryStatus } from "../../api/active-directory";
 import {
   availabilityOf,
   availabilityState,
@@ -13,8 +14,10 @@ import {
 /**
  * Whether users get the map, the layer, the service or the group now, as the
  * availability fields (options.visible, options.visibleFrom,
- * options.visibleUntil) are filled in. A layer passes its service: while
- * users don't get the service, they don't get the layer either.
+ * options.visibleUntil) are filled in, and while the backend looks users up
+ * in AD, which users: the members of the AD groups in visibleForGroups. A
+ * layer passes its service: while users don't get the service, they don't
+ * get the layer either.
  */
 export default function AvailabilityStatus({
   control,
@@ -24,11 +27,18 @@ export default function AvailabilityStatus({
   service?: { name: string; options: Record<string, unknown> };
 }) {
   const { t, i18n } = useTranslation();
-  const [visible, visibleFrom, visibleUntil] = useWatch({
+  const [visible, visibleFrom, visibleUntil, visibleForGroups] = useWatch({
     control,
-    name: ["options.visible", "options.visibleFrom", "options.visibleUntil"],
-  }) as [unknown, unknown, unknown];
+    name: [
+      "options.visible",
+      "options.visibleFrom",
+      "options.visibleUntil",
+      "visibleForGroups",
+    ],
+  }) as [unknown, unknown, unknown, string[] | undefined];
+  const { data: activeDirectory } = useActiveDirectoryStatus();
   const availability = availabilityOf({ visible, visibleFrom, visibleUntil });
+  const groups = activeDirectory?.lookupActive ? (visibleForGroups ?? []) : [];
 
   if (!hasValidPeriod(availability)) {
     return (
@@ -58,6 +68,10 @@ export default function AvailabilityStatus({
           : state.until
             ? t("availability.status.shownUntil", { until: when(state.until) })
             : t("availability.status.shown");
+  const onlyGroups =
+    state.kind === "shown" && groups.length > 0
+      ? ` ${t("availability.status.onlyGroups", { groups: groups.join(", ") })}`
+      : "";
 
   return (
     <>
@@ -66,6 +80,7 @@ export default function AvailabilityStatus({
         sx={{ mt: 2 }}
       >
         {text}
+        {onlyGroups}
       </Alert>
       {serviceAlert}
     </>
