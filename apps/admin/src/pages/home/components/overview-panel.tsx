@@ -23,6 +23,8 @@ export interface OverviewItem {
 }
 
 function StatCard({ title, count, to, loading }: OverviewItem) {
+  const { t } = useTranslation();
+
   return (
     <Card variant="outlined" sx={{ height: "100%" }}>
       <CardContent>
@@ -38,7 +40,7 @@ function StatCard({ title, count, to, loading }: OverviewItem) {
             </Typography>
           )}
           <Button component={Link} to={to} variant="contained" size="small">
-            View
+            {t("home.view")}
           </Button>
         </Stack>
       </CardContent>
