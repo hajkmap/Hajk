@@ -66,12 +66,19 @@ function LayerItemDetails({
   const showLegend = layerItemDetails?.layer?.get("layerType");
 
   const legendInfo = layerInfo?.legend;
+  // A sublayer's own legend (if any) wins over the layer's legend when we show
+  // details for that sublayer.
+  const subLayerName = layerItemDetails?.layer?.subLayers?.[subLayerIndex];
+  const subLayerLegend =
+    layerItemDetails?.layer?.layersInfo?.[subLayerName]?.legend;
+  // Keep only unique urls for the whole layer, the same way LayerItem does (see #1644).
   const legendUrl =
     showLegend && subLayerIndex === null
       ? (Array.isArray(legendInfo) ? legendInfo : [])
           .map((l) => l?.url)
-          .filter(Boolean)
-      : Array.isArray(legendInfo) && legendInfo[subLayerIndex]?.url;
+          .filter((url, index, self) => url && self.indexOf(url) === index)
+      : subLayerLegend ||
+        (Array.isArray(legendInfo) && legendInfo[subLayerIndex]?.url);
 
   // Handle opacity slider changes
   const handleOpacitySliderChange = (_, newValue) => {

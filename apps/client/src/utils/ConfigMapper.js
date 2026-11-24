@@ -67,10 +67,16 @@ export default class ConfigMapper {
       return legendUrl;
     }
 
+    // Legends for the layer as a whole, one entry per sublayer. The layer's own legend
+    // wins over the sublayers' legends here (see #1644). For a single sublayer it's the
+    // other way around, see mapLayersInfo().
     function getLegends() {
       return args.layers.map((layer) => {
+        const subLayerLegend = args.layersInfo?.find(
+          (l) => l.id === layer
+        )?.legend;
         return {
-          url: getLegendUrl(layer),
+          url: args.legend || subLayerLegend || getLegendUrl(layer),
           description: "Teckenförklaring",
         };
       });

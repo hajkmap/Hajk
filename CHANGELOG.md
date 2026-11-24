@@ -12,12 +12,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Admin + Client: WMTS layers can now have a default opacity, like WMS and vector layers. The opacity field is validated (0–1) the same way in all three layer forms, and an opacity of `0` is no longer turned into `1` in the Client. `LayerControlModel` gets `setOpacity(id, value)` and `getOpacity(id)`, which the LayerSwitcher opacity slider now uses. [#1945](https://github.com/hajkmap/Hajk/issues/1945)
+- Admin + Client: Legend can now be overridden per WMS sublayer. [#1949](https://github.com/hajkmap/Hajk/issues/1949)
 - Admin + Backend: Feedback can be marked as answered. The Admin's Feedback view now has separate tabs for unanswered and answered feedback, and a checkbox on each row moves it between them. The status, with when and by whom (if AD is active), is stored in `App_Data/feedback/answered.json` and set through the new admin-only `PATCH /api/v2/feedback/{id}`. `GET /feedback` includes `answered`, `answeredAt` and `answeredBy` for each entry, and `/feedback/stats` includes `answeredCount` and `unansweredCount`. [#1947](https://github.com/hajkmap/Hajk/issues/1947)
 
 ### Changed
 
 - Backend: Bumped `altcha-lib`.
 - Client: Bumped Vite from 7 to 8 (Rolldown/Oxc), `motion`, `@nieuwlandgeo/sldreader` from 0.7 to 2.2 and `@libpdf/core`. `vite.config.ts` updated for Vite 8.
+
+### Fixed
+
+- Client: LayerSwitcher no longer repeats a layer's custom legend once per sublayer in the layer details view. [#1949](https://github.com/hajkmap/Hajk/issues/1949)
 
 ## [4.4.0-rc.1] - 2026-11-16
 

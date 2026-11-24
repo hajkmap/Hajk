@@ -433,6 +433,33 @@ class WMSLayerForm extends Component {
             type="text"
           />
         </div>
+        <div className="form-row">
+          <div>
+            <label>Teckenförklaring</label>
+          </div>
+          <input
+            style={{ width: "100%" }}
+            type="text"
+            placeholder="URL till bild"
+            value={layerInfo.legend || ""}
+            onChange={(e) => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].legend = e.target.value;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo,
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                },
+              );
+            }}
+          />
+          <small>
+            Lämna tomt för automatisk teckenförklaring. Har hela lagret en egen
+            teckenförklaring används den i lagrets samlade teckenförklaring.
+          </small>
+        </div>
         <div className="form-row split0">
           <div>
             <label>Teckenförklaringsikon</label>
