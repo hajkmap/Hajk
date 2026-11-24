@@ -3,6 +3,8 @@ import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import gfm from "remark-gfm";
 import FeaturePropFilters from "./FeaturePropsFilters";
+import ImageCarousel from "./ImageCarousel";
+import rehypeCarousel from "./rehypeCarousel";
 import AppModel from "../../models/AppModel";
 
 import {
@@ -52,6 +54,7 @@ export default class FeaturePropsParsing {
     // a MUI Typography component).
     this.components = {
       ...customComponentsForReactMarkdown,
+      "hajk-carousel": ImageCarousel, // Created by rehypeCarousel
       p: ({ children }) => {
         if (!children) {
           return null;
@@ -106,7 +109,7 @@ export default class FeaturePropsParsing {
     };
     const start = str.match(jsonStart);
     const jsonLike = start && jsonEnds[start[0]].test(str);
-    var result = false;
+    var result;
 
     if (jsonLike) {
       try {
@@ -389,6 +392,18 @@ export default class FeaturePropsParsing {
    */
   mergeFeaturePropsWithMarkdown = async () => {
     if (this.markdown && typeof this.markdown === "string") {
+      // Convert {{carousel}}…{{/carousel}} to a wrapper element, see #1790. Must be done
+      // before placeholder replacement, which would otherwise consume the braces.
+      // The blank lines ensure that Markdown inside the wrapper is parsed. If HTML isn't
+      // allowed, only the content is kept (i.e. the images are stacked).
+      this.markdown = this.markdown.replace(
+        /\{\{carousel\}\}([\s\S]*?)\{\{\/carousel\}\}/gi,
+        (_match, content) =>
+          this.allowDangerousHtml
+            ? `\n\n<div class="hajk-carousel">\n\n${content}\n\n</div>\n\n`
+            : content
+      );
+
       // Convert markdown links with inline attributes to HTML anchors before
       // placeholder replacement, which would otherwise consume the {attrs} block.
       // E.g. [text](url){link-check=true} -> <a href="url" link-check="true">text</a>
@@ -472,7 +487,9 @@ export default class FeaturePropsParsing {
 
       // If admin wants to allow HTML in Markdown, add rehypeRaw plugin.
       // Note that the gfm plugin is always added: it gives access to Table syntax.
-      const rehypePlugins = this.allowDangerousHtml ? [rehypeRaw] : [];
+      const rehypePlugins = this.allowDangerousHtml
+        ? [rehypeRaw, rehypeCarousel]
+        : [];
 
       // Now, when promises are fulfilled, we can render. One of the render's helpers
       // will make use of the results in this.resolvedPromises, so that's why we had to wait.

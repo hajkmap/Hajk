@@ -107,7 +107,7 @@ const MapClickViewer = (props) => {
       <WindowSheet
         isOpen={open}
         onClose={closeWindow}
-        title={title}
+        title={title || "Information"}
         snapPoints={snapPoints}
         initialSnap={1}
         zIndex={1199}
