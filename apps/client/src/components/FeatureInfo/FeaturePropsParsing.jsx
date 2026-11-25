@@ -392,12 +392,12 @@ export default class FeaturePropsParsing {
    */
   mergeFeaturePropsWithMarkdown = async () => {
     if (this.markdown && typeof this.markdown === "string") {
-      // Convert {{carousel}}…{{/carousel}} to a wrapper element, see #1790. Must be done
-      // before placeholder replacement, which would otherwise consume the braces.
+      // Convert <carousel>…</carousel> to a wrapper element, see #1790. Must be done
+      // before placeholder replacement, so that tags in feature values are ignored.
       // The blank lines ensure that Markdown inside the wrapper is parsed. If HTML isn't
       // allowed, only the content is kept (i.e. the images are stacked).
       this.markdown = this.markdown.replace(
-        /\{\{carousel\}\}([\s\S]*?)\{\{\/carousel\}\}/gi,
+        /<carousel>([\s\S]*?)<\/carousel>/gi,
         (_match, content) =>
           this.allowDangerousHtml
             ? `\n\n<div class="hajk-carousel">\n\n${content}\n\n</div>\n\n`

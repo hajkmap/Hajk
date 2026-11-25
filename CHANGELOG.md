@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Admin + Client: WMTS layers can now have a default opacity, like WMS and vector layers. The opacity field is validated (0–1) the same way in all three layer forms, and an opacity of `0` is no longer turned into `1` in the Client. `LayerControlModel` gets `setOpacity(id, value)` and `getOpacity(id)`, which the LayerSwitcher opacity slider now uses. [#1945](https://github.com/hajkmap/Hajk/issues/1945)
 - Admin + Backend: Feedback can be marked as answered. The Admin's Feedback view now has separate tabs for unanswered and answered feedback, and a checkbox on each row moves it between them. The status, with when and by whom (if AD is active), is stored in `App_Data/feedback/answered.json` and set through the new admin-only `PATCH /api/v2/feedback/{id}`. `GET /feedback` includes `answered`, `answeredAt` and `answeredBy` for each entry, and `/feedback/stats` includes `answeredCount` and `unansweredCount`. [#1947](https://github.com/hajkmap/Hajk/issues/1947)
-- Client: Infoclick - Images can be shown in a swipeable carousel, one at a time, by wrapping them in `{{carousel}}…{{/carousel}}` in the layer's infoclick Markdown. Images without a URL are left out. Requires that HTML is allowed in the infoclick (default), otherwise the images are stacked as before. [#1790](https://github.com/hajkmap/Hajk/issues/1790)
+- Client: Infoclick - Images can be shown in a swipeable carousel, one at a time, by wrapping them in `<carousel>…</carousel>` in the layer's infoclick Markdown. Images without a URL are left out. Requires that HTML is allowed in the infoclick (default), otherwise the images are stacked as before. [#1790](https://github.com/hajkmap/Hajk/issues/1790)
 
 ### Changed
 
