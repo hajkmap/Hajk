@@ -100,10 +100,24 @@ export const getLegendInfoForLayer = (layer) => {
     ? layerInfo.legend
     : [];
 
+  // layerInfo.legend has one entry per configured sublayer (in config order), while
+  // params.LAYERS only holds the visible ones. Look entries up by sublayer name.
+  const configuredSublayers = Array.isArray(layer.subLayers)
+    ? layer.subLayers
+    : [];
+
   const entries = visibleSublayers.map((sublayer, index) => {
     const style = activeStyles[index] || layersInfo?.[sublayer]?.style || "";
-    const configuredEntry = configuredLegend[index];
-    const configuredUrl = configuredEntry?.Url ?? configuredEntry?.url ?? null;
+    const configIndex = configuredSublayers.indexOf(sublayer);
+    const configuredEntry =
+      configIndex >= 0 ? configuredLegend[configIndex] : undefined;
+    // Same precedence as the LayerSwitcher's sublayer row: the sublayer's own legend
+    // first (mapLayersInfo() falls back to the layer's legend, then GetLegendGraphic).
+    const configuredUrl =
+      layersInfo?.[sublayer]?.legend ||
+      configuredEntry?.Url ||
+      configuredEntry?.url ||
+      null;
     const generatedUrl = buildGetLegendGraphicUrl({
       url: baseUrl,
       layer: sublayer,

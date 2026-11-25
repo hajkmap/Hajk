@@ -22,6 +22,13 @@ const SERVERTYPE_MAPSERVER = "mapserver";
 //  ESRI ArcGIS Server (client --> MapServer)
 const SERVERTYPE_ARCGIS = "arcgis";
 
+// A sublayer legend must be empty (= automatic legend) or look like an image URL:
+// absolute (http/https), relative to the server ("/..", "./.."), or a data URL.
+const isValidLegendUrl = (value) =>
+  !value ||
+  value.trim() === "" ||
+  /^(https?:\/\/|\/|\.{1,2}\/|data:image\/)\S+$/i.test(value.trim());
+
 const defaultState = {
   load: false,
   imageLoad: false,
@@ -441,6 +448,9 @@ class WMSLayerForm extends Component {
             style={{ width: "100%" }}
             type="text"
             placeholder="URL till bild"
+            className={
+              isValidLegendUrl(layerInfo.legend) ? "" : "validation-error"
+            }
             value={layerInfo.legend || ""}
             onChange={(e) => {
               let addedLayersInfo = this.state.addedLayersInfo;
@@ -451,10 +461,22 @@ class WMSLayerForm extends Component {
                 },
                 () => {
                   this.renderLayerInfoDialog(layerInfo);
+                  // Clear a previous save error once all legends are valid again.
+                  if (this.getValidationClass("layersInfo")) {
+                    this.validateField("layersInfo");
+                  }
                 },
               );
             }}
           />
+          {!isValidLegendUrl(layerInfo.legend) && (
+            <div>
+              <small>
+                Ogiltig URL. Ange en adress som börjar med http://, https://
+                eller /.
+              </small>
+            </div>
+          )}
           <small>
             Lämna tomt för automatisk teckenförklaring. Har hela lagret en egen
             teckenförklaring används den i lagrets samlade teckenförklaring.
@@ -1557,7 +1579,13 @@ class WMSLayerForm extends Component {
   }
 
   validate() {
-    var validationFields = ["url", "caption", "layers", "opacity"];
+    var validationFields = [
+      "url",
+      "caption",
+      "layers",
+      "layersInfo",
+      "opacity",
+    ];
     var errors = [];
 
     validationFields.forEach((field) => {
@@ -1621,6 +1649,11 @@ class WMSLayerForm extends Component {
       case "url":
       case "caption":
         if (value === "") {
+          valid = false;
+        }
+        break;
+      case "layersInfo":
+        if (!value.every((info) => isValidLegendUrl(info.legend))) {
           valid = false;
         }
         break;
@@ -2090,6 +2123,12 @@ class WMSLayerForm extends Component {
           >
             <ul>{this.renderSelectedLayers()}</ul>
           </div>
+          {this.getValidationClass("layersInfo") && (
+            <small>
+              Ett eller flera valda lager har en ogiltig URL för
+              teckenförklaring.
+            </small>
+          )}
         </div>
         <div>
           <label>Stäng av möjlighet att expandera</label>

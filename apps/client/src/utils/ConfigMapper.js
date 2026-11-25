@@ -69,7 +69,8 @@ export default class ConfigMapper {
 
     // Legends for the layer as a whole, one entry per sublayer. The layer's own legend
     // wins over the sublayers' legends here (see #1644). For a single sublayer it's the
-    // other way around, see mapLayersInfo().
+    // other way around, see mapLayersInfo() - that precedence is also used by the
+    // sublayer details view and the per-sublayer entries in the print legend.
     function getLegends() {
       return args.layers.map((layer) => {
         const subLayerLegend = args.layersInfo?.find(
