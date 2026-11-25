@@ -41,7 +41,7 @@ export default function Header() {
             component="span"
             key="home"
           >
-            <Link to="/">Start</Link>
+            <Link to="/">{t("common.home")}</Link>
             {pathParts.length > 0 && (
               <Box
                 component="span"
@@ -129,7 +129,7 @@ export default function Header() {
               to="/"
               style={{ color: palette.text.primary, fontWeight: 600 }}
             >
-              Start
+              {t("common.home")}
             </Link>
           </Box>,
         ];

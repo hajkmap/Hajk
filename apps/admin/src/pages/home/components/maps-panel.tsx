@@ -20,7 +20,7 @@ import CreateMapDialog from "../../maps/components/create-map-dialog";
 import DuplicateMapDialog from "../../maps/components/duplicate-map-dialog";
 import MapCard from "./map-card";
 
-const MAX_MAPS_SHOWN = 7;
+const MAX_MAPS_SHOWN = 3;
 
 const CARD_GRID_SIZE = { xs: 12, sm: 6, md: 4, lg: 3 };
 const CARD_MIN_HEIGHT = 240;

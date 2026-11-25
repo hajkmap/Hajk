@@ -25,9 +25,9 @@ const NavList = (props: Props) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const [openCollapsibleIndex, setOpenCollapsibleIndex] = useState<
-    number | null
-  >(null);
+  const [openCollapsibleIndexes, setOpenCollapsibleIndexes] = useState<
+    Set<number>
+  >(() => new Set());
 
   const closeSidebarIfNeeded = () => {
     if (!props.locked) {
@@ -36,7 +36,15 @@ const NavList = (props: Props) => {
   };
 
   const handleCollapsibleToggle = (index: number) => {
-    setOpenCollapsibleIndex(openCollapsibleIndex === index ? null : index);
+    setOpenCollapsibleIndexes((current) => {
+      const next = new Set(current);
+      if (next.has(index)) {
+        next.delete(index);
+      } else {
+        next.add(index);
+      }
+      return next;
+    });
   };
 
   return (
@@ -67,7 +75,7 @@ const NavList = (props: Props) => {
               icon={menuItem.icon}
               subItems={menuItem.subItems}
               closeSidebarIfNeeded={closeSidebarIfNeeded}
-              collapsed={openCollapsibleIndex !== index}
+              collapsed={!openCollapsibleIndexes.has(index)}
               onToggle={() => handleCollapsibleToggle(index)}
             />
           ) : (
