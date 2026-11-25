@@ -15,6 +15,12 @@ import ImageLayer from "ol/layer/Image";
 import TileLayer from "ol/layer/Tile";
 import TileWMS from "ol/source/TileWMS";
 import ImageWMS from "ol/source/ImageWMS";
+import ImageArcGISRest from "ol/source/ImageArcGISRest";
+import {
+  TRANSPARENT_PIXEL,
+  buildArcGISImageUrl,
+  limitArcGISImageSize,
+} from "../../utils/arcgisHelpers";
 
 import {
   PAPER_DIMS_MM,
@@ -519,15 +525,22 @@ export default class PrintModel {
       });
   };
 
-  // Returns true if the supplied layer is a tiled or an image-based layer.
+  // Returns true if the supplied layer is a tiled or an image-based layer
+  // that Print can prepare (WMS or ArcGIS REST).
   layerIsTileOrImageLayer = (layer) => {
+    const source = layer.getSource();
     return (
-      (layer instanceof TileLayer && layer.getSource() instanceof TileWMS) ||
-      (layer instanceof ImageLayer && layer.getSource() instanceof ImageWMS)
+      (layer instanceof TileLayer && source instanceof TileWMS) ||
+      (layer instanceof ImageLayer &&
+        (source instanceof ImageWMS || source instanceof ImageArcGISRest))
     );
   };
 
-  // Returns all currently active image-layers as an array
+  // True for layers created by ArcGISLayer (an ArcGIS REST MapServer)
+  layerIsArcGISLayer = (layer) => layer.getSource() instanceof ImageArcGISRest;
+
+  // Returns all currently active image-layers as an array.
+  // Only WMS: prepareImageLayer adds WMS DPI params that ArcGIS does not use.
   getVisibleImageLayers = () => {
     return this.map
       .getLayers()
@@ -556,7 +569,7 @@ export default class PrintModel {
   // with only image sources? Well, it seems as if OL does some funky stuff with all the tiled sources,
   // leading to an excess of loaded tiles. By making sure to only use image-layers during print, we can
   // make sure we're not requesting too many tiles, and also that the wms-style is applied properly.
-  exchangeLayer = (layer) => {
+  exchangeLayer = (layer, options) => {
     // Let's run this in a try-catch just in case
     try {
       // Since we're adding a "print-layer", we want to make sure to hide
@@ -567,18 +580,36 @@ export default class PrintModel {
       this.hiddenLayers.add(layer);
       // When we create the new layer, we're gonna need the original source!
       const source = layer.getSource();
-      // Let's create a new image-source containing all the options from the supplied source
-      // along with some additional settings. We make sure to set the ratio to one (1) so that
-      // OL does not load more data than necessary, and we also make sure to disable hiDpi!
-      // (Otherwise the print-process will fetch more pixels than necessary).
-      const imageSource = new ImageWMS({
-        ...source.getProperties(),
-        projection: source.getProjection(),
-        crossOrigin: source.crossOrigin || source.crossOrigin_ || "anonymous", // `crossOrigin` is not always publicly available for some reason... Had to use the private property as fallback
-        params: { ...source.getParams() },
-        ratio: 1,
-        hidpi: false,
-      });
+      const crossOrigin =
+        source.crossOrigin || source.crossOrigin_ || "anonymous"; // `crossOrigin` is not always publicly available for some reason... Had to use the private property as fallback
+      // ArcGIS REST needs its own source type. Its images are requested with
+      // `dpi` set to the print resolution, so that the server draws symbols and
+      // labels, and applies its scale ranges, for the print and not for the
+      // screen (OpenLayers sends 90 by default). The images are also kept
+      // within what the server accepts (4096 px by default).
+      const imageSource = this.layerIsArcGISLayer(layer)
+        ? new ImageArcGISRest({
+            url: source.getUrl(),
+            params: { ...source.getParams(), dpi: options?.resolution },
+            projection: source.getProjection(),
+            crossOrigin,
+            ratio: 1,
+            hidpi: false,
+            imageLoadFunction: (image, src) => {
+              const url = buildArcGISImageUrl(src);
+              image.getImage().src = url
+                ? limitArcGISImageSize(url, this.maxTileSize)
+                : TRANSPARENT_PIXEL;
+            },
+          })
+        : new ImageWMS({
+            ...source.getProperties(),
+            projection: source.getProjection(),
+            crossOrigin,
+            params: { ...source.getParams() },
+            ratio: 1,
+            hidpi: false,
+          });
       // We have to make sure to check the current layer-opacity and use that
       // opacity-value on the new layer.
       const layerOpacity = layer.getOpacity() ?? 1;

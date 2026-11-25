@@ -484,6 +484,12 @@ class App extends React.PureComponent {
   componentDidMount() {
     this.checkConfigForUnsupportedTools();
 
+    // Sublayer names from the ArcGIS services are needed when the layers are
+    // created, so the map is set up once they have been read (or timed out).
+    this.appModel.prefetchArcGISServiceInfo().finally(() => this.setupMap());
+  }
+
+  setupMap() {
     const promises = this.appModel
       .createMap()
       .addSearchModel()
