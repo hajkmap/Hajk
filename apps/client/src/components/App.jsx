@@ -484,6 +484,23 @@ class App extends React.PureComponent {
   componentDidMount() {
     this.checkConfigForUnsupportedTools();
 
+    // Sublayer names from the ArcGIS services may be needed when the layers are
+    // created. If so, the map is set up once they have been read (or timed
+    // out). Otherwise (most maps, e.g. without ArcGIS layers) it's set up
+    // right away, just like before.
+    const arcgisServiceInfo = this.appModel.prefetchArcGISServiceInfo();
+    if (!arcgisServiceInfo) {
+      this.setupMap();
+      return;
+    }
+    // setupMap() runs in a promise here, so log its errors instead of letting
+    // them become silent unhandled rejections.
+    arcgisServiceInfo
+      .finally(() => this.setupMap())
+      .catch((error) => console.error("Failed to set up the map:", error));
+  }
+
+  setupMap() {
     const promises = this.appModel
       .createMap()
       .addSearchModel()

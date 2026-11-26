@@ -5,12 +5,12 @@ import LayerControlModel from "./LayerControlModel";
 import { decorateConfig } from "./appModel/configTranslator";
 import { createMap } from "./appModel/mapFactory";
 import { addLayers, highlight, clear } from "./appModel/layerLoader";
+import { fetchServiceLayers } from "../utils/arcgisServiceInfo";
 import { setLayerVisibilityFromParams } from "./appModel/layerVisibility";
 import PluginManager from "./appModel/pluginManager";
 
 import CoordinateSystemLoader from "../utils/CoordinateSystemLoader";
 import { hfetch } from "../utils/FetchWrapper";
-// import ArcGISLayer from "./layers/ArcGISLayer.js";
 // import DataLayer from "./layers/DataLayer.js";
 // TODO: Uncomment and ensure they show as expected
 // import {
@@ -28,6 +28,10 @@ import { hfetch } from "../utils/FetchWrapper";
 // } from "ol/control";
 
 import { register } from "ol/proj/proj4";
+
+// Max time to wait for ArcGIS sublayer names before creating the layers anyway
+// (the captions then fall back to "Caption (id)")
+const ARCGIS_SERVICE_INFO_TIMEOUT_MS = 3000;
 
 class AppModel {
   /**
@@ -206,6 +210,57 @@ class AppModel {
   addLayers() {
     addLayers(this);
     return this;
+  }
+
+  /**
+   * Reads the sublayer info (names, group layers) of the ArcGIS services used
+   * by the active map.
+   *
+   * All services are requested, so that Click.js knows which sublayers are
+   * group layers. But the map only *waits* for services whose sublayer names
+   * are needed as captions: layers with more than one sublayer and no
+   * layersInfo from the Admin. Maps without such layers start right away, and
+   * the wait is never longer than ARCGIS_SERVICE_INFO_TIMEOUT_MS, so a slow
+   * ArcGIS server can't hold up the map for long.
+   * @returns {Promise|null} A promise to wait for before the map is set up,
+   * or null if there is nothing to wait for.
+   */
+  prefetchArcGISServiceInfo() {
+    // Runs before translateConfig(), so layersConfig is still the raw object
+    // from the backend (ArcGIS layers are under "arcgislayers").
+    const rawLayersConfig = this.config.layersConfig;
+    const arcgisLayers = (
+      Array.isArray(rawLayersConfig)
+        ? rawLayersConfig.filter((l) => l.type === "arcgis")
+        : rawLayersConfig?.arcgislayers || []
+    ).filter((l) => l.url);
+    const proxy = this.config.appConfig.proxy;
+
+    // Start all requests (fetchServiceLayers caches them per URL)…
+    const requests = new Map(
+      arcgisLayers.map((l) => [l.url, fetchServiceLayers(l.url, proxy)])
+    );
+
+    // …but only wait for the ones whose names are used as captions.
+    const needsNames = (l) =>
+      (l.layers || []).length > 1 &&
+      !(Array.isArray(l.layersInfo) && l.layersInfo.length > 0);
+    const blocking = [
+      ...new Set(arcgisLayers.filter(needsNames).map((l) => l.url)),
+    ].map((url) => requests.get(url));
+    if (blocking.length === 0) {
+      // Nothing to wait for (e.g. no ArcGIS layers at all): the caller can set
+      // up the map right away, synchronously.
+      return null;
+    }
+
+    let timer;
+    const timeout = new Promise((resolve) => {
+      timer = setTimeout(resolve, ARCGIS_SERVICE_INFO_TIMEOUT_MS);
+    });
+    return Promise.race([Promise.all(blocking), timeout]).finally(() =>
+      clearTimeout(timer)
+    );
   }
 
   addLayerControl() {

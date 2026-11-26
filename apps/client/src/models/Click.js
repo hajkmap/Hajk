@@ -5,8 +5,12 @@ import TileLayer from "ol/layer/Tile";
 import ImageLayer from "ol/layer/Image";
 
 import { hfetch } from "../utils/FetchWrapper";
+import { queryArcGIS } from "../utils/arcgisQuery";
 
 function query(map, layer, evt) {
+  if (layer.get("arcgis")) {
+    return queryArcGIS(map, layer, evt);
+  }
   const coordinate = evt.coordinate;
   const resolution = map.getView().getResolution();
   const currentZoom = map.getView().getZoom();

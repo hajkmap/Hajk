@@ -1,4 +1,5 @@
 import ConfigMapper from "../../utils/ConfigMapper";
+import ArcGISLayer from "../layers/ArcGISLayer";
 import WMSLayer from "../layers/WMSLayer";
 import WMTSLayer from "../layers/WMTSLayer";
 import WFSVectorLayer from "../layers/VectorLayer";
@@ -48,10 +49,15 @@ export function addMapLayer(appModel, layer) {
       );
       appModel.map.addLayer(layerItem.layer);
       break;
-    // case "arcgis":
-    //   layerConfig = configMapper.mapArcGISConfig(layer);
-    //   layer = new ArcGISLayer(layerConfig);
-    //   break;
+    case "arcgis":
+      layerConfig = configMapper.mapArcGISConfig(layer);
+      layerItem = new ArcGISLayer(
+        layerConfig.options,
+        appModel.config.appConfig.proxy,
+        appModel.globalObserver
+      );
+      appModel.map.addLayer(layerItem.layer);
+      break;
     // case "data":
     //   layerConfig = configMapper.mapDataConfig(layer);
     //   layer = new DataLayer(layerConfig);
@@ -71,7 +77,10 @@ export function lookup(appModel, layers, type) {
     // Hence, no layer.set("layerType"). Instead we do this:
     layer.layerType = type;
     // Use the general value for infobox if not present in map config.
-    if (layerConfig !== undefined && layerConfig.type === "vector") {
+    if (
+      layerConfig !== undefined &&
+      (layerConfig.type === "vector" || layerConfig.type === "arcgis")
+    ) {
       if (!layer.infobox && layerConfig) {
         layer.infobox = layerConfig.infobox;
       }

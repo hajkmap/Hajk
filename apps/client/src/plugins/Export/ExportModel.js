@@ -11,7 +11,7 @@ import ImageWMS from "ol/source/ImageWMS";
 //import ImageVector from "ol/source/ImageVector";
 import { Translate } from "ol/interaction";
 import WMTS from "ol/source/WMTS";
-import TileArcGISRest from "ol/source/TileArcGISRest";
+import ImageArcGISRest from "ol/source/ImageArcGISRest";
 import Collection from "ol/Collection";
 import { hfetch } from "../../utils/FetchWrapper";
 
@@ -456,7 +456,9 @@ class ExportModel {
   findArcGIS() {
     function getArcGISLayerContract(layer) {
       var url = layer.getSource().get("url"),
-        extent = layer.get("extent") || [],
+        // ArcGIS layers keep the service's extent (in their own projection)
+        // in `serviceExtent`; `extent` would be in the map's projection.
+        extent = layer.get("serviceExtent") || layer.get("extent") || [],
         layers = [],
         projection = layer.get("projection");
 
@@ -486,7 +488,8 @@ class ExportModel {
     }
 
     function visibleArcGISLayer(layer) {
-      return layer.getSource() instanceof TileArcGISRest && layer.getVisible();
+      const source = layer.getSource();
+      return source instanceof ImageArcGISRest && layer.getVisible();
     }
 
     return this.map

@@ -18,6 +18,7 @@
     "build-preview": "vite build && vite preview",
     "prestart": "node prebuild.js",
     "prebuild": "node prebuild.js",
+    "test": "node --test \"test/**/*.test.js\"",
     "lint": "eslint src",
     "lint:fix": "eslint --fix src",
     "format": "prettier --write .",
