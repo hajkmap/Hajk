@@ -188,14 +188,13 @@ class WMSLayer {
     const wh = Math.round((targetRatio.pxRatio || 1) * 256);
 
     source.setTileLoadFunction((tile, src) => {
-      let url = new URL(src);
+      const url = new URL(src);
       url.searchParams.set("WIDTH", wh);
       url.searchParams.set("HEIGHT", wh);
       url.searchParams.set("FORMAT_OPTIONS", `dpi:${targetRatio.dpi}`); // Support GEOSERVER
       url.searchParams.set("DPI", targetRatio.dpi); // Support QGIS & CARMENTA_SERVER
       url.searchParams.set("MAP_RESOLUTION", targetRatio.dpi); // Support MAPSERVER
       tile.getImage().src = url.toString();
-      url = null;
     });
   }
 

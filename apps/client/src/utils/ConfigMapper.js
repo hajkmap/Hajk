@@ -2,6 +2,7 @@ import { Projection, get as getProjection } from "ol/proj";
 import { layerHasLabelStyle } from "./labelStyle";
 import { getServiceLayers } from "./arcgisServiceInfo";
 import { parseExtent, parseOpacity, splitLegend } from "./arcgisHelpers";
+import { cleanLegend, getWmsLegends } from "./wmsLegendHelpers";
 
 /**
  * CRSs whose official axis order is east/north (x/y). Every other CRS is
@@ -39,26 +40,27 @@ export default class ConfigMapper {
   }
 
   mapWMSConfig(args, properties) {
-    function getLegendUrl(layer) {
-      let legendUrl = "";
+    // The layer's own legend from Admin, empty if missing or whitespace only.
+    const layerLegend = cleanLegend(args.legend);
 
-      // If there's no legend URL specified, we'll need to get it from our WMS
-      if (args.legend === "") {
+    function getLegendUrl(layer) {
+      let legendUrl;
+
+      // If there's no legend URL specified (empty or missing), we'll need to get it from our WMS
+      if (!layerLegend) {
         /**
          * A layer can have multiple styles, so when getting Legend Graphic, it's important
          * to get it for the currently selected style.
          */
 
         // First get index if we're dealing with array
-        let getIndex =
-          args.layersInfo !== null
-            ? args.layersInfo.findIndex((l) => l.id === layer)
-            : null;
-        // Next, use that index to grab correct style and save its name for later use
-        let style =
-          args.layersInfo !== null &&
-          getIndex >= 0 &&
-          args.layersInfo[getIndex].style;
+        // layersInfo may be null or missing (older configs).
+        let getIndex = Array.isArray(args.layersInfo)
+          ? args.layersInfo.findIndex((l) => l.id === layer)
+          : -1;
+        // Next, use that index to grab correct style and save its name for later use.
+        // Fall back to an empty STYLE (= the server's default style), never "false"/"undefined".
+        const style = (getIndex >= 0 && args.layersInfo[getIndex].style) || "";
 
         let geoserverLegendOptions = "";
 
@@ -93,18 +95,19 @@ export default class ConfigMapper {
       }
       // If there's a legend URL specified in admin, use it as is
       else {
-        legendUrl = args.legend;
+        legendUrl = layerLegend;
       }
 
       return legendUrl;
     }
 
+    // One legend per sublayer, see getWmsLegends() for the precedence.
     function getLegends() {
-      return args.layers.map((layer) => {
-        return {
-          url: getLegendUrl(layer),
-          description: "Teckenförklaring",
-        };
+      return getWmsLegends({
+        layers: args.layers,
+        layersInfo: args.layersInfo,
+        legend: layerLegend,
+        getLegendUrl,
       });
     }
 
@@ -132,13 +135,14 @@ export default class ConfigMapper {
     function mapLayersInfo(layersInfo, infobox) {
       if (Array.isArray(layersInfo)) {
         return layersInfo.reduce((layersInfoObject, layerInfo) => {
-          layersInfoObject[layerInfo.id] = layerInfo;
-          if (!layerInfo.legend) {
-            layersInfoObject[layerInfo.id].legend = getLegendUrl(layerInfo.id);
-          }
-          if (infobox?.length) {
-            layersInfoObject[layerInfo.id].infobox = infobox;
-          }
+          // Copy, don't mutate: args.layersInfo is shared with the app's layersConfig,
+          // so a generated URL written back would look like an Admin legend the next
+          // time this layer is mapped (e.g. a layer used in two groups).
+          layersInfoObject[layerInfo.id] = {
+            ...layerInfo,
+            legend: cleanLegend(layerInfo.legend) || getLegendUrl(layerInfo.id),
+            ...(infobox?.length && { infobox }),
+          };
 
           return layersInfoObject;
         }, {});

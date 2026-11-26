@@ -5,6 +5,10 @@ import ImageWMS from "ol/source/ImageWMS";
 import ImageArcGISRest from "ol/source/ImageArcGISRest";
 import { hfetch } from "../../utils/FetchWrapper";
 import { filterLegendBySubLayers } from "../../utils/arcgisHelpers";
+import {
+  getPrintLegendUrl,
+  uniqueLegendEntries,
+} from "../../utils/wmsLegendHelpers";
 
 // ---------------------------------------------------------------------------
 // Layer helpers
@@ -154,9 +158,17 @@ export const getLegendInfoForLayer = (layer) => {
     ? layerInfo.legend
     : [];
 
+  // layerInfo.legend has one entry per configured sublayer (in config order), while
+  // params.LAYERS only holds the visible ones. Look entries up by sublayer name.
+  const configuredSublayers = Array.isArray(layer.subLayers)
+    ? layer.subLayers
+    : [];
+
   const entries = visibleSublayers.map((sublayer, index) => {
     const style = activeStyles[index] || layersInfo?.[sublayer]?.style || "";
-    const configuredEntry = configuredLegend[index];
+    const configIndex = configuredSublayers.indexOf(sublayer);
+    const configuredEntry =
+      configIndex >= 0 ? configuredLegend[configIndex] : undefined;
     const configuredUrl = configuredEntry?.Url ?? configuredEntry?.url ?? null;
     const generatedUrl = buildGetLegendGraphicUrl({
       url: baseUrl,
@@ -164,21 +176,34 @@ export const getLegendInfoForLayer = (layer) => {
       style,
       version,
     });
+    const getLegendGraphicUrl = getPrintLegendUrl({
+      configuredEntry,
+      generatedUrl,
+      activeStyle: activeStyles[index] || "",
+      isSingleSublayer: configuredSublayers.length === 1,
+    });
 
     return {
       sublayer,
       style,
       configuredUrl,
       generatedUrl,
-      getLegendGraphicUrl: configuredUrl || generatedUrl,
+      getLegendGraphicUrl,
     };
   });
+
+  // A layer-level legend is set on every sublayer's entry. Print it only once,
+  // the same way the LayerSwitcher does (see #1644).
+  const uniqueEntries = uniqueLegendEntries(
+    entries,
+    (entry) => entry.getLegendGraphicUrl
+  );
 
   return {
     name: layer.get("name"),
     caption: layer.get("caption"),
     sourceUrl: baseUrl,
-    entries,
+    entries: uniqueEntries,
   };
 };
 

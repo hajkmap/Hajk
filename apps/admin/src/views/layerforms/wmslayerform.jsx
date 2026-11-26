@@ -22,6 +22,15 @@ const SERVERTYPE_MAPSERVER = "mapserver";
 //  ESRI ArcGIS Server (client --> MapServer)
 const SERVERTYPE_ARCGIS = "arcgis";
 
+// A sublayer legend is either empty (= automatic legend) or a URL. Not validated, so
+// existing configs (relative paths like "legend/x.png", bare hosts etc.) still save.
+// Whitespace inside is saved as %20 (browsers do the same when loading it), and
+// whitespace only or a non-string value (hand-edited config) is saved as empty.
+const hasWhitespaceInside = (value) =>
+  typeof value === "string" && /\s/.test(value.trim());
+const normalizeLegendUrl = (value) =>
+  typeof value === "string" ? value.trim().replace(/\s/g, "%20") : "";
+
 const defaultState = {
   load: false,
   imageLoad: false,
@@ -432,6 +441,38 @@ class WMSLayerForm extends Component {
             }}
             type="text"
           />
+        </div>
+        <div className="form-row">
+          <div>
+            <label>Teckenförklaring</label>
+          </div>
+          <input
+            style={{ width: "100%" }}
+            type="text"
+            placeholder="URL till bild"
+            value={typeof layerInfo.legend === "string" ? layerInfo.legend : ""}
+            onChange={(e) => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].legend = e.target.value;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo,
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                },
+              );
+            }}
+          />
+          {hasWhitespaceInside(layerInfo.legend) && (
+            <div>
+              <small>Mellanslag i adressen sparas som %20.</small>
+            </div>
+          )}
+          <small>
+            Lämna tomt för automatisk teckenförklaring. Har hela lagret en egen
+            teckenförklaring används den i lagrets samlade teckenförklaring.
+          </small>
         </div>
         <div className="form-row split0">
           <div>
@@ -1491,6 +1532,10 @@ class WMSLayerForm extends Component {
     function format_layers_info(layersInfo) {
       return Object.keys(layersInfo).map((layerInfo) => ({
         ...layersInfo[layerInfo],
+        // An empty legend means "automatic legend", see normalizeLegendUrl.
+        ...(layersInfo[layerInfo].legend !== undefined && {
+          legend: normalizeLegendUrl(layersInfo[layerInfo].legend),
+        }),
       }));
     }
 
