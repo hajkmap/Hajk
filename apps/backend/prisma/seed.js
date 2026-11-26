@@ -55,6 +55,86 @@ const commaList = (value) => {
   return text.length > 0 ? text : undefined;
 };
 
+const textOrUndefined = (value) =>
+  typeof value === "string" && value.trim() !== "" ? value : undefined;
+
+/** Vector and search: one infoclick, stored on the InfoClickSettings columns. */
+const infoClickColumnsFromLayer = (layer) => ({
+  definition: textOrUndefined(layer.infobox) ?? textOrUndefined(layer.definition),
+  icon: textOrUndefined(layer.infoclickIcon) ?? textOrUndefined(layer.icon),
+  active: typeof layer.queryable === "boolean" ? layer.queryable : undefined,
+  displayFields: commaList(layer.displayFields ?? layer.searchDisplayName),
+  secondaryLabelFields: commaList(layer.secondaryLabelFields),
+  shortDisplayFields: commaList(
+    layer.shortDisplayFields ?? layer.searchShortDisplayName,
+  ),
+  legend: textOrUndefined(layer.legend),
+  legendIcon: textOrUndefined(layer.legendIcon),
+});
+
+/**
+ * One layers.json layersInfo row, stored with the InfoClickSettings names.
+ * `fallbackDefinition` fills a row that has no template of its own.
+ */
+const infoClickRowFromLayersInfo = (row, fallbackDefinition) => {
+  if (!row || typeof row !== "object") return null;
+  const id = typeof row.id === "string" ? row.id : "";
+  if (!id) return null;
+  const definition =
+    textOrUndefined(row.infobox) ??
+    textOrUndefined(row.definition) ??
+    fallbackDefinition;
+  const icon = textOrUndefined(row.infoclickIcon) ?? textOrUndefined(row.icon);
+  const displayFields = commaList(row.searchDisplayName ?? row.displayFields);
+  const secondaryLabelFields = commaList(row.secondaryLabelFields);
+  const shortDisplayFields = commaList(
+    row.searchShortDisplayName ?? row.shortDisplayFields,
+  );
+  return {
+    id,
+    caption: typeof row.caption === "string" ? row.caption : "",
+    style: typeof row.style === "string" ? row.style : "",
+    ...(definition ? { definition } : {}),
+    ...(icon ? { icon } : {}),
+    active: row.queryable === true || row.active === true,
+    ...(displayFields ? { displayFields } : {}),
+    ...(secondaryLabelFields ? { secondaryLabelFields } : {}),
+    ...(shortDisplayFields ? { shortDisplayFields } : {}),
+    ...(textOrUndefined(row.legend) ? { legend: row.legend } : {}),
+    ...(textOrUndefined(row.legendIcon) ? { legendIcon: row.legendIcon } : {}),
+    ...(row.searchUrl != null ? { searchUrl: row.searchUrl } : {}),
+    ...(row.searchPropertyName != null
+      ? { searchPropertyName: row.searchPropertyName }
+      : {}),
+    ...(row.searchOutputFormat != null
+      ? { searchOutputFormat: row.searchOutputFormat }
+      : {}),
+    ...(row.searchGeometryField != null
+      ? { searchGeometryField: row.searchGeometryField }
+      : {}),
+    ...(row.hasLabelStyle === true ? { hasLabelStyle: true } : {}),
+  };
+};
+
+/** WMS: one entry per sublayer, stored on InfoClickSettings.options. */
+const infoClickOptionsFromLayer = (layer, selectedLayers) => {
+  const fallback = textOrUndefined(layer.infobox);
+  const rows = Array.isArray(layer.layersInfo) ? layer.layersInfo : [];
+  if (rows.length === 0) {
+    if (!fallback) return [];
+    return selectedLayers.map((id) => ({
+      id,
+      caption: "",
+      style: "",
+      definition: fallback,
+      active: layer.queryable !== false,
+    }));
+  }
+  return rows
+    .map((row) => infoClickRowFromLayersInfo(row, fallback))
+    .filter((row) => row != null);
+};
+
 // Known plugin types available in the client. Each Tool instance references
 // one of these. Types found in map configs but missing here are upserted
 // with the type name as title.
@@ -502,17 +582,7 @@ async function readAndPopulateLayers() {
                 },
               },
               infoClickSettings: {
-                create: {
-                  definition:
-                    typeof layer.infobox === "string" ? layer.infobox : undefined,
-                  displayFields: commaList(
-                    layer.displayFields ?? layer.searchDisplayName,
-                  ),
-                  secondaryLabelFields: commaList(layer.secondaryLabelFields),
-                  shortDisplayFields: commaList(
-                    layer.shortDisplayFields ?? layer.searchShortDisplayName,
-                  ),
-                },
+                create: infoClickColumnsFromLayer(layer),
               },
               options: {},
             },
@@ -581,12 +651,22 @@ async function readAndPopulateLayers() {
                 },
               },
               infoClickSettings: {
-                create: {
-                  format: layer.infoFormat,
-                  sortProperty: layer.infoClickSortProperty,
-                  sortMethod: layer.infoClickSortType,
-                  sortDescending: layer.infoClickSortDesc,
-                },
+                create:
+                  type === "WMS"
+                    ? {
+                        format: layer.infoFormat,
+                        sortProperty: layer.infoClickSortProperty,
+                        sortMethod: layer.infoClickSortType,
+                        sortDescending: layer.infoClickSortDesc,
+                        options: infoClickOptionsFromLayer(layer, selectedLayers),
+                      }
+                    : {
+                        format: layer.infoFormat,
+                        sortProperty: layer.infoClickSortProperty,
+                        sortMethod: layer.infoClickSortType,
+                        sortDescending: layer.infoClickSortDesc,
+                        ...infoClickColumnsFromLayer(layer),
+                      },
               },
               options,
             },
@@ -985,7 +1065,7 @@ async function populateLayerTrees() {
         groupId,
         displayLayerId: layerId,
         visibleAtStart,
-        infobox,
+        options: infobox ? { definition: infobox } : {},
       });
     }
 

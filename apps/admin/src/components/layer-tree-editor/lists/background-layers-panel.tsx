@@ -638,6 +638,7 @@ export default function BackgroundLayersPanel({
 
       <LayerFormDialog
         open={editTarget != null}
+        layerId={editTarget?.layerId ?? ""}
         layerName={editTarget?.name ?? ""}
         initialValues={editInitialValues}
         onClose={() => setEditTarget(null)}

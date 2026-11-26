@@ -6,16 +6,17 @@ import {
   DialogContent,
   DialogTitle,
   FormControlLabel,
-  TextField,
   Typography,
 } from "@mui/material";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import LayerInfoclickButton from "../layer-infoclick-button";
 import { DEFAULT_LAYER_DISPLAY_SETTINGS, type LayerFormValues } from "./types";
 
 interface LayerFormDialogProps {
   open: boolean;
+  layerId: string;
   layerName: string;
   initialValues?: LayerFormValues;
   /** Exclusive parent groups manage visibility via radio selection in Kartlager. */
@@ -25,6 +26,7 @@ interface LayerFormDialogProps {
 }
 
 interface LayerFormDialogBodyProps {
+  layerId: string;
   layerName: string;
   initialValues?: LayerFormValues;
   disableVisibleAtStart?: boolean;
@@ -33,6 +35,7 @@ interface LayerFormDialogBodyProps {
 }
 
 function LayerFormDialogBody({
+  layerId,
   layerName,
   initialValues,
   disableVisibleAtStart = false,
@@ -81,20 +84,12 @@ function LayerFormDialogBody({
           label={t("map.layerVisibleAtStart")}
         />
 
-        <TextField
-          label={t("layerTree.settings.infobox")}
-          helperText={t("layerTree.settings.infoboxHelp")}
+        <LayerInfoclickButton
+          layerId={layerId}
           value={values.layerInfoBox}
-          onChange={(event) => {
-            setValues((current) => ({
-              ...current,
-              layerInfoBox: event.target.value,
-            }));
+          onChange={(layerInfoBox) => {
+            setValues((current) => ({ ...current, layerInfoBox }));
           }}
-          fullWidth
-          multiline
-          minRows={4}
-          sx={{ mt: 2 }}
         />
       </DialogContent>
       <DialogActions>
@@ -109,6 +104,7 @@ function LayerFormDialogBody({
 
 export default function LayerFormDialog({
   open,
+  layerId,
   layerName,
   initialValues,
   disableVisibleAtStart = false,
@@ -124,6 +120,7 @@ export default function LayerFormDialog({
       {open ? (
         <LayerFormDialogBody
           key={formKey}
+          layerId={layerId}
           layerName={layerName}
           initialValues={initialValues}
           disableVisibleAtStart={disableVisibleAtStart}

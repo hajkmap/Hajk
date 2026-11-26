@@ -1,8 +1,11 @@
 import type {
   MapGroupSettings,
   MapInfoGroup,
+  MapLayerInfoClick,
   MapLayerSettings,
+  MapLayerSublayerInfoClick,
   MapTreeSettings,
+  StoredMapLayerInfoClick,
 } from "../../api/layer-tree";
 import {
   buildChildren,
@@ -47,8 +50,79 @@ export const DEFAULT_GROUP_SETTINGS: GroupSettingsValues = {
 
 export const DEFAULT_LAYER_SETTINGS: LayerSettingsValues = {
   visibleAtStart: false,
-  infobox: "",
+  options: {},
 };
+
+function isBlankInfoClickValue(value: unknown): boolean {
+  if (value == null || value === "") return true;
+  if (Array.isArray(value)) return value.length === 0;
+  if (typeof value === "object") return Object.keys(value).length === 0;
+  return false;
+}
+
+/** A non-empty template on this placement. An empty one uses the layer's own infoclick. */
+export function hasInfoclickOverride(
+  options: StoredMapLayerInfoClick | undefined,
+): boolean {
+  if (!options) return false;
+  const rows = Array.isArray(options) ? options : (options.options ?? []);
+  if (rows.some((row) => row.definition.trim().length > 0)) return true;
+  if (Array.isArray(options)) return false;
+  return typeof options.definition === "string" && options.definition.trim().length > 0;
+}
+
+export function infoClickIsEmpty(options: StoredMapLayerInfoClick | undefined): boolean {
+  if (!options) return true;
+  if (Array.isArray(options)) return options.length === 0;
+  // A present `definition`, including "", is an override. Missing means no override.
+  const record = options as Record<string, unknown>;
+  return Object.entries(record).every(
+    ([key, value]) => key !== "definition" && isBlankInfoClickValue(value),
+  );
+}
+
+/** Sets the override template. "" is kept: an empty override shows nothing. */
+export function withDefinition(
+  options: MapLayerInfoClick,
+  definition: string,
+): MapLayerInfoClick {
+  return { ...options, definition: definition.trim() };
+}
+
+export type SublayerOverride = MapLayerSublayerInfoClick;
+
+function isSublayerRow(value: unknown): value is SublayerOverride {
+  if (!value || typeof value !== "object") return false;
+  const record = value as Record<string, unknown>;
+  return typeof record.id === "string" && typeof record.definition === "string";
+}
+
+/** The editor's object view. A stored WMS array is not wrapped in another `options` key when saved. */
+export function asInfoClick(value: StoredMapLayerInfoClick | undefined): MapLayerInfoClick {
+  if (Array.isArray(value)) return {};
+  return value ?? {};
+}
+
+export function sublayerOverridesOf(
+  options: StoredMapLayerInfoClick | undefined,
+): SublayerOverride[] {
+  const raw = Array.isArray(options) ? options : options?.options;
+  if (!Array.isArray(raw)) return [];
+  return raw.flatMap((row) => (isSublayerRow(row) && row.id ? [row] : []));
+}
+
+/** What is saved. A WMS list is the array. A vector or search layer stays an object. */
+export function storedInfoClick(options: MapLayerInfoClick, rows: SublayerOverride[] = []): StoredMapLayerInfoClick {
+  const stored = rows
+    .filter((row) => row.id)
+    .map((row) => ({ id: row.id, definition: row.definition.trim() }));
+  if (stored.length > 0) return stored;
+  const next = { ...options };
+  delete next.options;
+  if (typeof next.definition === "string") next.definition = next.definition.trim();
+  else delete next.definition;
+  return next;
+}
 
 export const EMPTY_SETTINGS: LayerTreeSettings = { groups: {}, layers: {} };
 
@@ -60,7 +134,7 @@ const isDefaultGroup = (values: GroupSettingsValues) =>
 
 const isDefaultLayer = (values: LayerSettingsValues) =>
   values.visibleAtStart === DEFAULT_LAYER_SETTINGS.visibleAtStart &&
-  values.infobox === DEFAULT_LAYER_SETTINGS.infobox;
+  infoClickIsEmpty(values.options);
 
 /** The values in a fixed key order, so equal settings compare equal. */
 function normalizedGroup(values: GroupSettingsValues): GroupSettingsValues {
@@ -89,15 +163,11 @@ export function fromMapTreeSettings(
   for (const { groupId, ...values } of settings?.groups ?? []) {
     result.groups[groupId] = normalizedGroup(values);
   }
-  for (const {
-    groupId,
-    layerId,
-    visibleAtStart,
-    infobox,
-  } of settings?.layers ?? []) {
+  for (const { groupId, layerId, visibleAtStart, options } of settings?.layers ??
+    []) {
     result.layers[layerSettingsKey(groupId, layerId)] = {
       visibleAtStart,
-      infobox,
+      options: options ?? {},
     };
   }
   return result;

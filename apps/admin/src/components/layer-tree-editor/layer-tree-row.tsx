@@ -11,7 +11,7 @@ import TuneOutlinedIcon from "@mui/icons-material/TuneOutlined";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
-import { Box, Chip, IconButton, Tooltip, Typography } from "@mui/material";
+import { Badge, Box, Chip, IconButton, Tooltip, Typography } from "@mui/material";
 import { memo, type MouseEvent as ReactMouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -77,6 +77,8 @@ interface LayerTreeRowProps {
   displayName?: string;
   /** Map mode: opens the group's or the layer's settings on this map. */
   onEditSettings?: () => void;
+  /** Map mode: this placement stores its own infoclick template. */
+  infoclickOverride?: boolean;
   /** In the move zone: it stays here until it is dropped from the zone. */
   inMoveZone?: boolean;
   /**
@@ -123,6 +125,7 @@ function LayerTreeRow({
   active = false,
   displayName,
   onEditSettings,
+  infoclickOverride = false,
   inMoveZone = false,
   availability,
   serviceAvailability,
@@ -395,13 +398,32 @@ function LayerTreeRow({
         </Tooltip>
       ) : null}
       {onEditSettings ? (
-        <Tooltip title={t("layerTree.settings.edit")}>
+        <Tooltip
+          title={
+            infoclickOverride
+              ? `${t("layerTree.settings.edit")}. ${t("layerTree.settings.infoclickOverride")}`
+              : t("layerTree.settings.edit")
+          }
+        >
           <IconButton
             size="small"
-            aria-label={t("layerTree.settings.edit")}
+            aria-label={
+              infoclickOverride
+                ? `${t("layerTree.settings.edit")}. ${t("layerTree.settings.infoclickOverride")}`
+                : t("layerTree.settings.edit")
+            }
             onClick={onEditSettings}
           >
-            <TuneOutlinedIcon fontSize="small" />
+            <Badge
+              color="primary"
+              variant="dot"
+              invisible={!infoclickOverride}
+              overlap="circular"
+              
+              slotProps={{ badge: { sx: { right: 0} } }}
+            >
+              <TuneOutlinedIcon fontSize="small" />
+            </Badge>
           </IconButton>
         </Tooltip>
       ) : null}

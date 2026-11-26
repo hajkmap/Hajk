@@ -56,7 +56,10 @@ export const ListSearchField = memo(function ListSearchField({
 }) {
   const onSearchRef = useRef(onSearch);
   const timerRef = useRef<number>(0);
-  onSearchRef.current = onSearch;
+
+  useEffect(() => {
+    onSearchRef.current = onSearch;
+  }, [onSearch]);
 
   useEffect(() => () => window.clearTimeout(timerRef.current), []);
 

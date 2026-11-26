@@ -2242,10 +2242,12 @@ export default function LayerSettings() {
                       <Alert severity="info" variant="outlined">
                         {t(
                           infoClickTarget === "sublayers"
-                            ? "layers.featureInfo.howItWorksWms"
+                            ? infoboxTypeNames.length > 1
+                              ? "layers.featureInfo.howItWorksWms"
+                              : "layers.featureInfo.howItWorksWmsSingle"
                             : isSearchLayer
                               ? "layers.featureInfo.howItWorksSearch"
-                              : "layers.featureInfo.howItWorksVector",
+                              : "layers.featureInfo.howItWorksWmsSingle",
                         )}
                       </Alert>
                     </FormFieldRow>

@@ -674,11 +674,10 @@ model MapGroupSetting {
 model MapLayerSetting {
   id             String       @id @default(cuid())
   mapName        String
-  /// The group the layer shows in.
   groupId        String
   displayLayerId String
   visibleAtStart Boolean      @default(false)
-  infobox        String       @default("")
+  options        Json         @default("{}")
   map            Map          @relation(fields: [mapName], references: [name], onDelete: Cascade, onUpdate: Cascade)
   group          Group        @relation(fields: [groupId], references: [id], onDelete: Cascade)
   displayLayer   DisplayLayer @relation(fields: [displayLayerId], references: [id], onDelete: Cascade)

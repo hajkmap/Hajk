@@ -1,11 +1,19 @@
-import { Button, Checkbox, FormControlLabel, TextField } from "@mui/material";
+import { Button, Checkbox, FormControlLabel } from "@mui/material";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import DialogWrapper from "../flexible-dialog";
-import type { LayerSettingsValues } from "./layer-tree-settings";
+import LayerInfoclickButton from "./layer-infoclick-button";
+import {
+  asInfoClick,
+  storedInfoClick,
+  sublayerOverridesOf,
+  withDefinition,
+  type LayerSettingsValues,
+} from "./layer-tree-settings";
 
 interface LayerTreeLayerSettingsDialogProps {
+  layerId: string;
   layerName: string;
   groupName: string;
   values: LayerSettingsValues;
@@ -20,6 +28,7 @@ interface LayerTreeLayerSettingsDialogProps {
  * form. Open it with a `key` per layer, so it starts from that layer's values.
  */
 export default function LayerTreeLayerSettingsDialog({
+  layerId,
   layerName,
   groupName,
   values: initial,
@@ -45,15 +54,22 @@ export default function LayerTreeLayerSettingsDialog({
           <Button onClick={onClose}>{t("common.cancel")}</Button>
           <Button
             variant="contained"
-            onClick={() =>
+            onClick={() => {
+              const info = asInfoClick(values.options);
+              const rows = sublayerOverridesOf(values.options);
               onSave({
                 // Not set here in an exclusive group; it keeps its value.
                 visibleAtStart: exclusive
                   ? initial.visibleAtStart
                   : values.visibleAtStart,
-                infobox: values.infobox.trim(),
-              })
-            }
+                options:
+                  rows.length > 0
+                    ? storedInfoClick(info, rows)
+                    : typeof info.definition === "string"
+                      ? storedInfoClick(withDefinition(info, info.definition))
+                      : storedInfoClick(info),
+              });
+            }}
           >
             {t("common.dialog.okBtn")}
           </Button>
@@ -79,18 +95,24 @@ export default function LayerTreeLayerSettingsDialog({
             : "layerTree.settings.visibleAtStart",
         )}
       />
-      <TextField
-        fullWidth
-        multiline
-        minRows={4}
-        label={t("layerTree.settings.infobox")}
-        helperText={t("layerTree.settings.infoboxHelp")}
-        value={values.infobox}
-        onChange={(event) =>
-          setValues((current) => ({ ...current, infobox: event.target.value }))
+      <LayerInfoclickButton
+        layerId={layerId}
+        value={asInfoClick(values.options).definition ?? ""}
+        onChange={(definition) =>
+          setValues((current) => ({
+            ...current,
+            options: storedInfoClick(
+              withDefinition(asInfoClick(current.options), definition),
+            ),
+          }))
         }
-        slotProps={{ htmlInput: { spellCheck: false } }}
-        sx={{ mt: 2 }}
+        sublayerOverrides={sublayerOverridesOf(values.options)}
+        onSublayerOverridesChange={(rows) =>
+          setValues((current) => ({
+            ...current,
+            options: storedInfoClick(asInfoClick(current.options), rows),
+          }))
+        }
       />
     </DialogWrapper>
   );

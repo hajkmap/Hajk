@@ -9,6 +9,7 @@ import {
   DEFAULT_GROUP_SETTINGS,
   DEFAULT_LAYER_SETTINGS,
   layerSettingsKey,
+  placementInfobox,
   type MapGroupSettings,
   type MapLayerSettings,
 } from "../services/map-layer-tree-settings.ts";
@@ -230,7 +231,7 @@ export async function buildClientLayerTreeForMap(
         index: childIndex,
         drawOrder: 0,
         visibleAtStart: layer.visibleAtStart,
-        infobox: layer.infobox,
+        infobox: placementInfobox(layer.options),
       };
       layers.push(ref);
       ordered.push({

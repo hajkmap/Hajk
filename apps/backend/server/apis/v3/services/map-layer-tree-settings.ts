@@ -35,12 +35,35 @@ export interface MapGroupSettings {
   infoGroup: MapInfoGroup;
 }
 
+/** Same field names as InfoClickSettings. `options` is the WMS sublayer list. */
+export interface MapLayerInfoClick {
+  definition?: string;
+  icon?: string;
+  format?: string;
+  sortProperty?: string;
+  sortMethod?: string;
+  sortDescending?: boolean;
+  active?: boolean;
+  displayFields?: string;
+  secondaryLabelFields?: string;
+  shortDisplayFields?: string;
+  legend?: string;
+  legendIcon?: string;
+  options?: Prisma.JsonValue;
+}
+
+/** A WMS override is the array itself. A vector or search override is one object. */
+export type StoredMapLayerInfoClick =
+  | MapLayerInfoClick
+  | { id: string; definition: string }[];
+
 export interface MapLayerSettings {
   /** The group the layer shows in. */
   groupId: string;
   layerId: string;
   visibleAtStart: boolean;
-  infobox: string;
+  /** Infoclick override. Empty means the layer's own infoclick is used. */
+  options: StoredMapLayerInfoClick;
 }
 
 export interface MapTreeSettings {
@@ -71,7 +94,7 @@ export const DEFAULT_LAYER_SETTINGS: Omit<
   "groupId" | "layerId"
 > = {
   visibleAtStart: false,
-  infobox: "",
+  options: {},
 };
 
 /** Key of a layer's settings: the group it shows in and the layer. */
@@ -90,6 +113,87 @@ const isObject = (value: unknown): value is Record<string, unknown> =>
   Boolean(value) && typeof value === "object" && !Array.isArray(value);
 
 const text = (value: unknown) => (typeof value === "string" ? value : "");
+
+const INFO_CLICK_TEXT = [
+  "definition",
+  "icon",
+  "format",
+  "sortProperty",
+  "sortMethod",
+  "displayFields",
+  "secondaryLabelFields",
+  "shortDisplayFields",
+  "legend",
+  "legendIcon",
+] as const;
+
+/** Keeps the InfoClickSettings field names and drops anything else. An array is a WMS sublayer list. */
+export function parseInfoClick(value: unknown): MapLayerInfoClick {
+  if (Array.isArray(value)) {
+    const rows = sublayerOverrides(value);
+    return rows.length > 0 ? { options: rows } : {};
+  }
+  if (!isObject(value)) return {};
+  const result: MapLayerInfoClick = {};
+  for (const key of INFO_CLICK_TEXT) {
+    const field = value[key];
+    if (typeof field !== "string") continue;
+    if (key === "definition") {
+      result.definition = field.trim();
+      continue;
+    }
+    if (field.trim() !== "") result[key] = field;
+  }
+  if (typeof value.sortDescending === "boolean") {
+    result.sortDescending = value.sortDescending;
+  }
+  if (typeof value.active === "boolean") result.active = value.active;
+  const sublayers = sublayerOverrides(value.options);
+  if (sublayers.length > 0) result.options = sublayers;
+  return result;
+}
+
+/** The JSON stored on the placement. A WMS list is the array, not `{ options: [...] }`. */
+export function storedInfoClick(value: unknown): StoredMapLayerInfoClick {
+  const parsed = parseInfoClick(value);
+  const rows = sublayerOverrides(parsed.options);
+  const { options: _sublayers, ...scalars } = parsed;
+  if (rows.length > 0 && Object.keys(scalars).length === 0) return rows;
+  if (rows.length > 0) return { ...scalars, options: rows };
+  return scalars;
+}
+
+/** WMS override rows. `id` is the sublayer id from layersInfo. */
+function sublayerOverrides(
+  value: unknown
+): { id: string; definition: string }[] {
+  if (!Array.isArray(value)) return [];
+  const rows: { id: string; definition: string }[] = [];
+  for (const row of value) {
+    if (!isObject(row) || typeof row.id !== "string" || row.id.trim() === "") {
+      continue;
+    }
+    if (typeof row.definition !== "string") continue;
+    rows.push({ id: row.id.trim(), definition: row.definition.trim() });
+  }
+  return rows;
+}
+
+/**
+ * The template the current map client reads as one `infobox`.
+ * A WMS placement stores one template per sublayer, which that one string
+ * cannot express, so the client keeps the layer's own templates.
+ */
+export function placementInfobox(options: StoredMapLayerInfoClick): string {
+  const parsed = parseInfoClick(options);
+  if (sublayerOverrides(parsed.options).length > 0) return "";
+  return parsed.definition ?? "";
+}
+
+export function infoClickIsEmpty(value: StoredMapLayerInfoClick): boolean {
+  if (Array.isArray(value)) return value.length === 0;
+  return Object.keys(value).length === 0;
+}
 
 /** Reads `settings` of a PUT on a map's tree; missing fields get defaults. */
 export function parseSettings(value: unknown): MapTreeSettings {
@@ -148,11 +252,17 @@ export function parseSettings(value: unknown): MapTreeSettings {
       );
     }
     seenLayers.add(key);
+    const parsed = parseInfoClick(entry.options);
+    const legacy = text(entry.infobox).trim();
+    if (legacy && !parsed.definition && !Array.isArray(entry.options)) {
+      parsed.definition = legacy;
+    }
+    const options = storedInfoClick(parsed);
     return {
       groupId: entry.groupId,
       layerId: entry.layerId,
       visibleAtStart: entry.visibleAtStart === true,
-      infobox: text(entry.infobox),
+      options,
     };
   });
 
@@ -220,7 +330,7 @@ function isDefaultGroup(settings: MapGroupSettings): boolean {
 function isDefaultLayer(settings: MapLayerSettings): boolean {
   return (
     settings.visibleAtStart === DEFAULT_LAYER_SETTINGS.visibleAtStart &&
-    settings.infobox === DEFAULT_LAYER_SETTINGS.infobox
+    infoClickIsEmpty(settings.options)
   );
 }
 
@@ -251,7 +361,7 @@ function fromLayerRow(row: LayerSettingRow): MapLayerSettings {
     groupId: row.groupId,
     layerId: row.displayLayerId,
     visibleAtStart: row.visibleAtStart,
-    infobox: row.infobox,
+    options: storedInfoClick(row.options),
   };
 }
 
@@ -324,7 +434,7 @@ export async function writeSettings(
         groupId: layer.groupId,
         displayLayerId: layer.layerId,
         visibleAtStart: layer.visibleAtStart,
-        infobox: layer.infobox,
+        options: storedInfoClick(layer.options),
       })),
     });
   }

@@ -62,6 +62,8 @@ interface FeatureInfoDesignerProps {
   typeNames: string[];
   caption: string;
   displayFields?: string;
+  fill?: boolean;
+  emptyShowsAttributes?: boolean;
 }
 
 export default function FeatureInfoDesigner({
@@ -72,6 +74,8 @@ export default function FeatureInfoDesigner({
   typeNames,
   caption,
   displayFields,
+  fill = false,
+  emptyShowsAttributes = true,
 }: FeatureInfoDesignerProps) {
   const { t } = useTranslation();
   const editorRef = useRef<FeatureInfoEditorHandle>(null);
@@ -84,6 +88,7 @@ export default function FeatureInfoDesigner({
     useNewPlaceholderMatching: false,
   });
   const [expanded, setExpanded] = useState(false);
+  const spacious = expanded || fill;
   const [previewWidth, setPreviewWidth] = useState(CLIENT_WINDOW_WIDTH);
   const [previewHeight, setPreviewHeight] = useState(CLIENT_WINDOW_BODY_HEIGHT);
   const [windowPreview, setWindowPreview] = useState(false);
@@ -224,7 +229,7 @@ export default function FeatureInfoDesigner({
         containerType: "inline-size",
         containerName: "feature-info",
         minWidth: 0,
-        ...(expanded && { flex: 1, height: "100%", minHeight: 0 }),
+        ...(spacious && { flex: 1, height: "100%", minHeight: 0 }),
       }}
     >
       {typeNames.length > 1 && (
@@ -252,12 +257,12 @@ export default function FeatureInfoDesigner({
           gap: 2,
           gridTemplateColumns: "minmax(0, 1fr)",
           alignItems: "stretch",
-          ...(expanded && { flex: 1, minHeight: 0 }),
+          ...(spacious && { flex: 1, minHeight: 0 }),
           [WIDE_LAYOUT]: {
-            gridTemplateColumns: expanded
+            gridTemplateColumns: spacious
               ? "300px minmax(280px, 1fr) minmax(280px, 432px)"
               : "minmax(220px, 0.7fr) minmax(320px, 1.4fr) minmax(280px, 432px)",
-            ...(expanded && { gridTemplateRows: "minmax(0, 1fr)" }),
+            ...(spacious && { gridTemplateRows: "minmax(0, 1fr)" }),
           },
         }}
       >
@@ -265,8 +270,8 @@ export default function FeatureInfoDesigner({
           sx={{
             ...fillColumnSx,
             height: 320,
-            ...(expanded && { minHeight: 0 }),
-            [WIDE_LAYOUT]: { height: expanded ? "auto" : PANEL_HEIGHT.lg },
+            ...(spacious && { minHeight: 0 }),
+            [WIDE_LAYOUT]: { height: spacious ? "auto" : PANEL_HEIGHT.lg },
           }}
         >
           <Box sx={fillInnerSx}>
@@ -284,8 +289,8 @@ export default function FeatureInfoDesigner({
           sx={{
             ...fillColumnSx,
             height: PANEL_HEIGHT.xs,
-            ...(expanded && { minHeight: 0 }),
-            [WIDE_LAYOUT]: { height: expanded ? "auto" : PANEL_HEIGHT.lg },
+            ...(spacious && { minHeight: 0 }),
+            [WIDE_LAYOUT]: { height: spacious ? "auto" : PANEL_HEIGHT.lg },
           }}
         >
           <Box sx={{ ...fillInnerSx, gap: 1 }}>
@@ -300,6 +305,7 @@ export default function FeatureInfoDesigner({
                 onToggleExpanded={toggleExpanded}
                 onOpenWindowPreview={openWindowPreview}
                 history={history}
+                emptyShowsAttributes={emptyShowsAttributes}
               />
             </Box>
             <FeatureInfoIssues issues={issues} onGoToLine={goToLine} />
@@ -308,9 +314,9 @@ export default function FeatureInfoDesigner({
         <Box
           sx={{
             ...fillColumnSx,
-            height: expanded ? 640 : PANEL_HEIGHT.xs,
-            ...(expanded && { minHeight: 0 }),
-            [WIDE_LAYOUT]: { height: expanded ? "auto" : PANEL_HEIGHT.lg },
+            height: spacious ? 640 : PANEL_HEIGHT.xs,
+            ...(spacious && { minHeight: 0 }),
+            [WIDE_LAYOUT]: { height: spacious ? "auto" : PANEL_HEIGHT.lg },
           }}
         >
           <Box sx={fillInnerSx}>
@@ -321,6 +327,7 @@ export default function FeatureInfoDesigner({
               options={options}
               controls={samplePicker}
               fill
+              emptyShowsAttributes={emptyShowsAttributes}
             />
           </Box>
         </Box>
@@ -331,7 +338,18 @@ export default function FeatureInfoDesigner({
   const title = caption ? `${t("layers.infobox")}: ${caption}` : t("layers.infobox");
   return (
     <>
-      {!expanded && <Box data-form-wide="">{workspace}</Box>}
+      {!expanded && (
+        <Box
+          data-form-wide=""
+          sx={
+            fill
+              ? { flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }
+              : undefined
+          }
+        >
+          {workspace}
+        </Box>
+      )}
       {expanded && (
         <Box data-form-wide="">
           <Alert severity="info" variant="outlined">
@@ -409,6 +427,7 @@ export default function FeatureInfoDesigner({
             properties={previewProperties}
             options={options}
             controls={samplePicker}
+            emptyShowsAttributes={emptyShowsAttributes}
             width={previewWidth}
             height={previewHeight}
             onWidthChange={changePreviewWidth}

@@ -9,6 +9,7 @@ import type { LayerTreeRowToggle } from "./layer-tree-row";
 import {
   groupSettingsOf,
   groupToggleState,
+  hasInfoclickOverride,
   layerSettingsOf,
   toggleGroupVisible,
   withGroupSettings,
@@ -22,6 +23,7 @@ export interface LayerTreeRowSettings {
   active?: boolean;
   displayName?: string;
   onEditSettings?: () => void;
+  infoclickOverride?: boolean;
 }
 
 const NO_SETTINGS: LayerTreeRowSettings = {};
@@ -115,6 +117,7 @@ export function useTreeSettingsUi({
       const picked = radioPreview[parent.id] === node.id;
       return {
         active: layer.visibleAtStart,
+        infoclickOverride: hasInfoclickOverride(layer.options),
         toggle: exclusive
           ? {
               state: picked ? "checked" : "unchecked",
@@ -183,6 +186,7 @@ export function useTreeSettingsUi({
     dialog = (
       <LayerTreeLayerSettingsDialog
         key={`layer:${target.groupId}:${target.layerId}`}
+        layerId={target.layerId}
         layerName={target.name}
         groupName={target.groupName}
         values={layerSettingsOf(settings, target.groupId, target.layerId)}

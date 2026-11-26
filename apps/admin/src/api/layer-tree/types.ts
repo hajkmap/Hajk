@@ -142,13 +142,42 @@ export interface MapGroupSettings {
   infoGroup: MapInfoGroup;
 }
 
+/** One WMS sublayer override. `id` is the sublayer id from layersInfo. */
+export interface MapLayerSublayerInfoClick {
+  id: string;
+  definition: string;
+}
+
+/**
+ * A vector or search override is this object.
+ * A WMS override is `MapLayerSublayerInfoClick[]`, stored as the JSON value itself.
+ */
+export interface MapLayerInfoClick {
+  definition?: string;
+  icon?: string;
+  format?: string;
+  sortProperty?: string;
+  sortMethod?: string;
+  sortDescending?: boolean;
+  active?: boolean;
+  displayFields?: string;
+  secondaryLabelFields?: string;
+  shortDisplayFields?: string;
+  legend?: string;
+  legendIcon?: string;
+  options?: MapLayerSublayerInfoClick[];
+}
+
+export type StoredMapLayerInfoClick = MapLayerInfoClick | MapLayerSublayerInfoClick[];
+
 /** A map's settings for a layer in one of its groups. */
 export interface MapLayerSettings {
   /** The group the layer shows in. */
   groupId: string;
   layerId: string;
   visibleAtStart: boolean;
-  infobox: string;
+  /** Infoclick override. Empty means the layer's own infoclick is used. */
+  options: StoredMapLayerInfoClick;
 }
 
 /** Only settings that differ from the defaults are stored and loaded. */

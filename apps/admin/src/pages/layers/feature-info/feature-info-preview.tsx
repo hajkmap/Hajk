@@ -29,6 +29,7 @@ interface FeatureInfoPreviewProps {
   onClose?: () => void;
   onMove?: (position: { left: number; top: number }) => void;
   windowOnly?: boolean;
+  emptyShowsAttributes?: boolean;
 }
 
 type RenderOutcome =
@@ -56,6 +57,7 @@ function FeatureInfoPreview({
   onClose,
   onMove,
   windowOnly = false,
+  emptyShowsAttributes = true,
 }: FeatureInfoPreviewProps) {
   const { t } = useTranslation();
   const allowDangerousHtml = options.allowDangerousHtml ?? true;
@@ -100,7 +102,7 @@ function FeatureInfoPreview({
         <Typography variant="subtitle2">{t("layers.featureInfo.preview")}</Typography>
       )}
       {!windowOnly && controls}
-      {!windowOnly && !template.trim() && (
+      {!windowOnly && emptyShowsAttributes && !template.trim() && (
         <Typography variant="caption" color="text.secondary">
           {t("layers.featureInfo.defaultTableNotice")}
         </Typography>
@@ -128,7 +130,9 @@ function FeatureInfoPreview({
           </Typography>
         )}
         {!template.trim() ? (
-          <FeatureInfoDefaultTable properties={properties} />
+          emptyShowsAttributes ? (
+            <FeatureInfoDefaultTable properties={properties} />
+          ) : null
         ) : !outcome.ok ? (
           renderError(outcome.error)
         ) : (

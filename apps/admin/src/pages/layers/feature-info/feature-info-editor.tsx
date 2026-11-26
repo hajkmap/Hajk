@@ -48,6 +48,7 @@ interface FeatureInfoEditorProps {
   onToggleExpanded: () => void;
   onOpenWindowPreview: () => void;
   history: EditorHistory;
+  emptyShowsAttributes?: boolean;
   ref?: Ref<FeatureInfoEditorHandle>;
 }
 
@@ -244,6 +245,7 @@ function FeatureInfoEditor({
   onToggleExpanded,
   onOpenWindowPreview,
   history,
+  emptyShowsAttributes = true,
   ref,
 }: FeatureInfoEditorProps) {
   const { t } = useTranslation();
@@ -410,7 +412,10 @@ function FeatureInfoEditor({
     committedRef.current = value;
     draftRef.current = value;
     if (value !== historyRef.current.currentValue()) {
-      historyRef.current.reset(value);
+      historyRef.current.push(
+        { value, start: value.length, end: value.length },
+        false,
+      );
       syncHistoryActions();
     }
     setDraft(value);
@@ -670,7 +675,11 @@ function FeatureInfoEditor({
           onBlur={commitNow}
           inputRef={inputRef}
           fullWidth
-          placeholder={t("layers.featureInfo.editorPlaceholder")}
+          placeholder={t(
+            emptyShowsAttributes
+              ? "layers.featureInfo.editorPlaceholder"
+              : "layers.featureInfo.editorPlaceholderOverride",
+          )}
           slotProps={{
             input: { inputComponent: "textarea" },
             htmlInput: {
