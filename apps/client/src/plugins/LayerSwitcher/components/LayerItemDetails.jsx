@@ -70,8 +70,8 @@ function LayerItemDetails({
   // details for that sublayer.
   const subLayerName = layerItemDetails?.layer?.subLayers?.[subLayerIndex];
   const subLayerInfo = layerItemDetails?.layer?.layersInfo?.[subLayerName];
-  // A sublayer with a legendIcon shows no legend image, same as in SubLayerItem.
-  const subLayerHasIcon = Boolean(subLayerInfo?.legendIcon);
+  // A legendIcon only replaces the legend in the compact sublayer row (SubLayerItem).
+  // The details view always shows the full legend image.
   const subLayerLegend = subLayerInfo?.legend;
   // Keep only unique urls for the whole layer, the same way LayerItem does (see #1644).
   const legendUrl =
@@ -79,10 +79,8 @@ function LayerItemDetails({
       ? (Array.isArray(legendInfo) ? legendInfo : [])
           .map((l) => l?.url)
           .filter((url, index, self) => url && self.indexOf(url) === index)
-      : subLayerHasIcon
-        ? null
-        : subLayerLegend ||
-          (Array.isArray(legendInfo) && legendInfo[subLayerIndex]?.url);
+      : subLayerLegend ||
+        (Array.isArray(legendInfo) && legendInfo[subLayerIndex]?.url);
 
   // Handle opacity slider changes
   const handleOpacitySliderChange = (_, newValue) => {

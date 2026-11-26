@@ -10,8 +10,8 @@ export default class ConfigMapper {
     function getLegendUrl(layer) {
       let legendUrl = "";
 
-      // If there's no legend URL specified, we'll need to get it from our WMS
-      if (args.legend === "") {
+      // If there's no legend URL specified (empty or missing), we'll need to get it from our WMS
+      if (!args.legend) {
         /**
          * A layer can have multiple styles, so when getting Legend Graphic, it's important
          * to get it for the currently selected style.
@@ -73,11 +73,15 @@ export default class ConfigMapper {
     // sublayer details view and the per-sublayer entries in the print legend.
     function getLegends() {
       return args.layers.map((layer) => {
-        const subLayerLegend = args.layersInfo?.find(
-          (l) => l.id === layer
-        )?.legend;
+        const subLayerInfo = args.layersInfo?.find((l) => l.id === layer);
+        // Ignore a legend that mapLayersInfo() filled in automatically (if args were mapped before).
+        const subLayerLegend = subLayerInfo?.legendIsGenerated
+          ? undefined
+          : subLayerInfo?.legend;
         return {
           url: args.legend || subLayerLegend || getLegendUrl(layer),
+          // True when no admin-set legend exists, i.e. url is a GetLegendGraphic request.
+          isGenerated: !args.legend && !subLayerLegend,
           description: "Teckenförklaring",
         };
       });
@@ -110,6 +114,9 @@ export default class ConfigMapper {
           layersInfoObject[layerInfo.id] = layerInfo;
           if (!layerInfo.legend) {
             layersInfoObject[layerInfo.id].legend = getLegendUrl(layerInfo.id);
+            // Lets consumers (e.g. the print legend) tell an automatic legend from one
+            // set by an admin on the sublayer.
+            layersInfoObject[layerInfo.id].legendIsGenerated = !args.legend;
           }
           if (infobox?.length) {
             layersInfoObject[layerInfo.id].infobox = infobox;

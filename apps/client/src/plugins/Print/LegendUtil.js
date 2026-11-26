@@ -111,13 +111,20 @@ export const getLegendInfoForLayer = (layer) => {
     const configIndex = configuredSublayers.indexOf(sublayer);
     const configuredEntry =
       configIndex >= 0 ? configuredLegend[configIndex] : undefined;
-    // Same precedence as the LayerSwitcher's sublayer row: the sublayer's own legend
-    // first (mapLayersInfo() falls back to the layer's legend, then GetLegendGraphic).
-    const configuredUrl =
-      layersInfo?.[sublayer]?.legend ||
-      configuredEntry?.Url ||
-      configuredEntry?.url ||
-      null;
+    // Same precedence as the LayerSwitcher's sublayer details view: the sublayer's own
+    // legend first, then the layer's legend. Only admin-set legends count here; when
+    // the legend is automatic we use generatedUrl below, which follows the active
+    // STYLES and the print legend options (e.g. higher dpi).
+    // Unlike the LayerSwitcher's compact sublayer row, a legendIcon does not replace
+    // the legend image in print, since the printed legend should be self-explanatory.
+    const subLayerInfo = layersInfo?.[sublayer];
+    const subLayerUrl = subLayerInfo?.legendIsGenerated
+      ? null
+      : subLayerInfo?.legend;
+    const layerUrl = configuredEntry?.isGenerated
+      ? null
+      : configuredEntry?.Url || configuredEntry?.url;
+    const configuredUrl = subLayerUrl || layerUrl || null;
     const generatedUrl = buildGetLegendGraphicUrl({
       url: baseUrl,
       layer: sublayer,

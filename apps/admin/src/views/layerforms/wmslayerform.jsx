@@ -22,12 +22,10 @@ const SERVERTYPE_MAPSERVER = "mapserver";
 //  ESRI ArcGIS Server (client --> MapServer)
 const SERVERTYPE_ARCGIS = "arcgis";
 
-// A sublayer legend must be empty (= automatic legend) or look like an image URL:
-// absolute (http/https), relative to the server ("/..", "./.."), or a data URL.
-const isValidLegendUrl = (value) =>
-  !value ||
-  value.trim() === "" ||
-  /^(https?:\/\/|\/|\.{1,2}\/|data:image\/)\S+$/i.test(value.trim());
+// A sublayer legend is either empty (= automatic legend) or a URL. Kept deliberately
+// loose so existing configs (relative paths like "legend/x.png", bare hosts etc.)
+// still save. We only reject values with whitespace inside, which can't be a URL.
+const isValidLegendUrl = (value) => !value || !/\s/.test(value.trim());
 
 const defaultState = {
   load: false,
@@ -472,8 +470,8 @@ class WMSLayerForm extends Component {
           {!isValidLegendUrl(layerInfo.legend) && (
             <div>
               <small>
-                Ogiltig URL. Ange en adress som börjar med http://, https://
-                eller /.
+                Ogiltig URL. Adressen får inte innehålla mellanslag (använd
+                %20).
               </small>
             </div>
           )}
@@ -1602,6 +1600,13 @@ class WMSLayerForm extends Component {
     return errors.length === 0;
   }
 
+  // Captions (or ids) of the sublayers whose legend URL fails isValidLegendUrl.
+  getLayersWithInvalidLegend() {
+    return Object.values(this.state.addedLayersInfo || {})
+      .filter((info) => !isValidLegendUrl(info.legend))
+      .map((info) => info.caption || info.id);
+  }
+
   getValidationClass(inputName) {
     return this.state.validationErrors.find((v) => v === inputName)
       ? "validation-error"
@@ -1663,9 +1668,12 @@ class WMSLayerForm extends Component {
 
     if (updateState !== false) {
       if (!valid) {
-        this.setState({
-          validationErrors: [...this.state.validationErrors, fieldName],
-        });
+        // Add the field only once, validateField may run on every keystroke.
+        if (!this.state.validationErrors.includes(fieldName)) {
+          this.setState({
+            validationErrors: [...this.state.validationErrors, fieldName],
+          });
+        }
       } else {
         this.setState({
           validationErrors: this.state.validationErrors.filter(
@@ -2125,8 +2133,8 @@ class WMSLayerForm extends Component {
           </div>
           {this.getValidationClass("layersInfo") && (
             <small>
-              Ett eller flera valda lager har en ogiltig URL för
-              teckenförklaring.
+              Ogiltig URL för teckenförklaring i:{" "}
+              {this.getLayersWithInvalidLegend().join(", ")}
             </small>
           )}
         </div>
