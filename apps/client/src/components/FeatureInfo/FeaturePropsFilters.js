@@ -57,7 +57,7 @@ class PropFilters {
           v = v.trim();
           if (isPropertyRegEx.test(v)) {
             // The value is in fact a nested property! Replace the value!
-            a[i] = this.properties[v] ? this.properties[v].trim() : "";
+            a[i] = this.properties[v] ? String(this.properties[v]).trim() : "";
           } else {
             a[i] = this.freeString(v);
           }
