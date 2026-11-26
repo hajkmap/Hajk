@@ -278,6 +278,26 @@ filters.add("notEquals", function (value, test, falseValue, trueValue) {
 });
 
 /*
+  startsWith
+  Example:
+  {'https://example.com'|startsWith('https', 'Secure', 'Not secure')}
+  outputs: Secure
+*/
+filters.add("startsWith", function (value, test, trueValue, falseValue) {
+  return value.startsWith(test) ? trueValue || value : falseValue || value;
+});
+
+/*
+  endsWith
+  Example:
+  {'document-2024.pdf'|endsWith('.pdf', 'PDF document', 'Other file')}
+  outputs: PDF document
+*/
+filters.add("endsWith", function (value, test, trueValue, falseValue) {
+  return value.endsWith(test) ? trueValue || value : falseValue || value;
+});
+
+/*
   datetime
   Example:
   {'2021-06-03T13:04:12Z'|datetime}
