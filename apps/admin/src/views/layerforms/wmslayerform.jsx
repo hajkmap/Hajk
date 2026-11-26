@@ -1538,6 +1538,10 @@ class WMSLayerForm extends Component {
     function format_layers_info(layersInfo) {
       return Object.keys(layersInfo).map((layerInfo) => ({
         ...layersInfo[layerInfo],
+        // A whitespace-only legend means "automatic legend", store it as empty.
+        ...(typeof layersInfo[layerInfo].legend === "string" && {
+          legend: layersInfo[layerInfo].legend.trim(),
+        }),
       }));
     }
 
@@ -2131,12 +2135,13 @@ class WMSLayerForm extends Component {
           >
             <ul>{this.renderSelectedLayers()}</ul>
           </div>
-          {this.getValidationClass("layersInfo") && (
-            <small>
-              Ogiltig URL för teckenförklaring i:{" "}
-              {this.getLayersWithInvalidLegend().join(", ")}
-            </small>
-          )}
+          {this.getValidationClass("layersInfo") &&
+            this.getLayersWithInvalidLegend().length > 0 && (
+              <small>
+                Ogiltig URL för teckenförklaring i:{" "}
+                {this.getLayersWithInvalidLegend().join(", ")}
+              </small>
+            )}
         </div>
         <div>
           <label>Stäng av möjlighet att expandera</label>

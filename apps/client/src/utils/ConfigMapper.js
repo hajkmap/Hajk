@@ -18,15 +18,12 @@ export default class ConfigMapper {
          */
 
         // First get index if we're dealing with array
-        let getIndex =
-          args.layersInfo !== null
-            ? args.layersInfo.findIndex((l) => l.id === layer)
-            : null;
+        // layersInfo may be null or missing (older configs).
+        let getIndex = Array.isArray(args.layersInfo)
+          ? args.layersInfo.findIndex((l) => l.id === layer)
+          : -1;
         // Next, use that index to grab correct style and save its name for later use
-        let style =
-          args.layersInfo !== null &&
-          getIndex >= 0 &&
-          args.layersInfo[getIndex].style;
+        let style = getIndex >= 0 && args.layersInfo[getIndex].style;
 
         let geoserverLegendOptions = "";
 
@@ -73,15 +70,11 @@ export default class ConfigMapper {
     // sublayer details view and the per-sublayer entries in the print legend.
     function getLegends() {
       return args.layers.map((layer) => {
-        const subLayerInfo = args.layersInfo?.find((l) => l.id === layer);
-        // Ignore a legend that mapLayersInfo() filled in automatically (if args were mapped before).
-        const subLayerLegend = subLayerInfo?.legendIsGenerated
-          ? undefined
-          : subLayerInfo?.legend;
+        const subLayerLegend = args.layersInfo?.find(
+          (l) => l.id === layer
+        )?.legend;
         return {
           url: args.legend || subLayerLegend || getLegendUrl(layer),
-          // True when no admin-set legend exists, i.e. url is a GetLegendGraphic request.
-          isGenerated: !args.legend && !subLayerLegend,
           description: "Teckenförklaring",
         };
       });
@@ -114,9 +107,6 @@ export default class ConfigMapper {
           layersInfoObject[layerInfo.id] = layerInfo;
           if (!layerInfo.legend) {
             layersInfoObject[layerInfo.id].legend = getLegendUrl(layerInfo.id);
-            // Lets consumers (e.g. the print legend) tell an automatic legend from one
-            // set by an admin on the sublayer.
-            layersInfoObject[layerInfo.id].legendIsGenerated = !args.legend;
           }
           if (infobox?.length) {
             layersInfoObject[layerInfo.id].infobox = infobox;
