@@ -1,5 +1,37 @@
-import { Projection } from "ol/proj";
+import { Projection, get as getProjection } from "ol/proj";
 import { layerHasLabelStyle } from "./labelStyle";
+import { getServiceLayers } from "./arcgisServiceInfo";
+import { parseExtent, parseOpacity, splitLegend } from "./arcgisHelpers";
+
+/**
+ * CRSs whose official axis order is east/north (x/y). Every other CRS is
+ * treated as north/east, which is correct for geographic CRSs like EPSG:4326
+ * and for SWEREF99 (EPSG:3006, 3007–3018). We can't ask OL for this, as our
+ * proj4 definitions lack "+axis=neu", so OL would report "enu" for SWEREF99.
+ * See #1888.
+ */
+const EAST_NORTH_CRS = ["EPSG:3857", "EPSG:900913", "CRS:84"];
+
+/**
+ * WMS 1.3.0 sends BBOX in the CRS's official axis order, so we need a
+ * Projection with the right 'axisOrientation'. The map's extent is only valid
+ * if the layer uses the map's projection; otherwise we take extent, units etc
+ * from the projection OL already knows, or the image is never requested.
+ */
+function createWms130Projection(projCode, mapConfig) {
+  const known = getProjection(projCode);
+  const sameAsMap = projCode === mapConfig.projection;
+
+  return new Projection({
+    code: projCode,
+    axisOrientation: EAST_NORTH_CRS.includes(projCode) ? "enu" : "neu",
+    extent: sameAsMap ? mapConfig.extent : known?.getExtent(),
+    units: known?.getUnits(),
+    worldExtent: known?.getWorldExtent(),
+    global: known?.isGlobal(),
+    metersPerUnit: known?.getMetersPerUnit(),
+  });
+}
 
 export default class ConfigMapper {
   constructor(proxy) {
@@ -128,13 +160,7 @@ export default class ConfigMapper {
 
     // WMS 1.3.0 requires a custom Projection object, as we need to specify 'axisOrientation'
     if (args.version === "1.3.0") {
-      // Create a new Projection
-      let projCode = projection;
-      projection = new Projection({
-        code: projCode,
-        axisOrientation: "neu",
-        extent: properties.mapConfig.map.extent,
-      });
+      projection = createWms130Projection(projection, properties.mapConfig.map);
     }
 
     // In the GetMap operation the srs parameter is called crs in 1.3.0,
@@ -407,18 +433,64 @@ export default class ConfigMapper {
   }
 
   mapArcGISConfig(args) {
-    function getLegendUrl() {
-      if (!Array.isArray(args.legend)) {
-        if (/^data/.test(args.legend)) {
-          args.legend = args.legend.split("#");
-        } else if (!/^http/.test(args.legend)) {
-          args.legend = "https://" + args.legend;
-        }
-      }
-      return args.legend;
+    const layers = args.layers || [];
+
+    // Admin saves the legend as a string (see splitLegend). Same priority as
+    // mapWMSConfig (#1953): layer legend first, then the sublayer's own legend.
+    // Identical URLs are only included once.
+    const getLegends = () => {
+      const seen = new Set();
+      return layers
+        .flatMap((id) => {
+          const subLayerLegend = Array.isArray(args.layersInfo)
+            ? args.layersInfo.find((l) => String(l.id) === String(id))?.legend
+            : undefined;
+          return splitLegend(args.legend || subLayerLegend || "").map((l) => ({
+            url: l.url,
+            description: l.description || "Teckenförklaring",
+          }));
+        })
+        .filter((l) => {
+          if (!l.url || seen.has(l.url)) return false;
+          seen.add(l.url);
+          return true;
+        });
+    };
+
+    const layersInfo = {};
+    if (Array.isArray(args.layersInfo) && args.layersInfo.length > 0) {
+      args.layersInfo.forEach((l) => {
+        layersInfo[l.id] = {
+          ...l,
+          style: l.style || "",
+          infobox: l.infobox || args.infobox || "",
+          // Click.js only queries sublayers with queryable === true. If the
+          // sublayer doesn't say, the layer's own setting decides.
+          queryable: l.queryable ?? args.queryable !== false,
+        };
+      });
+    } else {
+      // Layers created in Admin lack layersInfo: build it from layers + infobox
+      const serviceLayers = getServiceLayers(args.url);
+      layers.forEach((id) => {
+        // Use the sublayer's name from the service when there are several
+        // sublayers, so that they don't share the same name in the LayerSwitcher
+        const serviceName = serviceLayers?.get(String(id))?.name;
+        layersInfo[String(id)] = {
+          id: String(id),
+          caption:
+            layers.length > 1
+              ? serviceName || `${args.caption} (${id})`
+              : args.caption,
+          infobox: args.infobox || "",
+          style: "",
+          queryable: args.queryable !== false,
+          legendIcon: args.legendIcon || "",
+        };
+      });
     }
 
-    var config = {
+    return {
       type: "arcgis",
       options: {
         id: args.id,
@@ -427,22 +499,22 @@ export default class ConfigMapper {
         layerType: args.layerType,
         caption: args.caption,
         visible: args.visibleAtStart,
-        queryable: args.queryable !== false,
-        singleTile: args.singleTile !== false,
-        extent: args.extent,
+        opacity: parseOpacity(args.opacity),
+        zIndex: args.drawOrder || 0,
+        minZoom: args.minZoom,
+        maxZoom: args.maxZoom,
         information: args.infobox,
-        projection: args.projection,
-        opacity: args.opacity,
+        projection: args.projection || "EPSG:3006",
+        crossOrigin: "anonymous",
         attribution: args.attribution,
-        params: {
-          LAYERS: "show:" + args.layers.join(","),
-        },
-        legend: [
-          {
-            url: getLegendUrl(args),
-            description: "Teckenförklaring",
-          },
-        ],
+        // The service's extent, in the layer's `projection` (not necessarily
+        // the map's). Only used by Export - it must not clip the layer.
+        serviceExtent: parseExtent(args.extent),
+        legend: getLegends(),
+        legendIcon: args.legendIcon,
+        params: { LAYERS: layers.join(",") },
+        layersInfo: layersInfo,
+        visibleAtStartSubLayers: args.visibleAtStartSubLayers,
         infoVisible: args.infoVisible || false,
         infoTitle: args.infoTitle,
         infoText: args.infoText,
@@ -453,11 +525,8 @@ export default class ConfigMapper {
         hideExpandArrow: args.hideExpandArrow,
         timeSliderStart: args.timeSliderStart,
         timeSliderEnd: args.timeSliderEnd,
-        zIndex: args.drawOrder || 0,
         rotateMap: args.rotateMap || "n",
       },
     };
-
-    return config;
   }
 }

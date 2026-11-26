@@ -2,7 +2,9 @@ import TileLayer from "ol/layer/Tile";
 import ImageLayer from "ol/layer/Image";
 import TileWMS from "ol/source/TileWMS";
 import ImageWMS from "ol/source/ImageWMS";
+import ImageArcGISRest from "ol/source/ImageArcGISRest";
 import { hfetch } from "../../utils/FetchWrapper";
+import { filterLegendBySubLayers } from "../../utils/arcgisHelpers";
 
 // ---------------------------------------------------------------------------
 // Layer helpers
@@ -17,6 +19,12 @@ export const isWmsLayer = (layer) => {
     (layer instanceof ImageLayer && source instanceof ImageWMS)
   );
 };
+
+// True for layers created by ArcGISLayer (an ArcGIS REST MapServer).
+export const isArcGISLayer = (layer) =>
+  !!layer &&
+  typeof layer.getSource === "function" &&
+  layer.getSource() instanceof ImageArcGISRest;
 
 // Get WMS URL from source.
 const getSourceUrl = (source) => {
@@ -78,8 +86,54 @@ export const buildGetLegendGraphicUrl = ({
 // Legend info extraction
 // ---------------------------------------------------------------------------
 
-// Build legend metadata for a WMS layer.
+// Build legend metadata from Admin-configured legend entries (used by ArcGIS).
+const getConfiguredLegendInfoForLayer = (layer) => {
+  const layerInfo = layer.get("layerInfo");
+  const configuredLegend = Array.isArray(layerInfo?.legend)
+    ? layerInfo.legend
+    : [];
+  // Like for WMS, only print the legend of the sublayers that are visible
+  const visibleIds = (layer.getSource().getParams?.().LAYERS ?? "")
+    .split(",")
+    .filter(Boolean);
+  const entries = filterLegendBySubLayers(
+    configuredLegend.map((entry) => ({
+      ...entry,
+      url: entry?.Url ?? entry?.url ?? null,
+    })),
+    visibleIds,
+    layer.layersInfo
+  )
+    .map((entry, index) => {
+      const url = entry?.Url ?? entry?.url ?? null;
+      if (!url) return null;
+      return {
+        sublayer: entry?.description || String(index),
+        style: "",
+        configuredUrl: url,
+        generatedUrl: null,
+        getLegendGraphicUrl: url,
+      };
+    })
+    .filter(Boolean);
+
+  if (entries.length === 0) return null;
+
+  return {
+    name: layer.get("name"),
+    caption: layer.get("caption"),
+    sourceUrl: getSourceUrl(layer.getSource()),
+    entries,
+  };
+};
+
+// Build legend metadata for a WMS or ArcGIS layer.
 export const getLegendInfoForLayer = (layer) => {
+  if (isArcGISLayer(layer)) {
+    // ArcGIS has no GetLegendGraphic; Admin stores the symbols as data URLs.
+    return getConfiguredLegendInfoForLayer(layer);
+  }
+
   if (!isWmsLayer(layer)) return null;
 
   const source = layer.getSource();
@@ -168,10 +222,16 @@ const measureImage = (dataUrl) =>
   });
 
 // Load legend image and return data URL + size.
-// Uses hfetch so auth/proxy headers are applied.
+// Uses hfetch so auth/proxy headers are applied. Data URLs (ArcGIS legends
+// from Admin) are measured as they are — no network request.
 const loadImageAsDataUrl = async (url) => {
   if (!url) return null;
   try {
+    if (/^data:/i.test(url)) {
+      const { width, height } = await measureImage(url);
+      if (!width || !height) return null;
+      return { dataUrl: url, width, height };
+    }
     const response = await hfetch(url);
     if (!response.ok) {
       console.warn(
@@ -278,7 +338,9 @@ const loadLayerImages = async (entries, sizeConstraints) => {
 const toLegendInfo = (layerOrInfo) => {
   if (!layerOrInfo) return null;
   if (typeof layerOrInfo.getSource !== "function") return layerOrInfo;
-  return isWmsLayer(layerOrInfo) ? getLegendInfoForLayer(layerOrInfo) : null;
+  return isWmsLayer(layerOrInfo) || isArcGISLayer(layerOrInfo)
+    ? getLegendInfoForLayer(layerOrInfo)
+    : null;
 };
 
 // Build extra PDF pages with layer legends.
