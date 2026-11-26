@@ -33,14 +33,28 @@ function LayerItemDetails({
   const layerSwitcherConfig = app.config.mapConfig.tools.find(
     (tool) => tool.type === "layerswitcher"
   );
+  const showLegendByDefault =
+    layerSwitcherConfig?.options?.showLegendByDefault ?? false;
   // State that toggles legend collapse — defaults to true if admin has enabled showLegendByDefault
-  const [legendIsActive, setLegendIsActive] = useState(
-    layerSwitcherConfig?.options?.showLegendByDefault ?? false
-  );
+  const [legendIsActive, setLegendIsActive] = useState(showLegendByDefault);
   // Keep the layer opacity in state
   const [opacity, setOpacity] = useState(0);
   // Keep the layer quickAccess property in state
   const [quickAccess, setQuickAccess] = useState(false);
+
+  // Reset the state each time a new layer is shown. Done while rendering, not in an
+  // effect, see https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  const [shownLayerItemDetails, setShownLayerItemDetails] = useState(null);
+  if (layerItemDetails !== shownLayerItemDetails) {
+    setShownLayerItemDetails(layerItemDetails);
+    setLegendIsActive(showLegendByDefault);
+    // Not applicable for fakeMapLayers
+    const layer = layerItemDetails?.layer;
+    if (layer && !layer.isFakeMapLayer) {
+      setOpacity(layer.get("opacity"));
+      setQuickAccess(layer.get("quickAccess"));
+    }
+  }
 
   // Because of a warning in dev console, we need special handling of tooltip for backbutton.
   // When a user clicks back, the tooltip of the button needs to be closed before this view hides.
@@ -72,14 +86,20 @@ function LayerItemDetails({
   const subLayerInfo = layerItemDetails?.layer?.layersInfo?.[subLayerName];
   // A legendIcon only replaces the legend in the compact sublayer row (SubLayerItem).
   // The details view always shows the full legend image.
-  const subLayerLegend = subLayerInfo?.legend;
+  // Only for WMS: an ArcGIS sublayer legend is Admin's raw string (several data URLs,
+  // see splitLegend), not an image URL. ArcGIS uses the already split layerInfo.legend.
+  const isArcGIS = layerItemDetails?.layer?.get("arcgis") === true;
+  const subLayerLegend = isArcGIS ? undefined : subLayerInfo?.legend;
   // Keep only unique urls for the whole layer, the same way LayerItem does (see #1644).
   const legendUrl =
     showLegend && subLayerIndex === null
       ? (Array.isArray(legendInfo) ? legendInfo : [])
           .map((l) => l?.url)
           .filter((url, index, self) => url && self.indexOf(url) === index)
-      : subLayerLegend ||
+      : // For WMS, mapLayersInfo() always fills subLayerLegend (own legend, else the
+        // layer's, else automatic). The fallback is only for ArcGIS and configs
+        // without layersInfo, so change WMS precedence in mapLayersInfo(), not here.
+        subLayerLegend ||
         (Array.isArray(legendInfo) && legendInfo[subLayerIndex]?.url);
 
   // Handle opacity slider changes
@@ -101,18 +121,10 @@ function LayerItemDetails({
 
   // Setup listeners when component is mounted
   useEffect(() => {
-    // Reset legend visibility to the configured default each time a new layer is shown
-    setLegendIsActive(
-      layerSwitcherConfig?.options?.showLegendByDefault ?? false
-    );
-    if (layerItemDetails?.layer) {
-      // Register a listener: when layer's opacity changes make sure
-      // to update opacity state. Not applicable for fakeMapLayers
-      if (!layerItemDetails?.layer?.isFakeMapLayer) {
-        setOpacity(layerItemDetails?.layer?.get("opacity"));
-        setQuickAccess(layerItemDetails?.layer?.get("quickAccess"));
-        layerItemDetails?.layer?.on("change:opacity", setOpacityCallback);
-      }
+    // Register a listener: when layer's opacity changes make sure
+    // to update opacity state. Not applicable for fakeMapLayers
+    if (layerItemDetails?.layer && !layerItemDetails.layer.isFakeMapLayer) {
+      layerItemDetails.layer.on("change:opacity", setOpacityCallback);
     }
     return function () {
       layerItemDetails?.layer?.un("change:opacity", setOpacityCallback);
@@ -189,12 +201,9 @@ function LayerItemDetails({
       return;
     }
 
-    let snackbarMessage = "";
-    if (!quickAccess) {
-      snackbarMessage = `${renderDetailTitle()} har nu lagts till i snabbåtkomst.`;
-    } else {
-      snackbarMessage = `${renderDetailTitle()} har nu tagits bort från snabbåtkomst.`;
-    }
+    const snackbarMessage = quickAccess
+      ? `${renderDetailTitle()} har nu tagits bort från snabbåtkomst.`
+      : `${renderDetailTitle()} har nu lagts till i snabbåtkomst.`;
     enqueueSnackbar(snackbarMessage, {
       variant: "success",
       anchorOrigin: { vertical: "bottom", horizontal: "center" },

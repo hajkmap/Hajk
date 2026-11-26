@@ -22,10 +22,14 @@ const SERVERTYPE_MAPSERVER = "mapserver";
 //  ESRI ArcGIS Server (client --> MapServer)
 const SERVERTYPE_ARCGIS = "arcgis";
 
-// A sublayer legend is either empty (= automatic legend) or a URL. Kept deliberately
-// loose so existing configs (relative paths like "legend/x.png", bare hosts etc.)
-// still save. We only reject values with whitespace inside, which can't be a URL.
-const isValidLegendUrl = (value) => !value || !/\s/.test(value.trim());
+// A sublayer legend is either empty (= automatic legend) or a URL. Not validated, so
+// existing configs (relative paths like "legend/x.png", bare hosts etc.) still save.
+// Whitespace inside is saved as %20 (browsers do the same when loading it), and
+// whitespace only or a non-string value (hand-edited config) is saved as empty.
+const hasWhitespaceInside = (value) =>
+  typeof value === "string" && /\s/.test(value.trim());
+const normalizeLegendUrl = (value) =>
+  typeof value === "string" ? value.trim().replace(/\s/g, "%20") : "";
 
 const defaultState = {
   load: false,
@@ -446,10 +450,7 @@ class WMSLayerForm extends Component {
             style={{ width: "100%" }}
             type="text"
             placeholder="URL till bild"
-            className={
-              isValidLegendUrl(layerInfo.legend) ? "" : "validation-error"
-            }
-            value={layerInfo.legend || ""}
+            value={typeof layerInfo.legend === "string" ? layerInfo.legend : ""}
             onChange={(e) => {
               let addedLayersInfo = this.state.addedLayersInfo;
               addedLayersInfo[layerInfo.id].legend = e.target.value;
@@ -459,20 +460,13 @@ class WMSLayerForm extends Component {
                 },
                 () => {
                   this.renderLayerInfoDialog(layerInfo);
-                  // Clear a previous save error once all legends are valid again.
-                  if (this.getValidationClass("layersInfo")) {
-                    this.validateField("layersInfo");
-                  }
                 },
               );
             }}
           />
-          {!isValidLegendUrl(layerInfo.legend) && (
+          {hasWhitespaceInside(layerInfo.legend) && (
             <div>
-              <small>
-                Ogiltig URL. Adressen får inte innehålla mellanslag (använd
-                %20).
-              </small>
+              <small>Mellanslag i adressen sparas som %20.</small>
             </div>
           )}
           <small>
@@ -1538,9 +1532,9 @@ class WMSLayerForm extends Component {
     function format_layers_info(layersInfo) {
       return Object.keys(layersInfo).map((layerInfo) => ({
         ...layersInfo[layerInfo],
-        // A whitespace-only legend means "automatic legend", store it as empty.
-        ...(typeof layersInfo[layerInfo].legend === "string" && {
-          legend: layersInfo[layerInfo].legend.trim(),
+        // An empty legend means "automatic legend", see normalizeLegendUrl.
+        ...(layersInfo[layerInfo].legend !== undefined && {
+          legend: normalizeLegendUrl(layersInfo[layerInfo].legend),
         }),
       }));
     }
@@ -1581,13 +1575,7 @@ class WMSLayerForm extends Component {
   }
 
   validate() {
-    var validationFields = [
-      "url",
-      "caption",
-      "layers",
-      "layersInfo",
-      "opacity",
-    ];
+    var validationFields = ["url", "caption", "layers", "opacity"];
     var errors = [];
 
     validationFields.forEach((field) => {
@@ -1602,13 +1590,6 @@ class WMSLayerForm extends Component {
     });
 
     return errors.length === 0;
-  }
-
-  // Captions (or ids) of the sublayers whose legend URL fails isValidLegendUrl.
-  getLayersWithInvalidLegend() {
-    return Object.values(this.state.addedLayersInfo || {})
-      .filter((info) => !isValidLegendUrl(info.legend))
-      .map((info) => info.caption || info.id);
   }
 
   getValidationClass(inputName) {
@@ -1661,23 +1642,15 @@ class WMSLayerForm extends Component {
           valid = false;
         }
         break;
-      case "layersInfo":
-        if (!value.every((info) => isValidLegendUrl(info.legend))) {
-          valid = false;
-        }
-        break;
       default:
         break;
     }
 
     if (updateState !== false) {
       if (!valid) {
-        // Add the field only once, validateField may run on every keystroke.
-        if (!this.state.validationErrors.includes(fieldName)) {
-          this.setState({
-            validationErrors: [...this.state.validationErrors, fieldName],
-          });
-        }
+        this.setState({
+          validationErrors: [...this.state.validationErrors, fieldName],
+        });
       } else {
         this.setState({
           validationErrors: this.state.validationErrors.filter(
@@ -2135,13 +2108,6 @@ class WMSLayerForm extends Component {
           >
             <ul>{this.renderSelectedLayers()}</ul>
           </div>
-          {this.getValidationClass("layersInfo") &&
-            this.getLayersWithInvalidLegend().length > 0 && (
-              <small>
-                Ogiltig URL för teckenförklaring i:{" "}
-                {this.getLayersWithInvalidLegend().join(", ")}
-              </small>
-            )}
         </div>
         <div>
           <label>Stäng av möjlighet att expandera</label>

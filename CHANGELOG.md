@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Client: LayerSwitcher no longer repeats a layer's custom legend once per sublayer in the layer details view. [#1949](https://github.com/hajkmap/Hajk/issues/1949)
 - Client: A WMS layer whose config lacks the `legend` key now gets an automatic legend instead of none. [#1949](https://github.com/hajkmap/Hajk/issues/1949)
+- Client: The legend pages in Print no longer put a sublayer's legend under the wrong sublayer when some sublayers are hidden. [#1949](https://github.com/hajkmap/Hajk/issues/1949)
+- Client: The legend pages in Print no longer repeat a layer's custom legend once per sublayer, and show the active style (e.g. labels) for automatic legends of single-sublayer layers. [#1949](https://github.com/hajkmap/Hajk/issues/1949)
 
 ## [4.4.0-rc.1] - 2026-11-16
 
