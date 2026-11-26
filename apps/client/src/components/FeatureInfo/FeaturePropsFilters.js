@@ -1,6 +1,20 @@
 import AppModel from "../../models/AppModel";
 import HajkTransformer from "../../utils/HajkTransformer";
 import { getBrowserLocale } from "../../utils/locale";
+import {
+  age,
+  between,
+  contains,
+  divideBy,
+  endsWith,
+  formatArea,
+  formatLength,
+  split,
+  startsWith,
+  truncate,
+  urlEncode,
+  year,
+} from "../../utils/featurePropsFilterHelpers";
 
 class PropFilters {
   constructor() {
@@ -231,6 +245,19 @@ filters.add("gt", function (value, test, greaterValue, lessValue) {
 });
 
 /*
+  between
+  Inclusive range check. If the value or min/max is not a number, the original
+  value is returned. If trueValue or falseValue is missing, the original value
+  is returned. Decimal and negative bounds must be quoted.
+  Example:
+  {'3'|between(0, 10, 'Shallow', 'Deep')}
+  outputs: Shallow
+  {'-2'|between('-5', '0.5', 'Near freezing', 'Other')}
+  outputs: Near freezing
+*/
+filters.add("between", between);
+
+/*
   naNToNum
   If value is NaN or undef returns num as a number, otherwise returns value
   Example:
@@ -283,9 +310,7 @@ filters.add("notEquals", function (value, test, falseValue, trueValue) {
   {'https://example.com'|startsWith('https', 'Secure', 'Not secure')}
   outputs: Secure
 */
-filters.add("startsWith", function (value, test, trueValue, falseValue) {
-  return value.startsWith(test) ? trueValue || value : falseValue || value;
-});
+filters.add("startsWith", startsWith);
 
 /*
   endsWith
@@ -293,9 +318,29 @@ filters.add("startsWith", function (value, test, trueValue, falseValue) {
   {'document-2024.pdf'|endsWith('.pdf', 'PDF document', 'Other file')}
   outputs: PDF document
 */
-filters.add("endsWith", function (value, test, trueValue, falseValue) {
-  return value.endsWith(test) ? trueValue || value : falseValue || value;
-});
+filters.add("endsWith", endsWith);
+
+/*
+  contains
+  Case-sensitive, like startsWith/endsWith: 'stängd' does not match 'Stängd'.
+  Chain toLower first if needed. If trueValue or falseValue is missing, the
+  original value is returned.
+  Example:
+  {'Stängd för säsongen'|toLower|contains('stängd', 'Closed', 'Open')}
+  outputs: Closed
+*/
+filters.add("contains", contains);
+
+/*
+  urlEncode
+  Encodes a value for use in a URL's query string or path segment.
+  Meant for absolute URLs: relative Markdown links are encoded once more by
+  the Infoclick, which turns % into %25.
+  Example:
+  https://example.com/search?q={name|urlEncode}
+  outputs (name = 'Åby & Ösby'): https://example.com/search?q=%C3%85by%20%26%20%C3%96sby
+*/
+filters.add("urlEncode", urlEncode);
 
 /*
   datetime
@@ -360,6 +405,37 @@ filters.add("dateAddHours", function (value, hours) {
 });
 
 /*
+  year
+  Uses local time. A date without a time (2021-06-03 or 20210603) is read as a
+  local date. Also accepts the output of dateAddDays/dateAddHours.
+  Example:
+  {'2021-06-03T13:04:12Z'|year}
+  outputs: 2021
+  {'2021-12-31T12:00:00Z'|dateAddDays(1)|year}
+  outputs: 2022
+*/
+filters.add("year", year);
+
+/*
+  age(unit = 'auto')
+  Relative time, in the past or the future, in the browser's language.
+  unit: 'auto' (the largest whole unit), 'years', 'months', 'days', 'hours' or
+  'minutes'. Years, months, hours and minutes are whole elapsed units (one
+  year ago reads "för 1 år sedan"). Days are calendar days, so "i går" means
+  the previous date. In 'auto', a value with a time uses days only from 24
+  hours on, so a few minutes ago never reads "i går". A date without a time is
+  compared with today, so 'auto' goes no further than days ("i dag").
+  Example:
+  {'2026-11-23T10:00:00'|age}
+  outputs (on 2026-11-26): för 3 dagar sedan
+  {'1979-12-01'|age('years')}
+  outputs (on 2026-11-26): för 46 år sedan
+  {'2026-11-25'|age}
+  outputs (on 2026-11-26): i går
+*/
+filters.add("age", (value, unit) => age(value, unit, getBrowserLocale()));
+
+/*
   formatNumber
   Example:
   {'98000'|formatNumber}
@@ -373,6 +449,38 @@ filters.add("formatNumber", function (value) {
 });
 
 /*
+  formatArea(unit = 'auto', decimals = 2)
+  Input in m². unit: 'auto' (below 10 000 m² -> m², below 1 000 000 m² -> ha,
+  otherwise km²), 'm2', 'ha' or 'km2'. Note that 'auto' shows 150 ha as
+  1,5 km²: use formatArea('ha') to keep hectares for large areas.
+  Example:
+  {'12500'|formatArea}
+  outputs: 1,25 ha
+  {'12500'|formatArea('m2', 0)}
+  outputs: 12 500 m²
+  {'1500000'|formatArea}
+  outputs: 1,5 km²
+  {'1500000'|formatArea('ha')}
+  outputs: 150 ha
+*/
+filters.add("formatArea", (value, unit, decimals) =>
+  formatArea(value, unit, decimals, getBrowserLocale())
+);
+
+/*
+  formatLength(unit = 'auto', decimals = 2)
+  Input in m. unit: 'auto' (below 1 000 m -> m, otherwise km), 'm' or 'km'.
+  Example:
+  {'1500'|formatLength}
+  outputs: 1,5 km
+  {'1500'|formatLength('m', 0)}
+  outputs: 1 500 m
+*/
+filters.add("formatLength", (value, unit, decimals) =>
+  formatLength(value, unit, decimals, getBrowserLocale())
+);
+
+/*
   multiplyBy
   Example:
   {'0.08'|multiplyBy(100)}
@@ -384,6 +492,14 @@ filters.add("multiplyBy", function (value, multiplier) {
   }
   return value * multiplier;
 });
+
+/*
+  divideBy
+  Example:
+  {'1500'|divideBy(1000)}
+  outputs: 1.5
+*/
+filters.add("divideBy", divideBy);
 
 /*
   map
@@ -513,7 +629,7 @@ filters.add("left", function (value, searchFor) {
 });
 
 /*
-  left
+  right
   Example:
   {'probably_useful'|right('_')}
   outputs: useful
@@ -522,6 +638,36 @@ filters.add("right", function (value, searchFor) {
   const i = value.indexOf(searchFor);
   return i > -1 ? value.substring(i + searchFor.length, value.length) : value;
 });
+
+/*
+  truncate(length, suffix = '…')
+  Cuts values longer than length and appends the suffix.
+  A custom suffix such as '…' needs useNewPlaceholderMatching. '...' works
+  everywhere except in Fir.
+  Example:
+  {'Lorem ipsum dolor sit amet'|truncate(20)}
+  outputs: Lorem ipsum dolor si…
+  {'Lorem ipsum dolor sit amet'|truncate(20, '...')}
+  outputs: Lorem ipsum dolor si...
+*/
+filters.add("truncate", truncate);
+
+/*
+  split(separator, index = 0)
+  Splits on a literal string (not a RegExp, unlike replace) and returns the
+  part at index, counting from 0. A negative index counts from the end and must
+  be quoted. Out of range gives an empty string, so it chains with default.
+  Separators such as '/' need useNewPlaceholderMatching. '|' can't be used,
+  as it separates the filters.
+  Example:
+  {'a.b.c'|split('.', 1)}
+  outputs: b
+  {'a.b.c'|split('.', '-1')}
+  outputs: c
+  {'a.b.c'|split('.')}
+  outputs: a
+*/
+filters.add("split", split);
 
 /*
   trim
