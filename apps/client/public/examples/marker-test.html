@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Test: marker API</title>
+    <style>
+      body {
+        max-width: 1280px;
+        font-family: system-ui, sans-serif;
+      }
+      p {
+        max-width: 900px;
+        font-size: 14px;
+      }
+      code {
+        background: #f2f2f2;
+        padding: 1px 4px;
+        border-radius: 3px;
+      }
+      .readout {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        align-items: center;
+        margin: 8px 0;
+        font-size: 14px;
+      }
+      .readout output,
+      .readout input {
+        font-family: ui-monospace, monospace;
+        background: #f2f2f2;
+        padding: 1px 4px;
+        border-radius: 3px;
+        min-width: 90px;
+        display: inline-block;
+        border: 1px solid #ccc;
+        font-size: 14px;
+      }
+      .readout input:disabled {
+        color: #999;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="readout">
+      <span>
+        Map x: <output id="map-x">–</output> y:
+        <output id="map-y">–</output>
+      </span>
+      <span>
+        Marker x:
+        <input id="marker-x" type="number" step="any" disabled /> y:
+        <input id="marker-y" type="number" step="any" disabled />
+        <button id="set-marker" type="button" disabled>Set</button>
+      </span>
+      <button id="clear-marker" type="button" disabled>Clear</button>
+    </div>
+
+    <iframe id="iframe" src="/" width="1280" height="768"></iframe>
+
+    <script type="module">
+      const initialCoordinates = [1693757.22, 8239821.99];
+      // const initialCoordinates = null;
+      const centerOnStart = true;
+      const startZoom = 13;
+      const clickToPlace = true;
+
+      const iframe = document.getElementById("iframe");
+      const mapXOutput = document.getElementById("map-x");
+      const mapYOutput = document.getElementById("map-y");
+      const markerXInput = document.getElementById("marker-x");
+      const markerYInput = document.getElementById("marker-y");
+      const setButton = document.getElementById("set-marker");
+      const clearButton = document.getElementById("clear-marker");
+      let api = null;
+
+      const format = (value) =>
+        Number.isFinite(value) ? value.toFixed(2) : "–";
+
+      const waitForApi = () =>
+        new Promise((resolve) => {
+          const check = () =>
+            iframe.contentWindow.hajkPublicApi
+              ? resolve(iframe.contentWindow.hajkPublicApi)
+              : setTimeout(check, 50);
+          check();
+        });
+
+      const setup = async () => {
+        const found = await waitForApi();
+        // return if we already are aiting for the api
+        if (found === api) return;
+        api = found;
+        console.log("hajkPublicApi found");
+
+        // Listen for the ready event from hajk
+        try {
+          iframe.contentWindow.addEventListener("hajk:ready", () =>
+            console.log("hajk is ready")
+          );
+        } catch (error) {
+          console.log(error.message);
+        }
+
+        await api.ready;
+        console.log(`map projection is ${api.projection}`);
+
+        const renderMarker = () => {
+          const coordinate = api.marker.get();
+          markerXInput.value = coordinate ? coordinate[0] : "";
+          markerYInput.value = coordinate ? coordinate[1] : "";
+        };
+
+        const applyMarker = () => {
+          const x = Number(markerXInput.value);
+          const y = Number(markerYInput.value);
+
+          if (
+            markerXInput.value.trim() === "" ||
+            markerYInput.value.trim() === "" ||
+            !Number.isFinite(x) ||
+            !Number.isFinite(y)
+          ) {
+            console.warn("both x and y are required to set the marker");
+          } else {
+            api.marker.set([x, y], { center: true });
+          }
+
+          renderMarker();
+        };
+
+        const renderMapCenter = () => {
+          const [x, y] = api.olMap.getView().getCenter() ?? [];
+          mapXOutput.textContent = format(x);
+          mapYOutput.textContent = format(y);
+        };
+
+        api.olMap.on("moveend", renderMapCenter);
+        renderMapCenter();
+
+        // subscribe to the event that triggers if the marker in the map is moved inside Hajk
+        api.marker.subscribe(({ x, y }) => {
+          if (Number.isFinite(x) && Number.isFinite(y)) {
+            console.log(
+              `marker moved! x: ${x.toFixed(2)}, y: ${y.toFixed(2)})`
+            );
+          }
+          renderMarker();
+        });
+
+        setButton.onclick = applyMarker;
+        markerXInput.onchange = applyMarker;
+        markerYInput.onchange = applyMarker;
+
+        clearButton.onclick = () => {
+          api.marker.clear();
+          renderMarker();
+          console.log("marker cleared");
+        };
+
+        markerXInput.disabled = false;
+        markerYInput.disabled = false;
+        setButton.disabled = false;
+        clearButton.disabled = false;
+        renderMarker();
+
+        api.marker.setClickToPlace(clickToPlace);
+
+        if (initialCoordinates === null) {
+          console.log(
+            "no coordinates was passed at start, click the map to place the marker"
+          );
+        } else {
+          const ok = api.marker.set(initialCoordinates);
+          renderMarker();
+          if (ok && centerOnStart) {
+            api.olMap.getView().animate({
+              center: initialCoordinates,
+              zoom: startZoom ?? api.olMap.getView().getZoom(),
+            });
+          }
+        }
+      };
+
+      setup();
+      // run the setup again if the iframe reloads
+      iframe.addEventListener("load", setup);
+    </script>
+  </body>
+</html>

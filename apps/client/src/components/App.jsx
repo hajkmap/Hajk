@@ -11,6 +11,8 @@ import { getMergedSearchAndHashParams } from "../utils/getMergedSearchAndHashPar
 import SrShortcuts from "../components/SrShortcuts/SrShortcuts";
 import Analytics from "../models/Analytics";
 import AppModel from "../models/AppModel";
+import MarkerModel from "../models/MarkerModel";
+import { markAppReady } from "../utils/appReady";
 import {
   setConfig as setCookieConfig,
   functionalOk as functionalCookieOk,
@@ -567,6 +569,37 @@ class App extends React.PureComponent {
 
           // Tell everyone that we're done loading (in case someone listens)
           this.globalObserver.publish("core.appLoaded");
+
+          // The map is fully loaded, so it's now safe for an embedding parent
+          // (iframe/webview) to control it. Expose the movable marker on the
+          // public API and let the parent know that everything is in place,
+          // either by awaiting `hajkPublicApi.ready` or by listening for the
+          // "hajk:ready" event on the embedded window. See MarkerModel.
+          this.markerModel = new MarkerModel(this.appModel.getMap());
+          // Note: Object.assign (and not a new object) so that parents that
+          // grabbed `hajkPublicApi` early - e.g. to await `ready` - see this
+          // too. Same goes for the extension in bindHandlers() below.
+          Object.assign(window.hajkPublicApi, {
+            projection: this.appModel
+              .getMap()
+              .getView()
+              .getProjection()
+              .getCode(),
+            marker: {
+              set: (coordinate, options) =>
+                this.markerModel.set(coordinate, options),
+              get: () => this.markerModel.get(),
+              clear: () => this.markerModel.clear(),
+              subscribe: (callback) => this.markerModel.subscribe(callback),
+              setClickToPlace: (enabled) =>
+                this.markerModel.setClickToPlace(enabled),
+            },
+          });
+
+          markAppReady({
+            projection: window.hajkPublicApi.projection,
+          });
+          window.dispatchEvent(new CustomEvent("hajk:ready"));
         }
       );
     });
@@ -577,12 +610,11 @@ class App extends React.PureComponent {
 
   bindHandlers() {
     // Extend the hajkPublicApi with a couple of things that are available now
-    window.hajkPublicApi = {
-      ...window.hajkPublicApi,
+    Object.assign(window.hajkPublicApi, {
       olMap: this.appModel.map,
       layerControl: this.appModel.layerControl,
       dirtyLayers: {},
-    };
+    });
 
     // Register a handle to prevent pinch zoom on mobile devices.
     document.body.addEventListener(
