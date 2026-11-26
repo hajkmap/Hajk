@@ -10,6 +10,7 @@ import { Style, Icon, Fill, Stroke, Circle } from "ol/style";
 
 import AppModel from "./AppModel";
 import { hfetch } from "../utils/FetchWrapper";
+import { queryArcGIS } from "../utils/arcgisQuery";
 import { getInfoClickInfoFromLayerConfig } from "../utils/InfoClickHelpers";
 import {
   parseGMLFeatures,
@@ -533,6 +534,11 @@ export default class MapClickModel {
   }
 
   #query(layer, e) {
+    // ArcGIS REST layers have no GetFeatureInfo, they are queried through the
+    // ArcGIS REST API instead (the answer is a GeoJSON Response).
+    if (layer.get("arcgis")) {
+      return queryArcGIS(this.map, layer, e);
+    }
     const coordinate = e.coordinate;
     const resolution = this.map.getView().getResolution();
     const currentZoom = this.map.getView().getZoom();

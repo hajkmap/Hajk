@@ -222,7 +222,8 @@ class AppModel {
    * layersInfo from the Admin. Maps without such layers start right away, and
    * the wait is never longer than ARCGIS_SERVICE_INFO_TIMEOUT_MS, so a slow
    * ArcGIS server can't hold up the map for long.
-   * @returns {Promise}
+   * @returns {Promise|null} A promise to wait for before the map is set up,
+   * or null if there is nothing to wait for.
    */
   prefetchArcGISServiceInfo() {
     // Runs before translateConfig(), so layersConfig is still the raw object
@@ -248,7 +249,9 @@ class AppModel {
       ...new Set(arcgisLayers.filter(needsNames).map((l) => l.url)),
     ].map((url) => requests.get(url));
     if (blocking.length === 0) {
-      return Promise.resolve();
+      // Nothing to wait for (e.g. no ArcGIS layers at all): the caller can set
+      // up the map right away, synchronously.
+      return null;
     }
 
     let timer;
