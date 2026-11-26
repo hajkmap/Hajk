@@ -233,6 +233,7 @@ export default function LayerInfoclickButton({
               <FeatureInfoDesigner
                 key={activeId}
                 fill
+                expandDisabled
                 value={definitionFor(activeId)}
                 onChange={(definition) => changeSublayer(activeId, definition)}
                 serviceUrl={serviceQuery.data?.url ?? ""}
@@ -252,6 +253,7 @@ export default function LayerInfoclickButton({
             )}
             <FeatureInfoDesigner
               fill
+              expandDisabled
               value={shownValue}
               onChange={onChange}
               serviceUrl={serviceQuery.data?.url ?? ""}

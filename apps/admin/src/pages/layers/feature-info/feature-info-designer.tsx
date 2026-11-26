@@ -63,6 +63,7 @@ interface FeatureInfoDesignerProps {
   caption: string;
   displayFields?: string;
   fill?: boolean;
+  expandDisabled?: boolean;
   emptyShowsAttributes?: boolean;
 }
 
@@ -75,6 +76,7 @@ export default function FeatureInfoDesigner({
   caption,
   displayFields,
   fill = false,
+  expandDisabled = false,
   emptyShowsAttributes = true,
 }: FeatureInfoDesignerProps) {
   const { t } = useTranslation();
@@ -302,7 +304,8 @@ export default function FeatureInfoDesigner({
                 onChange={commitTemplate}
                 onPreviewChange={onPreviewChange}
                 expanded={expanded}
-                onToggleExpanded={toggleExpanded}
+                onToggleExpanded={expandDisabled ? () => undefined : toggleExpanded}
+                expandDisabled={expandDisabled}
                 onOpenWindowPreview={openWindowPreview}
                 history={history}
                 emptyShowsAttributes={emptyShowsAttributes}

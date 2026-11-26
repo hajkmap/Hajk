@@ -402,7 +402,6 @@ export default function LayersList({
     layerInfo: capabilitiesLayerInfo,
     isError: capabilitiesError,
     isLoading: capabilitiesLoading,
-    isFetching: capabilitiesFetching,
     isSlow: capabilitiesSlow,
     refetch: refetchCapabilities,
   } = useServiceCapabilities({
@@ -640,7 +639,6 @@ export default function LayersList({
                 selectedCapabilityLayers={selectedCapabilityLayers}
                 onToggleCapabilityLayer={handleToggleCapabilityLayer}
                 isLoading={capabilitiesLoading}
-                isFetching={Boolean(capabilitiesFetching)}
                 isError={capabilitiesError}
                 isSlow={capabilitiesSlow}
                 onRetry={() => void refetchCapabilities()}

@@ -46,6 +46,7 @@ interface FeatureInfoEditorProps {
   onPreviewChange: (value: string) => void;
   expanded: boolean;
   onToggleExpanded: () => void;
+  expandDisabled?: boolean;
   onOpenWindowPreview: () => void;
   history: EditorHistory;
   emptyShowsAttributes?: boolean;
@@ -75,6 +76,8 @@ const TOOLS: { key: ToolKey; icon: ReactNode }[] = [
 
 const toolbarButtonSx = { p: 0.5 } as const;
 
+const NARROW_TOOLBAR = "@container editor-toolbar (max-width: 380px)";
+
 const TABLE_SNIPPET =
   "\n| Egenskap | Värde |\n| --- | --- |\n| Namn | {namn} |\n";
 
@@ -87,6 +90,7 @@ const EDITOR_TEXT = {
 const EditorToolbar = memo(function EditorToolbar({
   expanded,
   onToggleExpanded,
+  expandDisabled = false,
   onOpenWindowPreview,
   onTool,
   onInsertSnippet,
@@ -98,6 +102,7 @@ const EditorToolbar = memo(function EditorToolbar({
 }: {
   expanded: boolean;
   onToggleExpanded: () => void;
+  expandDisabled: boolean;
   onOpenWindowPreview: () => void;
   onTool: (key: ToolKey) => void;
   onInsertSnippet: (snippet: string) => void;
@@ -113,19 +118,23 @@ const EditorToolbar = memo(function EditorToolbar({
       role="toolbar"
       aria-label={t("layers.featureInfo.toolbar")}
       sx={{
+        containerType: "inline-size",
+        containerName: "editor-toolbar",
         display: "flex",
-        flexDirection: "column",
+        flexWrap: "wrap",
+        alignItems: "center",
         minWidth: 0,
-        overflow: "hidden",
       }}
     >
       <Box
         sx={{
           display: "flex",
+          flex: "1 0 auto",
           flexWrap: "nowrap",
           alignItems: "center",
           px: 0.5,
           minWidth: 0,
+          [NARROW_TOOLBAR]: { flexBasis: "100%" },
         }}
       >
         {TOOLS.map((tool, index) => (
@@ -159,52 +168,67 @@ const EditorToolbar = memo(function EditorToolbar({
             <FormatIndentIncreaseIcon fontSize="small" />
           </IconButton>
         </Tooltip>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            flexShrink: 0,
-            ml: "auto",
-          }}
-        >
-          <FeatureInfoSyntaxHelp onInsertFilter={onInsertSnippet} />
-          <Tooltip title={t("layers.featureInfo.resizeWindow")}>
-            <IconButton
-              size="small"
-              sx={toolbarButtonSx}
-              aria-label={t("layers.featureInfo.resizeWindow")}
-              onClick={onOpenWindowPreview}
-            >
-              <PreviewIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip
-            title={t(
-              expanded
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          flexShrink: 0,
+          [NARROW_TOOLBAR]: { order: 3 },
+        }}
+      >
+        <FeatureInfoSyntaxHelp onInsertFilter={onInsertSnippet} />
+        <Tooltip title={t("layers.featureInfo.resizeWindow")}>
+          <IconButton
+            size="small"
+            sx={toolbarButtonSx}
+            aria-label={t("layers.featureInfo.resizeWindow")}
+            onClick={onOpenWindowPreview}
+          >
+            <PreviewIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        <Tooltip
+          title={t(
+            expandDisabled
+              ? "layers.featureInfo.expandDisabled"
+              : expanded
                 ? "layers.featureInfo.collapse"
                 : "layers.featureInfo.expand",
-            )}
-          >
-            <IconButton
-              size="small"
-              sx={toolbarButtonSx}
-              aria-label={t(
-                expanded
+          )}
+        >
+          <span>
+          <IconButton
+            size="small"
+            sx={toolbarButtonSx}
+            disabled={expandDisabled}
+            aria-label={t(
+              expandDisabled
+                ? "layers.featureInfo.expandDisabled"
+                : expanded
                   ? "layers.featureInfo.collapse"
                   : "layers.featureInfo.expand",
-              )}
-              onClick={onToggleExpanded}
-            >
-              {expanded ? (
-                <CloseFullscreenIcon fontSize="small" />
-              ) : (
-                <OpenInFullIcon fontSize="small" />
-              )}
-            </IconButton>
-          </Tooltip>
-        </Box>
+            )}
+            onClick={onToggleExpanded}
+          >
+            {expanded ? (
+              <CloseFullscreenIcon fontSize="small" />
+            ) : (
+              <OpenInFullIcon fontSize="small" />
+            )}
+          </IconButton>
+          </span>
+        </Tooltip>
       </Box>
-      <Box sx={{ display: "flex", alignItems: "center", px: 0.5 }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          flexBasis: "100%",
+          px: 0.5,
+          [NARROW_TOOLBAR]: { flexBasis: "auto", order: 2 },
+        }}
+      >
         <Tooltip title={t("layers.featureInfo.tool.undo")}>
           <span>
             <IconButton
@@ -243,6 +267,7 @@ function FeatureInfoEditor({
   onPreviewChange,
   expanded,
   onToggleExpanded,
+  expandDisabled = false,
   onOpenWindowPreview,
   history,
   emptyShowsAttributes = true,
@@ -601,6 +626,7 @@ function FeatureInfoEditor({
       <EditorToolbar
         expanded={expanded}
         onToggleExpanded={onToggleExpanded}
+        expandDisabled={expandDisabled}
         onOpenWindowPreview={onOpenWindowPreview}
         onTool={runTool}
         onInsertSnippet={insertSnippet}

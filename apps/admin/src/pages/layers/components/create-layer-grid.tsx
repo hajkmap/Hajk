@@ -2,7 +2,6 @@ import {
   Box,
   Button,
   Chip,
-  CircularProgress,
   FormControl,
   IconButton,
   InputLabel,
@@ -49,7 +48,6 @@ interface CreateLayerGrid {
   onToggleCapabilityLayer: (layerName: string) => void;
 
   isLoading: boolean;
-  isFetching: boolean;
   isError: boolean;
   /** The service has been slow to answer, and its answer is still awaited. */
   isSlow: boolean;
@@ -69,7 +67,6 @@ export function CreateLayerGrid({
   selectedCapabilityLayers,
   onToggleCapabilityLayer,
   isLoading,
-  isFetching,
   isError,
   isSlow,
   onRetry,
@@ -249,19 +246,10 @@ export function CreateLayerGrid({
         <SlowServiceNotice />
       ) : isError ? (
         <Box sx={{ textAlign: "center", py: 2 }}>
-          {!isFetching && (
-            <Typography color="error" sx={{ mb: 2 }}>
-              {t("layers.errorLoadingCapabilities")}
-            </Typography>
-          )}
-          <Button
-            variant="outlined"
-            onClick={onRetry}
-            disabled={isFetching}
-            startIcon={
-              isFetching ? <CircularProgress color="inherit" size={18} /> : null
-            }
-          >
+          <Typography color="error" sx={{ mb: 2 }}>
+            {t("layers.errorLoadingCapabilities")}
+          </Typography>
+          <Button variant="outlined" onClick={onRetry}>
             {t("common.retry")}
           </Button>
         </Box>

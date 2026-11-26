@@ -22,6 +22,7 @@ import {
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import { useTranslation } from "react-i18next";
 import FormPanel from "../../../components/form-components/form-panel";
+import AttributeMultiSelect from "../feature-info/attribute-multi-select";
 import {
   InlineLabelWithHelp,
   SelectWithHelp,
@@ -381,30 +382,51 @@ export default function LayerInfoClickModal({
           <FormPanel title={t("layers.infoClickAndSearch")}>
             <Grid container spacing={2}>
               <Grid size={12}>
-                <TextFieldWithHelp
-                  labelKey="layers.displayFieldInResultList"
-                  helpKey="layers.help.primaryDisplayFields"
-                  fullWidth
-                  {...register("searchDisplayName")}
-                  helperText={t("layers.displayFieldInResultListHelp")}
+                <Controller
+                  name="searchDisplayName"
+                  control={control}
+                  render={({ field }) => (
+                    <AttributeMultiSelect
+                      labelKey="layers.displayFieldInResultList"
+                      helpKey="layers.help.primaryDisplayFields"
+                      serviceUrl={serviceUrl}
+                      typeNames={[layerName]}
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  )}
                 />
               </Grid>
               <Grid size={12}>
-                <TextFieldWithHelp
-                  labelKey="layers.secondaryDisplayFieldInResultList"
-                  helpKey="layers.help.secondaryDisplayFields"
-                  fullWidth
-                  {...register("secondaryLabelFields")}
-                  helperText={t("layers.secondaryDisplayFieldInResultListHelp")}
+                <Controller
+                  name="secondaryLabelFields"
+                  control={control}
+                  render={({ field }) => (
+                    <AttributeMultiSelect
+                      labelKey="layers.secondaryDisplayFieldInResultList"
+                      helpKey="layers.help.secondaryDisplayFields"
+                      serviceUrl={serviceUrl}
+                      typeNames={[layerName]}
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  )}
                 />
               </Grid>
               <Grid size={12}>
-                <TextFieldWithHelp
-                  labelKey="layers.shortDisplayField"
-                  helpKey="layers.help.shortDisplayFields"
-                  fullWidth
-                  {...register("searchShortDisplayName")}
-                  helperText={t("layers.shortDisplayFieldHelp")}
+                <Controller
+                  name="searchShortDisplayName"
+                  control={control}
+                  render={({ field }) => (
+                    <AttributeMultiSelect
+                      labelKey="layers.shortDisplayField"
+                      helpKey="layers.help.shortDisplayFields"
+                      serviceUrl={serviceUrl}
+                      typeNames={[layerName]}
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  )}
                 />
               </Grid>
             </Grid>
@@ -421,12 +443,19 @@ export default function LayerInfoClickModal({
                 />
               </Grid>
               <Grid size={12}>
-                <TextFieldWithHelp
-                  labelKey="layers.searchFields"
-                  helpKey="layers.help.searchFields"
-                  fullWidth
-                  {...register("searchPropertyName")}
-                  helperText={t("layers.searchFieldsHelp")}
+                <Controller
+                  name="searchPropertyName"
+                  control={control}
+                  render={({ field }) => (
+                    <AttributeMultiSelect
+                      labelKey="layers.searchFields"
+                      helpKey="layers.help.searchFields"
+                      serviceUrl={serviceUrl}
+                      typeNames={[layerName]}
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  )}
                 />
               </Grid>
               <Grid size={{ xs: 12, md: 6 }}>

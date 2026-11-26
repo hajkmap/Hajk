@@ -105,6 +105,12 @@ const withExternals = (
     );
   };
 
+function withoutMarkdownNode<T extends { node?: unknown }>(props: T): Omit<T, "node"> {
+  const domProps = { ...props };
+  delete domProps.node;
+  return domProps;
+}
+
 const clientComponents: Components = {
   hr: () => <Divider />,
   a: ({ children, href, title, target }) =>
@@ -138,6 +144,24 @@ const clientComponents: Components = {
   tr: MarkdownRow,
   td: Cell,
   th: Cell,
+  button: ({ children }) => (
+    <button type="button" onClick={(event) => event.preventDefault()}>
+      {children}
+    </button>
+  ),
+  input: (props) => {
+    const { type, onKeyDown, ...domProps } = withoutMarkdownNode(props);
+    return (
+      <input
+        {...domProps}
+        type={type === "submit" || type === "image" ? "button" : type}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") event.preventDefault();
+          onKeyDown?.(event);
+        }}
+      />
+    );
+  },
   blockquote: ({ children }) => (
     <Paper
       variant="outlined"

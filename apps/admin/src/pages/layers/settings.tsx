@@ -68,6 +68,7 @@ import FormAccordion from "../../components/form-components/form-accordion";
 import LayerInfoClickModal, {
   type LayerInfoClickModalValues,
 } from "./components/layer-infoclick-modal";
+import AttributeMultiSelect from "./feature-info/attribute-multi-select";
 import FeatureInfoDesigner from "./feature-info/feature-info-designer";
 import {
   hasBlockingIssues,
@@ -2399,11 +2400,19 @@ export default function LayerSettings() {
                       allValues={showSettingsSearchUi ? getValues() : undefined}
                     >
                       <FormFieldRow>
-                        <TextFieldWithHelp
-                          labelKey="layers.displayFieldInResultList"
-                          helpKey="layers.help.primaryDisplayFields"
-                          fullWidth
-                          {...register("infoClickSettings.displayFields")}
+                        <Controller
+                          name="infoClickSettings.displayFields"
+                          control={control}
+                          render={({ field }) => (
+                            <AttributeMultiSelect
+                              labelKey="layers.displayFieldInResultList"
+                              helpKey="layers.help.primaryDisplayFields"
+                              serviceUrl={service?.url ?? ""}
+                              typeNames={infoboxTypeNames}
+                              value={typeof field.value === "string" ? field.value : ""}
+                              onChange={field.onChange}
+                            />
+                          )}
                         />
                       </FormFieldRow>
                     </SettingsSearchField>
@@ -2415,11 +2424,19 @@ export default function LayerSettings() {
                       allValues={showSettingsSearchUi ? getValues() : undefined}
                     >
                       <FormFieldRow>
-                        <TextFieldWithHelp
-                          labelKey="layers.secondaryDisplayFieldInResultList"
-                          helpKey="layers.help.secondaryDisplayFields"
-                          fullWidth
-                          {...register("infoClickSettings.secondaryLabelFields")}
+                        <Controller
+                          name="infoClickSettings.secondaryLabelFields"
+                          control={control}
+                          render={({ field }) => (
+                            <AttributeMultiSelect
+                              labelKey="layers.secondaryDisplayFieldInResultList"
+                              helpKey="layers.help.secondaryDisplayFields"
+                              serviceUrl={service?.url ?? ""}
+                              typeNames={infoboxTypeNames}
+                              value={typeof field.value === "string" ? field.value : ""}
+                              onChange={field.onChange}
+                            />
+                          )}
                         />
                       </FormFieldRow>
                     </SettingsSearchField>
@@ -2431,11 +2448,19 @@ export default function LayerSettings() {
                       allValues={showSettingsSearchUi ? getValues() : undefined}
                     >
                       <FormFieldRow>
-                        <TextFieldWithHelp
-                          labelKey="layers.shortDisplayField"
-                          helpKey="layers.help.shortDisplayFields"
-                          fullWidth
-                          {...register("infoClickSettings.shortDisplayFields")}
+                        <Controller
+                          name="infoClickSettings.shortDisplayFields"
+                          control={control}
+                          render={({ field }) => (
+                            <AttributeMultiSelect
+                              labelKey="layers.shortDisplayField"
+                              helpKey="layers.help.shortDisplayFields"
+                              serviceUrl={service?.url ?? ""}
+                              typeNames={infoboxTypeNames}
+                              value={typeof field.value === "string" ? field.value : ""}
+                              onChange={field.onChange}
+                            />
+                          )}
                         />
                       </FormFieldRow>
                     </SettingsSearchField>
@@ -2477,7 +2502,7 @@ export default function LayerSettings() {
                     )}
                     </>
                     )}
-                    {!isSearchLayer && (
+                    {!isSearchLayer && !isVectorLayer && (
                     <FormAccordion
                       title={t("layers.featureInfo.formatAndSort")}
                       bordered
@@ -2731,12 +2756,19 @@ export default function LayerSettings() {
                       allValues={showSettingsSearchUi ? getValues() : undefined}
                     >
                       <FormFieldRow>
-                        <TextFieldWithHelp
-                          labelKey="layers.searchSettings.searchFields"
-                          helpKey="layers.help.searchFields"
-                          fullWidth
-                          helperText={t("layers.searchFieldsHelp")}
-                          {...register("searchSettings.searchFields")}
+                        <Controller
+                          name="searchSettings.searchFields"
+                          control={control}
+                          render={({ field }) => (
+                            <AttributeMultiSelect
+                              labelKey="layers.searchSettings.searchFields"
+                              helpKey="layers.help.searchFields"
+                              serviceUrl={service?.url ?? ""}
+                              typeNames={infoboxTypeNames}
+                              value={typeof field.value === "string" ? field.value : ""}
+                              onChange={field.onChange}
+                            />
+                          )}
                         />
                       </FormFieldRow>
                     </SettingsSearchField>

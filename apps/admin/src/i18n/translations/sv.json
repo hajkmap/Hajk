@@ -966,6 +966,7 @@
     "layers.featureInfo.newPlaceholderMatchingHelp": "Motsvarar kartans infoklick-inställning. Ändrar bara förhandsgranskningen.",
     "layers.featureInfo.defaultTableNotice": "Ingen mall: kartklienten visar alla attribut i en tabell.",
     "layers.featureInfo.expand": "Öppna i stort fönster",
+    "layers.featureInfo.expandDisabled": "Redan i stort fönster",
     "layers.featureInfo.resizeWindow": "Öppna infoklicksfönstret och ändra storlek",
     "layers.featureInfo.windowSizeLabel": "Infoklicksfönstrets storlek, {{width}} gånger {{height}} pixlar",
     "layers.featureInfo.moveWindow": "Flytta infoklicksfönstret",

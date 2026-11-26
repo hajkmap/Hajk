@@ -1,4 +1,10 @@
-import { memo, useMemo, type ReactNode } from "react";
+import {
+  memo,
+  useMemo,
+  type KeyboardEvent,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
 import { Alert, Box, Typography } from "@mui/material";
 import ClientWindowFrame from "./client-window-frame";
 import { useTranslation } from "react-i18next";
@@ -30,6 +36,24 @@ interface FeatureInfoPreviewProps {
   onMove?: (position: { left: number; top: number }) => void;
   windowOnly?: boolean;
   emptyShowsAttributes?: boolean;
+}
+
+function holdPreviewSubmit(event: MouseEvent<HTMLElement> | KeyboardEvent<HTMLElement>) {
+  const control =
+    event.target instanceof Element
+      ? event.target.closest("button, input, select")
+      : null;
+  if (!control || !event.currentTarget.contains(control)) return;
+  if (event.type === "keydown" && "key" in event && event.key !== "Enter") return;
+  if (event.type === "click" && !(control instanceof HTMLButtonElement)) {
+    if (
+      !(control instanceof HTMLInputElement) ||
+      (control.type !== "submit" && control.type !== "image")
+    ) {
+      return;
+    }
+  }
+  event.preventDefault();
 }
 
 type RenderOutcome =
@@ -118,6 +142,7 @@ function FeatureInfoPreview({
         onClose={onClose}
         onMove={onMove}
       >
+        <Box onClickCapture={holdPreviewSubmit} onKeyDownCapture={holdPreviewSubmit}>
         {caption && (
           <Typography
             variant="button"
@@ -147,6 +172,7 @@ function FeatureInfoPreview({
             />
           </PreviewErrorBoundary>
         )}
+        </Box>
       </ClientWindowFrame>
       {!windowOnly && outcome.ok &&
         outcome.filterIssues
